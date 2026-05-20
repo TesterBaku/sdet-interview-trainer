@@ -8,21 +8,19 @@ export default function manifest(): MetadataRoute.Manifest {
       "Flashcards, quizzes, mock interviews, and coding tasks for QA Automation and SDET interview prep.",
     start_url: "/",
     display: "standalone",
-    orientation: "portrait",
     background_color: "#f6efe3",
     theme_color: "#17324d",
     categories: ["education"],
     icons: [
       {
         src: "/icon",
-        sizes: "512x512",
+        sizes: "192x192",
         type: "image/png",
       },
       {
         src: "/icon",
         sizes: "512x512",
         type: "image/png",
-        purpose: "maskable",
       },
       {
         src: "/apple-icon",

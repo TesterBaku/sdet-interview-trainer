@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   description: "QA Automation and SDET interview practice with flashcards, quizzes, mock interviews, and coding tasks.",
   appleWebApp: {
     capable: true,
-    statusBarStyle: "default",
+    statusBarStyle: "black-translucent",
     title: "SDET Trainer",
   },
 };
@@ -23,8 +23,8 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="en">
       <body>
-        <PwaInit />
         <Navigation />
+        <PwaInit />
         <main className="mx-auto min-h-screen w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8">{children}</main>
       </body>
     </html>
