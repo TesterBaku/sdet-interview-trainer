@@ -16,7 +16,7 @@ export function Navigation() {
   return (
     <header className="sticky top-0 z-20 border-b border-ink/10 bg-paper/85 backdrop-blur-xl">
       <nav className="mx-auto flex max-w-7xl flex-col gap-3 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
-        <Link className="font-display text-2xl font-bold tracking-tight text-blueprint" href="/">
+        <Link className="font-display text-xl font-bold tracking-tight text-blueprint sm:text-2xl" href="/">
           SDET Interview Trainer
         </Link>
         <div className="flex flex-wrap gap-2">

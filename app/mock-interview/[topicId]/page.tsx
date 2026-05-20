@@ -46,7 +46,7 @@ export default function MockInterviewPage() {
       <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <Link className="text-sm font-bold text-signal" href={`/topics/${topic.id}`}>Back to topic</Link>
-          <h1 className="mt-2 font-display text-5xl font-black text-blueprint">{topic.title} Mock Interview</h1>
+          <h1 className="mt-2 font-display text-3xl font-black text-blueprint sm:text-5xl">{topic.title} Mock Interview</h1>
         </div>
         <p className="font-bold text-ink/60">Prompt {index + 1} of {questions.length}</p>
       </header>
@@ -54,7 +54,7 @@ export default function MockInterviewPage() {
         <label className="block">
           <span className="font-bold">Your answer</span>
           <textarea
-            className="mt-2 min-h-40 w-full rounded-2xl border border-ink/10 bg-paper/70 p-4 leading-7 outline-none focus:border-signal"
+            className="mt-2 min-h-24 w-full rounded-2xl border border-ink/10 bg-paper/70 p-4 leading-7 outline-none focus:border-signal sm:min-h-40"
             onChange={(event) => setAnswer(event.target.value)}
             placeholder="Write your answer as if you are speaking to an interviewer..."
             value={answer}
