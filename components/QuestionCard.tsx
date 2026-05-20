@@ -1,0 +1,24 @@
+import type { Question } from "@/types/Question";
+
+type QuestionCardProps = {
+  question: Question;
+  children?: React.ReactNode;
+};
+
+export function QuestionCard({ question, children }: QuestionCardProps) {
+  return (
+    <article className="rounded-[2rem] border border-ink/10 bg-white/80 p-6 shadow-panel">
+      <div className="flex flex-wrap gap-2">
+        <span className="rounded-full bg-blueprint px-3 py-1 text-xs font-bold uppercase tracking-[0.16em] text-paper">
+          {question.type}
+        </span>
+        <span className="rounded-full bg-brass/20 px-3 py-1 text-xs font-bold uppercase tracking-[0.16em] text-blueprint">
+          {question.difficulty}
+        </span>
+      </div>
+      <h1 className="mt-5 font-display text-3xl font-black text-blueprint">{question.title ?? question.question}</h1>
+      {question.title ? <p className="mt-3 text-lg text-ink/80">{question.question}</p> : null}
+      {children ? <div className="mt-6">{children}</div> : null}
+    </article>
+  );
+}

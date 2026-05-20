@@ -1,0 +1,43 @@
+[
+  {
+    "id": "aws-001",
+    "topicId": "aws",
+    "topicTitle": "AWS Basics for QA/SDET",
+    "level": "mid",
+    "type": "interview",
+    "difficulty": "easy",
+    "question": "Why should an SDET know CloudWatch?",
+    "shortAnswer": "CloudWatch helps inspect logs, metrics, alarms, and runtime behavior for tests and deployed services.",
+    "interviewAnswer": "CloudWatch is useful when validating deployments and debugging failures in cloud environments. An SDET can use logs and metrics to confirm service behavior, identify backend errors behind UI/API failures, and provide better defect evidence.",
+    "realProjectExample": "When an API smoke test returned 500, CloudWatch logs showed a missing environment variable in the deployed Lambda.",
+    "followUps": ["What logs would you attach to a bug?", "How do metrics help testing?", "How do you debug a Lambda failure?"],
+    "tags": ["aws", "cloudwatch", "debugging"]
+  },
+  {
+    "id": "aws-002",
+    "topicId": "aws",
+    "topicTitle": "AWS Basics for QA/SDET",
+    "level": "mid",
+    "type": "quiz",
+    "difficulty": "easy",
+    "question": "Which AWS service is commonly used to store files and test artifacts?",
+    "choices": ["S3", "IAM", "VPC", "Route 53"],
+    "correctAnswer": "S3",
+    "explanation": "S3 is object storage and is often used for reports, screenshots, videos, and exported data.",
+    "tags": ["aws", "s3", "artifacts"]
+  },
+  {
+    "id": "aws-003",
+    "topicId": "aws",
+    "topicTitle": "AWS Basics for QA/SDET",
+    "level": "senior",
+    "type": "scenario",
+    "difficulty": "medium",
+    "question": "After deployment to AWS, smoke tests fail because the app cannot read configuration. What do you check?",
+    "shortAnswer": "Check environment variables, secrets, IAM permissions, deployment version, logs, and service health.",
+    "interviewAnswer": "I would inspect deployment metadata and CloudWatch logs first, then verify the expected environment variables or secret references exist in the target environment. If the service reads from SSM or Secrets Manager, I would check IAM permissions and resource names.",
+    "realProjectExample": "A staging smoke test failed because ECS task definitions referenced a renamed secret. The app started but failed on the first API call.",
+    "followUps": ["How do you validate deployment config automatically?", "What should smoke tests cover?", "How do IAM failures appear in logs?"],
+    "tags": ["aws", "deployment", "configuration"]
+  }
+]

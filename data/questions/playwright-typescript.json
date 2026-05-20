@@ -1,0 +1,49 @@
+[
+  {
+    "id": "playwright-typescript-001",
+    "topicId": "playwright-typescript",
+    "topicTitle": "Playwright with TypeScript",
+    "level": "mid",
+    "type": "interview",
+    "difficulty": "easy",
+    "question": "What is the difference between page.locator() and page.$() in Playwright?",
+    "shortAnswer": "page.locator() creates a retryable Locator. page.$() returns an ElementHandle for the current DOM match.",
+    "interviewAnswer": "I prefer locators because they auto-wait and work well with retryable assertions. ElementHandle is more brittle for modern reactive UIs because it can point to a node that gets replaced.",
+    "realProjectExample": "For checkout tests, I used getByRole and locator assertions so the test waited for the button to become actionable.",
+    "followUps": ["Why is auto-waiting useful?", "When would CSS selectors still be acceptable?", "What makes getByRole resilient?"],
+    "tags": ["playwright", "typescript", "locator"]
+  },
+  {
+    "id": "playwright-typescript-002",
+    "topicId": "playwright-typescript",
+    "topicTitle": "Playwright with TypeScript",
+    "level": "mid",
+    "type": "quiz",
+    "difficulty": "easy",
+    "question": "Which Playwright feature records screenshots, DOM snapshots, and action timelines for debugging?",
+    "choices": ["Trace Viewer", "HAR only", "tsconfig", "ESLint"],
+    "correctAnswer": "Trace Viewer",
+    "explanation": "Trace Viewer helps debug failures by showing actions, snapshots, network, console, and screenshots.",
+    "tags": ["playwright", "trace", "debugging"]
+  },
+  {
+    "id": "playwright-typescript-003",
+    "topicId": "playwright-typescript",
+    "topicTitle": "Playwright with TypeScript",
+    "level": "senior",
+    "type": "coding",
+    "difficulty": "medium",
+    "title": "Filter failed test names",
+    "question": "Write a TypeScript helper that returns the names of failed tests.",
+    "problem": "Given test result objects with name and status, return names where status is failed.",
+    "inputExample": "[{name:'login', status:'passed'}, {name:'cart', status:'failed'}]",
+    "expectedOutput": "['cart']",
+    "hint": "Filter first, then map to names.",
+    "solutionLanguage": "typescript",
+    "solution": "type TestResult = { name: string; status: 'passed' | 'failed' | 'skipped' };\n\nfunction failedTestNames(results: TestResult[]): string[] {\n  return results.filter((result) => result.status === 'failed').map((result) => result.name);\n}",
+    "explanation": "The helper uses typed status values and a clear filter/map pipeline.",
+    "commonMistakes": ["Using any everywhere", "Mutating the input array", "Returning full objects instead of names"],
+    "followUps": ["How would you group failures by suite?", "How would you type retries?", "How would this feed a report?"],
+    "tags": ["typescript", "array", "reporting"]
+  }
+]

@@ -1,0 +1,49 @@
+[
+  {
+    "id": "python-coding-001",
+    "topicId": "python-coding",
+    "topicTitle": "Python Coding for QA/SDET",
+    "level": "mid",
+    "type": "coding",
+    "difficulty": "easy",
+    "title": "Find duplicate values",
+    "question": "Write a function that returns duplicate values from a list.",
+    "problem": "Given a list of values, return each value that appears more than once, preserving first duplicate order.",
+    "inputExample": "[1, 2, 3, 2, 4, 1]",
+    "expectedOutput": "[2, 1]",
+    "hint": "Track seen values and duplicate values with sets.",
+    "solutionLanguage": "python",
+    "solution": "def find_duplicates(items):\n    seen = set()\n    duplicates = []\n    duplicate_set = set()\n\n    for item in items:\n        if item in seen and item not in duplicate_set:\n            duplicates.append(item)\n            duplicate_set.add(item)\n        seen.add(item)\n\n    return duplicates",
+    "explanation": "The function uses one set for values already seen and another to prevent returning the same duplicate twice.",
+    "commonMistakes": ["Returning duplicates multiple times", "Using nested loops unnecessarily", "Not preserving order"],
+    "followUps": ["What is the time complexity?", "How would you handle unhashable values?", "How would you write a pytest for this?"],
+    "tags": ["python", "list", "set", "duplicates"]
+  },
+  {
+    "id": "python-coding-002",
+    "topicId": "python-coding",
+    "topicTitle": "Python Coding for QA/SDET",
+    "level": "mid",
+    "type": "quiz",
+    "difficulty": "easy",
+    "question": "Which Python data structure is best for checking if an item has already been seen?",
+    "choices": ["list", "set", "tuple", "string"],
+    "correctAnswer": "set",
+    "explanation": "A set provides average O(1) membership checks, which is ideal for duplicate detection and validation helpers.",
+    "tags": ["python", "set", "complexity"]
+  },
+  {
+    "id": "python-coding-003",
+    "topicId": "python-coding",
+    "topicTitle": "Python Coding for QA/SDET",
+    "level": "senior",
+    "type": "interview",
+    "difficulty": "medium",
+    "question": "How would you validate an API response payload in Python without making the test brittle?",
+    "shortAnswer": "Validate required structure and business-critical fields, then avoid asserting unstable fields like timestamps unless needed.",
+    "interviewAnswer": "I separate schema-level checks from business assertions. I validate required keys, data types, status-related fields, and known invariants, while allowing dynamic fields such as IDs or timestamps to vary. For larger APIs I use helper functions or JSON schema so tests stay readable and consistent.",
+    "realProjectExample": "For an order API, I would assert the order status, item count, and customer ID, but only validate that createdAt is a valid timestamp rather than matching an exact value.",
+    "followUps": ["When would you use JSON schema?", "How do you test optional fields?", "How do you handle backward-compatible API changes?"],
+    "tags": ["python", "api", "validation"]
+  }
+]

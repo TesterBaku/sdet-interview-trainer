@@ -1,0 +1,49 @@
+[
+  {
+    "id": "sql-postgresql-001",
+    "topicId": "sql-postgresql",
+    "topicTitle": "SQL / PostgreSQL",
+    "level": "mid",
+    "type": "coding",
+    "difficulty": "medium",
+    "title": "Find duplicate emails",
+    "question": "Write a SQL query to find duplicate customer emails.",
+    "problem": "Given a customers table with email, return emails that appear more than once.",
+    "inputExample": "customers(id, email)",
+    "expectedOutput": "email rows where COUNT(*) > 1",
+    "hint": "Group by email and filter groups with HAVING.",
+    "solutionLanguage": "sql",
+    "solution": "SELECT email\nFROM customers\nWHERE email IS NOT NULL\nGROUP BY email\nHAVING COUNT(*) > 1;",
+    "explanation": "GROUP BY creates one group per email, and HAVING filters groups after aggregation.",
+    "commonMistakes": ["Using WHERE COUNT(*) > 1", "Forgetting NULL behavior", "Selecting non-grouped columns"],
+    "followUps": ["How would you include duplicate counts?", "How would you delete duplicates safely?", "How would you handle case-insensitive email matching?"],
+    "tags": ["sql", "group by", "having"]
+  },
+  {
+    "id": "sql-postgresql-002",
+    "topicId": "sql-postgresql",
+    "topicTitle": "SQL / PostgreSQL",
+    "level": "mid",
+    "type": "quiz",
+    "difficulty": "easy",
+    "question": "Which clause filters aggregated groups?",
+    "choices": ["WHERE", "HAVING", "ORDER BY", "LIMIT"],
+    "correctAnswer": "HAVING",
+    "explanation": "WHERE filters rows before aggregation; HAVING filters groups after GROUP BY.",
+    "tags": ["sql", "aggregation"]
+  },
+  {
+    "id": "sql-postgresql-003",
+    "topicId": "sql-postgresql",
+    "topicTitle": "SQL / PostgreSQL",
+    "level": "senior",
+    "type": "scenario",
+    "difficulty": "medium",
+    "question": "A test fails because the UI shows the latest order status, but your query returns an older status. How do you debug it?",
+    "shortAnswer": "Check ordering logic, timestamps, joins, environment data, and whether the UI reads from a different source or cache.",
+    "interviewAnswer": "I would verify the expected business rule first: latest by created_at, updated_at, sequence, or event version. Then I would query all status records for the order, inspect joins, and compare the API/UI source. If the UI uses cached or denormalized data, I would validate that pipeline too.",
+    "realProjectExample": "For an order history bug, the test used MAX(id) but the app used updated_at, so backfilled records broke the assertion. We changed the validation query to match the product rule.",
+    "followUps": ["How do you avoid flaky database assertions?", "When should tests avoid direct DB checks?", "How do transactions affect test reads?"],
+    "tags": ["sql", "debugging", "data validation"]
+  }
+]

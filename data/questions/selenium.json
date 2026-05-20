@@ -1,0 +1,43 @@
+[
+  {
+    "id": "selenium-001",
+    "topicId": "selenium",
+    "topicTitle": "Selenium",
+    "level": "mid",
+    "type": "interview",
+    "difficulty": "easy",
+    "question": "What is the difference between implicit wait and explicit wait in Selenium?",
+    "shortAnswer": "Implicit wait applies globally to element lookup. Explicit wait waits for a specific condition.",
+    "interviewAnswer": "I prefer explicit waits because they make synchronization intentional and condition-based. Implicit waits can hide timing problems and interact poorly with explicit waits. For stable tests, I wait for user-observable states such as visibility, clickability, or text changes.",
+    "realProjectExample": "For a checkout button, I used WebDriverWait until the button was clickable instead of sleeping or relying on a global wait.",
+    "followUps": ["Why are hard sleeps bad?", "How do you handle stale elements?", "What conditions do you wait for most often?"],
+    "tags": ["selenium", "waits", "webdriver"]
+  },
+  {
+    "id": "selenium-002",
+    "topicId": "selenium",
+    "topicTitle": "Selenium",
+    "level": "mid",
+    "type": "quiz",
+    "difficulty": "easy",
+    "question": "Which Selenium pattern helps organize page-specific locators and actions?",
+    "choices": ["Singleton", "Page Object Model", "Observer", "Factory Method only"],
+    "correctAnswer": "Page Object Model",
+    "explanation": "Page Object Model keeps page locators and page-level actions in dedicated classes, improving maintainability.",
+    "tags": ["selenium", "pom"]
+  },
+  {
+    "id": "selenium-003",
+    "topicId": "selenium",
+    "topicTitle": "Selenium",
+    "level": "senior",
+    "type": "scenario",
+    "difficulty": "medium",
+    "question": "A Selenium test fails intermittently with StaleElementReferenceException. What do you do?",
+    "shortAnswer": "Find why the DOM is re-rendering, re-locate the element after the update, and wait for a stable condition.",
+    "interviewAnswer": "I do not retry blindly first. I inspect the UI behavior and determine whether a framework re-render or navigation replaces the node. Then I update the test to locate the element closer to the action and wait for the post-render state before interacting.",
+    "realProjectExample": "A React grid refreshed after filtering. We fixed the test by waiting for the loading indicator to disappear and then locating the row again.",
+    "followUps": ["When are retries acceptable?", "How do you debug DOM refreshes?", "How would Playwright handle this differently?"],
+    "tags": ["selenium", "flaky tests", "stale element"]
+  }
+]

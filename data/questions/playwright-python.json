@@ -1,0 +1,49 @@
+[
+  {
+    "id": "playwright-python-001",
+    "topicId": "playwright-python",
+    "topicTitle": "Playwright with Python",
+    "level": "mid",
+    "type": "interview",
+    "difficulty": "easy",
+    "question": "Why are Playwright locators preferred over ElementHandle in Python?",
+    "shortAnswer": "Locators are lazy and retry actions/assertions, while ElementHandle points to a specific DOM node.",
+    "interviewAnswer": "I use locators because they align with Playwright auto-waiting and reduce flaky interactions on dynamic pages. ElementHandle can become stale if the DOM changes, so I reserve it for rare low-level cases.",
+    "realProjectExample": "For a login form, I would use page.get_by_label('Email').fill(user) and expect(locator).to_be_visible() rather than grabbing a handle early.",
+    "followUps": ["What does auto-waiting cover?", "How do assertions retry?", "When would you use get_by_role?"],
+    "tags": ["playwright", "python", "locators"]
+  },
+  {
+    "id": "playwright-python-002",
+    "topicId": "playwright-python",
+    "topicTitle": "Playwright with Python",
+    "level": "mid",
+    "type": "quiz",
+    "difficulty": "easy",
+    "question": "Which pytest feature is commonly used to share Playwright setup?",
+    "choices": ["decorators only", "fixtures", "metaclasses", "global variables"],
+    "correctAnswer": "fixtures",
+    "explanation": "Pytest fixtures are the standard way to provide browser, context, page, and test data setup.",
+    "tags": ["playwright", "pytest", "fixtures"]
+  },
+  {
+    "id": "playwright-python-003",
+    "topicId": "playwright-python",
+    "topicTitle": "Playwright with Python",
+    "level": "senior",
+    "type": "coding",
+    "difficulty": "medium",
+    "title": "Validate API response keys",
+    "question": "Write a Python helper that checks required keys in a response dictionary.",
+    "problem": "Given a dict and required keys, return missing keys.",
+    "inputExample": "payload={'id': 1, 'name': 'Rufat'}, required=['id', 'email']",
+    "expectedOutput": "['email']",
+    "hint": "Compare the required keys against payload.keys().",
+    "solutionLanguage": "python",
+    "solution": "def missing_required_keys(payload, required):\n    return [key for key in required if key not in payload]",
+    "explanation": "The helper keeps API assertions focused and produces a useful list of missing fields.",
+    "commonMistakes": ["Failing at the first missing key", "Not returning useful diagnostics", "Assuming nested fields are flat"],
+    "followUps": ["How would you validate nested keys?", "How would you integrate this with pytest?", "When is JSON schema better?"],
+    "tags": ["python", "api", "helper"]
+  }
+]

@@ -1,0 +1,43 @@
+[
+  {
+    "id": "cicd-001",
+    "topicId": "cicd",
+    "topicTitle": "CI/CD for QA/SDET",
+    "level": "mid",
+    "type": "interview",
+    "difficulty": "easy",
+    "question": "What test stages would you include in a CI pipeline?",
+    "shortAnswer": "Fast checks first, then build, unit tests, API/component tests, smoke UI tests, reports, and optional full regression later.",
+    "interviewAnswer": "I want the earliest failures to be cheap and clear. A typical pipeline runs lint/static checks, unit tests, build, API or integration tests, then a small smoke UI suite. Longer regression suites can run nightly or before release depending on risk.",
+    "realProjectExample": "In one pipeline, PRs ran lint, unit tests, API tests, and 20 smoke UI tests. Full browser regression ran nightly with reports posted to Slack.",
+    "followUps": ["Where do you put flaky tests?", "How do you handle test reports?", "How do secrets get managed?"],
+    "tags": ["ci", "pipeline", "quality gates"]
+  },
+  {
+    "id": "cicd-002",
+    "topicId": "cicd",
+    "topicTitle": "CI/CD for QA/SDET",
+    "level": "mid",
+    "type": "quiz",
+    "difficulty": "easy",
+    "question": "Where should API keys and passwords be stored in CI?",
+    "choices": ["Committed test config", "CI secret store", "README", "Hard-coded constants"],
+    "correctAnswer": "CI secret store",
+    "explanation": "Secrets should be stored in the CI/CD platform's secret management system and injected at runtime.",
+    "tags": ["ci", "secrets", "security"]
+  },
+  {
+    "id": "cicd-003",
+    "topicId": "cicd",
+    "topicTitle": "CI/CD for QA/SDET",
+    "level": "senior",
+    "type": "scenario",
+    "difficulty": "medium",
+    "question": "A pipeline fails only in CI, not locally. How do you investigate?",
+    "shortAnswer": "Compare environment, dependencies, browser versions, secrets, test data, parallelism, and artifacts.",
+    "interviewAnswer": "I start by pulling CI artifacts: logs, screenshots, traces, videos, and environment metadata. Then I compare dependency versions, browser images, timeouts, env vars, data setup, and parallel execution. The goal is to reproduce the CI shape locally or in a disposable runner.",
+    "realProjectExample": "A Playwright test only failed in CI because the container timezone differed from local. We made date assertions timezone-aware.",
+    "followUps": ["What artifacts are most useful?", "How do you debug parallel-only failures?", "How do you prevent environment drift?"],
+    "tags": ["ci", "debugging", "artifacts"]
+  }
+]

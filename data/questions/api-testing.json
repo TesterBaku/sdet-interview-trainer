@@ -1,0 +1,43 @@
+[
+  {
+    "id": "api-testing-001",
+    "topicId": "api-testing",
+    "topicTitle": "API Testing",
+    "level": "mid",
+    "type": "interview",
+    "difficulty": "easy",
+    "question": "What do you validate in a good API test beyond the status code?",
+    "shortAnswer": "Validate response body, schema, headers when relevant, business rules, and side effects.",
+    "interviewAnswer": "A status code is only the first signal. I also validate required fields, data types, important headers, error messages, persistence side effects, and contract expectations. I keep assertions tied to business risk rather than checking every unstable implementation detail.",
+    "realProjectExample": "For a create-user endpoint, I checked 201, response ID, default role, database persistence, and duplicate-email behavior.",
+    "followUps": ["How do you test negative cases?", "When do you validate headers?", "How do you test idempotency?"],
+    "tags": ["api", "rest", "assertions"]
+  },
+  {
+    "id": "api-testing-002",
+    "topicId": "api-testing",
+    "topicTitle": "API Testing",
+    "level": "mid",
+    "type": "quiz",
+    "difficulty": "easy",
+    "question": "Which status code usually means a resource was created successfully?",
+    "choices": ["200", "201", "204", "409"],
+    "correctAnswer": "201",
+    "explanation": "201 Created indicates the request succeeded and a new resource was created.",
+    "tags": ["api", "status codes"]
+  },
+  {
+    "id": "api-testing-003",
+    "topicId": "api-testing",
+    "topicTitle": "API Testing",
+    "level": "senior",
+    "type": "scenario",
+    "difficulty": "medium",
+    "question": "An API test fails intermittently with 409 conflicts when creating test users. How would you fix it?",
+    "shortAnswer": "Make test data unique, isolate cleanup, and verify whether retries are hiding a real idempotency issue.",
+    "interviewAnswer": "I would first confirm the conflict source. If multiple test runs share static emails, I would generate unique data and clean it safely. If the endpoint should be idempotent, I would clarify expected behavior and add targeted coverage for duplicate creation.",
+    "realProjectExample": "We changed static qa@example.com users to unique emails using run IDs and added cleanup by test tag, which removed CI collisions.",
+    "followUps": ["How do you manage test data in parallel CI?", "When should cleanup be avoided?", "How do you test duplicate requests?"],
+    "tags": ["api", "test data", "ci"]
+  }
+]

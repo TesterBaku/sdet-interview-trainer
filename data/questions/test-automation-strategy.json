@@ -1,0 +1,43 @@
+[
+  {
+    "id": "test-automation-strategy-001",
+    "topicId": "test-automation-strategy",
+    "topicTitle": "Test Automation Strategy",
+    "level": "senior",
+    "type": "interview",
+    "difficulty": "medium",
+    "question": "How do you decide what should be automated first?",
+    "shortAnswer": "Start with high-risk, high-repeatability flows that are stable enough to automate and valuable in CI.",
+    "interviewAnswer": "I prioritize automation by risk, frequency, stability, and feedback value. Smoke paths, critical revenue flows, and regression-prone areas usually come first. I avoid automating volatile features too early unless a lower-level test can cover the risk.",
+    "realProjectExample": "For an e-commerce app, we automated login, product search, checkout happy path, and payment failure handling before lower-risk visual variations.",
+    "followUps": ["How do you measure automation ROI?", "What should stay manual?", "How do you handle flaky high-value tests?"],
+    "tags": ["strategy", "prioritization", "test pyramid"]
+  },
+  {
+    "id": "test-automation-strategy-002",
+    "topicId": "test-automation-strategy",
+    "topicTitle": "Test Automation Strategy",
+    "level": "mid",
+    "type": "quiz",
+    "difficulty": "easy",
+    "question": "What does the test pyramid recommend?",
+    "choices": ["Mostly UI tests", "More lower-level tests than end-to-end tests", "Only manual testing", "No integration tests"],
+    "correctAnswer": "More lower-level tests than end-to-end tests",
+    "explanation": "The pyramid encourages many fast unit/component tests, fewer integration tests, and a smaller number of end-to-end tests.",
+    "tags": ["strategy", "test pyramid"]
+  },
+  {
+    "id": "test-automation-strategy-003",
+    "topicId": "test-automation-strategy",
+    "topicTitle": "Test Automation Strategy",
+    "level": "senior",
+    "type": "scenario",
+    "difficulty": "medium",
+    "question": "Your team has 300 UI tests and CI takes 90 minutes. What is your improvement plan?",
+    "shortAnswer": "Profile the suite, split by risk and speed, move coverage lower where possible, parallelize, and create quality gates.",
+    "interviewAnswer": "I would measure slow and flaky tests first, then separate smoke, critical regression, and full nightly suites. I would move repetitive UI coverage to API or component tests where appropriate, add parallel execution, and define a fast PR gate that developers trust.",
+    "realProjectExample": "We reduced PR feedback from 70 minutes to 12 by keeping 40 smoke tests in PR, moving validation-heavy checks to API tests, and running full regression nightly.",
+    "followUps": ["How do you choose PR gate tests?", "What metrics do you track?", "How do you remove duplicate coverage?"],
+    "tags": ["strategy", "ci", "suite optimization"]
+  }
+]

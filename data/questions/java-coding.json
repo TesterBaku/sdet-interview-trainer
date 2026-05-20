@@ -1,0 +1,49 @@
+[
+  {
+    "id": "java-coding-001",
+    "topicId": "java-coding",
+    "topicTitle": "Java Coding for QA/SDET",
+    "level": "mid",
+    "type": "coding",
+    "difficulty": "easy",
+    "title": "Count word frequency",
+    "question": "Write a Java method that counts how many times each word appears.",
+    "problem": "Given a list of words, return a map from word to count.",
+    "inputExample": "[\"login\", \"cart\", \"login\"]",
+    "expectedOutput": "{login=2, cart=1}",
+    "hint": "Use a HashMap and increment the count for each word.",
+    "solutionLanguage": "java",
+    "solution": "public static Map<String, Integer> countWords(List<String> words) {\n    Map<String, Integer> counts = new HashMap<>();\n    for (String word : words) {\n        counts.put(word, counts.getOrDefault(word, 0) + 1);\n    }\n    return counts;\n}",
+    "explanation": "HashMap stores each word as a key and updates the count as the list is scanned once.",
+    "commonMistakes": ["Forgetting getOrDefault", "Using == for string comparison", "Not handling an empty list"],
+    "followUps": ["How would you make it case-insensitive?", "What is the time complexity?", "How would you test it with JUnit?"],
+    "tags": ["java", "hashmap", "frequency"]
+  },
+  {
+    "id": "java-coding-002",
+    "topicId": "java-coding",
+    "topicTitle": "Java Coding for QA/SDET",
+    "level": "mid",
+    "type": "quiz",
+    "difficulty": "easy",
+    "question": "Which Java collection prevents duplicate values?",
+    "choices": ["ArrayList", "HashSet", "LinkedList", "HashMap"],
+    "correctAnswer": "HashSet",
+    "explanation": "A HashSet stores unique elements and is commonly used for duplicate detection.",
+    "tags": ["java", "collection", "hashset"]
+  },
+  {
+    "id": "java-coding-003",
+    "topicId": "java-coding",
+    "topicTitle": "Java Coding for QA/SDET",
+    "level": "senior",
+    "type": "interview",
+    "difficulty": "medium",
+    "question": "How would you design reusable Java test utilities without creating a hard-to-maintain helper dump?",
+    "shortAnswer": "Group utilities by responsibility, keep them stateless when possible, and avoid hiding test intent behind overly generic methods.",
+    "interviewAnswer": "I create small focused utilities such as ApiAssertions, Waits, TestDataFactory, or JsonHelpers. Each utility has clear ownership and avoids mixing unrelated behavior. If a helper starts encoding workflow logic, I usually move that into a page object, service object, or fixture layer instead.",
+    "realProjectExample": "In a Selenium framework I kept locator waits in a Waits class, browser actions in page objects, and API payload builders in factories so tests remained readable.",
+    "followUps": ["When should helper logic become a class?", "How do you avoid static utility abuse?", "How would you test utilities?"],
+    "tags": ["java", "framework", "utilities"]
+  }
+]

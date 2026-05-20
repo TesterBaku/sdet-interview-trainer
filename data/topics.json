@@ -1,0 +1,82 @@
+[
+  {
+    "id": "python-coding",
+    "title": "Python Coding for QA/SDET",
+    "description": "Python coding patterns for automation utilities, data validation, and interview problem solving.",
+    "category": "coding",
+    "questionCount": 3,
+    "difficulty": "mixed"
+  },
+  {
+    "id": "java-coding",
+    "title": "Java Coding for QA/SDET",
+    "description": "Java fundamentals and automation helper problems commonly asked in SDET interviews.",
+    "category": "coding",
+    "questionCount": 3,
+    "difficulty": "mixed"
+  },
+  {
+    "id": "sql-postgresql",
+    "title": "SQL / PostgreSQL",
+    "description": "Querying, aggregation, joins, and validation patterns for database-backed testing.",
+    "category": "database",
+    "questionCount": 3,
+    "difficulty": "mixed"
+  },
+  {
+    "id": "selenium",
+    "title": "Selenium",
+    "description": "WebDriver concepts, waits, locators, flaky test handling, and framework design.",
+    "category": "automation",
+    "questionCount": 3,
+    "difficulty": "mixed"
+  },
+  {
+    "id": "playwright-python",
+    "title": "Playwright with Python",
+    "description": "Python Playwright, pytest fixtures, locators, tracing, and stable UI/API automation.",
+    "category": "automation",
+    "questionCount": 3,
+    "difficulty": "mixed"
+  },
+  {
+    "id": "playwright-typescript",
+    "title": "Playwright with TypeScript",
+    "description": "TypeScript Playwright test runner, locators, fixtures, API testing, and CI execution.",
+    "category": "automation",
+    "questionCount": 3,
+    "difficulty": "mixed"
+  },
+  {
+    "id": "api-testing",
+    "title": "API Testing",
+    "description": "REST testing strategy, schemas, auth, negative coverage, and resilient API checks.",
+    "category": "automation",
+    "questionCount": 3,
+    "difficulty": "mixed"
+  },
+  {
+    "id": "test-automation-strategy",
+    "title": "Test Automation Strategy",
+    "description": "Automation architecture, test pyramid decisions, maintainability, ownership, and ROI.",
+    "category": "strategy",
+    "questionCount": 3,
+    "difficulty": "mixed"
+  },
+  {
+    "id": "cicd",
+    "title": "CI/CD for QA/SDET",
+    "description": "Pipeline quality gates, smoke/regression stages, reports, retries, and secrets handling.",
+    "category": "strategy",
+    "questionCount": 3,
+    "difficulty": "mixed"
+  },
+  {
+    "id": "aws",
+    "title": "AWS Basics for QA/SDET",
+    "description": "CloudWatch, S3, Lambda, IAM, deployment validation, and cloud testing fundamentals.",
+    "category": "cloud",
+    "questionCount": 3,
+    "difficulty": "mixed"
+  }
+]
