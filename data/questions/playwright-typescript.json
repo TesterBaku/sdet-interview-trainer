@@ -10,8 +10,16 @@
     "shortAnswer": "page.locator() creates a retryable Locator. page.$() returns an ElementHandle for the current DOM match.",
     "interviewAnswer": "I prefer locators because they auto-wait and work well with retryable assertions. ElementHandle is more brittle for modern reactive UIs because it can point to a node that gets replaced.",
     "realProjectExample": "For checkout tests, I used getByRole and locator assertions so the test waited for the button to become actionable.",
-    "followUps": ["Why is auto-waiting useful?", "When would CSS selectors still be acceptable?", "What makes getByRole resilient?"],
-    "tags": ["playwright", "typescript", "locator"]
+    "followUps": [
+      "Why is auto-waiting useful?",
+      "When would CSS selectors still be acceptable?",
+      "What makes getByRole resilient?"
+    ],
+    "tags": [
+      "playwright",
+      "typescript",
+      "locator"
+    ]
   },
   {
     "id": "playwright-typescript-002",
@@ -21,10 +29,19 @@
     "type": "quiz",
     "difficulty": "easy",
     "question": "Which Playwright feature records screenshots, DOM snapshots, and action timelines for debugging?",
-    "choices": ["Trace Viewer", "HAR only", "tsconfig", "ESLint"],
+    "choices": [
+      "Trace Viewer",
+      "HAR only",
+      "tsconfig",
+      "ESLint"
+    ],
     "correctAnswer": "Trace Viewer",
     "explanation": "Trace Viewer helps debug failures by showing actions, snapshots, network, console, and screenshots.",
-    "tags": ["playwright", "trace", "debugging"]
+    "tags": [
+      "playwright",
+      "trace",
+      "debugging"
+    ]
   },
   {
     "id": "playwright-typescript-003",
@@ -42,8 +59,632 @@
     "solutionLanguage": "typescript",
     "solution": "type TestResult = { name: string; status: 'passed' | 'failed' | 'skipped' };\n\nfunction failedTestNames(results: TestResult[]): string[] {\n  return results.filter((result) => result.status === 'failed').map((result) => result.name);\n}",
     "explanation": "The helper uses typed status values and a clear filter/map pipeline.",
-    "commonMistakes": ["Using any everywhere", "Mutating the input array", "Returning full objects instead of names"],
-    "followUps": ["How would you group failures by suite?", "How would you type retries?", "How would this feed a report?"],
-    "tags": ["typescript", "array", "reporting"]
+    "commonMistakes": [
+      "Using any everywhere",
+      "Mutating the input array",
+      "Returning full objects instead of names"
+    ],
+    "followUps": [
+      "How would you group failures by suite?",
+      "How would you type retries?",
+      "How would this feed a report?"
+    ],
+    "tags": [
+      "typescript",
+      "array",
+      "reporting"
+    ]
+  },
+  {
+    "id": "playwright-typescript-004",
+    "topicId": "playwright-typescript",
+    "topicTitle": "Playwright with TypeScript",
+    "level": "mid",
+    "type": "quiz",
+    "difficulty": "easy",
+    "question": "Which Playwright locator method is most resilient to UI refactors because it uses ARIA roles?",
+    "choices": [
+      "page.getByRole()",
+      "page.$('.btn')",
+      "page.locator('#submit')",
+      "page.getByXPath()"
+    ],
+    "correctAnswer": "page.getByRole()",
+    "explanation": "getByRole queries by accessible role and name, matching what assistive technologies see. It survives CSS class and ID renames that would break selector-based locators.",
+    "tags": [
+      "playwright",
+      "locator",
+      "getByRole",
+      "accessibility"
+    ]
+  },
+  {
+    "id": "playwright-typescript-005",
+    "topicId": "playwright-typescript",
+    "topicTitle": "Playwright with TypeScript",
+    "level": "mid",
+    "type": "quiz",
+    "difficulty": "easy",
+    "question": "What does Playwright's auto-waiting mechanism do before executing an action like click()?",
+    "choices": [
+      "Waits for the element to be visible, stable, and enabled",
+      "Sleeps for 1 second unconditionally",
+      "Only checks that the element exists in the DOM",
+      "Retries the entire test from the beginning"
+    ],
+    "correctAnswer": "Waits for the element to be visible, stable, and enabled",
+    "explanation": "Playwright auto-waits for actionability conditions (attached, visible, stable, enabled, not obscured) before firing an action, eliminating most explicit waits.",
+    "tags": [
+      "playwright",
+      "auto-waiting",
+      "actionability"
+    ]
+  },
+  {
+    "id": "playwright-typescript-006",
+    "topicId": "playwright-typescript",
+    "topicTitle": "Playwright with TypeScript",
+    "level": "mid",
+    "type": "quiz",
+    "difficulty": "medium",
+    "question": "In Playwright's playwright.config.ts, which option sets the number of times a failed test is retried before being marked as failed?",
+    "choices": [
+      "retries",
+      "maxFailures",
+      "timeout",
+      "workers"
+    ],
+    "correctAnswer": "retries",
+    "explanation": "The `retries` config key (e.g. retries: 2) tells Playwright to re-run a failed test up to that many times. It is distinct from `timeout` (per-action timeout) and `workers` (parallelism).",
+    "tags": [
+      "playwright",
+      "config",
+      "retries",
+      "ci"
+    ]
+  },
+  {
+    "id": "playwright-typescript-007",
+    "topicId": "playwright-typescript",
+    "topicTitle": "Playwright with TypeScript",
+    "level": "senior",
+    "type": "quiz",
+    "difficulty": "medium",
+    "question": "Which assertion in @playwright/test verifies that a locator eventually contains specific text, with built-in retry logic?",
+    "choices": [
+      "await expect(locator).toHaveText('Hello')",
+      "assert(await locator.textContent() === 'Hello')",
+      "await locator.waitForText('Hello')",
+      "expect(locator.innerText()).toBe('Hello')"
+    ],
+    "correctAnswer": "await expect(locator).toHaveText('Hello')",
+    "explanation": "expect(locator).toHaveText() is a web-first assertion that polls the locator until the text matches or the timeout expires. Plain assert() or Jest-style toBe() on a snapshot value does not retry.",
+    "tags": [
+      "playwright",
+      "assertions",
+      "web-first-assertions"
+    ]
+  },
+  {
+    "id": "playwright-typescript-008",
+    "topicId": "playwright-typescript",
+    "topicTitle": "Playwright with TypeScript",
+    "level": "senior",
+    "type": "quiz",
+    "difficulty": "medium",
+    "question": "When tracing is set to 'on-first-retry' in playwright.config.ts, when is a trace zip file actually saved to disk?",
+    "choices": [
+      "Only on the first retry attempt of a failing test",
+      "After every test regardless of outcome",
+      "Only when the test passes on retry",
+      "Never; it must be triggered manually via page.tracing.start()"
+    ],
+    "correctAnswer": "Only on the first retry attempt of a failing test",
+    "explanation": "'on-first-retry' starts a trace when Playwright is about to retry a test for the first time, then saves the zip on completion. This limits disk usage compared to 'on' while still capturing the failing run.",
+    "tags": [
+      "playwright",
+      "trace",
+      "config",
+      "ci"
+    ]
+  },
+  {
+    "id": "playwright-typescript-009",
+    "topicId": "playwright-typescript",
+    "topicTitle": "Playwright with TypeScript",
+    "level": "senior",
+    "type": "quiz",
+    "difficulty": "hard",
+    "question": "What is the correct way to share authenticated browser state (cookies and localStorage) across all tests in a Playwright project without logging in for every test?",
+    "choices": [
+      "Use storageState in the project config pointing to a saved auth JSON file produced by a global setup",
+      "Call page.context().clearCookies() before each test",
+      "Set browserContext.setDefaultTimeout(0) to skip auth checks",
+      "Use a beforeEach hook that navigates to the login page every time"
+    ],
+    "correctAnswer": "Use storageState in the project config pointing to a saved auth JSON file produced by a global setup",
+    "explanation": "Playwright's recommended pattern is to authenticate once in globalSetup, save the context state with context.storageState({ path }), then reference that file in playwright.config.ts via use.storageState. All tests in the project start with that authenticated state.",
+    "tags": [
+      "playwright",
+      "auth",
+      "storageState",
+      "fixtures",
+      "performance"
+    ]
+  },
+  {
+    "id": "playwright-typescript-010",
+    "topicId": "playwright-typescript",
+    "topicTitle": "Playwright with TypeScript",
+    "level": "mid",
+    "type": "quiz",
+    "difficulty": "medium",
+    "question": "Which Playwright CLI command opens the interactive UI mode that lets you run, filter, and watch tests in real time?",
+    "choices": [
+      "npx playwright test --ui",
+      "npx playwright debug",
+      "npx playwright show-report",
+      "npx playwright codegen"
+    ],
+    "correctAnswer": "npx playwright test --ui",
+    "explanation": "--ui launches Playwright's built-in browser-based test runner. --debug opens the Playwright Inspector for stepping, show-report opens the HTML report, and codegen records new tests.",
+    "tags": [
+      "playwright",
+      "cli",
+      "ui-mode",
+      "tooling"
+    ]
+  },
+  {
+    "id": "playwright-typescript-011",
+    "topicId": "playwright-typescript",
+    "topicTitle": "Playwright with TypeScript",
+    "level": "mid",
+    "type": "coding",
+    "difficulty": "easy",
+    "title": "Click a button by ARIA role",
+    "question": "Write a Playwright test that navigates to a URL and clicks a submit button located by its ARIA role.",
+    "problem": "Use test() from @playwright/test. Navigate to 'https://example.com/form', find the button with role 'button' and name 'Submit', click it, then assert the page URL contains '/confirmation'.",
+    "inputExample": "A form page at https://example.com/form with a <button>Submit</button>",
+    "expectedOutput": "URL after click matches /confirmation/",
+    "hint": "Use page.getByRole() with { name: 'Submit' }, then expect(page).toHaveURL().",
+    "solutionLanguage": "typescript",
+    "solution": "import { test, expect } from '@playwright/test';\n\ntest('submit form via ARIA role', async ({ page }) => {\n  await page.goto('https://example.com/form');\n\n  await page.getByRole('button', { name: 'Submit' }).click();\n\n  await expect(page).toHaveURL(/\\/confirmation/);\n});",
+    "explanation": "getByRole('button', { name: 'Submit' }) finds the element by its accessible role and name — this survives CSS and ID changes. expect(page).toHaveURL() is a web-first assertion that retries until the URL matches.",
+    "commonMistakes": [
+      "Using page.$('#submit') which ties the test to a specific id attribute",
+      "Adding an explicit waitForURL() before the assertion — toHaveURL already retries",
+      "Forgetting await before the click"
+    ],
+    "followUps": [
+      "How would you handle a button whose name is dynamic?",
+      "What locator would you use if there were two Submit buttons on the page?",
+      "How do you assert the button is disabled before submission?"
+    ],
+    "tags": [
+      "playwright",
+      "getByRole",
+      "navigation",
+      "assertions"
+    ]
+  },
+  {
+    "id": "playwright-typescript-012",
+    "topicId": "playwright-typescript",
+    "topicTitle": "Playwright with TypeScript",
+    "level": "mid",
+    "type": "coding",
+    "difficulty": "medium",
+    "title": "Page Object Model — LoginPage class",
+    "question": "Implement a LoginPage class using Playwright's Page Object Model pattern.",
+    "problem": "Create a LoginPage class that accepts a Playwright Page, exposes a goto() method, a login(username, password) method, and an errorMessage() locator getter. The login form has #username, #password, and a submit button with role 'button' and name 'Sign in'.",
+    "inputExample": "const loginPage = new LoginPage(page);\nawait loginPage.goto();\nawait loginPage.login('admin', 'secret');",
+    "expectedOutput": "No TypeScript errors; login() fills fields and clicks submit; errorMessage() returns a locator.",
+    "hint": "Store page as a private readonly property. Use this.page.locator() in each method.",
+    "solutionLanguage": "typescript",
+    "solution": "import { Page, Locator } from '@playwright/test';\n\nexport class LoginPage {\n  private readonly page: Page;\n  private readonly usernameInput: Locator;\n  private readonly passwordInput: Locator;\n  private readonly submitButton: Locator;\n\n  constructor(page: Page) {\n    this.page = page;\n    this.usernameInput = page.locator('#username');\n    this.passwordInput = page.locator('#password');\n    this.submitButton = page.getByRole('button', { name: 'Sign in' });\n  }\n\n  async goto(): Promise<void> {\n    await this.page.goto('/login');\n  }\n\n  async login(username: string, password: string): Promise<void> {\n    await this.usernameInput.fill(username);\n    await this.passwordInput.fill(password);\n    await this.submitButton.click();\n  }\n\n  errorMessage(): Locator {\n    return this.page.getByRole('alert');\n  }\n}",
+    "explanation": "Locators are initialised in the constructor so they are declared once and reused. goto() and login() are async because they perform browser actions. errorMessage() returns a Locator (not a promise) because Locators are lazy — they resolve on assertion or action.",
+    "commonMistakes": [
+      "Returning ElementHandle from a getter instead of Locator",
+      "Making errorMessage() async and awaiting the locator — locators don't need await to be created",
+      "Hardcoding the full URL instead of a relative path that works across environments"
+    ],
+    "followUps": [
+      "How would you extend this pattern to a BasePage class?",
+      "How do you share a LoginPage instance across multiple test files via a fixture?",
+      "What is the component object pattern and how does it differ from POM?"
+    ],
+    "tags": [
+      "playwright",
+      "page-object-model",
+      "typescript",
+      "locator"
+    ]
+  },
+  {
+    "id": "playwright-typescript-013",
+    "topicId": "playwright-typescript",
+    "topicTitle": "Playwright with TypeScript",
+    "level": "senior",
+    "type": "coding",
+    "difficulty": "medium",
+    "title": "Custom fixture for authenticated page",
+    "question": "Create a Playwright custom fixture that provides a pre-authenticated page to tests.",
+    "problem": "Extend Playwright's base fixtures to add an `authedPage` fixture. The fixture should navigate to '/login', fill in credentials from environment variables (PW_USER, PW_PASS), click the Sign in button, then yield the page. Tests receive an already-logged-in page.",
+    "inputExample": "test('dashboard loads', async ({ authedPage }) => {\n  await expect(authedPage.getByRole('heading', { name: 'Dashboard' })).toBeVisible();\n});",
+    "expectedOutput": "Test passes without any login steps inside the test body.",
+    "hint": "Use test.extend<{ authedPage: Page }>(). The fixture is a generator function with { page } and use().",
+    "solutionLanguage": "typescript",
+    "solution": "import { test as base, expect, Page } from '@playwright/test';\n\ntype AuthFixtures = {\n  authedPage: Page;\n};\n\nexport const test = base.extend<AuthFixtures>({\n  authedPage: async ({ page }, use) => {\n    const username = process.env.PW_USER ?? '';\n    const password = process.env.PW_PASS ?? '';\n\n    await page.goto('/login');\n    await page.getByLabel('Username').fill(username);\n    await page.getByLabel('Password').fill(password);\n    await page.getByRole('button', { name: 'Sign in' }).click();\n    await expect(page).toHaveURL(/\\/dashboard/);\n\n    await use(page);\n\n    // Teardown: nothing needed — page is closed automatically\n  },\n});\n\nexport { expect };",
+    "explanation": "test.extend() creates a new test object with additional fixtures. The fixture function is an async generator that sets up state before use() and can clean up after. Exporting the extended test and expect means test files import from this module instead of @playwright/test.",
+    "commonMistakes": [
+      "Forgetting to call await use(page) — this pauses the fixture so the test can run",
+      "Not exporting expect alongside the extended test object",
+      "Hardcoding credentials instead of reading from environment variables"
+    ],
+    "followUps": [
+      "How would you scope this fixture to worker level to reuse across tests in a file?",
+      "How does storageState differ from this fixture approach?",
+      "How would you parameterise the fixture for different user roles?"
+    ],
+    "tags": [
+      "playwright",
+      "fixtures",
+      "typescript",
+      "auth",
+      "test-extend"
+    ]
+  },
+  {
+    "id": "playwright-typescript-014",
+    "topicId": "playwright-typescript",
+    "topicTitle": "Playwright with TypeScript",
+    "level": "senior",
+    "type": "coding",
+    "difficulty": "hard",
+    "title": "API request via APIRequestContext inside a test",
+    "question": "Write a Playwright test that creates a resource via the REST API and then verifies it appears in the UI.",
+    "problem": "Use request fixture from @playwright/test to POST to '/api/items' with JSON body { name: 'Widget', price: 9.99 }. Assert the response status is 201. Then navigate to '/items' in the browser and assert a list item with text 'Widget' is visible.",
+    "inputExample": "POST /api/items → 201 Created\nGET /items (browser) → page shows 'Widget' in a list",
+    "expectedOutput": "API call returns 201; page locator for 'Widget' is visible.",
+    "hint": "Use request.post() for the API call. Then use page.goto() for the UI check. Both fixtures are available in the same test.",
+    "solutionLanguage": "typescript",
+    "solution": "import { test, expect } from '@playwright/test';\n\ntest('create item via API then verify in UI', async ({ request, page }) => {\n  // 1. Create item through the API\n  const response = await request.post('/api/items', {\n    data: { name: 'Widget', price: 9.99 },\n  });\n  expect(response.status()).toBe(201);\n\n  const body = await response.json() as { id: number; name: string };\n  expect(body.name).toBe('Widget');\n\n  // 2. Verify the item appears in the browser UI\n  await page.goto('/items');\n  await expect(page.getByRole('listitem').filter({ hasText: 'Widget' })).toBeVisible();\n});",
+    "explanation": "request is Playwright's APIRequestContext, available as a built-in fixture alongside page. It reuses the same base URL and authentication state as the browser context. Mixing API setup with UI assertion in a single test is a common SDET pattern that avoids slow UI-only data creation.",
+    "commonMistakes": [
+      "Using fetch() instead of the request fixture, losing Playwright's base URL and auth context",
+      "Not awaiting response.json() before asserting on the body",
+      "Assuming the UI updates synchronously — always use a retrying assertion like toBeVisible()"
+    ],
+    "followUps": [
+      "How would you delete the item after the test to avoid polluting test data?",
+      "How do you authenticate the API request when the app uses session cookies?",
+      "When would you use APIRequestContext outside of a test file, e.g. in globalSetup?"
+    ],
+    "tags": [
+      "playwright",
+      "api",
+      "APIRequestContext",
+      "request",
+      "typescript"
+    ]
+  },
+  {
+    "id": "playwright-typescript-015",
+    "topicId": "playwright-typescript",
+    "topicTitle": "Playwright with TypeScript",
+    "level": "senior",
+    "type": "coding",
+    "difficulty": "hard",
+    "title": "Retry-safe locator with filter and nth",
+    "question": "Write a Playwright helper that returns the Nth product card locator from a list, filtered by a category label.",
+    "problem": "Given a page that renders product cards as <article> elements each containing a <span class='category'> and a <h2 class='title'>, write a function getProductCard(page, category, index) that returns a Locator for the Nth card (0-based) matching the given category.",
+    "inputExample": "getProductCard(page, 'Electronics', 0) // first Electronics card",
+    "expectedOutput": "A Locator that resolves to the first article element whose category span contains 'Electronics'.",
+    "hint": "Use page.locator('article').filter({ has: page.locator('.category', { hasText: category }) }).nth(index).",
+    "solutionLanguage": "typescript",
+    "solution": "import { Page, Locator } from '@playwright/test';\n\nfunction getProductCard(page: Page, category: string, index: number): Locator {\n  return page\n    .locator('article')\n    .filter({ has: page.locator('.category', { hasText: category }) })\n    .nth(index);\n}\n\n// Usage in a test:\n// const card = getProductCard(page, 'Electronics', 0);\n// await expect(card).toBeVisible();\n// await expect(card.locator('h2.title')).toHaveText('Laptop');",
+    "explanation": "locator.filter({ has }) narrows a locator set by requiring a descendant that itself matches a locator. .nth() picks one from the filtered list. Because all three are Locator operations, the whole chain auto-waits and retries — unlike page.$() chains which snapshot the DOM at call time.",
+    "commonMistakes": [
+      "Using page.$$('article') which returns a static array of ElementHandles",
+      "Forgetting that nth() is 0-based",
+      "Chaining page.$() operations and wondering why the locator goes stale"
+    ],
+    "followUps": [
+      "How would you assert the count of matching cards?",
+      "How would you loop over all matching cards and collect their titles?",
+      "What is the difference between filter({ has }) and filter({ hasText })?"
+    ],
+    "tags": [
+      "playwright",
+      "locator",
+      "filter",
+      "typescript",
+      "dom-traversal"
+    ]
+  },
+  {
+    "id": "playwright-typescript-016",
+    "topicId": "playwright-typescript",
+    "topicTitle": "Playwright with TypeScript",
+    "level": "mid",
+    "type": "coding",
+    "difficulty": "medium",
+    "title": "Assert API response shape with TypeScript",
+    "question": "Write a typed helper that validates a Playwright API response matches an expected shape.",
+    "problem": "Create a function assertUserResponse(response: APIResponse) that asserts the HTTP status is 200 and that the JSON body matches { id: number, email: string, role: string }. Use expect from @playwright/test.",
+    "inputExample": "const res = await request.get('/api/me');\nawait assertUserResponse(res);",
+    "expectedOutput": "No assertion error when the response is { id: 1, email: 'a@b.com', role: 'admin' }.",
+    "hint": "Use expect(response.status()).toBe(200) and then type-cast the JSON body before asserting fields.",
+    "solutionLanguage": "typescript",
+    "solution": "import { expect, APIResponse } from '@playwright/test';\n\ntype UserResponse = {\n  id: number;\n  email: string;\n  role: string;\n};\n\nasync function assertUserResponse(response: APIResponse): Promise<void> {\n  expect(response.status()).toBe(200);\n\n  const body = await response.json() as UserResponse;\n\n  expect(typeof body.id).toBe('number');\n  expect(typeof body.email).toBe('string');\n  expect(typeof body.role).toBe('string');\n  expect(body.email).toMatch(/.+@.+/);\n}",
+    "explanation": "Typing the response body with a local type alias improves IDE autocomplete and catches property typos at compile time. expect(response.status()) is synchronous — response.status() is not a Promise. response.json() is async and must be awaited.",
+    "commonMistakes": [
+      "Awaiting response.status() — it is not a Promise",
+      "Using any for the body type and losing all type safety",
+      "Not awaiting response.json() before asserting on it"
+    ],
+    "followUps": [
+      "How would you use Zod or io-ts for runtime schema validation instead of manual assertions?",
+      "How would you assert the full response matches a JSON schema file?",
+      "How do you reuse this helper across multiple test files?"
+    ],
+    "tags": [
+      "playwright",
+      "api",
+      "typescript",
+      "assertions",
+      "APIRequestContext"
+    ]
+  },
+  {
+    "id": "playwright-typescript-017",
+    "topicId": "playwright-typescript",
+    "topicTitle": "Playwright with TypeScript",
+    "level": "mid",
+    "type": "coding",
+    "difficulty": "medium",
+    "title": "Enable and capture a trace programmatically",
+    "question": "Write a Playwright test that starts a trace manually, performs an action, and saves the trace on failure.",
+    "problem": "In a test, start tracing with screenshots and snapshots enabled before navigating to '/dashboard'. After asserting the heading is visible, stop the trace and save it to 'test-results/trace.zip' only when the test is in a failed state using testInfo.",
+    "inputExample": "Test passes: no zip saved. Test fails: trace.zip written to test-results/.",
+    "expectedOutput": "Trace zip is attached to testInfo and saved on disk when the test fails.",
+    "hint": "Use context.tracing.start() and context.tracing.stop(). Use testInfo.status and testInfo.attachments.",
+    "solutionLanguage": "typescript",
+    "solution": "import { test, expect } from '@playwright/test';\nimport path from 'path';\n\ntest('dashboard heading visible', async ({ context, page }, testInfo) => {\n  await context.tracing.start({ screenshots: true, snapshots: true });\n\n  await page.goto('/dashboard');\n  await expect(page.getByRole('heading', { level: 1 })).toBeVisible();\n\n  if (testInfo.status !== testInfo.expectedStatus) {\n    const tracePath = path.join(testInfo.outputDir, 'trace.zip');\n    await context.tracing.stop({ path: tracePath });\n    await testInfo.attach('trace', { path: tracePath, contentType: 'application/zip' });\n  } else {\n    await context.tracing.stop();\n  }\n});",
+    "explanation": "context.tracing.start/stop give fine-grained control beyond the config-level trace setting. testInfo.status reflects the outcome after all retries; comparing it to testInfo.expectedStatus detects unexpected failures. testInfo.attach() links the zip to the HTML report.",
+    "commonMistakes": [
+      "Calling page.tracing instead of context.tracing — tracing lives on the BrowserContext",
+      "Always saving the trace even on pass, wasting disk space",
+      "Forgetting to call tracing.stop() on the passing path, which leaks the trace buffer"
+    ],
+    "followUps": [
+      "How does this compare to setting trace: 'on-first-retry' in the config?",
+      "How do you view a saved trace zip file?",
+      "What information does a trace zip contain beyond screenshots?"
+    ],
+    "tags": [
+      "playwright",
+      "trace",
+      "tracing",
+      "testInfo",
+      "debugging"
+    ]
+  },
+  {
+    "id": "playwright-typescript-018",
+    "topicId": "playwright-typescript",
+    "topicTitle": "Playwright with TypeScript",
+    "level": "mid",
+    "type": "coding",
+    "difficulty": "easy",
+    "title": "Parallel test execution with workers config",
+    "question": "Write a playwright.config.ts that runs tests in parallel across 4 workers in CI and 2 workers locally.",
+    "problem": "Create a minimal playwright.config.ts that: sets 4 workers when the CI environment variable is set, defaults to 2 workers otherwise, sets a 30-second timeout per test, and configures the chromium project.",
+    "inputExample": "CI=true npx playwright test  → 4 workers\nnpx playwright test        → 2 workers",
+    "expectedOutput": "Valid playwright.config.ts that TypeScript compiles without errors.",
+    "hint": "Use process.env.CI to branch the workers value. Use defineConfig for type safety.",
+    "solutionLanguage": "typescript",
+    "solution": "import { defineConfig, devices } from '@playwright/test';\n\nexport default defineConfig({\n  timeout: 30_000,\n  workers: process.env.CI ? 4 : 2,\n  use: {\n    baseURL: process.env.BASE_URL ?? 'http://localhost:3000',\n    trace: 'on-first-retry',\n  },\n  projects: [\n    {\n      name: 'chromium',\n      use: { ...devices['Desktop Chrome'] },\n    },\n  ],\n});",
+    "explanation": "defineConfig() provides full TypeScript inference for all config keys. The ternary on process.env.CI is the idiomatic way to branch between local and CI settings without a separate config file. devices['Desktop Chrome'] includes realistic viewport and user-agent defaults.",
+    "commonMistakes": [
+      "Using module.exports = {} instead of defineConfig(), losing type checking",
+      "Setting workers to a string instead of a number",
+      "Forgetting baseURL, which forces every test to use absolute URLs"
+    ],
+    "followUps": [
+      "How do you shard tests across multiple CI machines?",
+      "What is the difference between workers and fullyParallel?",
+      "How do you prevent tests within the same file from running in parallel?"
+    ],
+    "tags": [
+      "playwright",
+      "config",
+      "ci",
+      "parallelism",
+      "workers"
+    ]
+  },
+  {
+    "id": "playwright-typescript-019",
+    "topicId": "playwright-typescript",
+    "topicTitle": "Playwright with TypeScript",
+    "level": "senior",
+    "type": "interview",
+    "difficulty": "medium",
+    "question": "How do you design a scalable Page Object Model for a large Playwright TypeScript test suite?",
+    "shortAnswer": "Use a BasePage with shared utilities, one POM class per page/component, initialise Locators in the constructor, and expose POM instances via custom fixtures.",
+    "interviewAnswer": "I structure POMs with a BasePage that holds the Page reference and common helpers like waitForNetworkIdle() or navigate(). Each page class extends BasePage and declares its Locators as private readonly properties in the constructor. Component-level objects like a NavBar or DataTable get their own class. I expose them through a fixtures file (test.extend) so tests import a single `test` object that already has `loginPage`, `dashboardPage`, etc. ready. This approach keeps test files focused on assertions and business logic, not selector details.",
+    "realProjectExample": "On an e-commerce project with 300+ tests, I introduced a CartComponent class used by both the CheckoutPage and MiniCartPage objects. When the cart API changed, I updated one class and all dependent tests passed without modification.",
+    "followUps": [
+      "How do you avoid circular dependencies between POM classes?",
+      "How do you test a component that appears across multiple pages?",
+      "When would you choose not to use POM and write inline selectors instead?"
+    ],
+    "tags": [
+      "playwright",
+      "page-object-model",
+      "typescript",
+      "architecture",
+      "fixtures"
+    ]
+  },
+  {
+    "id": "playwright-typescript-020",
+    "topicId": "playwright-typescript",
+    "topicTitle": "Playwright with TypeScript",
+    "level": "senior",
+    "type": "interview",
+    "difficulty": "medium",
+    "question": "How do you integrate Playwright tests into a CI/CD pipeline and ensure fast, reliable feedback?",
+    "shortAnswer": "Run tests in parallel with sharding, cache browser binaries, use retries only for known flaky tests, and publish the HTML report as a CI artifact.",
+    "interviewAnswer": "I configure the pipeline to install browser binaries with npx playwright install --with-deps and cache them by the Playwright version hash. Tests run fully parallel (fullyParallel: true) with sharding across multiple agents — for example, --shard=1/4 through 4/4 on GitHub Actions. retries: 1 catches transient network blips without masking real bugs. I set trace: 'on-first-retry' and screenshot: 'only-on-failure' to capture evidence without inflating artifact size. The HTML report is uploaded as an artifact and a Slack notification posts a summary. Quality gates fail the PR if more than 2% of tests fail or if any test marked @smoke fails.",
+    "realProjectExample": "On a SaaS product with a 600-test suite, sharding across 4 GitHub Actions runners cut pipeline time from 18 minutes to 5 minutes. Caching browser binaries saved another 90 seconds per run.",
+    "followUps": [
+      "How do you handle tests that need a running backend service in CI?",
+      "What strategy do you use for test data isolation in parallel runs?",
+      "How do you report flaky tests differently from genuine failures?"
+    ],
+    "tags": [
+      "playwright",
+      "ci",
+      "github-actions",
+      "sharding",
+      "parallelism",
+      "retries"
+    ]
+  },
+  {
+    "id": "playwright-typescript-021",
+    "topicId": "playwright-typescript",
+    "topicTitle": "Playwright with TypeScript",
+    "level": "senior",
+    "type": "interview",
+    "difficulty": "hard",
+    "question": "How do you use Playwright's APIRequestContext to set up and tear down test data without hitting the UI?",
+    "shortAnswer": "Use the request fixture in beforeAll/afterAll or in a custom fixture to create and delete test data via REST API, keeping UI tests fast and isolated.",
+    "interviewAnswer": "For each test or suite I need isolated data, I write a fixture or beforeAll hook that calls request.post() to create entities and stores the returned IDs. After the test, afterAll (or the fixture's teardown after use()) deletes them with request.delete(). This is 10-50x faster than creating data through the UI and produces no flakiness from form interactions. I also set the request fixture's extraHTTPHeaders to include an admin API key stored in an environment variable so teardown can always succeed even if the test failed mid-way.",
+    "realProjectExample": "On a project management app, creating a project through the UI took 8 seconds per test because of a multi-step wizard. Switching to API setup brought that to 200ms, cutting the 200-test suite from 45 minutes to 12 minutes.",
+    "followUps": [
+      "How do you handle cascade deletes — entities that depend on each other?",
+      "What do you do when the app has no public API for test data setup?",
+      "How do you ensure teardown runs even when a test times out?"
+    ],
+    "tags": [
+      "playwright",
+      "api",
+      "APIRequestContext",
+      "test-data",
+      "fixtures",
+      "performance"
+    ]
+  },
+  {
+    "id": "playwright-typescript-022",
+    "topicId": "playwright-typescript",
+    "topicTitle": "Playwright with TypeScript",
+    "level": "mid",
+    "type": "interview",
+    "difficulty": "easy",
+    "question": "What is the difference between Playwright's web-first assertions and regular Jest-style assertions?",
+    "shortAnswer": "Web-first assertions like expect(locator).toBeVisible() poll the DOM until the condition is met or timeout, whereas Jest-style expect().toBe() evaluates a value once with no retry.",
+    "interviewAnswer": "Web-first assertions are attached to Locators and the Page object. They internally retry on an interval until the expected state is reached or the timeout (default 5 s) expires. This eliminates most waitForSelector() calls. Regular assertions work on plain values — for example expect(count).toBe(5) — and fail immediately if the value doesn't match. Mixing them incorrectly, like expect(await locator.textContent()).toBe('Hello'), produces a brittle test that can race because the textContent snapshot is taken once.",
+    "realProjectExample": "I replaced about 40 explicit await page.waitForSelector('.toast') calls with expect(page.getByRole('status')).toBeVisible(). The tests became shorter, more readable, and stopped failing on slow CI machines.",
+    "followUps": [
+      "What is the default assertion timeout and how do you change it?",
+      "How do you assert that an element does NOT exist on the page?",
+      "When would you use expect(value) over expect(locator)?"
+    ],
+    "tags": [
+      "playwright",
+      "assertions",
+      "web-first-assertions",
+      "typescript"
+    ]
+  },
+  {
+    "id": "playwright-typescript-023",
+    "topicId": "playwright-typescript",
+    "topicTitle": "Playwright with TypeScript",
+    "level": "senior",
+    "type": "interview",
+    "difficulty": "hard",
+    "question": "How do you debug a flaky Playwright test that only fails in CI and never locally?",
+    "shortAnswer": "Use traces and video artifacts from CI, reproduce with --headed and slow-mo locally, and isolate the race condition by inspecting the timeline in Trace Viewer.",
+    "interviewAnswer": "My first step is to check the CI artifact: I look at the trace zip in Trace Viewer to see the exact sequence of actions, DOM snapshots before and after each step, and the network waterfall. Usually the failure is a timing issue — an element is momentarily detached during a React re-render, or a network request takes longer on CI. I then check whether the test uses a hard-coded timeout or a selector that is not stable. If the trace shows a selector resolving to the wrong element, I switch to a more specific getByRole or add a filter. If it's a network race, I intercept the request with page.route() to control when it resolves. I also run the CI job with DEBUG=pw:api to capture verbose Playwright logs without changing the test code.",
+    "realProjectExample": "A checkout test failed in CI because a 'Continue' button appeared briefly disabled after a coupon validation API call. Locally the API responded in 30ms; in CI it took 400ms. The fix was to assert expect(button).toBeEnabled() before clicking, which auto-waited for the button to become active.",
+    "followUps": [
+      "How do you mark a test as flaky vs. genuinely broken in your reporting system?",
+      "How do you prevent flaky tests from merging into the main branch?",
+      "When does increasing the timeout actually fix a flaky test vs. just hiding it?"
+    ],
+    "tags": [
+      "playwright",
+      "flaky-tests",
+      "trace",
+      "debugging",
+      "ci",
+      "retries"
+    ]
+  },
+  {
+    "id": "playwright-typescript-024",
+    "topicId": "playwright-typescript",
+    "topicTitle": "Playwright with TypeScript",
+    "level": "senior",
+    "type": "interview",
+    "difficulty": "medium",
+    "question": "How do you structure Playwright fixtures to support multiple user roles in a test suite?",
+    "shortAnswer": "Create a fixture per role that sets up a separate browser context with its own storageState, then compose them in a shared fixtures file exported as the test function.",
+    "interviewAnswer": "I define a fixtures file that extends base test with one fixture per role — adminPage, editorPage, viewerPage. Each fixture loads a saved storageState JSON file produced by a globalSetup script that authenticates each role once per CI run. The fixture yields a Page scoped to that role's context. Tests that need multi-role interaction destructure multiple fixtures in the same test function — Playwright creates one browser context per fixture automatically. I store the auth JSON files in a gitignored .auth/ directory and regenerate them in globalSetup if they are missing or expired.",
+    "realProjectExample": "On a document collaboration platform I needed tests covering admin approvals of editor submissions. With two fixtures (adminPage and editorPage) a single test could submit a document as editor and verify it appeared in the admin review queue — all without re-logging between steps.",
+    "followUps": [
+      "How do you refresh authentication state when tokens expire during a long test run?",
+      "How do you prevent two fixtures from sharing the same browser context accidentally?",
+      "How do you parameterise tests to run the same scenario for multiple roles?"
+    ],
+    "tags": [
+      "playwright",
+      "fixtures",
+      "auth",
+      "roles",
+      "storageState",
+      "typescript"
+    ]
+  },
+  {
+    "id": "playwright-typescript-025",
+    "topicId": "playwright-typescript",
+    "topicTitle": "Playwright with TypeScript",
+    "level": "senior",
+    "type": "coding",
+    "difficulty": "hard",
+    "title": "Global setup: authenticate and save storage state",
+    "question": "Write a Playwright globalSetup file that authenticates as an admin user and saves the browser state for reuse across all tests.",
+    "problem": "Create a globalSetup.ts that: launches a Chromium browser, navigates to '/login', logs in with credentials from PW_ADMIN_USER and PW_ADMIN_PASS env vars, waits for navigation to '/dashboard', saves the storage state to '.auth/admin.json', and closes the browser. The playwright.config.ts should reference this file and use the saved state.",
+    "inputExample": "npx playwright test  →  globalSetup runs once, saves .auth/admin.json, all test projects start authenticated",
+    "expectedOutput": "'.auth/admin.json' exists after setup; tests skip the login UI entirely.",
+    "hint": "Use chromium.launch() from playwright, not from @playwright/test. Call context.storageState({ path }) before closing.",
+    "solutionLanguage": "typescript",
+    "solution": "// globalSetup.ts\nimport { chromium, FullConfig } from '@playwright/test';\n\nexport default async function globalSetup(config: FullConfig): Promise<void> {\n  const { baseURL } = config.projects[0].use;\n  const adminUser = process.env.PW_ADMIN_USER ?? '';\n  const adminPass = process.env.PW_ADMIN_PASS ?? '';\n\n  const browser = await chromium.launch();\n  const context = await browser.newContext();\n  const page = await context.newPage();\n\n  await page.goto(`${baseURL}/login`);\n  await page.getByLabel('Email').fill(adminUser);\n  await page.getByLabel('Password').fill(adminPass);\n  await page.getByRole('button', { name: 'Sign in' }).click();\n  await page.waitForURL('**/dashboard');\n\n  await context.storageState({ path: '.auth/admin.json' });\n  await browser.close();\n}\n\n// playwright.config.ts (relevant excerpt)\n// import { defineConfig } from '@playwright/test';\n// export default defineConfig({\n//   globalSetup: require.resolve('./globalSetup'),\n//   use: {\n//     storageState: '.auth/admin.json',\n//   },\n// });",
+    "explanation": "globalSetup runs once before the test suite. chromium.launch() from @playwright/test gives access to Playwright's browser API outside the test runner context. context.storageState() serialises cookies and localStorage to a JSON file. All test projects that set use.storageState to that file start each test with the admin session already active — no login UI interaction needed.",
+    "commonMistakes": [
+      "Importing Page from @playwright/test and trying to use it in globalSetup — globalSetup doesn't receive fixtures",
+      "Not creating the .auth/ directory before writing the file — use fs.mkdirSync('.auth', { recursive: true }) if needed",
+      "Setting storageState at the project level but also running a login fixture, causing double-auth and potential session conflicts"
+    ],
+    "followUps": [
+      "How do you invalidate the saved storageState when the session expires?",
+      "How do you save storageState for multiple roles in the same globalSetup?",
+      "What is the difference between globalSetup and a beforeAll hook?"
+    ],
+    "tags": [
+      "playwright",
+      "globalSetup",
+      "storageState",
+      "auth",
+      "ci",
+      "typescript"
+    ]
   }
 ]

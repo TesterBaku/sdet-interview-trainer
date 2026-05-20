@@ -21,7 +21,7 @@ test("home, topics, and topic detail render the MVP navigation path", async ({ p
   await expect(page.getByRole("heading", { name: "Practice like the interview is already scheduled." })).toBeVisible();
   await expect(page.getByRole("link", { name: "Topics" })).toBeVisible();
   await expect(page.getByText("TOTAL")).toBeVisible();
-  await expect(page.getByText("96")).toBeVisible();
+  await expect(page.getByText("250")).toBeVisible();
 
   await page.getByRole("link", { name: "Topics" }).click();
   await expect(page).toHaveURL("/topics");
@@ -63,56 +63,76 @@ test("flashcards reveal answers, navigate cards, and save weak status to progres
   await expect(page.getByText("Validate required structure and business-critical fields", { exact: false })).toBeVisible();
 });
 
-// playwright-python has exactly 2 non-coding flashcard questions (-001 interview, -002 quiz).
-// If a non-coding question is added to that file these tests need updating.
+// playwright-python flashcard questions: 16 non-coding out of 25 total.
+// Last card is playwright-python-025 (interview). Update these if questions change.
+const playwrightPythonFlashcardIds = [
+  "playwright-python-001", "playwright-python-002", "playwright-python-004",
+  "playwright-python-006", "playwright-python-008", "playwright-python-010",
+  "playwright-python-012", "playwright-python-014", "playwright-python-016",
+  "playwright-python-018", "playwright-python-019", "playwright-python-021",
+  "playwright-python-022", "playwright-python-023", "playwright-python-024",
+  "playwright-python-025"
+];
+const ppLastCard = playwrightPythonFlashcardIds[playwrightPythonFlashcardIds.length - 1];
+const ppTotalCards = playwrightPythonFlashcardIds.length; // 16
 
 test("flashcards last card requires marking before Finish is enabled", async ({ page }) => {
   await clearAppState(page);
   await page.goto("/flashcards/playwright-python");
 
-  await page.getByRole("button", { name: "Next" }).click();
-  await expect(page.getByText("Card 2 of 2")).toBeVisible();
+  // Navigate to the last card
+  for (let i = 0; i < ppTotalCards - 1; i++) {
+    await page.getByRole("button", { name: "Next" }).click();
+  }
+  await expect(page.getByText(`Card ${ppTotalCards} of ${ppTotalCards}`)).toBeVisible();
 
   // Finish is disabled and hint text is visible until the card is marked
   await expect(page.getByRole("button", { name: "Finish" })).toBeDisabled();
   await expect(page.getByText("Mark this card to finish")).toBeVisible();
   await expect(page.getByRole("link", { name: "Finish" })).not.toBeVisible();
 
-  // Mark the card — Finish should become an active link, hint disappears
+  // Mark the card — Finish becomes an active link, hint disappears
   await page.getByRole("button", { name: "Reveal answer" }).click();
   await page.getByRole("button", { name: "Known" }).click();
   await expect(page.getByRole("button", { name: "Finish" })).not.toBeVisible();
   await expect(page.getByText("Mark this card to finish")).not.toBeVisible();
   await expect(page.getByRole("link", { name: "Finish" })).toBeVisible();
 
-  // Finish navigates to the topic page
   await page.getByRole("link", { name: "Finish" }).click();
   await expect(page).toHaveURL("/topics/playwright-python");
 });
 
 test("flashcards all cards marked tracks full completion", async ({ page }) => {
-  await clearAppState(page);
+  // Pre-seed first 15 records; test that marking the last card via UI records all 16
+  const first15 = playwrightPythonFlashcardIds.slice(0, -1).map((id) => ({
+    questionId: id, status: "known", attempts: 1, lastReviewedAt: new Date().toISOString()
+  }));
+  await page.goto("/");
+  await page.evaluate(
+    ([key, value]) => window.localStorage.setItem(key, value),
+    [progressKey, JSON.stringify({ records: first15, completedQuestions: 15, weakQuestions: 0, reviewQuestions: 0 })]
+  );
+
   await page.goto("/flashcards/playwright-python");
+  for (let i = 0; i < ppTotalCards - 1; i++) {
+    await page.getByRole("button", { name: "Next" }).click();
+  }
 
-  // Mark card 1
+  // Last card is unmarked — Finish is disabled
+  await expect(page.getByRole("button", { name: "Finish" })).toBeDisabled();
   await page.getByRole("button", { name: "Reveal answer" }).click();
   await page.getByRole("button", { name: "Known" }).click();
-  await page.getByRole("button", { name: "Next" }).click();
 
-  // Mark card 2 (last card)
-  await page.getByRole("button", { name: "Reveal answer" }).click();
-  await page.getByRole("button", { name: "Known" }).click();
-
-  // Finish is now enabled — navigate and verify both questions recorded
+  // All cards now marked — Finish navigates to topic
   await page.getByRole("link", { name: "Finish" }).click();
   await expect(page).toHaveURL("/topics/playwright-python");
 
   const progress = await page.evaluate(
     (key) => JSON.parse(window.localStorage.getItem(key) ?? "{}"),
-    "sdet-interview-trainer-progress"
+    progressKey
   );
-  expect(progress.records).toHaveLength(2);
-  expect(progress.completedQuestions).toBe(2);
+  expect(progress.records).toHaveLength(ppTotalCards);
+  expect(progress.completedQuestions).toBe(ppTotalCards);
 });
 
 test("flashcards previously marked card enables Finish immediately on return", async ({ page }) => {
@@ -123,7 +143,7 @@ test("flashcards previously marked card enables Finish immediately on return", a
     [
       progressKey,
       JSON.stringify({
-        records: [{ questionId: "playwright-python-002", status: "known", attempts: 1, lastReviewedAt: new Date().toISOString() }],
+        records: [{ questionId: ppLastCard, status: "known", attempts: 1, lastReviewedAt: new Date().toISOString() }],
         completedQuestions: 1,
         weakQuestions: 0,
         reviewQuestions: 0
@@ -132,10 +152,12 @@ test("flashcards previously marked card enables Finish immediately on return", a
   );
 
   await page.goto("/flashcards/playwright-python");
-  await page.getByRole("button", { name: "Next" }).click();
-  await expect(page.getByText("Card 2 of 2")).toBeVisible();
+  for (let i = 0; i < ppTotalCards - 1; i++) {
+    await page.getByRole("button", { name: "Next" }).click();
+  }
+  await expect(page.getByText(`Card ${ppTotalCards} of ${ppTotalCards}`)).toBeVisible();
 
-  // Previously marked card — Finish is immediately active, no hint
+  // Previously marked — Finish is immediately active, no hint shown
   await expect(page.getByRole("link", { name: "Finish" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Finish" })).not.toBeVisible();
   await expect(page.getByText("Mark this card to finish")).not.toBeVisible();
@@ -143,12 +165,23 @@ test("flashcards previously marked card enables Finish immediately on return", a
 
 test("quiz preserves correctness and final save is idempotent", async ({ page }) => {
   await clearAppState(page);
-  await page.goto("/quiz/selenium");
+  // test-automation-strategy has 9 quiz questions; navigate through Q1–Q8 quickly,
+  // then test correctness + idempotency on Q9 (test-automation-strategy-011).
+  await page.goto("/quiz/test-automation-strategy");
 
-  await page.getByLabel("Singleton").check();
+  for (let i = 0; i < 8; i++) {
+    await page.locator("label").first().click();
+    await page.getByRole("button", { name: "Submit answer" }).click();
+    await page.getByRole("button", { name: "Save and continue" }).click();
+  }
+
+  // Q9 — wrong answer to verify correctness feedback
+  await page.getByLabel("A manual sign-off step before any deployment").check();
   await expect(page.getByRole("button", { name: "Submit answer" })).toBeEnabled();
   await page.getByRole("button", { name: "Submit answer" }).click();
-  await expect(page.getByText("Incorrect. Correct answer: Page Object Model")).toBeVisible();
+  await expect(
+    page.getByText("Incorrect. Correct answer: A defined threshold that must be met before a pipeline stage can proceed")
+  ).toBeVisible();
   await page.getByRole("button", { name: "Save and finish" }).click();
 
   await expect(page.getByRole("button", { name: "Saved" })).toBeDisabled();
@@ -156,14 +189,16 @@ test("quiz preserves correctness and final save is idempotent", async ({ page })
   await expect
     .poll(async () => page.evaluate((key) => JSON.parse(window.localStorage.getItem(key) ?? "{}"), progressKey))
     .toMatchObject({
-      records: [{ questionId: "selenium-002", status: "review", attempts: 1 }],
-      reviewQuestions: 1
+      records: expect.arrayContaining([
+        expect.objectContaining({ questionId: "test-automation-strategy-011", status: "review", attempts: 1 })
+      ])
     });
 
+  // Idempotency: force-click Saved again, attempts must not increment
   await page.getByRole("button", { name: "Saved" }).click({ force: true });
   const progress = await page.evaluate((key) => JSON.parse(window.localStorage.getItem(key) ?? "{}"), progressKey);
-  expect(progress.records).toHaveLength(1);
-  expect(progress.records[0].attempts).toBe(1);
+  const lastRecord = progress.records.find((r: { questionId: string }) => r.questionId === "test-automation-strategy-011");
+  expect(lastRecord.attempts).toBe(1);
 });
 
 test("mock interview accepts an answer, reveals model guidance, and saves self-rating", async ({ page }) => {

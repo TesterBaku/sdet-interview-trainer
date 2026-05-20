@@ -10,8 +10,16 @@
     "shortAnswer": "Implicit wait applies globally to element lookup. Explicit wait waits for a specific condition.",
     "interviewAnswer": "I prefer explicit waits because they make synchronization intentional and condition-based. Implicit waits can hide timing problems and interact poorly with explicit waits. For stable tests, I wait for user-observable states such as visibility, clickability, or text changes.",
     "realProjectExample": "For a checkout button, I used WebDriverWait until the button was clickable instead of sleeping or relying on a global wait.",
-    "followUps": ["Why are hard sleeps bad?", "How do you handle stale elements?", "What conditions do you wait for most often?"],
-    "tags": ["selenium", "waits", "webdriver"]
+    "followUps": [
+      "Why are hard sleeps bad?",
+      "How do you handle stale elements?",
+      "What conditions do you wait for most often?"
+    ],
+    "tags": [
+      "selenium",
+      "waits",
+      "webdriver"
+    ]
   },
   {
     "id": "selenium-002",
@@ -21,10 +29,18 @@
     "type": "quiz",
     "difficulty": "easy",
     "question": "Which Selenium pattern helps organize page-specific locators and actions?",
-    "choices": ["Singleton", "Page Object Model", "Observer", "Factory Method only"],
+    "choices": [
+      "Singleton",
+      "Page Object Model",
+      "Observer",
+      "Factory Method only"
+    ],
     "correctAnswer": "Page Object Model",
     "explanation": "Page Object Model keeps page locators and page-level actions in dedicated classes, improving maintainability.",
-    "tags": ["selenium", "pom"]
+    "tags": [
+      "selenium",
+      "pom"
+    ]
   },
   {
     "id": "selenium-003",
@@ -37,7 +53,611 @@
     "shortAnswer": "Find why the DOM is re-rendering, re-locate the element after the update, and wait for a stable condition.",
     "interviewAnswer": "I do not retry blindly first. I inspect the UI behavior and determine whether a framework re-render or navigation replaces the node. Then I update the test to locate the element closer to the action and wait for the post-render state before interacting.",
     "realProjectExample": "A React grid refreshed after filtering. We fixed the test by waiting for the loading indicator to disappear and then locating the row again.",
-    "followUps": ["When are retries acceptable?", "How do you debug DOM refreshes?", "How would Playwright handle this differently?"],
-    "tags": ["selenium", "flaky tests", "stale element"]
+    "followUps": [
+      "When are retries acceptable?",
+      "How do you debug DOM refreshes?",
+      "How would Playwright handle this differently?"
+    ],
+    "tags": [
+      "selenium",
+      "flaky tests",
+      "stale element"
+    ]
+  },
+  {
+    "id": "selenium-004",
+    "topicId": "selenium",
+    "topicTitle": "Selenium",
+    "level": "mid",
+    "type": "coding",
+    "difficulty": "medium",
+    "title": "Explicit Wait for Element Visibility",
+    "question": "Write a Java method that waits up to 10 seconds for an element identified by a CSS selector to be visible, then returns the element.",
+    "problem": "Implement a utility method `waitForVisible(WebDriver driver, String cssSelector)` that uses WebDriverWait with ExpectedConditions to wait for visibility. Return the WebElement once visible. Throw a descriptive RuntimeException if the wait times out.",
+    "inputExample": "waitForVisible(driver, \"#submit-btn\")",
+    "expectedOutput": "WebElement that is visible in the DOM, or RuntimeException with message 'Element not visible within 10 seconds: #submit-btn'",
+    "hint": "Use WebDriverWait with ExpectedConditions.visibilityOfElementLocated and a By.cssSelector locator. Catch TimeoutException to wrap it.",
+    "solutionLanguage": "java",
+    "solution": "import org.openqa.selenium.By;\nimport org.openqa.selenium.WebDriver;\nimport org.openqa.selenium.WebElement;\nimport org.openqa.selenium.support.ui.ExpectedConditions;\nimport org.openqa.selenium.support.ui.WebDriverWait;\nimport org.openqa.selenium.TimeoutException;\nimport java.time.Duration;\n\npublic class WaitUtils {\n\n    public static WebElement waitForVisible(WebDriver driver, String cssSelector) {\n        try {\n            return new WebDriverWait(driver, Duration.ofSeconds(10))\n                    .until(ExpectedConditions.visibilityOfElementLocated(\n                            By.cssSelector(cssSelector)));\n        } catch (TimeoutException e) {\n            throw new RuntimeException(\n                    \"Element not visible within 10 seconds: \" + cssSelector, e);\n        }\n    }\n}",
+    "explanation": "WebDriverWait polls the condition every 500 ms by default. visibilityOfElementLocated checks that the element is in the DOM and has non-zero dimensions. Wrapping TimeoutException provides a clear failure message for test reporters.",
+    "commonMistakes": [
+      "Mixing implicit and explicit waits, which causes unpredictable poll timing",
+      "Using Thread.sleep instead of a condition-based wait",
+      "Forgetting Duration.ofSeconds — passing a plain int is the deprecated Selenium 3 API"
+    ],
+    "followUps": [
+      "How would you make the timeout configurable?",
+      "What is the difference between visibilityOf and visibilityOfElementLocated?",
+      "How do you wait for an element to disappear?"
+    ],
+    "tags": [
+      "selenium",
+      "waits",
+      "explicit wait",
+      "webdriver"
+    ]
+  },
+  {
+    "id": "selenium-005",
+    "topicId": "selenium",
+    "topicTitle": "Selenium",
+    "level": "mid",
+    "type": "coding",
+    "difficulty": "medium",
+    "title": "Switch to iframe and Interact with Element Inside",
+    "question": "Write a Java method that switches into an iframe by its ID, clicks a button inside the iframe, then switches back to the default content.",
+    "problem": "Implement `clickInsideIframe(WebDriver driver, String iframeId, String buttonCssSelector)`. The method must: (1) wait up to 5 seconds for the iframe to be available, (2) switch into it, (3) click the button, (4) switch back to default content.",
+    "inputExample": "clickInsideIframe(driver, \"payment-frame\", \"#pay-now\")",
+    "expectedOutput": "Button inside iframe is clicked; driver context is restored to default content",
+    "hint": "Use ExpectedConditions.frameToBeAvailableAndSwitchToIt to combine the wait and switch in one step.",
+    "solutionLanguage": "java",
+    "solution": "import org.openqa.selenium.By;\nimport org.openqa.selenium.WebDriver;\nimport org.openqa.selenium.support.ui.ExpectedConditions;\nimport org.openqa.selenium.support.ui.WebDriverWait;\nimport java.time.Duration;\n\npublic class IframeUtils {\n\n    public static void clickInsideIframe(WebDriver driver, String iframeId, String buttonCssSelector) {\n        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5));\n\n        wait.until(ExpectedConditions.frameToBeAvailableAndSwitchToIt(\n                By.id(iframeId)));\n        try {\n            driver.findElement(By.cssSelector(buttonCssSelector)).click();\n        } finally {\n            driver.switchTo().defaultContent();\n        }\n    }\n}",
+    "explanation": "frameToBeAvailableAndSwitchToIt waits for the iframe element to exist and then performs the context switch in one atomic step. The finally block guarantees the driver context is restored even if the click throws, preventing hard-to-debug context leaks in subsequent test steps.",
+    "commonMistakes": [
+      "Forgetting to call switchTo().defaultContent() after the interaction, leaving the driver inside the iframe",
+      "Using driver.switchTo().frame(int index) which is brittle when iframe order changes",
+      "Not waiting for the iframe to be present before switching, causing NoSuchFrameException"
+    ],
+    "followUps": [
+      "How do you switch to a nested iframe?",
+      "How do you handle a dynamically injected iframe that does not have an id?",
+      "What is the difference between switchTo().defaultContent() and switchTo().parentFrame()?"
+    ],
+    "tags": [
+      "selenium",
+      "iframe",
+      "webdriver",
+      "context switching"
+    ]
+  },
+  {
+    "id": "selenium-006",
+    "topicId": "selenium",
+    "topicTitle": "Selenium",
+    "level": "mid",
+    "type": "coding",
+    "difficulty": "medium",
+    "title": "Handle Browser Alert",
+    "question": "Write a Java method that accepts or dismisses a browser alert and returns the alert text before acting on it.",
+    "problem": "Implement `handleAlert(WebDriver driver, boolean accept)`. Wait up to 5 seconds for the alert to be present using ExpectedConditions. Capture the alert text, then accept or dismiss based on the flag. Return the captured text.",
+    "inputExample": "String text = handleAlert(driver, true);  // accepts the alert",
+    "expectedOutput": "Returns the alert message string, e.g. \"Are you sure you want to delete this item?\"",
+    "hint": "Use ExpectedConditions.alertIsPresent() and the Alert interface from driver.switchTo().alert().",
+    "solutionLanguage": "java",
+    "solution": "import org.openqa.selenium.Alert;\nimport org.openqa.selenium.WebDriver;\nimport org.openqa.selenium.support.ui.ExpectedConditions;\nimport org.openqa.selenium.support.ui.WebDriverWait;\nimport java.time.Duration;\n\npublic class AlertUtils {\n\n    public static String handleAlert(WebDriver driver, boolean accept) {\n        Alert alert = new WebDriverWait(driver, Duration.ofSeconds(5))\n                .until(ExpectedConditions.alertIsPresent());\n        String text = alert.getText();\n        if (accept) {\n            alert.accept();\n        } else {\n            alert.dismiss();\n        }\n        return text;\n    }\n}",
+    "explanation": "alertIsPresent() polls until a JavaScript alert, confirm, or prompt dialog is open and returns the Alert object directly. Reading the text before accepting or dismissing is essential — the reference becomes invalid once the alert is closed. The boolean flag keeps the method general enough to cover both confirmation and cancellation scenarios.",
+    "commonMistakes": [
+      "Calling alert.getText() after accept() — the alert is gone and the call throws",
+      "Not waiting for the alert, causing NoAlertPresentException when the dialog opens asynchronously",
+      "Using Thread.sleep instead of ExpectedConditions.alertIsPresent()"
+    ],
+    "followUps": [
+      "How do you handle a JavaScript prompt that requires text input?",
+      "How do you verify that no alert is present?",
+      "How does Selenium handle authentication dialogs?"
+    ],
+    "tags": [
+      "selenium",
+      "alerts",
+      "webdriver",
+      "javascript dialogs"
+    ]
+  },
+  {
+    "id": "selenium-007",
+    "topicId": "selenium",
+    "topicTitle": "Selenium",
+    "level": "mid",
+    "type": "coding",
+    "difficulty": "medium",
+    "title": "Switch to New Browser Window or Tab",
+    "question": "Write a Java method that opens a link (which opens in a new tab), switches to the new tab, and returns its title.",
+    "problem": "Implement `getTitleOfNewTab(WebDriver driver, WebElement linkElement)`. Capture the current window handles before clicking. Click the element. Wait until the number of handles increases by one. Switch to the new window and return its title. Do not close the new window.",
+    "inputExample": "String title = getTitleOfNewTab(driver, driver.findElement(By.id(\"open-docs\")));",
+    "expectedOutput": "Returns the page title of the newly opened tab, e.g. \"Documentation — MyApp\"",
+    "hint": "Capture the initial handle set, click, then use WebDriverWait until the window handles count is greater than the original. Use stream or set difference to identify the new handle.",
+    "solutionLanguage": "java",
+    "solution": "import org.openqa.selenium.WebDriver;\nimport org.openqa.selenium.WebElement;\nimport org.openqa.selenium.support.ui.ExpectedConditions;\nimport org.openqa.selenium.support.ui.WebDriverWait;\nimport java.time.Duration;\nimport java.util.Set;\n\npublic class WindowUtils {\n\n    public static String getTitleOfNewTab(WebDriver driver, WebElement linkElement) {\n        Set<String> existingHandles = driver.getWindowHandles();\n        linkElement.click();\n\n        new WebDriverWait(driver, Duration.ofSeconds(10))\n                .until(ExpectedConditions.numberOfWindowsToBe(existingHandles.size() + 1));\n\n        String newHandle = driver.getWindowHandles().stream()\n                .filter(h -> !existingHandles.contains(h))\n                .findFirst()\n                .orElseThrow(() -> new RuntimeException(\"New window handle not found\"));\n\n        driver.switchTo().window(newHandle);\n        return driver.getTitle();\n    }\n}",
+    "explanation": "Snapshot the handle set before the click because getWindowHandles() returns all open handles at call time. numberOfWindowsToBe waits for the OS/browser to register the new window before we try to find its handle. Stream filtering is null-safe and avoids index-based assumptions about handle ordering.",
+    "commonMistakes": [
+      "Not waiting for the new window handle to appear, so the filter finds nothing",
+      "Iterating getWindowHandles() in order and assuming the last one is the new window — the set is unordered",
+      "Forgetting to switch driver context, so subsequent findElement calls still target the original tab"
+    ],
+    "followUps": [
+      "How do you close the new tab and switch back to the original?",
+      "What is the difference between a window and a tab in Selenium?",
+      "How do you handle pop-ups that open before the page fully loads?"
+    ],
+    "tags": [
+      "selenium",
+      "windows",
+      "tabs",
+      "webdriver",
+      "context switching"
+    ]
+  },
+  {
+    "id": "selenium-008",
+    "topicId": "selenium",
+    "topicTitle": "Selenium",
+    "level": "senior",
+    "type": "coding",
+    "difficulty": "hard",
+    "title": "Fluent Wait with Custom Polling and Ignored Exceptions",
+    "question": "Write a Java method that uses a FluentWait to poll for an element every 2 seconds for up to 20 seconds, ignoring StaleElementReferenceException and NoSuchElementException.",
+    "problem": "Implement `fluentFind(WebDriver driver, By locator)` using FluentWait. Configure: timeout 20 s, polling interval 2 s, ignore StaleElementReferenceException and NoSuchElementException. The condition should locate the element and verify it is displayed. Return the element.",
+    "inputExample": "WebElement el = fluentFind(driver, By.xpath(\"//table[@id='results']//tr[last()]\"));",
+    "expectedOutput": "The located WebElement that is displayed, or TimeoutException if not found within 20 seconds",
+    "hint": "FluentWait<WebDriver> is the concrete class. Use .withTimeout(), .pollingEvery(), .ignoring(), and .until() with a lambda.",
+    "solutionLanguage": "java",
+    "solution": "import org.openqa.selenium.By;\nimport org.openqa.selenium.NoSuchElementException;\nimport org.openqa.selenium.StaleElementReferenceException;\nimport org.openqa.selenium.WebDriver;\nimport org.openqa.selenium.WebElement;\nimport org.openqa.selenium.support.ui.FluentWait;\nimport java.time.Duration;\n\npublic class FluentWaitUtils {\n\n    public static WebElement fluentFind(WebDriver driver, By locator) {\n        FluentWait<WebDriver> wait = new FluentWait<>(driver)\n                .withTimeout(Duration.ofSeconds(20))\n                .pollingEvery(Duration.ofSeconds(2))\n                .ignoring(NoSuchElementException.class)\n                .ignoring(StaleElementReferenceException.class);\n\n        return wait.until(d -> {\n            WebElement el = d.findElement(locator);\n            return el.isDisplayed() ? el : null;\n        });\n    }\n}",
+    "explanation": "FluentWait gives fine-grained control over polling frequency and exception whitelisting. Returning null from the until lambda signals that the condition is not yet met and causes another poll cycle. Ignoring both exceptions covers the case where the element is transiently absent or replaced by a DOM update during the polling interval.",
+    "commonMistakes": [
+      "Returning false instead of null when the condition is not met — the lambda must return null, not a falsy value",
+      "Using WebDriverWait (which extends FluentWait) but not realizing it already has 500 ms default polling",
+      "Setting pollingEvery longer than withTimeout, which means only one poll ever executes"
+    ],
+    "followUps": [
+      "When would you choose FluentWait over WebDriverWait?",
+      "How do you add a custom message to the TimeoutException thrown by FluentWait?",
+      "How do you implement a retry mechanism at the test method level instead of the element level?"
+    ],
+    "tags": [
+      "selenium",
+      "waits",
+      "fluent wait",
+      "flaky tests",
+      "webdriver"
+    ]
+  },
+  {
+    "id": "selenium-009",
+    "topicId": "selenium",
+    "topicTitle": "Selenium",
+    "level": "senior",
+    "type": "coding",
+    "difficulty": "hard",
+    "title": "Page Object Model — Login Page Class",
+    "question": "Implement a LoginPage class following the Page Object Model pattern using PageFactory.",
+    "problem": "Create a `LoginPage` class with: (1) @FindBy annotations for username field, password field, and submit button; (2) a constructor that accepts WebDriver and initializes elements via PageFactory; (3) a `login(String username, String password)` method that enters credentials and clicks submit; (4) a `getErrorMessage()` method that returns the text of an error div with id 'error-msg' if present, or an empty string if absent.",
+    "inputExample": "LoginPage page = new LoginPage(driver);\npage.login(\"admin\", \"wrong\");\nString err = page.getErrorMessage();",
+    "expectedOutput": "After failed login, getErrorMessage() returns \"Invalid credentials\" (or whatever error text the app shows)",
+    "hint": "Use @FindBy(id = ...) for the form fields. In getErrorMessage(), catch NoSuchElementException to return an empty string gracefully.",
+    "solutionLanguage": "java",
+    "solution": "import org.openqa.selenium.NoSuchElementException;\nimport org.openqa.selenium.WebDriver;\nimport org.openqa.selenium.WebElement;\nimport org.openqa.selenium.support.FindBy;\nimport org.openqa.selenium.support.PageFactory;\n\npublic class LoginPage {\n\n    private final WebDriver driver;\n\n    @FindBy(id = \"username\")\n    private WebElement usernameField;\n\n    @FindBy(id = \"password\")\n    private WebElement passwordField;\n\n    @FindBy(id = \"login-btn\")\n    private WebElement loginButton;\n\n    @FindBy(id = \"error-msg\")\n    private WebElement errorMessage;\n\n    public LoginPage(WebDriver driver) {\n        this.driver = driver;\n        PageFactory.initElements(driver, this);\n    }\n\n    public void login(String username, String password) {\n        usernameField.clear();\n        usernameField.sendKeys(username);\n        passwordField.clear();\n        passwordField.sendKeys(password);\n        loginButton.click();\n    }\n\n    public String getErrorMessage() {\n        try {\n            return errorMessage.isDisplayed() ? errorMessage.getText() : \"\";\n        } catch (NoSuchElementException e) {\n            return \"\";\n        }\n    }\n}",
+    "explanation": "PageFactory.initElements creates lazy proxies for each @FindBy field — the element is not located until first access. This avoids StaleElementReferenceException for elements that are only present after navigation. The constructor takes WebDriver rather than a static reference to support parallel test execution with separate driver instances.",
+    "commonMistakes": [
+      "Making WebDriver a static field, which breaks parallel test execution",
+      "Not calling usernameField.clear() before sendKeys, leaving previous values in the field",
+      "Returning null from getErrorMessage() instead of an empty string, causing NullPointerExceptions in assertions"
+    ],
+    "followUps": [
+      "How do you handle page navigation (returning the next page object) inside a POM method?",
+      "What are the limitations of PageFactory lazy proxies when the DOM changes?",
+      "How do you extend this pattern for a LoadableComponent?"
+    ],
+    "tags": [
+      "selenium",
+      "pom",
+      "page object model",
+      "pagefactory",
+      "webdriver"
+    ]
+  },
+  {
+    "id": "selenium-010",
+    "topicId": "selenium",
+    "topicTitle": "Selenium",
+    "level": "senior",
+    "type": "coding",
+    "difficulty": "hard",
+    "title": "Retry Logic for Stale Element Interactions",
+    "question": "Write a Java utility method that retries a WebElement action up to a configurable number of times when StaleElementReferenceException is thrown.",
+    "problem": "Implement `retryOnStale(Supplier<WebElement> locator, Consumer<WebElement> action, int maxRetries)`. On each attempt, call locator.get() to get a fresh element reference, then call action.accept(element). Catch StaleElementReferenceException and retry. Throw the exception if all retries are exhausted.",
+    "inputExample": "retryOnStale(\n    () -> driver.findElement(By.id(\"dynamic-row\")),\n    el -> el.click(),\n    3\n);",
+    "expectedOutput": "The action executes successfully, or StaleElementReferenceException is thrown after 3 failed attempts",
+    "hint": "Use a for loop up to maxRetries. Re-locate on every iteration. Only rethrow on the last attempt.",
+    "solutionLanguage": "java",
+    "solution": "import org.openqa.selenium.StaleElementReferenceException;\nimport org.openqa.selenium.WebElement;\nimport java.util.function.Consumer;\nimport java.util.function.Supplier;\n\npublic class RetryUtils {\n\n    public static void retryOnStale(\n            Supplier<WebElement> locator,\n            Consumer<WebElement> action,\n            int maxRetries) {\n\n        StaleElementReferenceException lastException = null;\n\n        for (int attempt = 0; attempt < maxRetries; attempt++) {\n            try {\n                WebElement element = locator.get();\n                action.accept(element);\n                return;\n            } catch (StaleElementReferenceException e) {\n                lastException = e;\n            }\n        }\n        throw lastException;\n    }\n}",
+    "explanation": "The Supplier re-locates the element on every attempt rather than reusing a cached reference — this is the key that makes the retry effective. Using functional interfaces keeps the utility generic enough to wrap any action (click, getText, sendKeys). Storing the last exception ensures the root cause is preserved when all retries are exhausted.",
+    "commonMistakes": [
+      "Passing the WebElement directly instead of a Supplier, so the stale reference is reused on every retry",
+      "Catching all exceptions instead of only StaleElementReferenceException, masking unrelated failures",
+      "Not rethrowing the exception after max retries, making test failures silent"
+    ],
+    "followUps": [
+      "When should you fix the root cause instead of adding retry logic?",
+      "How do you apply this pattern to a method that returns a value (e.g., getText)?",
+      "How would you log the number of retries for test diagnostics?"
+    ],
+    "tags": [
+      "selenium",
+      "stale element",
+      "flaky tests",
+      "retry",
+      "webdriver"
+    ]
+  },
+  {
+    "id": "selenium-011",
+    "topicId": "selenium",
+    "topicTitle": "Selenium",
+    "level": "mid",
+    "type": "coding",
+    "difficulty": "easy",
+    "title": "Find Element Using Multiple Locator Strategies",
+    "question": "Write a Java method that attempts to locate an element using three locator strategies in priority order and returns the first match.",
+    "problem": "Implement `findByAny(WebDriver driver, By... locators)`. Try each locator in order. Return the first element found. If none is found, throw a NoSuchElementException with a message listing all attempted locators.",
+    "inputExample": "WebElement el = findByAny(driver,\n    By.id(\"submit\"),\n    By.cssSelector(\".btn-primary\"),\n    By.xpath(\"//button[text()='Submit']\"));",
+    "expectedOutput": "First successfully located WebElement, or NoSuchElementException listing all three locators",
+    "hint": "Loop over the locators array, wrap each findElement call in a try-catch for NoSuchElementException, and build an error string using Arrays.toString if all fail.",
+    "solutionLanguage": "java",
+    "solution": "import org.openqa.selenium.By;\nimport org.openqa.selenium.NoSuchElementException;\nimport org.openqa.selenium.WebDriver;\nimport org.openqa.selenium.WebElement;\nimport java.util.Arrays;\n\npublic class LocatorUtils {\n\n    public static WebElement findByAny(WebDriver driver, By... locators) {\n        for (By locator : locators) {\n            try {\n                return driver.findElement(locator);\n            } catch (NoSuchElementException ignored) {\n                // try next locator\n            }\n        }\n        throw new NoSuchElementException(\n                \"Element not found with any of: \" + Arrays.toString(locators));\n    }\n}",
+    "explanation": "Varargs allow the caller to pass any number of locators without constructing a list. The loop short-circuits on the first success. The exception message lists all tried locators, which significantly speeds up debugging when locators drift after a UI change.",
+    "commonMistakes": [
+      "Calling driver.findElements() and checking isEmpty() — this also works but requires post-loop processing",
+      "Suppressing the exception entirely and returning null, which causes a NullPointerException later in the test",
+      "Not documenting the priority order, making future locator additions unpredictable"
+    ],
+    "followUps": [
+      "How do you decide which locator strategy to use first?",
+      "What are the performance implications of trying multiple locators?",
+      "How does CSS selector performance compare to XPath in modern browsers?"
+    ],
+    "tags": [
+      "selenium",
+      "locators",
+      "webdriver",
+      "xpath",
+      "css selector"
+    ]
+  },
+  {
+    "id": "selenium-012",
+    "topicId": "selenium",
+    "topicTitle": "Selenium",
+    "level": "mid",
+    "type": "quiz",
+    "difficulty": "easy",
+    "question": "Which locator strategy is generally recommended as most stable for automation?",
+    "choices": [
+      "XPath using element position (e.g., //div[3]/span[2])",
+      "CSS selector using generated class names",
+      "ID attribute when it is unique and stable",
+      "Link text for all clickable elements"
+    ],
+    "correctAnswer": "ID attribute when it is unique and stable",
+    "explanation": "ID attributes are the fastest locator strategy and least affected by structural DOM changes. Positional XPath and generated class names both break when the UI is restyled or restructured.",
+    "tags": [
+      "selenium",
+      "locators",
+      "best practices"
+    ]
+  },
+  {
+    "id": "selenium-013",
+    "topicId": "selenium",
+    "topicTitle": "Selenium",
+    "level": "mid",
+    "type": "quiz",
+    "difficulty": "easy",
+    "question": "What does ExpectedConditions.elementToBeClickable() verify?",
+    "choices": [
+      "The element is present in the DOM only",
+      "The element is visible and enabled",
+      "The element has a click event listener attached",
+      "The element is visible only"
+    ],
+    "correctAnswer": "The element is visible and enabled",
+    "explanation": "elementToBeClickable checks that the element is both visible (non-zero dimensions, not hidden) and enabled (not the disabled attribute). An element can be in the DOM and visible but still disabled, which would cause a click to do nothing.",
+    "tags": [
+      "selenium",
+      "waits",
+      "expected conditions"
+    ]
+  },
+  {
+    "id": "selenium-014",
+    "topicId": "selenium",
+    "topicTitle": "Selenium",
+    "level": "mid",
+    "type": "quiz",
+    "difficulty": "medium",
+    "question": "A test uses both driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10)) and WebDriverWait(driver, 5). What is the most likely problem?",
+    "choices": [
+      "WebDriverWait will be ignored entirely",
+      "The implicit wait will extend the explicit wait timeout to 10 seconds",
+      "The test will throw a configuration exception at runtime",
+      "Implicit and explicit waits interact unpredictably and can cause longer-than-expected wait times"
+    ],
+    "correctAnswer": "Implicit and explicit waits interact unpredictably and can cause longer-than-expected wait times",
+    "explanation": "Mixing implicit and explicit waits is a well-known Selenium anti-pattern. The implicit wait timer runs in the browser driver, while WebDriverWait polls in the client. When an explicit wait condition calls findElement internally, the implicit wait may cause each poll attempt to block for up to its full timeout, making the combined wait far longer than intended.",
+    "tags": [
+      "selenium",
+      "waits",
+      "anti-patterns",
+      "implicit wait"
+    ],
+    "problem": ""
+  },
+  {
+    "id": "selenium-015",
+    "topicId": "selenium",
+    "topicTitle": "Selenium",
+    "level": "senior",
+    "type": "quiz",
+    "difficulty": "medium",
+    "question": "In the Page Object Model, a method navigates to the next page and returns a new page object. What is the primary benefit of this approach?",
+    "choices": [
+      "It avoids the need for explicit waits",
+      "It makes the test method typesafe and self-documenting about the resulting page state",
+      "It prevents the driver from opening new browser windows",
+      "It reduces the number of WebDriver calls"
+    ],
+    "correctAnswer": "It makes the test method typesafe and self-documenting about the resulting page state",
+    "explanation": "Returning a typed page object (e.g., DashboardPage login()) makes the test flow read like a user journey and lets the compiler enforce that the caller is operating on the correct page. It also forces the page object to encapsulate the navigation contract, preventing tests from directly constructing page objects in an invalid state.",
+    "tags": [
+      "selenium",
+      "pom",
+      "page object model",
+      "design patterns"
+    ]
+  },
+  {
+    "id": "selenium-016",
+    "topicId": "selenium",
+    "topicTitle": "Selenium",
+    "level": "senior",
+    "type": "quiz",
+    "difficulty": "medium",
+    "question": "A test suite has a 20% flake rate on a CI pipeline that runs in Docker containers. Which investigation step is most likely to reveal the root cause?",
+    "choices": [
+      "Increase all explicit wait timeouts to 30 seconds",
+      "Switch from CSS selectors to XPath",
+      "Compare screenshots and WebDriver logs between passing and failing runs to identify timing or state issues",
+      "Run tests sequentially instead of in parallel"
+    ],
+    "correctAnswer": "Compare screenshots and WebDriver logs between passing and failing runs to identify timing or state issues",
+    "explanation": "Flakiness almost always has a specific root cause: a timing gap, an unstable locator, shared test data, or a race condition in the application. Increasing timeouts treats the symptom but slows the suite. Comparing screenshots and logs between pass and fail runs identifies the exact state that differs — which leads to a targeted fix.",
+    "tags": [
+      "selenium",
+      "flaky tests",
+      "debugging",
+      "ci"
+    ]
+  },
+  {
+    "id": "selenium-017",
+    "topicId": "selenium",
+    "topicTitle": "Selenium",
+    "level": "senior",
+    "type": "quiz",
+    "difficulty": "hard",
+    "question": "You need to wait for an AJAX spinner to disappear before interacting with updated content. Which ExpectedCondition is most appropriate?",
+    "choices": [
+      "ExpectedConditions.visibilityOfElementLocated(spinnerLocator)",
+      "ExpectedConditions.invisibilityOfElementLocated(spinnerLocator)",
+      "ExpectedConditions.stalenessOf(spinnerElement)",
+      "ExpectedConditions.presenceOfElementLocated(spinnerLocator)"
+    ],
+    "correctAnswer": "ExpectedConditions.invisibilityOfElementLocated(spinnerLocator)",
+    "explanation": "invisibilityOfElementLocated returns true when the element is either not in the DOM or is present but has display:none or visibility:hidden. stalenessOf would work if the spinner is removed from the DOM, but invisibilityOfElementLocated is more robust because it also handles spinners that are hidden via CSS rather than removed.",
+    "tags": [
+      "selenium",
+      "waits",
+      "ajax",
+      "expected conditions"
+    ]
+  },
+  {
+    "id": "selenium-018",
+    "topicId": "selenium",
+    "topicTitle": "Selenium",
+    "level": "senior",
+    "type": "quiz",
+    "difficulty": "hard",
+    "question": "Your team wants to run 50 Selenium tests in parallel using TestNG. Which WebDriver setup is correct?",
+    "choices": [
+      "Create a single static WebDriver instance and share it across all test classes",
+      "Create a ThreadLocal<WebDriver> and initialize a new driver instance per thread",
+      "Use driver.clone() to create thread-safe copies of one driver",
+      "Pass the same RemoteWebDriver URL to all threads and let the Grid serialize access"
+    ],
+    "correctAnswer": "Create a ThreadLocal<WebDriver> and initialize a new driver instance per thread",
+    "explanation": "WebDriver is not thread-safe. Each test thread needs its own driver instance to avoid state collisions. ThreadLocal<WebDriver> binds one driver instance per thread, which works with TestNG's parallel='methods' or parallel='classes' configuration. A Selenium Grid node or cloud provider then handles browser allocation across threads.",
+    "tags": [
+      "selenium",
+      "parallel execution",
+      "thread safety",
+      "testng",
+      "webdriver"
+    ]
+  },
+  {
+    "id": "selenium-019",
+    "topicId": "selenium",
+    "topicTitle": "Selenium",
+    "level": "mid",
+    "type": "interview",
+    "difficulty": "easy",
+    "question": "How do you handle dynamic XPath when element attributes change between test runs?",
+    "shortAnswer": "Anchor to stable attributes or text, avoid index-based and auto-generated value selectors.",
+    "interviewAnswer": "I look for attributes that are semantically meaningful and stable across releases: data-testid, aria-label, name, and text content. If the developer team is receptive, I ask them to add data-testid attributes to interactive elements — this decouples the test locators from CSS class churn. When I must use XPath, I use contains() or normalize-space() for partial text matches rather than exact string equality, which is fragile when copy changes.",
+    "realProjectExample": "A dashboard had auto-generated IDs like 'btn_12345'. I worked with the front-end team to add data-testid='export-report-btn' and replaced all affected locators. Flakiness on that page dropped to zero.",
+    "followUps": [
+      "What is the difference between absolute and relative XPath?",
+      "How do you select an element based on sibling text?",
+      "When would you use CSS selectors over XPath?"
+    ],
+    "tags": [
+      "selenium",
+      "locators",
+      "xpath",
+      "best practices"
+    ]
+  },
+  {
+    "id": "selenium-020",
+    "topicId": "selenium",
+    "topicTitle": "Selenium",
+    "level": "senior",
+    "type": "interview",
+    "difficulty": "medium",
+    "question": "How do you design a Selenium test framework from scratch for a large team of SDETs?",
+    "shortAnswer": "Layer the framework: WebDriver management, BasePage with shared waits, topic-specific page objects, data providers, and a reporting layer.",
+    "interviewAnswer": "I start with WebDriver lifecycle management — typically a ThreadLocal factory with a @BeforeMethod that creates and a @AfterMethod that quits the driver. On top of that I build a BasePage class that holds the driver reference and exposes typed wait helpers so individual page objects stay focused on UI interactions. The page objects return typed next-page objects to give tests a fluent, typesafe flow. Test data is externalized — I favor JSON or a builder pattern over hardcoded strings. For reporting I integrate Allure or Extent Reports. I enforce a coding style — no Thread.sleep, no raw findElement without a wait, no static driver — via a custom SpotBugs or PMD rule so CI fails fast on violations.",
+    "realProjectExample": "At a previous company I led the migration from a monolithic test class with static driver instances to a layered framework. Within two sprints we reduced setup time per new test from 2 hours to 20 minutes and eliminated 90% of driver-related flakiness.",
+    "followUps": [
+      "How do you handle test data isolation across parallel tests?",
+      "How do you version-control test data?",
+      "How do you onboard new SDETs to the framework?"
+    ],
+    "tags": [
+      "selenium",
+      "framework design",
+      "pom",
+      "test architecture",
+      "best practices"
+    ]
+  },
+  {
+    "id": "selenium-021",
+    "topicId": "selenium",
+    "topicTitle": "Selenium",
+    "level": "senior",
+    "type": "interview",
+    "difficulty": "medium",
+    "question": "How do you approach debugging a Selenium test that passes locally but fails consistently in CI?",
+    "shortAnswer": "Check environment differences: headless mode, screen resolution, browser version, timing, and resource constraints.",
+    "interviewAnswer": "The most common causes are headless-mode rendering differences, slower CI machines triggering timing gaps, and missing or mismatched browser driver versions. My debugging process: (1) reproduce in a local Docker container matching the CI image; (2) enable Selenium event logging and capture a screenshot and page source on failure; (3) compare DOM state between local and CI at the point of failure; (4) check if the issue is timing by temporarily increasing waits — if that fixes it, I identify the condition and add a proper ExpectedCondition; (5) verify browser and driver version parity using a browser matrix in the CI config.",
+    "realProjectExample": "A test clicked a dropdown that worked locally but failed in CI with an element-not-interactable error. The CI runner used a smaller viewport — the dropdown was outside the visible area. Adding a JavascriptExecutor scroll-into-view before the click fixed it permanently.",
+    "followUps": [
+      "How do you capture artifacts from a failed CI test run?",
+      "How do you test against multiple browser versions in CI?",
+      "What is the role of Selenium Grid in a CI pipeline?"
+    ],
+    "tags": [
+      "selenium",
+      "debugging",
+      "ci",
+      "headless",
+      "flaky tests"
+    ]
+  },
+  {
+    "id": "selenium-022",
+    "topicId": "selenium",
+    "topicTitle": "Selenium",
+    "level": "senior",
+    "type": "interview",
+    "difficulty": "hard",
+    "question": "How do you prevent and detect flaky tests in a Selenium suite of 500+ tests?",
+    "shortAnswer": "Combine deterministic waits, test isolation, quarantine policies, and systematic flakiness tracking.",
+    "interviewAnswer": "Prevention: every interaction is preceded by an explicit condition-based wait; tests own their data and do not share state; page objects encapsulate retry logic for known unstable components. Detection: I run the full suite three consecutive times in CI and flag any test that does not have a 100% pass rate as a flake candidate. I tag those tests @Flaky and move them to a quarantine suite that runs but does not block the pipeline while we investigate. For each quarantined test I open a defect ticket with the screenshot, log, and failure rate. Tracking over time with a dashboard (Allure history or a custom Jenkins plugin) shows whether flakiness is growing or shrinking as a metric.",
+    "realProjectExample": "On a 600-test suite with a 15% flake rate I introduced the quarantine tagging system. Within six weeks we had root-caused and fixed 80% of the flaky tests, dropping the overall flake rate to under 2% and restoring team trust in the CI green signal.",
+    "followUps": [
+      "How do you prioritize which flaky tests to fix first?",
+      "How do you communicate flakiness risk to product managers?",
+      "What is the cost of a flaky test to the team beyond the failed pipeline run?"
+    ],
+    "tags": [
+      "selenium",
+      "flaky tests",
+      "test strategy",
+      "ci",
+      "test architecture"
+    ]
+  },
+  {
+    "id": "selenium-023",
+    "topicId": "selenium",
+    "topicTitle": "Selenium",
+    "level": "senior",
+    "type": "interview",
+    "difficulty": "hard",
+    "question": "How do you scale Selenium test execution for a release pipeline that must finish in under 15 minutes?",
+    "shortAnswer": "Use parallel execution on a Selenium Grid or cloud provider, partition tests into meaningful shards, and optimize individual test speed.",
+    "interviewAnswer": "I start by profiling the suite to identify the slowest tests and measure the current serial runtime. Then I enable TestNG or JUnit 5 parallel execution with ThreadLocal driver management and target a Selenium Grid or a cloud provider like Sauce Labs or BrowserStack. For a 500-test suite, running 10 parallel threads typically achieves a 6–8x speedup after accounting for Grid overhead and contention. I also apply test-level optimizations: use headless Chrome for non-visual tests, skip full page loads with direct URL navigation where the state allows, and minimize redundant login flows by reusing session cookies via API setup. For the CI pipeline specifically I run smoke tests (20–30 tests) as a fast gate and defer the full regression to off-peak hours or only on release branches.",
+    "realProjectExample": "A 45-minute suite was blocking three releases per day. I set up a 20-node Selenium Grid on Kubernetes, introduced TestNG parallel='methods' with ThreadLocal WebDriver, and partitioned the suite into smoke and regression groups. The smoke suite ran in 4 minutes and unblocked deployment; full regression ran nightly.",
+    "followUps": [
+      "How do you handle test ordering dependencies when running tests in parallel?",
+      "What are the trade-offs between a self-hosted Selenium Grid and a cloud provider?",
+      "How do you handle session management in parallel tests that require authentication?"
+    ],
+    "tags": [
+      "selenium",
+      "parallel execution",
+      "selenium grid",
+      "ci",
+      "performance",
+      "scalability"
+    ]
+  },
+  {
+    "id": "selenium-024",
+    "topicId": "selenium",
+    "topicTitle": "Selenium",
+    "level": "senior",
+    "type": "quiz",
+    "difficulty": "hard",
+    "question": "Which approach correctly handles a situation where a dropdown is implemented as a custom div-based component (not a native <select>) in Selenium?",
+    "choices": [
+      "Use Select class with the div locator",
+      "Click the trigger element to open the dropdown, wait for the options list to be visible, then click the desired option element",
+      "Use driver.findElement(By.tagName(\"select\")) to find the hidden underlying select",
+      "Use Actions.dragAndDrop to scroll through the options"
+    ],
+    "correctAnswer": "Click the trigger element to open the dropdown, wait for the options list to be visible, then click the desired option element",
+    "explanation": "Selenium's Select class only works with native HTML <select> elements. Custom dropdown components (built with divs, ul/li, or React/Angular libraries) must be interacted with as regular elements: click the trigger, wait for the list to appear using ExpectedConditions.visibilityOfElementLocated, then click the matching option. Attempting to use Select on a div throws an UnexpectedTagNameException.",
+    "tags": [
+      "selenium",
+      "locators",
+      "custom components",
+      "webdriver"
+    ]
+  },
+  {
+    "id": "selenium-025",
+    "topicId": "selenium",
+    "topicTitle": "Selenium",
+    "level": "mid",
+    "type": "interview",
+    "difficulty": "medium",
+    "question": "When and how do you use JavascriptExecutor in Selenium tests?",
+    "shortAnswer": "Use JavascriptExecutor as a last resort for interactions WebDriver cannot perform natively — scrolling, clicking hidden elements, reading computed state, or setting values on framework-controlled inputs.",
+    "interviewAnswer": "JavascriptExecutor lets you execute arbitrary JavaScript in the browser context via executeScript and executeAsyncScript. I use it deliberately and sparingly: primarily for scrollIntoView before clicking elements that are off-screen, for setting values on date pickers or file inputs that reject sendKeys, and for reading non-standard element properties like scrollTop or dataset values. I avoid using it to click elements because it bypasses the browser's event propagation — a JavaScript click can pass a test while a real user click would fail if the element is covered. When I find myself reaching for JavascriptExecutor for basic interactions, it usually signals a locator or wait problem that I should fix instead.",
+    "realProjectExample": "A test on a long dashboard page failed with ElementNotInteractableException because the save button was below the fold. I added a one-line scrollIntoView call via JavascriptExecutor before the click. The alternative — maximizing the window or changing viewport size — would have affected other tests.",
+    "followUps": [
+      "What is the difference between executeScript and executeAsyncScript?",
+      "Why is clicking via JavascriptExecutor considered a test smell?",
+      "How do you use JavascriptExecutor to wait for Angular or React to finish rendering?"
+    ],
+    "tags": [
+      "selenium",
+      "javascript executor",
+      "webdriver",
+      "best practices"
+    ]
   }
 ]

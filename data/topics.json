@@ -28,7 +28,7 @@
     "title": "Selenium",
     "description": "WebDriver concepts, waits, locators, flaky test handling, and framework design.",
     "category": "automation",
-    "questionCount": 3,
+    "questionCount": 25,
     "difficulty": "mixed"
   },
   {
@@ -36,7 +36,7 @@
     "title": "Playwright with Python",
     "description": "Python Playwright, pytest fixtures, locators, tracing, and stable UI/API automation.",
     "category": "automation",
-    "questionCount": 3,
+    "questionCount": 25,
     "difficulty": "mixed"
   },
   {
@@ -44,7 +44,7 @@
     "title": "Playwright with TypeScript",
     "description": "TypeScript Playwright test runner, locators, fixtures, API testing, and CI execution.",
     "category": "automation",
-    "questionCount": 3,
+    "questionCount": 25,
     "difficulty": "mixed"
   },
   {
@@ -52,7 +52,7 @@
     "title": "API Testing",
     "description": "REST testing strategy, schemas, auth, negative coverage, and resilient API checks.",
     "category": "automation",
-    "questionCount": 3,
+    "questionCount": 25,
     "difficulty": "mixed"
   },
   {
@@ -60,7 +60,7 @@
     "title": "Test Automation Strategy",
     "description": "Automation architecture, test pyramid decisions, maintainability, ownership, and ROI.",
     "category": "strategy",
-    "questionCount": 3,
+    "questionCount": 25,
     "difficulty": "mixed"
   },
   {
@@ -68,7 +68,7 @@
     "title": "CI/CD for QA/SDET",
     "description": "Pipeline quality gates, smoke/regression stages, reports, retries, and secrets handling.",
     "category": "strategy",
-    "questionCount": 3,
+    "questionCount": 25,
     "difficulty": "mixed"
   },
   {
@@ -76,7 +76,7 @@
     "title": "AWS Basics for QA/SDET",
     "description": "CloudWatch, S3, Lambda, IAM, deployment validation, and cloud testing fundamentals.",
     "category": "cloud",
-    "questionCount": 3,
+    "questionCount": 25,
     "difficulty": "mixed"
   }
 ]

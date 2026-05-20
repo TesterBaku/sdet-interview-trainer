@@ -10,8 +10,16 @@
     "shortAnswer": "Locators are lazy and retry actions/assertions, while ElementHandle points to a specific DOM node.",
     "interviewAnswer": "I use locators because they align with Playwright auto-waiting and reduce flaky interactions on dynamic pages. ElementHandle can become stale if the DOM changes, so I reserve it for rare low-level cases.",
     "realProjectExample": "For a login form, I would use page.get_by_label('Email').fill(user) and expect(locator).to_be_visible() rather than grabbing a handle early.",
-    "followUps": ["What does auto-waiting cover?", "How do assertions retry?", "When would you use get_by_role?"],
-    "tags": ["playwright", "python", "locators"]
+    "followUps": [
+      "What does auto-waiting cover?",
+      "How do assertions retry?",
+      "When would you use get_by_role?"
+    ],
+    "tags": [
+      "playwright",
+      "python",
+      "locators"
+    ]
   },
   {
     "id": "playwright-python-002",
@@ -21,10 +29,19 @@
     "type": "quiz",
     "difficulty": "easy",
     "question": "Which pytest feature is commonly used to share Playwright setup?",
-    "choices": ["decorators only", "fixtures", "metaclasses", "global variables"],
+    "choices": [
+      "decorators only",
+      "fixtures",
+      "metaclasses",
+      "global variables"
+    ],
     "correctAnswer": "fixtures",
     "explanation": "Pytest fixtures are the standard way to provide browser, context, page, and test data setup.",
-    "tags": ["playwright", "pytest", "fixtures"]
+    "tags": [
+      "playwright",
+      "pytest",
+      "fixtures"
+    ]
   },
   {
     "id": "playwright-python-003",
@@ -42,8 +59,619 @@
     "solutionLanguage": "python",
     "solution": "def missing_required_keys(payload, required):\n    return [key for key in required if key not in payload]",
     "explanation": "The helper keeps API assertions focused and produces a useful list of missing fields.",
-    "commonMistakes": ["Failing at the first missing key", "Not returning useful diagnostics", "Assuming nested fields are flat"],
-    "followUps": ["How would you validate nested keys?", "How would you integrate this with pytest?", "When is JSON schema better?"],
-    "tags": ["python", "api", "helper"]
+    "commonMistakes": [
+      "Failing at the first missing key",
+      "Not returning useful diagnostics",
+      "Assuming nested fields are flat"
+    ],
+    "followUps": [
+      "How would you validate nested keys?",
+      "How would you integrate this with pytest?",
+      "When is JSON schema better?"
+    ],
+    "tags": [
+      "python",
+      "api",
+      "helper"
+    ]
+  },
+  {
+    "id": "playwright-python-004",
+    "topicId": "playwright-python",
+    "topicTitle": "Playwright with Python",
+    "level": "mid",
+    "type": "quiz",
+    "difficulty": "easy",
+    "question": "What is the key difference between the sync and async Playwright Python APIs?",
+    "choices": [
+      "The sync API only works with Chromium; async works with all browsers",
+      "The sync API uses with sync_playwright() as p: while async requires async with async_playwright() as p: and an event loop",
+      "The async API does not support screenshots",
+      "The sync API requires manual browser.close() calls; async closes automatically"
+    ],
+    "correctAnswer": "The sync API uses with sync_playwright() as p: while async requires async with async_playwright() as p: and an event loop",
+    "explanation": "Playwright Python ships two entry points. sync_playwright() wraps the async internals with a synchronous context manager suitable for most test scripts. async_playwright() is used when the calling code is already async, such as in asyncio-based applications or frameworks.",
+    "tags": [
+      "playwright",
+      "python",
+      "sync",
+      "async"
+    ]
+  },
+  {
+    "id": "playwright-python-005",
+    "topicId": "playwright-python",
+    "topicTitle": "Playwright with Python",
+    "level": "mid",
+    "type": "coding",
+    "difficulty": "easy",
+    "title": "Launch browser and take a screenshot",
+    "question": "Write a sync Playwright Python script that opens example.com and saves a screenshot to example.png.",
+    "problem": "Use the sync API to launch Chromium in headless mode, navigate to https://example.com, capture a full-page screenshot, and close the browser.",
+    "inputExample": "No runtime input; the target URL is hardcoded.",
+    "expectedOutput": "A file named example.png is written to disk.",
+    "hint": "Use sync_playwright() as a context manager. Call browser.new_page() and then page.screenshot().",
+    "solutionLanguage": "python",
+    "solution": "from playwright.sync_api import sync_playwright\n\ndef take_screenshot():\n    with sync_playwright() as p:\n        browser = p.chromium.launch(headless=True)\n        page = browser.new_page()\n        page.goto('https://example.com')\n        page.screenshot(path='example.png', full_page=True)\n        browser.close()\n\ntake_screenshot()",
+    "explanation": "sync_playwright() returns a Playwright instance. We launch Chromium, create a new page, navigate, and capture a screenshot. full_page=True scrolls and stitches the entire document. The browser is explicitly closed in the sync API.",
+    "commonMistakes": [
+      "Forgetting to call browser.close(), causing a dangling process",
+      "Calling page.screenshot() before page.goto() completes",
+      "Using async_playwright() without an event loop in a sync script"
+    ],
+    "followUps": [
+      "How would you capture a screenshot only when a test fails?",
+      "How does full_page differ from a viewport screenshot?",
+      "How would you rewrite this with pytest fixtures?"
+    ],
+    "tags": [
+      "playwright",
+      "python",
+      "screenshot",
+      "sync"
+    ]
+  },
+  {
+    "id": "playwright-python-006",
+    "topicId": "playwright-python",
+    "topicTitle": "Playwright with Python",
+    "level": "mid",
+    "type": "interview",
+    "difficulty": "easy",
+    "question": "How does Playwright's browser / context / page hierarchy work in Python?",
+    "shortAnswer": "Browser is the process, BrowserContext is an isolated session (cookies, storage), and Page is a single tab within a context.",
+    "interviewAnswer": "I think of it as three layers. The Browser object represents the actual browser process — you launch it once per test run. A BrowserContext is like a fresh incognito profile: it has its own cookies, local storage, and network state, so tests don't bleed into each other. A Page is a single tab inside a context. For test isolation I create one context per test; for performance I reuse the browser across all tests in a session.",
+    "realProjectExample": "In a multi-tenant SaaS project I created two contexts per test run — one for an admin user and one for a regular user — so I could assert cross-account visibility rules without logging in and out between assertions.",
+    "followUps": [
+      "What happens to open pages when you close a context?",
+      "How do you share authenticated state across tests without re-logging in?",
+      "When would you use browser.new_page() directly instead of creating a context first?"
+    ],
+    "tags": [
+      "playwright",
+      "python",
+      "browser",
+      "context",
+      "page"
+    ]
+  },
+  {
+    "id": "playwright-python-007",
+    "topicId": "playwright-python",
+    "topicTitle": "Playwright with Python",
+    "level": "mid",
+    "type": "coding",
+    "difficulty": "medium",
+    "title": "Pytest fixture for a reusable page",
+    "question": "Write pytest fixtures that provide a browser, a context, and a page, each at the appropriate scope.",
+    "problem": "Define three pytest fixtures: browser (session scope), context (function scope), and page (function scope). The page fixture should yield a Page object and close the context after the test.",
+    "inputExample": "A pytest test function that receives page as a parameter.",
+    "expectedOutput": "Each test receives a fresh context and page while the browser process is reused across the session.",
+    "hint": "Use @pytest.fixture(scope='session') for the browser and @pytest.fixture for context and page. Remember to yield and then close.",
+    "solutionLanguage": "python",
+    "solution": "import pytest\nfrom playwright.sync_api import sync_playwright, Browser, BrowserContext, Page\n\n@pytest.fixture(scope='session')\ndef browser():\n    with sync_playwright() as p:\n        browser = p.chromium.launch(headless=True)\n        yield browser\n        browser.close()\n\n@pytest.fixture\ndef context(browser: Browser) -> BrowserContext:\n    ctx = browser.new_context()\n    yield ctx\n    ctx.close()\n\n@pytest.fixture\ndef page(context: BrowserContext) -> Page:\n    p = context.new_page()\n    yield p\n    # context fixture closes the context, which closes the page",
+    "explanation": "Session-scoped browser avoids the overhead of launching a new process per test. Function-scoped context gives each test isolated cookies and storage. The page is created inside the context. Teardown is handled by closing the context, which automatically closes all its pages.",
+    "commonMistakes": [
+      "Making browser function-scoped, which relaunches the browser on every test",
+      "Forgetting to yield, which prevents teardown from running",
+      "Not closing the context, leaving dangling browser contexts"
+    ],
+    "followUps": [
+      "How would you add an authenticated storage state to the context fixture?",
+      "How do pytest-playwright's built-in fixtures differ from writing your own?",
+      "How would you parameterize the browser fixture to run on Firefox and WebKit too?"
+    ],
+    "tags": [
+      "playwright",
+      "python",
+      "pytest",
+      "fixtures"
+    ]
+  },
+  {
+    "id": "playwright-python-008",
+    "topicId": "playwright-python",
+    "topicTitle": "Playwright with Python",
+    "level": "mid",
+    "type": "quiz",
+    "difficulty": "medium",
+    "question": "Which Playwright Python method waits for a network response matching a URL pattern before continuing?",
+    "choices": [
+      "page.wait_for_timeout(5000)",
+      "page.wait_for_response(url_pattern)",
+      "page.wait_for_selector('.spinner', state='hidden')",
+      "page.wait_for_load_state('networkidle')"
+    ],
+    "correctAnswer": "page.wait_for_response(url_pattern)",
+    "explanation": "page.wait_for_response() accepts a URL string, glob, or predicate and resolves when a matching response is received. It is more deterministic than waiting for a fixed timeout or networkidle because it is tied to a specific network event.",
+    "tags": [
+      "playwright",
+      "python",
+      "waits",
+      "network"
+    ]
+  },
+  {
+    "id": "playwright-python-009",
+    "topicId": "playwright-python",
+    "topicTitle": "Playwright with Python",
+    "level": "mid",
+    "type": "coding",
+    "difficulty": "medium",
+    "title": "Intercept and assert an API request",
+    "question": "Write a pytest test that intercepts the POST /api/login request and asserts the request body contains the correct email.",
+    "problem": "Use page.expect_request() as a context manager to capture the POST request triggered by clicking a submit button, then assert the request payload.",
+    "inputExample": "A login page at http://localhost:3000/login with email and password fields and a Submit button.",
+    "expectedOutput": "The test passes when the intercepted request body contains 'email': 'user@example.com'.",
+    "hint": "Use with page.expect_request('**/api/login') as request_info: then trigger the action, then read request_info.value.post_data_json().",
+    "solutionLanguage": "python",
+    "solution": "import json\nimport pytest\nfrom playwright.sync_api import Page, expect\n\ndef test_login_request_payload(page: Page):\n    page.goto('http://localhost:3000/login')\n    page.get_by_label('Email').fill('user@example.com')\n    page.get_by_label('Password').fill('secret')\n\n    with page.expect_request('**/api/login') as req_info:\n        page.get_by_role('button', name='Submit').click()\n\n    request = req_info.value\n    body = request.post_data_json()\n    assert body['email'] == 'user@example.com'",
+    "explanation": "expect_request() is a context manager that starts listening before the action that triggers the request. After exiting the block, req_info.value holds the matched Request object. post_data_json() parses the body as JSON so we can assert individual fields.",
+    "commonMistakes": [
+      "Triggering the action before entering the expect_request() context, missing the request",
+      "Using post_data instead of post_data_json() and manually parsing JSON",
+      "Matching on too broad a URL pattern and catching an unrelated request"
+    ],
+    "followUps": [
+      "How would you mock the response to return a 401 status?",
+      "How do you assert both request and response in one test?",
+      "When would you use page.route() instead of page.expect_request()?"
+    ],
+    "tags": [
+      "playwright",
+      "python",
+      "api",
+      "network",
+      "intercept"
+    ]
+  },
+  {
+    "id": "playwright-python-010",
+    "topicId": "playwright-python",
+    "topicTitle": "Playwright with Python",
+    "level": "senior",
+    "type": "interview",
+    "difficulty": "medium",
+    "question": "How do you implement the Page Object Model in Playwright Python?",
+    "shortAnswer": "Create a class per page that encapsulates locators and actions, then inject the Page object via the constructor.",
+    "interviewAnswer": "I create one Python class per logical page or component. The constructor accepts a Playwright Page object and defines locators as properties or instance attributes. Methods represent user actions — login(), submit_form(), get_error_message(). Tests import the page class and call methods; they never reference CSS selectors directly. This means a selector change only touches one file. I also separate page objects from test data and fixtures so each layer has a single responsibility.",
+    "realProjectExample": "On an e-commerce project I had a CheckoutPage class with locators for address fields, a payment section, and a confirm button. When the team redesigned the checkout flow, only CheckoutPage needed updating — none of the 40 tests that used it changed.",
+    "followUps": [
+      "How do you handle components shared across multiple pages, like a navigation bar?",
+      "Should page objects contain assertions?",
+      "How do you structure POM in a large repo with dozens of pages?"
+    ],
+    "tags": [
+      "playwright",
+      "python",
+      "page-object-model",
+      "architecture"
+    ]
+  },
+  {
+    "id": "playwright-python-011",
+    "topicId": "playwright-python",
+    "topicTitle": "Playwright with Python",
+    "level": "senior",
+    "type": "coding",
+    "difficulty": "medium",
+    "title": "Page Object Model class for a login page",
+    "question": "Implement a LoginPage class following the Page Object Model pattern for a login page with email, password, and submit button.",
+    "problem": "Create a LoginPage class that accepts a Playwright Page, exposes a login(email, password) method, and a get_error_text() method. Write a test that uses it.",
+    "inputExample": "LoginPage(page).login('user@example.com', 'wrongpass')",
+    "expectedOutput": "The test calls page object methods; no raw locators appear in the test body.",
+    "hint": "Store locators as properties using get_by_label and get_by_role. Methods should return self or a value as appropriate.",
+    "solutionLanguage": "python",
+    "solution": "from playwright.sync_api import Page, expect\n\nclass LoginPage:\n    def __init__(self, page: Page) -> None:\n        self.page = page\n        self.email_input = page.get_by_label('Email')\n        self.password_input = page.get_by_label('Password')\n        self.submit_button = page.get_by_role('button', name='Log in')\n        self.error_message = page.get_by_role('alert')\n\n    def goto(self) -> 'LoginPage':\n        self.page.goto('/login')\n        return self\n\n    def login(self, email: str, password: str) -> None:\n        self.email_input.fill(email)\n        self.password_input.fill(password)\n        self.submit_button.click()\n\n    def get_error_text(self) -> str:\n        return self.error_message.inner_text()\n\n\n# test_login.py\ndef test_invalid_credentials_shows_error(page: Page):\n    login_page = LoginPage(page)\n    login_page.goto()\n    login_page.login('user@example.com', 'wrongpass')\n    assert login_page.get_error_text() == 'Invalid email or password'",
+    "explanation": "Locators are defined once in __init__ as instance attributes. Methods express intent (login, get_error_text) rather than implementation details. The test reads like a specification and has zero knowledge of selectors. The fluent goto() returning self allows chaining when desired.",
+    "commonMistakes": [
+      "Putting assertions inside page object methods, mixing concerns",
+      "Storing located elements as element handles instead of locators, causing stale element errors",
+      "Duplicating locators in multiple test files instead of centralizing them"
+    ],
+    "followUps": [
+      "How would you handle a page object for a multi-step wizard?",
+      "How do you test the page object itself in isolation?",
+      "How would you type-annotate the return type of login() if it navigates to a dashboard?"
+    ],
+    "tags": [
+      "playwright",
+      "python",
+      "page-object-model",
+      "locators"
+    ]
+  },
+  {
+    "id": "playwright-python-012",
+    "topicId": "playwright-python",
+    "topicTitle": "Playwright with Python",
+    "level": "mid",
+    "type": "quiz",
+    "difficulty": "easy",
+    "question": "What does expect(locator).to_be_visible() do differently from locator.is_visible()?",
+    "choices": [
+      "They are identical; expect() is just an alias",
+      "expect() retries the assertion until it passes or times out; is_visible() checks once and returns a boolean immediately",
+      "is_visible() waits for the element; expect() does not wait",
+      "expect() only works with role-based locators"
+    ],
+    "correctAnswer": "expect() retries the assertion until it passes or times out; is_visible() checks once and returns a boolean immediately",
+    "explanation": "Playwright's expect() assertions use an auto-retry loop with a configurable timeout (default 5 s). locator.is_visible() is a synchronous point-in-time check that returns True or False immediately. Using expect() is strongly preferred in tests because it tolerates rendering delays without explicit waits.",
+    "tags": [
+      "playwright",
+      "python",
+      "assertions",
+      "waits"
+    ]
+  },
+  {
+    "id": "playwright-python-013",
+    "topicId": "playwright-python",
+    "topicTitle": "Playwright with Python",
+    "level": "senior",
+    "type": "coding",
+    "difficulty": "hard",
+    "title": "Mock an API route and assert UI behavior",
+    "question": "Write a Playwright Python test that mocks a GET /api/products endpoint to return a known fixture and then asserts the UI renders the mocked product name.",
+    "problem": "Use page.route() to intercept GET /api/products and fulfill it with a JSON fixture containing one product. Assert the product name appears on the page.",
+    "inputExample": "page.goto('/products') triggers a fetch to /api/products",
+    "expectedOutput": "The test passes and the mocked product name 'Widget Pro' is visible on the page.",
+    "hint": "Use page.route(url, handler) where the handler calls route.fulfill(). Set content_type and body in fulfill().",
+    "solutionLanguage": "python",
+    "solution": "import json\nfrom playwright.sync_api import Page, Route, expect\n\nFAKE_PRODUCTS = [{\"id\": 1, \"name\": \"Widget Pro\", \"price\": 29.99}]\n\ndef test_products_page_renders_mocked_data(page: Page):\n    def handle_products(route: Route):\n        route.fulfill(\n            status=200,\n            content_type='application/json',\n            body=json.dumps(FAKE_PRODUCTS),\n        )\n\n    page.route('**/api/products', handle_products)\n    page.goto('http://localhost:3000/products')\n\n    expect(page.get_by_text('Widget Pro')).to_be_visible()",
+    "explanation": "page.route() registers an interceptor before navigation. When the browser makes a request matching the glob pattern, the handler is called instead of hitting the real server. route.fulfill() returns a synthetic response. This makes the test fully deterministic — it does not depend on backend state or network availability.",
+    "commonMistakes": [
+      "Calling page.goto() before registering the route, causing the real request to fire first",
+      "Forgetting to set content_type, which may cause the frontend to misparse the response",
+      "Using route.abort() instead of route.fulfill(), which causes a network error in the frontend"
+    ],
+    "followUps": [
+      "How would you simulate a 500 error response to test the error state UI?",
+      "How do you remove a route after it has served one request?",
+      "How would you verify that the route was actually called the expected number of times?"
+    ],
+    "tags": [
+      "playwright",
+      "python",
+      "api",
+      "mocking",
+      "route"
+    ]
+  },
+  {
+    "id": "playwright-python-014",
+    "topicId": "playwright-python",
+    "topicTitle": "Playwright with Python",
+    "level": "senior",
+    "type": "interview",
+    "difficulty": "medium",
+    "question": "How do you use Playwright traces to debug flaky tests?",
+    "shortAnswer": "Enable tracing on the browser context, run the test, then open the trace zip in the Playwright trace viewer to replay DOM snapshots, network calls, and console logs.",
+    "interviewAnswer": "When a test is flaky in CI but passes locally I enable tracing at the context level with context.tracing.start(screenshots=True, snapshots=True). After the test — even on failure — I call context.tracing.stop(path='trace.zip'). In CI I upload the zip as an artifact. Then I run playwright show-trace trace.zip locally to step through every action, see DOM snapshots before and after each click, inspect network calls, and check console errors. This almost always reveals whether the flake is a timing issue, an unexpected UI change, or a backend race condition.",
+    "realProjectExample": "A checkout test was failing intermittently in GitHub Actions. The trace showed that the 'Place Order' button was visible but overlapped by a cookie consent banner that only appeared in the CI environment. The DOM snapshot made it immediately clear. I added an accept-cookie step to the test and the flake disappeared.",
+    "followUps": [
+      "What is the performance overhead of tracing in CI?",
+      "How do you enable tracing only on the first retry of a failed test?",
+      "What is the difference between screenshots=True and snapshots=True in tracing.start()?"
+    ],
+    "tags": [
+      "playwright",
+      "python",
+      "traces",
+      "debugging",
+      "flaky-tests"
+    ]
+  },
+  {
+    "id": "playwright-python-015",
+    "topicId": "playwright-python",
+    "topicTitle": "Playwright with Python",
+    "level": "mid",
+    "type": "coding",
+    "difficulty": "medium",
+    "title": "Capture a trace on test failure",
+    "question": "Write pytest fixtures that start a trace before each test and save it on failure.",
+    "problem": "Extend the context fixture to start tracing with screenshots and snapshots enabled. In teardown, save the trace only if the test failed, using the test node id as the filename.",
+    "inputExample": "A pytest test that fails due to an assertion error.",
+    "expectedOutput": "A trace zip file named after the test is written to the traces/ directory only when the test fails.",
+    "hint": "Use request.node.rep_call.failed inside the fixture teardown. You need the pytest_runtest_makereport hook to attach the result to the request node.",
+    "solutionLanguage": "python",
+    "solution": "import pytest\nfrom pathlib import Path\nfrom playwright.sync_api import Browser, BrowserContext\n\n@pytest.fixture\ndef context(browser: Browser, request) -> BrowserContext:\n    ctx = browser.new_context()\n    ctx.tracing.start(screenshots=True, snapshots=True, sources=True)\n    yield ctx\n    failed = getattr(request.node, 'rep_call', None) and request.node.rep_call.failed\n    if failed:\n        traces_dir = Path('traces')\n        traces_dir.mkdir(exist_ok=True)\n        safe_name = request.node.nodeid.replace('/', '_').replace('::', '__')\n        ctx.tracing.stop(path=str(traces_dir / f'{safe_name}.zip'))\n    else:\n        ctx.tracing.stop()\n    ctx.close()\n\n@pytest.hookimpl(tryfirst=True, hookwrapper=True)\ndef pytest_runtest_makereport(item, call):\n    outcome = yield\n    rep = outcome.get_result()\n    setattr(item, f'rep_{rep.when}', rep)",
+    "explanation": "The hookimpl stores the test result (setup/call/teardown phase) on the item object before teardown runs. In the context fixture's teardown we check rep_call.failed. If the test failed we stop the trace to a file; otherwise we stop it without saving to avoid filling disk with passing-test traces. The trace filename uses the node id with path separators replaced so it is filesystem-safe.",
+    "commonMistakes": [
+      "Checking request.node.failed instead of request.node.rep_call.failed, which is not a valid attribute",
+      "Calling ctx.tracing.stop() without a path even on failure, discarding the trace",
+      "Not creating the traces/ directory before writing, causing a FileNotFoundError"
+    ],
+    "followUps": [
+      "How would you upload the trace artifact to GitHub Actions?",
+      "How do you enable tracing only on retried tests using pytest-playwright?",
+      "What is the sources=True parameter for in tracing.start()?"
+    ],
+    "tags": [
+      "playwright",
+      "python",
+      "traces",
+      "pytest",
+      "fixtures"
+    ]
+  },
+  {
+    "id": "playwright-python-016",
+    "topicId": "playwright-python",
+    "topicTitle": "Playwright with Python",
+    "level": "mid",
+    "type": "quiz",
+    "difficulty": "medium",
+    "question": "Which of the following locator strategies is most resilient to UI refactoring?",
+    "choices": [
+      "page.locator('#submit-btn-v2')",
+      "page.locator('div > span:nth-child(3)')",
+      "page.get_by_role('button', name='Submit')",
+      "page.locator('[class=\"btn btn-primary\"]')"
+    ],
+    "correctAnswer": "page.get_by_role('button', name='Submit')",
+    "explanation": "Role-based locators query the accessibility tree rather than implementation details like IDs, CSS classes, or DOM structure. An ID or class can change with a refactor; the button's accessible role and name are much more stable because they reflect what the element does for the user.",
+    "tags": [
+      "playwright",
+      "python",
+      "locators",
+      "best-practices"
+    ]
+  },
+  {
+    "id": "playwright-python-017",
+    "topicId": "playwright-python",
+    "topicTitle": "Playwright with Python",
+    "level": "senior",
+    "type": "coding",
+    "difficulty": "hard",
+    "title": "Parallel browser contexts for multi-user scenario",
+    "question": "Write a test that opens two browser contexts simultaneously — one as an admin and one as a regular user — and asserts role-based visibility differences.",
+    "problem": "Create two contexts from the same browser, each with pre-authenticated storage state loaded from a JSON file. Navigate both to /dashboard and assert that the admin sees an 'Admin Panel' link while the regular user does not.",
+    "inputExample": "admin_state.json and user_state.json contain stored authentication cookies.",
+    "expectedOutput": "The admin context page sees the Admin Panel link; the user context page does not.",
+    "hint": "Pass storage_state=path to browser.new_context(). Use expect(locator).to_be_visible() and expect(locator).not_to_be_visible().",
+    "solutionLanguage": "python",
+    "solution": "from playwright.sync_api import Browser, expect\n\ndef test_admin_sees_admin_panel_user_does_not(browser: Browser):\n    admin_context = browser.new_context(storage_state='admin_state.json')\n    user_context = browser.new_context(storage_state='user_state.json')\n\n    try:\n        admin_page = admin_context.new_page()\n        user_page = user_context.new_page()\n\n        admin_page.goto('http://localhost:3000/dashboard')\n        user_page.goto('http://localhost:3000/dashboard')\n\n        admin_panel_link = admin_page.get_by_role('link', name='Admin Panel')\n        expect(admin_panel_link).to_be_visible()\n\n        user_admin_link = user_page.get_by_role('link', name='Admin Panel')\n        expect(user_admin_link).not_to_be_visible()\n    finally:\n        admin_context.close()\n        user_context.close()",
+    "explanation": "Each context is fully isolated with its own cookies and local storage. Passing storage_state restores a previously saved authentication state, avoiding a login flow in every test. Both pages are driven in the same test to make the comparison explicit. The try/finally ensures contexts are closed even if an assertion fails.",
+    "commonMistakes": [
+      "Sharing a single context for both roles, causing state pollution between them",
+      "Not closing contexts in teardown, leaking browser resources",
+      "Generating storage state files inside the test rather than in a setup script, slowing the test suite"
+    ],
+    "followUps": [
+      "How would you generate the admin_state.json file in a global setup step?",
+      "How does Playwright handle running these two contexts in parallel across CPU threads?",
+      "How would you extend this pattern to test three or more roles?"
+    ],
+    "tags": [
+      "playwright",
+      "python",
+      "context",
+      "authentication",
+      "multi-user"
+    ]
+  },
+  {
+    "id": "playwright-python-018",
+    "topicId": "playwright-python",
+    "topicTitle": "Playwright with Python",
+    "level": "mid",
+    "type": "quiz",
+    "difficulty": "medium",
+    "question": "What does page.wait_for_load_state('networkidle') wait for?",
+    "choices": [
+      "All JavaScript to finish executing",
+      "The DOMContentLoaded event to fire",
+      "At least 500 ms with no more than 0 network connections",
+      "The page title to change"
+    ],
+    "correctAnswer": "At least 500 ms with no more than 0 network connections",
+    "explanation": "networkidle waits until there are no ongoing network requests for at least 500 milliseconds. It is useful for pages that make background XHR/fetch requests after initial load. However, it can be slow and is not always reliable for highly dynamic SPAs; prefer waiting for a specific element or response when possible.",
+    "tags": [
+      "playwright",
+      "python",
+      "waits",
+      "network"
+    ]
+  },
+  {
+    "id": "playwright-python-019",
+    "topicId": "playwright-python",
+    "topicTitle": "Playwright with Python",
+    "level": "senior",
+    "type": "interview",
+    "difficulty": "hard",
+    "question": "How do you design a Playwright Python test suite for reliability in CI with minimal flakiness?",
+    "shortAnswer": "Use explicit locators, avoid hardcoded waits, run tests in parallel with isolated contexts, enable retries, and capture traces on failure for diagnosis.",
+    "interviewAnswer": "Reliability starts with locator quality. I use role-based and label-based locators so tests survive DOM refactors. I replace every page.wait_for_timeout() with an event-based wait — wait_for_response(), expect(), or wait_for_selector(state='visible'). I run each test in its own browser context so there is no shared state. In CI I enable one or two retries in pytest.ini to absorb genuine infrastructure noise, but I treat retries as a signal — if a test retries more than 10% of the time I investigate the root cause. I enable tracing on the first retry so I can diagnose flakes from the CI artifact without needing to reproduce them locally. I also run the suite with --workers=auto in pytest-xdist to parallelize across CPUs and keep the wall-clock time low enough that developers actually wait for results.",
+    "realProjectExample": "On a dashboard product we had a suite of 200 E2E tests running in 40 minutes single-threaded and flaking at 8%. After introducing function-scoped contexts, switching all timeouts to event-based waits, adding --workers=4, and enabling trace-on-retry, we cut runtime to 11 minutes and flakiness to under 1%.",
+    "followUps": [
+      "How do you decide what belongs in E2E tests versus API tests versus unit tests?",
+      "How do you handle test data cleanup in a shared staging environment?",
+      "How do you gate a deployment on E2E test results without blocking fast PRs?"
+    ],
+    "tags": [
+      "playwright",
+      "python",
+      "flaky-tests",
+      "ci",
+      "reliability"
+    ]
+  },
+  {
+    "id": "playwright-python-020",
+    "topicId": "playwright-python",
+    "topicTitle": "Playwright with Python",
+    "level": "senior",
+    "type": "coding",
+    "difficulty": "hard",
+    "title": "API testing with APIRequestContext",
+    "question": "Write a pytest test that uses Playwright's APIRequestContext to call POST /api/users, assert the response status and body, and then clean up via DELETE /api/users/{id}.",
+    "problem": "Use playwright.request.new_context() to create an APIRequestContext with a base URL and Authorization header. POST to create a user, assert 201 status and the returned id field, then DELETE the user in teardown.",
+    "inputExample": "POST /api/users with body {\"name\": \"Alice\", \"role\": \"tester\"} returns {\"id\": \"abc123\", \"name\": \"Alice\"}",
+    "expectedOutput": "Test asserts status 201, response body has an 'id' field, and the user is deleted after the test.",
+    "hint": "Use api_context.post(url, data={...}) and response.json() to read the body. Use a try/finally to guarantee cleanup.",
+    "solutionLanguage": "python",
+    "solution": "import pytest\nfrom playwright.sync_api import Playwright, APIRequestContext\n\nBASE_URL = 'http://localhost:8000'\nTOKEN = 'Bearer test-token'\n\n@pytest.fixture\ndef api(playwright: Playwright) -> APIRequestContext:\n    context = playwright.request.new_context(\n        base_url=BASE_URL,\n        extra_http_headers={'Authorization': TOKEN},\n    )\n    yield context\n    context.dispose()\n\ndef test_create_and_delete_user(api: APIRequestContext):\n    user_id = None\n    try:\n        response = api.post('/api/users', data={'name': 'Alice', 'role': 'tester'})\n        assert response.status == 201, f'Expected 201, got {response.status}'\n\n        body = response.json()\n        assert 'id' in body, f\"Response body missing 'id': {body}\"\n        user_id = body['id']\n    finally:\n        if user_id:\n            delete_resp = api.delete(f'/api/users/{user_id}')\n            assert delete_resp.status in (200, 204)",
+    "explanation": "APIRequestContext is Playwright's built-in HTTP client. It reuses the same network stack as the browser, supports base URLs and shared headers, and integrates naturally with pytest fixtures. Creating it in a fixture with yield and dispose() ensures the underlying connections are cleaned up. The try/finally guarantees the test user is deleted even if the assertion fails, keeping the test environment clean.",
+    "commonMistakes": [
+      "Not calling context.dispose(), leaving open HTTP connections",
+      "Skipping cleanup when the creation assertion fails, polluting test data",
+      "Using requests or httpx instead of APIRequestContext and missing Playwright's HAR recording and header sharing"
+    ],
+    "followUps": [
+      "How would you reuse authentication headers across all API tests in a session fixture?",
+      "How does APIRequestContext compare to the requests library for SDET use?",
+      "How would you log all API calls made during a test for debugging?"
+    ],
+    "tags": [
+      "playwright",
+      "python",
+      "api",
+      "APIRequestContext",
+      "pytest"
+    ]
+  },
+  {
+    "id": "playwright-python-021",
+    "topicId": "playwright-python",
+    "topicTitle": "Playwright with Python",
+    "level": "mid",
+    "type": "quiz",
+    "difficulty": "hard",
+    "question": "You call page.click('#submit') and the test fails intermittently with 'Element is not attached to the DOM'. What is the most likely cause and fix?",
+    "choices": [
+      "The selector is wrong; switch to get_by_role",
+      "The element is detached because the DOM re-rendered between locating and clicking; use a Locator instead of ElementHandle so Playwright re-queries before the action",
+      "Playwright does not support CSS ID selectors; use XPath",
+      "The browser is running headless; run in headed mode"
+    ],
+    "correctAnswer": "The element is detached because the DOM re-rendered between locating and clicking; use a Locator instead of ElementHandle so Playwright re-queries before the action",
+    "explanation": "ElementHandle captures a reference to a specific DOM node. If a JS framework tears down and recreates that node (common in React/Vue/Angular on state change), the reference becomes stale. A Locator does not hold a DOM reference — it re-queries the page on every interaction, so it is immune to this class of flakiness. page.click(selector) also uses a locator internally, so this error most commonly appears when code explicitly uses ElementHandle.",
+    "tags": [
+      "playwright",
+      "python",
+      "locators",
+      "flaky-tests",
+      "ElementHandle"
+    ]
+  },
+  {
+    "id": "playwright-python-022",
+    "topicId": "playwright-python",
+    "topicTitle": "Playwright with Python",
+    "level": "senior",
+    "type": "interview",
+    "difficulty": "hard",
+    "question": "How do you handle authentication state across a large Playwright Python test suite without logging in on every test?",
+    "shortAnswer": "Save authenticated storage state once in a global setup and load it into each browser context via the storage_state parameter.",
+    "interviewAnswer": "Logging in on every test is the single biggest source of both slowness and flakiness in E2E suites. My approach is a global setup script — conftest.py at session scope or a pytest fixture with scope='session' — that logs in once, calls context.storage_state(path='auth.json'), and saves cookies and local storage to disk. Every subsequent test creates its context with browser.new_context(storage_state='auth.json'), which restores the authenticated session instantly without a network round-trip to the login endpoint. For suites with multiple roles I save a separate state file per role. I also add a freshness check: if auth.json is older than a configured threshold, the setup script re-authenticates. This keeps the auth file from expiring mid-suite on long-running CI jobs.",
+    "realProjectExample": "For a SaaS app with three user roles we had been spending 45 seconds on login flows per test. Switching to saved storage state reduced per-test overhead to under 100 ms. The session-scoped fixture re-authenticates at most once per CI job per role, regardless of how many tests need that role.",
+    "followUps": [
+      "How do you handle MFA or CAPTCHA in the login step of global setup?",
+      "How do you ensure the auth.json is not committed to version control?",
+      "What do you do if the token inside auth.json expires mid-run?"
+    ],
+    "tags": [
+      "playwright",
+      "python",
+      "authentication",
+      "storage-state",
+      "performance"
+    ]
+  },
+  {
+    "id": "playwright-python-023",
+    "topicId": "playwright-python",
+    "topicTitle": "Playwright with Python",
+    "level": "mid",
+    "type": "quiz",
+    "difficulty": "medium",
+    "question": "Which method on a Locator returns a Python list so you can iterate over matched elements?",
+    "choices": [
+      "locator.element_handles()",
+      "locator.all()",
+      "locator.query_selector_all()",
+      "locator.get_all_elements()"
+    ],
+    "correctAnswer": "locator.all()",
+    "explanation": "locator.all() returns a list of Locator objects, one per matched DOM element. Each item is still a Locator (not an ElementHandle), so auto-retry behaviour is preserved on individual access. element_handles() also returns a list but gives stale ElementHandle references. query_selector_all() and get_all_elements() are not Playwright Python API methods.",
+    "tags": [
+      "playwright",
+      "python",
+      "locators",
+      "assertions"
+    ]
+  },
+  {
+    "id": "playwright-python-024",
+    "topicId": "playwright-python",
+    "topicTitle": "Playwright with Python",
+    "level": "senior",
+    "type": "quiz",
+    "difficulty": "hard",
+    "question": "When would you use page.wait_for_selector('.spinner', state='hidden') over expect(page.locator('.spinner')).to_be_hidden()?",
+    "choices": [
+      "Both handle absent and hidden elements; prefer expect().to_be_hidden() in modern code for better failure messages",
+      "wait_for_selector is necessary when the spinner is not yet in the DOM; to_be_hidden only passes if the element exists but is invisible",
+      "expect().to_be_hidden() is deprecated in Playwright Python",
+      "wait_for_selector blocks the main thread; expect() runs in a background thread"
+    ],
+    "correctAnswer": "Both handle absent and hidden elements; prefer expect().to_be_hidden() in modern code for better failure messages",
+    "explanation": "page.wait_for_selector(selector, state='hidden') resolves when the element either does not exist or is not visible — covering both cases. expect(locator).to_be_hidden() also passes when the element is absent, so in practice they behave similarly. However, wait_for_selector predates the expect() API and is lower-level; in modern code expect().to_be_hidden() is preferred because it integrates with the assertion retry loop and produces better failure messages. The key insight is that to_be_hidden() does pass when the element is absent — a common misconception is that it requires the element to be present.",
+    "tags": [
+      "playwright",
+      "python",
+      "waits",
+      "assertions",
+      "best-practices"
+    ]
+  },
+  {
+    "id": "playwright-python-025",
+    "topicId": "playwright-python",
+    "topicTitle": "Playwright with Python",
+    "level": "senior",
+    "type": "interview",
+    "difficulty": "hard",
+    "question": "How do you integrate Playwright Python tests into a CI/CD pipeline and enforce quality gates?",
+    "shortAnswer": "Run tests in parallel on every PR, gate merges on a pass threshold, publish HTML reports as artifacts, and fail the build on new flakes above a tolerance.",
+    "interviewAnswer": "My CI integration has several layers. First, I use pytest-xdist with --workers=auto so tests run in parallel across available CPUs; this usually cuts wall-clock time by 3-5x. I launch Playwright in fully headless mode with browsers pre-installed in the Docker image to avoid download overhead. I configure pytest --retries=1 so genuine infrastructure noise does not block merges, but I export a retry metric to Datadog — if a test retries more than 5% over the past 7 days it gets filed as a flake ticket. For reporting, pytest-playwright generates an HTML report and I upload it as a GitHub Actions artifact with retention-days=14. I also archive trace.zip files on failure. The quality gate itself is a status check that blocks PR merges if any test fails after retries, or if the test suite has not been run at all (required status check). For long suites I split by module with sharding: pytest --shard-id=$CI_NODE_INDEX --num-shards=$CI_NODE_TOTAL so a 10-minute suite becomes 2 minutes across 5 runners.",
+    "realProjectExample": "For a payments platform we ran 400 E2E tests. Single-threaded they took 22 minutes, blocking developer feedback. I introduced a 6-shard GitHub Actions matrix job. Each shard ran for under 4 minutes. Merge gates went from a developer complaint to a non-issue. We also added a Slack alert whenever the suite failure rate exceeded 2% in any 24-hour window, which caught regressions before they were reported by users.",
+    "followUps": [
+      "How do you decide which tests run on every commit versus nightly only?",
+      "How do you handle Playwright browser version upgrades in CI without breaking the suite?",
+      "What is your strategy for test data isolation when multiple CI jobs run against a shared staging environment?"
+    ],
+    "tags": [
+      "playwright",
+      "python",
+      "ci-cd",
+      "pipeline",
+      "quality-gates",
+      "performance"
+    ]
   }
 ]
