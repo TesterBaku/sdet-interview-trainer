@@ -52,13 +52,24 @@ export function FlashcardsClient() {
           Previous
         </button>
         {index === questions.length - 1 ? (
-          <Link
-            aria-label="Finish — return to topic"
-            className="rounded-full bg-signal px-5 py-3 font-bold text-white shadow-panel transition hover:bg-[#b93e1f] focus-ring"
-            href={`/topics/${topic.id}`}
-          >
-            Finish
-          </Link>
+          getRecord(progress, question.id) ? (
+            <Link
+              aria-label="Finish — return to topic"
+              className="rounded-full bg-signal px-5 py-3 font-bold text-white shadow-panel transition hover:bg-[#b93e1f] focus-ring"
+              href={`/topics/${topic.id}`}
+            >
+              Finish
+            </Link>
+          ) : (
+            <button
+              className="rounded-full bg-signal px-5 py-3 font-bold text-white shadow-panel disabled:opacity-40 focus-ring"
+              disabled
+              title="Mark this card before finishing"
+              type="button"
+            >
+              Finish
+            </button>
+          )
         ) : (
           <button
             className="rounded-full bg-ink px-5 py-3 font-bold text-paper shadow-panel focus-ring"
