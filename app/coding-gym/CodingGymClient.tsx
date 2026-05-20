@@ -18,7 +18,7 @@ export function CodingGymClient() {
           runner is needed for the MVP; focus on recognizing patterns and explaining tradeoffs.
         </p>
       </header>
-      <div className="grid gap-5 md:grid-cols-2">
+      <div className="grid gap-5 lg:grid-cols-2">
         {questions.map((question) => (
           <CodingTaskCard
             currentStatus={getRecord(progress, question.id)?.status}

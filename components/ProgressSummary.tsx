@@ -17,7 +17,7 @@ export function ProgressSummary({ summary, title = "Progress Summary" }: Progres
       <div className="mt-4 h-3 overflow-hidden rounded-full bg-ink/10">
         <div className="h-full rounded-full bg-signal" style={{ width: `${summary.percentComplete}%` }} />
       </div>
-      <dl className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+      <dl className="mt-5 grid grid-cols-2 gap-3 lg:grid-cols-5">
         {[
           ["Total", summary.totalQuestions],
           ["Completed", summary.completedQuestions],
