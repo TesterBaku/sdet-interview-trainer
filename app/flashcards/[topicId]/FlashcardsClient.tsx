@@ -53,6 +53,7 @@ export function FlashcardsClient() {
         </button>
         {index === questions.length - 1 ? (
           <Link
+            aria-label="Finish — return to topic"
             className="rounded-full bg-signal px-5 py-3 font-bold text-white shadow-panel transition hover:bg-[#b93e1f] focus-ring"
             href={`/topics/${topic.id}`}
           >

@@ -63,6 +63,23 @@ test("flashcards reveal answers, navigate cards, and save weak status to progres
   await expect(page.getByText("Validate required structure and business-critical fields", { exact: false })).toBeVisible();
 });
 
+test("flashcards last card shows Finish button that returns to topic", async ({ page }) => {
+  await clearAppState(page);
+  await page.goto("/flashcards/playwright-python");
+
+  await expect(page.getByText("Card 1 of 2")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Next" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Finish" })).not.toBeVisible();
+
+  await page.getByRole("button", { name: "Next" }).click();
+  await expect(page.getByText("Card 2 of 2")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Next" })).not.toBeVisible();
+  await expect(page.getByRole("link", { name: "Finish" })).toBeVisible();
+
+  await page.getByRole("link", { name: "Finish" }).click();
+  await expect(page).toHaveURL("/topics/playwright-python");
+});
+
 test("quiz preserves correctness and final save is idempotent", async ({ page }) => {
   await clearAppState(page);
   await page.goto("/quiz/selenium");
