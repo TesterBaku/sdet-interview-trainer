@@ -10,8 +10,16 @@
     "shortAnswer": "Implicit wait applies globally to element lookup. Explicit wait waits for a specific condition.",
     "interviewAnswer": "I prefer explicit waits because they make synchronization intentional and condition-based. Implicit waits can hide timing problems and interact poorly with explicit waits. For stable tests, I wait for user-observable states such as visibility, clickability, or text changes.",
     "realProjectExample": "For a checkout button, I used WebDriverWait until the button was clickable instead of sleeping or relying on a global wait.",
-    "followUps": ["Why are hard sleeps bad?", "How do you handle stale elements?", "What conditions do you wait for most often?"],
-    "tags": ["selenium", "waits", "webdriver"]
+    "followUps": [
+      "Why are hard sleeps bad?",
+      "How do you handle stale elements?",
+      "What conditions do you wait for most often?"
+    ],
+    "tags": [
+      "selenium",
+      "waits",
+      "webdriver"
+    ]
   },
   {
     "id": "selenium-002",
@@ -21,10 +29,18 @@
     "type": "quiz",
     "difficulty": "easy",
     "question": "Which Selenium pattern helps organize page-specific locators and actions?",
-    "choices": ["Singleton", "Page Object Model", "Observer", "Factory Method only"],
+    "choices": [
+      "Singleton",
+      "Page Object Model",
+      "Observer",
+      "Factory Method only"
+    ],
     "correctAnswer": "Page Object Model",
     "explanation": "Page Object Model keeps page locators and page-level actions in dedicated classes, improving maintainability.",
-    "tags": ["selenium", "pom"]
+    "tags": [
+      "selenium",
+      "pom"
+    ]
   },
   {
     "id": "selenium-003",
@@ -37,8 +53,16 @@
     "shortAnswer": "Find why the DOM is re-rendering, re-locate the element after the update, and wait for a stable condition.",
     "interviewAnswer": "I do not retry blindly first. I inspect the UI behavior and determine whether a framework re-render or navigation replaces the node. Then I update the test to locate the element closer to the action and wait for the post-render state before interacting.",
     "realProjectExample": "A React grid refreshed after filtering. We fixed the test by waiting for the loading indicator to disappear and then locating the row again.",
-    "followUps": ["When are retries acceptable?", "How do you debug DOM refreshes?", "How would Playwright handle this differently?"],
-    "tags": ["selenium", "flaky tests", "stale element"]
+    "followUps": [
+      "When are retries acceptable?",
+      "How do you debug DOM refreshes?",
+      "How would Playwright handle this differently?"
+    ],
+    "tags": [
+      "selenium",
+      "flaky tests",
+      "stale element"
+    ]
   },
   {
     "id": "selenium-004",
@@ -66,7 +90,12 @@
       "What is the difference between visibilityOf and visibilityOfElementLocated?",
       "How do you wait for an element to disappear?"
     ],
-    "tags": ["selenium", "waits", "explicit wait", "webdriver"]
+    "tags": [
+      "selenium",
+      "waits",
+      "explicit wait",
+      "webdriver"
+    ]
   },
   {
     "id": "selenium-005",
@@ -94,7 +123,12 @@
       "How do you handle a dynamically injected iframe that does not have an id?",
       "What is the difference between switchTo().defaultContent() and switchTo().parentFrame()?"
     ],
-    "tags": ["selenium", "iframe", "webdriver", "context switching"]
+    "tags": [
+      "selenium",
+      "iframe",
+      "webdriver",
+      "context switching"
+    ]
   },
   {
     "id": "selenium-006",
@@ -122,7 +156,12 @@
       "How do you verify that no alert is present?",
       "How does Selenium handle authentication dialogs?"
     ],
-    "tags": ["selenium", "alerts", "webdriver", "javascript dialogs"]
+    "tags": [
+      "selenium",
+      "alerts",
+      "webdriver",
+      "javascript dialogs"
+    ]
   },
   {
     "id": "selenium-007",
@@ -150,7 +189,13 @@
       "What is the difference between a window and a tab in Selenium?",
       "How do you handle pop-ups that open before the page fully loads?"
     ],
-    "tags": ["selenium", "windows", "tabs", "webdriver", "context switching"]
+    "tags": [
+      "selenium",
+      "windows",
+      "tabs",
+      "webdriver",
+      "context switching"
+    ]
   },
   {
     "id": "selenium-008",
@@ -178,7 +223,13 @@
       "How do you add a custom message to the TimeoutException thrown by FluentWait?",
       "How do you implement a retry mechanism at the test method level instead of the element level?"
     ],
-    "tags": ["selenium", "waits", "fluent wait", "flaky tests", "webdriver"]
+    "tags": [
+      "selenium",
+      "waits",
+      "fluent wait",
+      "flaky tests",
+      "webdriver"
+    ]
   },
   {
     "id": "selenium-009",
@@ -206,7 +257,13 @@
       "What are the limitations of PageFactory lazy proxies when the DOM changes?",
       "How do you extend this pattern for a LoadableComponent?"
     ],
-    "tags": ["selenium", "pom", "page object model", "pagefactory", "webdriver"]
+    "tags": [
+      "selenium",
+      "pom",
+      "page object model",
+      "pagefactory",
+      "webdriver"
+    ]
   },
   {
     "id": "selenium-010",
@@ -234,7 +291,13 @@
       "How do you apply this pattern to a method that returns a value (e.g., getText)?",
       "How would you log the number of retries for test diagnostics?"
     ],
-    "tags": ["selenium", "stale element", "flaky tests", "retry", "webdriver"]
+    "tags": [
+      "selenium",
+      "stale element",
+      "flaky tests",
+      "retry",
+      "webdriver"
+    ]
   },
   {
     "id": "selenium-011",
@@ -262,7 +325,13 @@
       "What are the performance implications of trying multiple locators?",
       "How does CSS selector performance compare to XPath in modern browsers?"
     ],
-    "tags": ["selenium", "locators", "webdriver", "xpath", "css selector"]
+    "tags": [
+      "selenium",
+      "locators",
+      "webdriver",
+      "xpath",
+      "css selector"
+    ]
   },
   {
     "id": "selenium-012",
@@ -280,7 +349,11 @@
     ],
     "correctAnswer": "ID attribute when it is unique and stable",
     "explanation": "ID attributes are the fastest locator strategy and least affected by structural DOM changes. Positional XPath and generated class names both break when the UI is restyled or restructured.",
-    "tags": ["selenium", "locators", "best practices"]
+    "tags": [
+      "selenium",
+      "locators",
+      "best practices"
+    ]
   },
   {
     "id": "selenium-013",
@@ -298,7 +371,11 @@
     ],
     "correctAnswer": "The element is visible and enabled",
     "explanation": "elementToBeClickable checks that the element is both visible (non-zero dimensions, not hidden) and enabled (not the disabled attribute). An element can be in the DOM and visible but still disabled, which would cause a click to do nothing.",
-    "tags": ["selenium", "waits", "expected conditions"]
+    "tags": [
+      "selenium",
+      "waits",
+      "expected conditions"
+    ]
   },
   {
     "id": "selenium-014",
@@ -307,7 +384,7 @@
     "level": "mid",
     "type": "quiz",
     "difficulty": "medium",
-    "question": "A test uses both driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS) and WebDriverWait(driver, 5). What is the most likely problem?",
+    "question": "A test uses both driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10)) and WebDriverWait(driver, 5). What is the most likely problem?",
     "choices": [
       "WebDriverWait will be ignored entirely",
       "The implicit wait will extend the explicit wait timeout to 10 seconds",
@@ -316,7 +393,13 @@
     ],
     "correctAnswer": "Implicit and explicit waits interact unpredictably and can cause longer-than-expected wait times",
     "explanation": "Mixing implicit and explicit waits is a well-known Selenium anti-pattern. The implicit wait timer runs in the browser driver, while WebDriverWait polls in the client. When an explicit wait condition calls findElement internally, the implicit wait may cause each poll attempt to block for up to its full timeout, making the combined wait far longer than intended.",
-    "tags": ["selenium", "waits", "anti-patterns", "implicit wait"]
+    "tags": [
+      "selenium",
+      "waits",
+      "anti-patterns",
+      "implicit wait"
+    ],
+    "problem": ""
   },
   {
     "id": "selenium-015",
@@ -334,7 +417,12 @@
     ],
     "correctAnswer": "It makes the test method typesafe and self-documenting about the resulting page state",
     "explanation": "Returning a typed page object (e.g., DashboardPage login()) makes the test flow read like a user journey and lets the compiler enforce that the caller is operating on the correct page. It also forces the page object to encapsulate the navigation contract, preventing tests from directly constructing page objects in an invalid state.",
-    "tags": ["selenium", "pom", "page object model", "design patterns"]
+    "tags": [
+      "selenium",
+      "pom",
+      "page object model",
+      "design patterns"
+    ]
   },
   {
     "id": "selenium-016",
@@ -352,7 +440,12 @@
     ],
     "correctAnswer": "Compare screenshots and WebDriver logs between passing and failing runs to identify timing or state issues",
     "explanation": "Flakiness almost always has a specific root cause: a timing gap, an unstable locator, shared test data, or a race condition in the application. Increasing timeouts treats the symptom but slows the suite. Comparing screenshots and logs between pass and fail runs identifies the exact state that differs — which leads to a targeted fix.",
-    "tags": ["selenium", "flaky tests", "debugging", "ci"]
+    "tags": [
+      "selenium",
+      "flaky tests",
+      "debugging",
+      "ci"
+    ]
   },
   {
     "id": "selenium-017",
@@ -370,7 +463,12 @@
     ],
     "correctAnswer": "ExpectedConditions.invisibilityOfElementLocated(spinnerLocator)",
     "explanation": "invisibilityOfElementLocated returns true when the element is either not in the DOM or is present but has display:none or visibility:hidden. stalenessOf would work if the spinner is removed from the DOM, but invisibilityOfElementLocated is more robust because it also handles spinners that are hidden via CSS rather than removed.",
-    "tags": ["selenium", "waits", "ajax", "expected conditions"]
+    "tags": [
+      "selenium",
+      "waits",
+      "ajax",
+      "expected conditions"
+    ]
   },
   {
     "id": "selenium-018",
@@ -388,7 +486,13 @@
     ],
     "correctAnswer": "Create a ThreadLocal<WebDriver> and initialize a new driver instance per thread",
     "explanation": "WebDriver is not thread-safe. Each test thread needs its own driver instance to avoid state collisions. ThreadLocal<WebDriver> binds one driver instance per thread, which works with TestNG's parallel='methods' or parallel='classes' configuration. A Selenium Grid node or cloud provider then handles browser allocation across threads.",
-    "tags": ["selenium", "parallel execution", "thread safety", "testng", "webdriver"]
+    "tags": [
+      "selenium",
+      "parallel execution",
+      "thread safety",
+      "testng",
+      "webdriver"
+    ]
   },
   {
     "id": "selenium-019",
@@ -406,7 +510,12 @@
       "How do you select an element based on sibling text?",
       "When would you use CSS selectors over XPath?"
     ],
-    "tags": ["selenium", "locators", "xpath", "best practices"]
+    "tags": [
+      "selenium",
+      "locators",
+      "xpath",
+      "best practices"
+    ]
   },
   {
     "id": "selenium-020",
@@ -424,7 +533,13 @@
       "How do you version-control test data?",
       "How do you onboard new SDETs to the framework?"
     ],
-    "tags": ["selenium", "framework design", "pom", "test architecture", "best practices"]
+    "tags": [
+      "selenium",
+      "framework design",
+      "pom",
+      "test architecture",
+      "best practices"
+    ]
   },
   {
     "id": "selenium-021",
@@ -442,7 +557,13 @@
       "How do you test against multiple browser versions in CI?",
       "What is the role of Selenium Grid in a CI pipeline?"
     ],
-    "tags": ["selenium", "debugging", "ci", "headless", "flaky tests"]
+    "tags": [
+      "selenium",
+      "debugging",
+      "ci",
+      "headless",
+      "flaky tests"
+    ]
   },
   {
     "id": "selenium-022",
@@ -460,7 +581,13 @@
       "How do you communicate flakiness risk to product managers?",
       "What is the cost of a flaky test to the team beyond the failed pipeline run?"
     ],
-    "tags": ["selenium", "flaky tests", "test strategy", "ci", "test architecture"]
+    "tags": [
+      "selenium",
+      "flaky tests",
+      "test strategy",
+      "ci",
+      "test architecture"
+    ]
   },
   {
     "id": "selenium-023",
@@ -478,7 +605,14 @@
       "What are the trade-offs between a self-hosted Selenium Grid and a cloud provider?",
       "How do you handle session management in parallel tests that require authentication?"
     ],
-    "tags": ["selenium", "parallel execution", "selenium grid", "ci", "performance", "scalability"]
+    "tags": [
+      "selenium",
+      "parallel execution",
+      "selenium grid",
+      "ci",
+      "performance",
+      "scalability"
+    ]
   },
   {
     "id": "selenium-024",
@@ -496,7 +630,12 @@
     ],
     "correctAnswer": "Click the trigger element to open the dropdown, wait for the options list to be visible, then click the desired option element",
     "explanation": "Selenium's Select class only works with native HTML <select> elements. Custom dropdown components (built with divs, ul/li, or React/Angular libraries) must be interacted with as regular elements: click the trigger, wait for the list to appear using ExpectedConditions.visibilityOfElementLocated, then click the matching option. Attempting to use Select on a div throws an UnexpectedTagNameException.",
-    "tags": ["selenium", "locators", "custom components", "webdriver"]
+    "tags": [
+      "selenium",
+      "locators",
+      "custom components",
+      "webdriver"
+    ]
   },
   {
     "id": "selenium-025",
@@ -514,6 +653,11 @@
       "Why is clicking via JavascriptExecutor considered a test smell?",
       "How do you use JavascriptExecutor to wait for Angular or React to finish rendering?"
     ],
-    "tags": ["selenium", "javascript executor", "webdriver", "best practices"]
+    "tags": [
+      "selenium",
+      "javascript executor",
+      "webdriver",
+      "best practices"
+    ]
   }
 ]

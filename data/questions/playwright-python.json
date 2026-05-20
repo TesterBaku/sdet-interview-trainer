@@ -10,8 +10,16 @@
     "shortAnswer": "Locators are lazy and retry actions/assertions, while ElementHandle points to a specific DOM node.",
     "interviewAnswer": "I use locators because they align with Playwright auto-waiting and reduce flaky interactions on dynamic pages. ElementHandle can become stale if the DOM changes, so I reserve it for rare low-level cases.",
     "realProjectExample": "For a login form, I would use page.get_by_label('Email').fill(user) and expect(locator).to_be_visible() rather than grabbing a handle early.",
-    "followUps": ["What does auto-waiting cover?", "How do assertions retry?", "When would you use get_by_role?"],
-    "tags": ["playwright", "python", "locators"]
+    "followUps": [
+      "What does auto-waiting cover?",
+      "How do assertions retry?",
+      "When would you use get_by_role?"
+    ],
+    "tags": [
+      "playwright",
+      "python",
+      "locators"
+    ]
   },
   {
     "id": "playwright-python-002",
@@ -21,10 +29,19 @@
     "type": "quiz",
     "difficulty": "easy",
     "question": "Which pytest feature is commonly used to share Playwright setup?",
-    "choices": ["decorators only", "fixtures", "metaclasses", "global variables"],
+    "choices": [
+      "decorators only",
+      "fixtures",
+      "metaclasses",
+      "global variables"
+    ],
     "correctAnswer": "fixtures",
     "explanation": "Pytest fixtures are the standard way to provide browser, context, page, and test data setup.",
-    "tags": ["playwright", "pytest", "fixtures"]
+    "tags": [
+      "playwright",
+      "pytest",
+      "fixtures"
+    ]
   },
   {
     "id": "playwright-python-003",
@@ -42,9 +59,21 @@
     "solutionLanguage": "python",
     "solution": "def missing_required_keys(payload, required):\n    return [key for key in required if key not in payload]",
     "explanation": "The helper keeps API assertions focused and produces a useful list of missing fields.",
-    "commonMistakes": ["Failing at the first missing key", "Not returning useful diagnostics", "Assuming nested fields are flat"],
-    "followUps": ["How would you validate nested keys?", "How would you integrate this with pytest?", "When is JSON schema better?"],
-    "tags": ["python", "api", "helper"]
+    "commonMistakes": [
+      "Failing at the first missing key",
+      "Not returning useful diagnostics",
+      "Assuming nested fields are flat"
+    ],
+    "followUps": [
+      "How would you validate nested keys?",
+      "How would you integrate this with pytest?",
+      "When is JSON schema better?"
+    ],
+    "tags": [
+      "python",
+      "api",
+      "helper"
+    ]
   },
   {
     "id": "playwright-python-004",
@@ -62,7 +91,12 @@
     ],
     "correctAnswer": "The sync API uses with sync_playwright() as p: while async requires async with async_playwright() as p: and an event loop",
     "explanation": "Playwright Python ships two entry points. sync_playwright() wraps the async internals with a synchronous context manager suitable for most test scripts. async_playwright() is used when the calling code is already async, such as in asyncio-based applications or frameworks.",
-    "tags": ["playwright", "python", "sync", "async"]
+    "tags": [
+      "playwright",
+      "python",
+      "sync",
+      "async"
+    ]
   },
   {
     "id": "playwright-python-005",
@@ -90,7 +124,12 @@
       "How does full_page differ from a viewport screenshot?",
       "How would you rewrite this with pytest fixtures?"
     ],
-    "tags": ["playwright", "python", "screenshot", "sync"]
+    "tags": [
+      "playwright",
+      "python",
+      "screenshot",
+      "sync"
+    ]
   },
   {
     "id": "playwright-python-006",
@@ -108,7 +147,13 @@
       "How do you share authenticated state across tests without re-logging in?",
       "When would you use browser.new_page() directly instead of creating a context first?"
     ],
-    "tags": ["playwright", "python", "browser", "context", "page"]
+    "tags": [
+      "playwright",
+      "python",
+      "browser",
+      "context",
+      "page"
+    ]
   },
   {
     "id": "playwright-python-007",
@@ -136,7 +181,12 @@
       "How do pytest-playwright's built-in fixtures differ from writing your own?",
       "How would you parameterize the browser fixture to run on Firefox and WebKit too?"
     ],
-    "tags": ["playwright", "python", "pytest", "fixtures"]
+    "tags": [
+      "playwright",
+      "python",
+      "pytest",
+      "fixtures"
+    ]
   },
   {
     "id": "playwright-python-008",
@@ -154,7 +204,12 @@
     ],
     "correctAnswer": "page.wait_for_response(url_pattern)",
     "explanation": "page.wait_for_response() accepts a URL string, glob, or predicate and resolves when a matching response is received. It is more deterministic than waiting for a fixed timeout or networkidle because it is tied to a specific network event.",
-    "tags": ["playwright", "python", "waits", "network"]
+    "tags": [
+      "playwright",
+      "python",
+      "waits",
+      "network"
+    ]
   },
   {
     "id": "playwright-python-009",
@@ -182,7 +237,13 @@
       "How do you assert both request and response in one test?",
       "When would you use page.route() instead of page.expect_request()?"
     ],
-    "tags": ["playwright", "python", "api", "network", "intercept"]
+    "tags": [
+      "playwright",
+      "python",
+      "api",
+      "network",
+      "intercept"
+    ]
   },
   {
     "id": "playwright-python-010",
@@ -200,7 +261,12 @@
       "Should page objects contain assertions?",
       "How do you structure POM in a large repo with dozens of pages?"
     ],
-    "tags": ["playwright", "python", "page-object-model", "architecture"]
+    "tags": [
+      "playwright",
+      "python",
+      "page-object-model",
+      "architecture"
+    ]
   },
   {
     "id": "playwright-python-011",
@@ -228,7 +294,12 @@
       "How do you test the page object itself in isolation?",
       "How would you type-annotate the return type of login() if it navigates to a dashboard?"
     ],
-    "tags": ["playwright", "python", "page-object-model", "locators"]
+    "tags": [
+      "playwright",
+      "python",
+      "page-object-model",
+      "locators"
+    ]
   },
   {
     "id": "playwright-python-012",
@@ -246,7 +317,12 @@
     ],
     "correctAnswer": "expect() retries the assertion until it passes or times out; is_visible() checks once and returns a boolean immediately",
     "explanation": "Playwright's expect() assertions use an auto-retry loop with a configurable timeout (default 5 s). locator.is_visible() is a synchronous point-in-time check that returns True or False immediately. Using expect() is strongly preferred in tests because it tolerates rendering delays without explicit waits.",
-    "tags": ["playwright", "python", "assertions", "waits"]
+    "tags": [
+      "playwright",
+      "python",
+      "assertions",
+      "waits"
+    ]
   },
   {
     "id": "playwright-python-013",
@@ -274,7 +350,13 @@
       "How do you remove a route after it has served one request?",
       "How would you verify that the route was actually called the expected number of times?"
     ],
-    "tags": ["playwright", "python", "api", "mocking", "route"]
+    "tags": [
+      "playwright",
+      "python",
+      "api",
+      "mocking",
+      "route"
+    ]
   },
   {
     "id": "playwright-python-014",
@@ -292,7 +374,13 @@
       "How do you enable tracing only on the first retry of a failed test?",
       "What is the difference between screenshots=True and snapshots=True in tracing.start()?"
     ],
-    "tags": ["playwright", "python", "traces", "debugging", "flaky-tests"]
+    "tags": [
+      "playwright",
+      "python",
+      "traces",
+      "debugging",
+      "flaky-tests"
+    ]
   },
   {
     "id": "playwright-python-015",
@@ -320,7 +408,13 @@
       "How do you enable tracing only on retried tests using pytest-playwright?",
       "What is the sources=True parameter for in tracing.start()?"
     ],
-    "tags": ["playwright", "python", "traces", "pytest", "fixtures"]
+    "tags": [
+      "playwright",
+      "python",
+      "traces",
+      "pytest",
+      "fixtures"
+    ]
   },
   {
     "id": "playwright-python-016",
@@ -338,7 +432,12 @@
     ],
     "correctAnswer": "page.get_by_role('button', name='Submit')",
     "explanation": "Role-based locators query the accessibility tree rather than implementation details like IDs, CSS classes, or DOM structure. An ID or class can change with a refactor; the button's accessible role and name are much more stable because they reflect what the element does for the user.",
-    "tags": ["playwright", "python", "locators", "best-practices"]
+    "tags": [
+      "playwright",
+      "python",
+      "locators",
+      "best-practices"
+    ]
   },
   {
     "id": "playwright-python-017",
@@ -366,7 +465,13 @@
       "How does Playwright handle running these two contexts in parallel across CPU threads?",
       "How would you extend this pattern to test three or more roles?"
     ],
-    "tags": ["playwright", "python", "context", "authentication", "multi-user"]
+    "tags": [
+      "playwright",
+      "python",
+      "context",
+      "authentication",
+      "multi-user"
+    ]
   },
   {
     "id": "playwright-python-018",
@@ -384,7 +489,12 @@
     ],
     "correctAnswer": "At least 500 ms with no more than 0 network connections",
     "explanation": "networkidle waits until there are no ongoing network requests for at least 500 milliseconds. It is useful for pages that make background XHR/fetch requests after initial load. However, it can be slow and is not always reliable for highly dynamic SPAs; prefer waiting for a specific element or response when possible.",
-    "tags": ["playwright", "python", "waits", "network"]
+    "tags": [
+      "playwright",
+      "python",
+      "waits",
+      "network"
+    ]
   },
   {
     "id": "playwright-python-019",
@@ -402,7 +512,13 @@
       "How do you handle test data cleanup in a shared staging environment?",
       "How do you gate a deployment on E2E test results without blocking fast PRs?"
     ],
-    "tags": ["playwright", "python", "flaky-tests", "ci", "reliability"]
+    "tags": [
+      "playwright",
+      "python",
+      "flaky-tests",
+      "ci",
+      "reliability"
+    ]
   },
   {
     "id": "playwright-python-020",
@@ -430,7 +546,13 @@
       "How does APIRequestContext compare to the requests library for SDET use?",
       "How would you log all API calls made during a test for debugging?"
     ],
-    "tags": ["playwright", "python", "api", "APIRequestContext", "pytest"]
+    "tags": [
+      "playwright",
+      "python",
+      "api",
+      "APIRequestContext",
+      "pytest"
+    ]
   },
   {
     "id": "playwright-python-021",
@@ -448,7 +570,13 @@
     ],
     "correctAnswer": "The element is detached because the DOM re-rendered between locating and clicking; use a Locator instead of ElementHandle so Playwright re-queries before the action",
     "explanation": "ElementHandle captures a reference to a specific DOM node. If a JS framework tears down and recreates that node (common in React/Vue/Angular on state change), the reference becomes stale. A Locator does not hold a DOM reference — it re-queries the page on every interaction, so it is immune to this class of flakiness. page.click(selector) also uses a locator internally, so this error most commonly appears when code explicitly uses ElementHandle.",
-    "tags": ["playwright", "python", "locators", "flaky-tests", "ElementHandle"]
+    "tags": [
+      "playwright",
+      "python",
+      "locators",
+      "flaky-tests",
+      "ElementHandle"
+    ]
   },
   {
     "id": "playwright-python-022",
@@ -466,7 +594,13 @@
       "How do you ensure the auth.json is not committed to version control?",
       "What do you do if the token inside auth.json expires mid-run?"
     ],
-    "tags": ["playwright", "python", "authentication", "storage-state", "performance"]
+    "tags": [
+      "playwright",
+      "python",
+      "authentication",
+      "storage-state",
+      "performance"
+    ]
   },
   {
     "id": "playwright-python-023",
@@ -484,7 +618,12 @@
     ],
     "correctAnswer": "locator.all()",
     "explanation": "locator.all() returns a list of Locator objects, one per matched DOM element. Each item is still a Locator (not an ElementHandle), so auto-retry behaviour is preserved on individual access. element_handles() also returns a list but gives stale ElementHandle references. query_selector_all() and get_all_elements() are not Playwright Python API methods.",
-    "tags": ["playwright", "python", "locators", "assertions"]
+    "tags": [
+      "playwright",
+      "python",
+      "locators",
+      "assertions"
+    ]
   },
   {
     "id": "playwright-python-024",
@@ -495,14 +634,20 @@
     "difficulty": "hard",
     "question": "When would you use page.wait_for_selector('.spinner', state='hidden') over expect(page.locator('.spinner')).to_be_hidden()?",
     "choices": [
-      "They are interchangeable; always prefer whichever is shorter",
+      "Both handle absent and hidden elements; prefer expect().to_be_hidden() in modern code for better failure messages",
       "wait_for_selector is necessary when the spinner is not yet in the DOM; to_be_hidden only passes if the element exists but is invisible",
       "expect().to_be_hidden() is deprecated in Playwright Python",
       "wait_for_selector blocks the main thread; expect() runs in a background thread"
     ],
-    "correctAnswer": "wait_for_selector is necessary when the spinner is not yet in the DOM; to_be_hidden only passes if the element exists but is invisible",
+    "correctAnswer": "Both handle absent and hidden elements; prefer expect().to_be_hidden() in modern code for better failure messages",
     "explanation": "page.wait_for_selector(selector, state='hidden') resolves when the element either does not exist or is not visible — covering both cases. expect(locator).to_be_hidden() also passes when the element is absent, so in practice they behave similarly. However, wait_for_selector predates the expect() API and is lower-level; in modern code expect().to_be_hidden() is preferred because it integrates with the assertion retry loop and produces better failure messages. The key insight is that to_be_hidden() does pass when the element is absent — a common misconception is that it requires the element to be present.",
-    "tags": ["playwright", "python", "waits", "assertions", "best-practices"]
+    "tags": [
+      "playwright",
+      "python",
+      "waits",
+      "assertions",
+      "best-practices"
+    ]
   },
   {
     "id": "playwright-python-025",
@@ -520,6 +665,13 @@
       "How do you handle Playwright browser version upgrades in CI without breaking the suite?",
       "What is your strategy for test data isolation when multiple CI jobs run against a shared staging environment?"
     ],
-    "tags": ["playwright", "python", "ci-cd", "pipeline", "quality-gates", "performance"]
+    "tags": [
+      "playwright",
+      "python",
+      "ci-cd",
+      "pipeline",
+      "quality-gates",
+      "performance"
+    ]
   }
 ]
