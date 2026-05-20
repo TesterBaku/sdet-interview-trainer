@@ -78,7 +78,7 @@ export function CodingTaskCard({ question, currentStatus, onMark }: CodingTaskCa
           </button>
         </div>
         <textarea
-          className="mt-4 min-h-72 w-full resize-y rounded-2xl border border-paper/10 bg-[#0b1118] p-4 font-mono text-sm leading-6 text-[#f3e8d2] outline-none placeholder:text-paper/35 focus:border-brass"
+          className="mt-4 min-h-48 w-full resize-y rounded-2xl border border-paper/10 bg-[#0b1118] p-4 font-mono text-sm leading-6 text-[#f3e8d2] outline-none placeholder:text-paper/35 focus:border-brass sm:min-h-72"
           onChange={(event) => updateDraft(event.target.value)}
           placeholder={`Write your ${question.solutionLanguage ?? "code"} answer here...`}
           spellCheck={false}

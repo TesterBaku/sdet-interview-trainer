@@ -30,7 +30,7 @@ export function FlashcardsClient() {
           <Link className="text-sm font-bold text-signal" href={`/topics/${topic.id}`}>
             Back to topic
           </Link>
-          <h1 className="mt-2 font-display text-5xl font-black text-blueprint">{topic.title} Flashcards</h1>
+          <h1 className="mt-2 font-display text-3xl font-black text-blueprint sm:text-5xl">{topic.title} Flashcards</h1>
         </div>
         <p className="font-bold text-ink/60">
           Card {index + 1} of {questions.length}

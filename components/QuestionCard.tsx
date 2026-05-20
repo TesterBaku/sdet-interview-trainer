@@ -16,7 +16,7 @@ export function QuestionCard({ question, children }: QuestionCardProps) {
           {question.difficulty}
         </span>
       </div>
-      <h1 className="mt-5 font-display text-3xl font-black text-blueprint">{question.title ?? question.question}</h1>
+      <h1 className="mt-5 font-display text-2xl font-black text-blueprint sm:text-3xl">{question.title ?? question.question}</h1>
       {question.title ? <p className="mt-3 text-lg text-ink/80">{question.question}</p> : null}
       {children ? <div className="mt-6">{children}</div> : null}
     </article>

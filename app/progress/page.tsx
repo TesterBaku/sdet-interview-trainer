@@ -13,7 +13,7 @@ export default function ProgressPage() {
     <div className="space-y-6">
       <header>
         <p className="text-sm font-black uppercase tracking-[0.28em] text-signal">Progress</p>
-        <h1 className="mt-2 font-display text-5xl font-black text-blueprint">Track readiness by topic</h1>
+        <h1 className="mt-2 font-display text-3xl font-black text-blueprint sm:text-5xl">Track readiness by topic</h1>
       </header>
       <ProgressSummary summary={summary} />
       <section className="rounded-[2rem] border border-ink/10 bg-white/75 p-5 shadow-panel">
