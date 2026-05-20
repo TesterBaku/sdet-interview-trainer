@@ -51,14 +51,23 @@ export function FlashcardsClient() {
         >
           Previous
         </button>
-        <button
-          className="rounded-full bg-ink px-5 py-3 font-bold text-paper shadow-panel disabled:opacity-40 focus-ring"
-          disabled={index === questions.length - 1}
-          onClick={() => setIndex((value) => value + 1)}
-          type="button"
-        >
-          Next
-        </button>
+        {index === questions.length - 1 ? (
+          <Link
+            aria-label="Finish — return to topic"
+            className="rounded-full bg-signal px-5 py-3 font-bold text-white shadow-panel transition hover:bg-[#b93e1f] focus-ring"
+            href={`/topics/${topic.id}`}
+          >
+            Finish
+          </Link>
+        ) : (
+          <button
+            className="rounded-full bg-ink px-5 py-3 font-bold text-paper shadow-panel focus-ring"
+            onClick={() => setIndex((value) => value + 1)}
+            type="button"
+          >
+            Next
+          </button>
+        )}
       </div>
     </div>
   );
