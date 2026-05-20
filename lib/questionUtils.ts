@@ -40,6 +40,13 @@ export function getQuestion(questionId: string): Question | undefined {
   return allQuestions.find((question) => question.id === questionId);
 }
 
+export function getFlashcardQuestions(topicId: string): Question[] {
+  // coding questions are handled exclusively in Coding Gym
+  return getQuestionsByTopic(topicId).filter(
+    (question) => question.type === "quiz" || question.type === "interview" || question.type === "scenario"
+  );
+}
+
 export function getQuizQuestions(topicId: string): Question[] {
   return getQuestionsByTopic(topicId).filter(
     (question) => question.type === "quiz" && question.choices?.length && question.correctAnswer

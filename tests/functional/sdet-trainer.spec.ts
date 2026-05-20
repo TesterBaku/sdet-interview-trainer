@@ -43,24 +43,24 @@ test("flashcards reveal answers, navigate cards, and save weak status to progres
   await clearAppState(page);
   await page.goto("/flashcards/python-coding");
 
-  await expect(page.getByText("Card 1 of 3")).toBeVisible();
+  await expect(page.getByText("Card 1 of 2")).toBeVisible();
   await page.getByRole("button", { name: "Reveal answer" }).click();
-  await expect(page.getByText("Solution (python)")).toBeVisible();
-  await expect(page.getByText("def find_duplicates(items):")).toBeVisible();
+  await expect(page.getByText("Correct answer")).toBeVisible();
+  await expect(page.getByText("set", { exact: true })).toBeVisible();
 
   await page.getByRole("button", { name: "Weak" }).click();
   await expect
     .poll(async () => page.evaluate((key) => JSON.parse(window.localStorage.getItem(key) ?? "{}"), progressKey))
     .toMatchObject({
-      records: [{ questionId: "python-coding-001", status: "weak", attempts: 1 }],
+      records: [{ questionId: "python-coding-002", status: "weak", attempts: 1 }],
       weakQuestions: 1
     });
 
   await page.getByRole("button", { name: "Next" }).click();
-  await expect(page.getByText("Card 2 of 3")).toBeVisible();
+  await expect(page.getByText("Card 2 of 2")).toBeVisible();
   await page.getByRole("button", { name: "Reveal answer" }).click();
-  await expect(page.getByText("Correct answer")).toBeVisible();
-  await expect(page.getByText("set", { exact: true })).toBeVisible();
+  await expect(page.getByText("Short answer")).toBeVisible();
+  await expect(page.getByText("Validate required structure and business-critical fields", { exact: false })).toBeVisible();
 });
 
 test("quiz preserves correctness and final save is idempotent", async ({ page }) => {

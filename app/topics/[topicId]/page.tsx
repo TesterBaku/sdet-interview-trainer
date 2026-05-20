@@ -3,13 +3,13 @@
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { ProgressSummary } from "@/components/ProgressSummary";
-import { getInterviewQuestions, getQuestionsByTopic, getQuizQuestions, getTopic } from "@/lib/questionUtils";
+import { getFlashcardQuestions, getInterviewQuestions, getQuizQuestions, getTopic } from "@/lib/questionUtils";
 import { summarizeTopicProgress, useProgress } from "@/lib/progress";
 
 export default function TopicDetailPage() {
   const params = useParams<{ topicId: string }>();
   const topic = getTopic(params.topicId);
-  const questions = getQuestionsByTopic(params.topicId);
+  const flashcardCount = getFlashcardQuestions(params.topicId).length;
   const quizCount = getQuizQuestions(params.topicId).length;
   const interviewCount = getInterviewQuestions(params.topicId).length;
   const { progress } = useProgress();
@@ -21,10 +21,10 @@ export default function TopicDetailPage() {
   const summary = summarizeTopicProgress(progress, topic.id);
 
   const actions = [
-    { href: `/flashcards/${topic.id}`, title: "Flashcards", body: `${questions.length} questions with answer reveal and status tracking.` },
+    { href: `/flashcards/${topic.id}`, title: "Flashcards", body: `${flashcardCount} questions with answer reveal and status tracking.` },
     { href: `/quiz/${topic.id}`, title: "Quiz", body: `${quizCount} multiple-choice checks with explanations.` },
     { href: `/mock-interview/${topic.id}`, title: "Mock Interview", body: `${interviewCount} interview/scenario prompts with self-rating.` },
-    { href: `/flashcards/${topic.id}`, title: "Review Weak Questions", body: "Use flashcards and mark weak items as you improve." }
+    { href: `/flashcards/${topic.id}`, title: "Review Weak Questions", body: "Revisit all flashcard questions and mark weak items as you improve." }
   ];
 
   return (

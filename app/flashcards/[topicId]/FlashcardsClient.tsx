@@ -4,19 +4,23 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useState } from "react";
 import { Flashcard } from "@/components/Flashcard";
-import { getQuestionsByTopic, getTopic } from "@/lib/questionUtils";
+import { getFlashcardQuestions, getTopic } from "@/lib/questionUtils";
 import { getRecord, useProgress } from "@/lib/progress";
 
 export function FlashcardsClient() {
   const params = useParams<{ topicId: string }>();
   const topic = getTopic(params.topicId);
-  const questions = getQuestionsByTopic(params.topicId);
+  const questions = getFlashcardQuestions(params.topicId);
   const [index, setIndex] = useState(0);
   const { progress, updateQuestion } = useProgress();
   const question = questions[index];
 
-  if (!topic || !question) {
-    return <p className="rounded-2xl bg-white/80 p-6">No flashcards found for this topic.</p>;
+  if (!topic) {
+    return <p className="rounded-2xl bg-white/80 p-6">Topic not found.</p>;
+  }
+
+  if (!question) {
+    return <p className="rounded-2xl bg-white/80 p-6">No flashcards available for this topic.</p>;
   }
 
   return (
