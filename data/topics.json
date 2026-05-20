@@ -4,7 +4,7 @@
     "title": "Python Coding for QA/SDET",
     "description": "Python coding patterns for automation utilities, data validation, and interview problem solving.",
     "category": "coding",
-    "questionCount": 3,
+    "questionCount": 25,
     "difficulty": "mixed"
   },
   {
@@ -12,7 +12,7 @@
     "title": "Java Coding for QA/SDET",
     "description": "Java fundamentals and automation helper problems commonly asked in SDET interviews.",
     "category": "coding",
-    "questionCount": 3,
+    "questionCount": 25,
     "difficulty": "mixed"
   },
   {
@@ -20,7 +20,7 @@
     "title": "SQL / PostgreSQL",
     "description": "Querying, aggregation, joins, and validation patterns for database-backed testing.",
     "category": "database",
-    "questionCount": 3,
+    "questionCount": 25,
     "difficulty": "mixed"
   },
   {

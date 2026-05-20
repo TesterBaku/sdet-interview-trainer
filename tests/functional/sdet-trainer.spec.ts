@@ -21,7 +21,7 @@ test("home, topics, and topic detail render the MVP navigation path", async ({ p
   await expect(page.getByRole("heading", { name: "Practice like the interview is already scheduled." })).toBeVisible();
   await expect(page.getByRole("link", { name: "Topics" })).toBeVisible();
   await expect(page.getByText("TOTAL")).toBeVisible();
-  await expect(page.getByText("30")).toBeVisible();
+  await expect(page.getByText("96")).toBeVisible();
 
   await page.getByRole("link", { name: "Topics" }).click();
   await expect(page).toHaveURL("/topics");
@@ -43,7 +43,7 @@ test("flashcards reveal answers, navigate cards, and save weak status to progres
   await clearAppState(page);
   await page.goto("/flashcards/python-coding");
 
-  await expect(page.getByText("Card 1 of 2")).toBeVisible();
+  await expect(page.getByText("Card 1 of 12")).toBeVisible();
   await page.getByRole("button", { name: "Reveal answer" }).click();
   await expect(page.getByText("Correct answer")).toBeVisible();
   await expect(page.getByText("set", { exact: true })).toBeVisible();
@@ -57,7 +57,7 @@ test("flashcards reveal answers, navigate cards, and save weak status to progres
     });
 
   await page.getByRole("button", { name: "Next" }).click();
-  await expect(page.getByText("Card 2 of 2")).toBeVisible();
+  await expect(page.getByText("Card 2 of 12")).toBeVisible();
   await page.getByRole("button", { name: "Reveal answer" }).click();
   await expect(page.getByText("Short answer")).toBeVisible();
   await expect(page.getByText("Validate required structure and business-critical fields", { exact: false })).toBeVisible();
@@ -65,12 +65,12 @@ test("flashcards reveal answers, navigate cards, and save weak status to progres
 
 test("quiz preserves correctness and final save is idempotent", async ({ page }) => {
   await clearAppState(page);
-  await page.goto("/quiz/python-coding");
+  await page.goto("/quiz/selenium");
 
-  await page.getByLabel("list").check();
+  await page.getByLabel("Singleton").check();
   await expect(page.getByRole("button", { name: "Submit answer" })).toBeEnabled();
   await page.getByRole("button", { name: "Submit answer" }).click();
-  await expect(page.getByText("Incorrect. Correct answer: set")).toBeVisible();
+  await expect(page.getByText("Incorrect. Correct answer: Page Object Model")).toBeVisible();
   await page.getByRole("button", { name: "Save and finish" }).click();
 
   await expect(page.getByRole("button", { name: "Saved" })).toBeDisabled();
@@ -78,7 +78,7 @@ test("quiz preserves correctness and final save is idempotent", async ({ page })
   await expect
     .poll(async () => page.evaluate((key) => JSON.parse(window.localStorage.getItem(key) ?? "{}"), progressKey))
     .toMatchObject({
-      records: [{ questionId: "python-coding-002", status: "review", attempts: 1 }],
+      records: [{ questionId: "selenium-002", status: "review", attempts: 1 }],
       reviewQuestions: 1
     });
 
@@ -168,6 +168,6 @@ test("progress page reflects saved localStorage records", async ({ page }) => {
   await page.goto("/progress");
 
   await expect(page.getByRole("heading", { name: "Track readiness by topic" })).toBeVisible();
-  await expect(page.getByText("2/3 completed, 1 weak")).toBeVisible();
-  await expect(page.getByText("67%").first()).toBeVisible();
+  await expect(page.getByText("2/25 completed, 1 weak")).toBeVisible();
+  await expect(page.getByText("8%").first()).toBeVisible();
 });
