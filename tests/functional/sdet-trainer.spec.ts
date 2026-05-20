@@ -116,7 +116,6 @@ test("flashcards all cards marked tracks full completion", async ({ page }) => {
 });
 
 test("flashcards previously marked card enables Finish immediately on return", async ({ page }) => {
-  const progressKey = "sdet-interview-trainer-progress";
   // Pre-seed the last card as already marked from a prior session
   await page.goto("/");
   await page.evaluate(
