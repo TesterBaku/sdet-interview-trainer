@@ -15,8 +15,12 @@ export function FlashcardsClient() {
   const { progress, updateQuestion } = useProgress();
   const question = questions[index];
 
-  if (!topic || !question) {
-    return <p className="rounded-2xl bg-white/80 p-6">No flashcards found for this topic.</p>;
+  if (!topic) {
+    return <p className="rounded-2xl bg-white/80 p-6">Topic not found.</p>;
+  }
+
+  if (!question) {
+    return <p className="rounded-2xl bg-white/80 p-6">No flashcards available for this topic.</p>;
   }
 
   return (

@@ -41,7 +41,10 @@ export function getQuestion(questionId: string): Question | undefined {
 }
 
 export function getFlashcardQuestions(topicId: string): Question[] {
-  return getQuestionsByTopic(topicId).filter((question) => question.type !== "coding");
+  // coding questions are handled exclusively in Coding Gym
+  return getQuestionsByTopic(topicId).filter(
+    (question) => question.type === "quiz" || question.type === "interview" || question.type === "scenario"
+  );
 }
 
 export function getQuizQuestions(topicId: string): Question[] {
