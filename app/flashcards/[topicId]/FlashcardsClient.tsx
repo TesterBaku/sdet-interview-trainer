@@ -52,13 +52,29 @@ export function FlashcardsClient() {
           Previous
         </button>
         {index === questions.length - 1 ? (
-          <Link
-            aria-label="Finish — return to topic"
-            className="rounded-full bg-signal px-5 py-3 font-bold text-white shadow-panel transition hover:bg-[#b93e1f] focus-ring"
-            href={`/topics/${topic.id}`}
-          >
-            Finish
-          </Link>
+          // A card marked in a prior session is already counted as completed,
+          // so cross-session records satisfy the gate intentionally.
+          (getRecord(progress, question.id)?.status ?? "new") !== "new" ? (
+            <Link
+              className="rounded-full bg-signal px-5 py-3 font-bold text-white shadow-panel transition hover:bg-[#b93e1f] focus-ring"
+              href={`/topics/${topic.id}`}
+            >
+              Finish
+            </Link>
+          ) : (
+            <div className="flex flex-col items-end gap-1">
+              <button
+                className="rounded-full bg-signal px-5 py-3 font-bold text-white shadow-panel disabled:opacity-40 focus-ring"
+                disabled
+                type="button"
+              >
+                Finish
+              </button>
+              <p aria-live="polite" className="text-xs font-semibold text-ink/50">
+                Mark this card to finish
+              </p>
+            </div>
+          )
         ) : (
           <button
             className="rounded-full bg-ink px-5 py-3 font-bold text-paper shadow-panel focus-ring"
