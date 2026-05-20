@@ -4,13 +4,13 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useState } from "react";
 import { Flashcard } from "@/components/Flashcard";
-import { getQuestionsByTopic, getTopic } from "@/lib/questionUtils";
+import { getFlashcardQuestions, getTopic } from "@/lib/questionUtils";
 import { getRecord, useProgress } from "@/lib/progress";
 
 export function FlashcardsClient() {
   const params = useParams<{ topicId: string }>();
   const topic = getTopic(params.topicId);
-  const questions = getQuestionsByTopic(params.topicId);
+  const questions = getFlashcardQuestions(params.topicId);
   const [index, setIndex] = useState(0);
   const { progress, updateQuestion } = useProgress();
   const question = questions[index];
