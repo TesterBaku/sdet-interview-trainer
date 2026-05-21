@@ -19,9 +19,12 @@ function practiceHref(question: Question): string {
 
 function ReviewInner() {
   const searchParams = useSearchParams();
-  const status = (searchParams.get("status") as StatusFilter) ?? "all";
-  const typeFilter = (searchParams.get("type") as TypeFilter) ?? "all";
-  const topicFilter = searchParams.get("topic") ?? "all";
+  const rawStatus = searchParams.get("status");
+  const status: StatusFilter = rawStatus === "weak" || rawStatus === "review" ? rawStatus : "all";
+  const rawType = searchParams.get("type");
+  const typeFilter: TypeFilter = rawType === "coding" || rawType === "interview" ? rawType : "all";
+  const rawTopic = searchParams.get("topic");
+  const topicFilter = rawTopic && topics.some((t) => t.id === rawTopic) ? rawTopic : "all";
   const { progress } = useProgress();
 
   const flaggedRecords = progress.records.filter(

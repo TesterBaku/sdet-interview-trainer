@@ -451,6 +451,29 @@ test("review queue empty state renders when no flagged questions exist", async (
   await expect(page.getByText(/Nothing matches these filters/)).toBeVisible();
 });
 
+test("review queue ignores invalid query params and falls back to defaults", async ({ page }) => {
+  await page.goto("/");
+  await page.evaluate(
+    ([key, value]) => window.localStorage.setItem(key, value),
+    [
+      progressKey,
+      JSON.stringify({
+        records: [
+          { questionId: "python-coding-001", status: "weak", attempts: 1, lastReviewedAt: new Date().toISOString() },
+          { questionId: "python-coding-002", status: "review", attempts: 1, lastReviewedAt: new Date().toISOString() },
+        ],
+        completedQuestions: 2,
+        weakQuestions: 1,
+        reviewQuestions: 1,
+      }),
+    ]
+  );
+
+  // Invalid status, type, and topic should be ignored — both flagged questions still visible
+  await page.goto("/review?status=foo&type=bar&topic=does-not-exist");
+  await expect(page.getByRole("heading", { name: "2 questions" })).toBeVisible();
+});
+
 test("navigation includes a Review link", async ({ page }) => {
   await page.goto("/");
   await expect(page.getByRole("link", { name: "Review", exact: true })).toBeVisible();
