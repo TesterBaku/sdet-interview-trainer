@@ -3,15 +3,14 @@
 import { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { CodingTaskCard } from "@/components/CodingTaskCard";
-import { getCodingQuestions, getTopic } from "@/lib/questionUtils";
+import { getCodingQuestions, getCodingQuestionsByTopic, getTopic } from "@/lib/questionUtils";
 import { getRecord, useProgress } from "@/lib/progress";
 
 function CodingGymInner() {
   const searchParams = useSearchParams();
   const topicId = searchParams.get("topic") ?? "";
   const topic = topicId ? getTopic(topicId) : undefined;
-  const allCoding = getCodingQuestions();
-  const questions = topic ? allCoding.filter((q) => q.topicId === topic.id) : allCoding;
+  const questions = topic ? getCodingQuestionsByTopic(topic.id) : getCodingQuestions();
   const { progress, updateQuestion } = useProgress();
 
   return (
