@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { ProgressSummary } from "@/components/ProgressSummary";
-import { getQuestionsByTopic, getWeakTopicIds, topics } from "@/lib/questionUtils";
+import { getWeakTopicIds, topics } from "@/lib/questionUtils";
 import { summarizeProgress, summarizeTopicProgress, useProgress } from "@/lib/progress";
 
 export function HomeClient() {
@@ -29,9 +29,9 @@ export function HomeClient() {
 
       <div className="grid gap-5 lg:grid-cols-3">
         <Link className="rounded-[2rem] bg-ink p-6 text-paper shadow-panel transition hover:-translate-y-1" href={`/topics/${nextTopic.id}`}>
-          <p className="text-sm font-bold uppercase tracking-[0.2em] text-paper/60">Continue practice</p>
-          <h2 className="mt-4 font-display text-3xl font-bold">{nextTopic.title}</h2>
-          <p className="mt-3 text-paper/70">{getQuestionsByTopic(nextTopic.id).length} starter questions ready.</p>
+          <p className="text-sm font-bold uppercase tracking-[0.2em] text-paper/60">Continue Practice</p>
+          <h2 className="mt-4 font-display text-3xl font-bold">Pick up where you left off</h2>
+          <p className="mt-3 text-paper/70">Resume your latest topic or start with Python / Java coding.</p>
         </Link>
         <Link className="rounded-[2rem] bg-signal p-6 text-white shadow-panel transition hover:-translate-y-1" href="/coding-gym">
           <p className="text-sm font-bold uppercase tracking-[0.2em] text-white/70">Coding Gym</p>

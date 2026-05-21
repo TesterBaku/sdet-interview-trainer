@@ -14,6 +14,22 @@ async function clearAppState(page: { goto: (url: string) => Promise<unknown>; ev
   );
 }
 
+test("home Continue Practice card uses generic copy and links to a topic", async ({ page }) => {
+  await clearAppState(page);
+  await page.goto("/");
+
+  const card = page.getByRole("link", { name: /Pick up where you left off/ });
+  await expect(card).toBeVisible();
+  await expect(page.getByText(/Resume your latest topic/)).toBeVisible();
+
+  // Card href must always point at a valid topic route — never a hardcoded slug
+  const href = await card.getAttribute("href");
+  expect(href).toMatch(/^\/topics\/[a-z0-9-]+$/);
+
+  await card.click();
+  await expect(page).toHaveURL(href!);
+});
+
 test("home, topics, and topic detail render the MVP navigation path", async ({ page }) => {
   await clearAppState(page);
   await page.goto("/");
