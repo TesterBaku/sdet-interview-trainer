@@ -329,6 +329,9 @@ test("each major page has a descriptive <title>", async ({ page }) => {
 
   await page.goto("/review");
   await expect(page).toHaveTitle(/Review Queue.*SDET Interview Trainer/i);
+
+  await page.goto("/daily-practice");
+  await expect(page).toHaveTitle(/Daily Practice.*SDET Interview Trainer/i);
 });
 
 test("home page has OpenGraph meta tags", async ({ page }) => {
@@ -393,6 +396,48 @@ test("progress page reflects saved localStorage records", async ({ page }) => {
   await expect(page.getByRole("heading", { name: "Track readiness by topic" })).toBeVisible();
   await expect(page.getByText("2/25 completed, 1 weak")).toBeVisible();
   await expect(page.getByText("8%").first()).toBeVisible();
+});
+
+// ── Daily Practice ──────────────────────────────────────────────────────────
+
+test("home page shows a Daily Practice card linking to /daily-practice", async ({ page }) => {
+  await clearAppState(page);
+  await page.goto("/");
+
+  const card = page.getByRole("link", { name: /Start Daily Practice/ });
+  await expect(card).toBeVisible();
+  await expect(card).toHaveAttribute("href", "/daily-practice");
+});
+
+test("daily practice renders all 5 sections with the planned mix of items", async ({ page }) => {
+  await clearAppState(page);
+  await page.goto("/daily-practice");
+
+  await expect(page.getByRole("heading", { name: "Python / Java coding" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "SQL" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Playwright / Selenium" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "API / CI/CD / AWS" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Strategy / Mock" })).toBeVisible();
+
+  // 3 + 2 + 2 + 2 + 1 = 10 items total
+  await expect(page.getByText(/0 of 10 done today/)).toBeVisible();
+});
+
+test("daily practice plan is stable across reloads on the same day", async ({ page }) => {
+  await clearAppState(page);
+  await page.goto("/daily-practice");
+
+  const firstItemTitles = await page.locator("li p.font-bold").allTextContents();
+
+  await page.reload();
+  const reloadedTitles = await page.locator("li p.font-bold").allTextContents();
+
+  expect(reloadedTitles).toEqual(firstItemTitles);
+});
+
+test("navigation includes a Daily link", async ({ page }) => {
+  await page.goto("/");
+  await expect(page.getByRole("link", { name: "Daily", exact: true })).toBeVisible();
 });
 
 // ── Progress breakdown + /review route ──────────────────────────────────────
