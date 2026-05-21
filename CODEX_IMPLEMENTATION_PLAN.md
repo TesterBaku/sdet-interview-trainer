@@ -1,4 +1,7 @@
-re# Codex Implementation Plan — SDET Interview Trainer
+# Codex Implementation Plan — SDET Interview Trainer
+
+> **Status (2026-05-21):** ✅ **Historical — all steps complete.** This was the original kickoff plan used to scaffold the project. Kept here for reference. For the current state of the app, see [README.md](README.md) and [APP_ARCHITECTURE.md](APP_ARCHITECTURE.md).
+
 
 ## Local Project Path
 

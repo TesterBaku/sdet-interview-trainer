@@ -1,110 +1,69 @@
 # MVP Roadmap — SDET Interview Trainer
 
-## Phase 0 — Preparation
+Status as of 2026-05-21 — MVP shipped, app live at https://sdet-interview-trainer.vercel.app.
 
-Create local folder:
+## ✅ Phase 0 — Preparation
 
-```text
-C:\Rufat_docs\Projects\interview_prep_app
-```
+Created local folder, placed docs, initialized Next.js app.
 
-Place these documentation files in the folder.
+## ✅ Phase 1 — App Skeleton
 
-Initialize Next.js app.
-
-## Phase 1 — App Skeleton
-
-Build:
-
-- Next.js app
-- TypeScript setup
-- Tailwind setup
+- Next.js 16 + TypeScript + Tailwind
 - Navigation
 - Home page
 - Topics page
 - Static topics JSON
 
-Done when:
+## ✅ Phase 2 — Topic Detail and Content Loading
 
-- App runs locally
-- Home page works
-- Topics page shows all 10 topics
+- Topic detail page with 4–5 action cards
+- Question loading utilities (`lib/questionUtils.ts`)
+- Sample data files for all 10 topics
 
-## Phase 2 — Topic Detail and Content Loading
+## ✅ Phase 3 — Practice Modes
 
-Build:
+- Flashcard mode (with last-card blocking until marked)
+- Quiz mode (with idempotent save, completion banner)
+- Mock Interview mode (with 60–90s answer guide, Back-to-topic on last prompt)
+- Coding Gym (with sandbox draft persistence)
 
-- Topic detail page
-- Question loading utilities
-- Sample data files
-- 3 sample questions per topic
+## ✅ Phase 4 — Progress Tracking
 
-Done when:
-
-- User can open each topic
-- Topic detail shows practice options
-
-## Phase 3 — Practice Modes
-
-Build:
-
-- Flashcard mode
-- Quiz mode
-- Mock Interview mode
-- Coding Gym
-
-Done when:
-
-- User can practice questions in all 4 modes
-
-## Phase 4 — Progress Tracking
-
-Build:
-
-- localStorage progress
+- localStorage progress (`sdet-interview-trainer-progress`)
 - known/review/weak status
-- progress summary
-- topic progress percentage
+- Progress summary component
+- Topic progress percentage
+- Per-type progress breakdowns (Coding / Quiz / Mock Interview)
 
-Done when:
+## ✅ Phase 5 — Content Expansion
 
-- Progress persists after page refresh
+All 10 topics shipped with 25 questions each = **250 questions total.**
 
-## Phase 5 — Content Expansion
+## ✅ Phase 6 — Polish (delivered post-MVP)
 
-Add full content:
+- ✅ Mobile responsive design across all pages
+- ✅ Progressive Web App (installable manifest + service worker)
+- ✅ SEO (per-page titles, OpenGraph, Twitter Card, sitemap, robots.txt)
+- ✅ Vercel Analytics for page-view tracking
+- ✅ HTTP security headers (XFO, nosniff, Referrer-Policy, Permissions-Policy)
+- ✅ Per-topic Coding Tasks shortcut from Topic Detail (`/coding-gym?topic=`)
+- ✅ Global Review Queue at `/review` with status/type/topic filters
+- ✅ Daily Practice mode at `/daily-practice` — 10 items rotating per UTC day
+- ✅ Playwright regression suite (31 tests) running on every PR
+- ⏸ Search — not needed yet, content is small and well-organized
+- ⏸ Difficulty labels in the UI — data has `difficulty` field but it isn't exposed in the UI yet
+- ⏸ Bookmarks (separate from weak/review) — review queue covers the main use case
+- ⏸ Export/import progress — not requested
 
-1. Python Coding — 25 questions
-2. Java Coding — 25 questions
-3. SQL/PostgreSQL — 25 questions
-4. Playwright TypeScript — 25 questions
-5. Playwright Python — 25 questions
-6. Selenium — 25 questions
-7. API Testing — 25 questions
-8. Test Automation Strategy — 25 questions
-9. CI/CD — 25 questions
-10. AWS — 25 questions
+## ⏭ Phase 7 — Future Public Version (not started)
 
-## Phase 6 — Polish
-
-Add:
-
-- Search
-- Filters
-- Difficulty labels
-- Bookmarks
-- Review queue
-- Mobile layout polish
-- Export/import progress
-
-## Phase 7 — Future Public Version
-
-Add:
+These intentionally remain out of scope while the app is for personal use:
 
 - Login
-- Cloud database
+- Cloud database with cross-device sync
 - AI answer evaluation
 - Voice interview practice
 - Resume/job-description upload
 - Public content library
 - Admin content editor
+- Deep-link to a specific question from the review queue or daily plan

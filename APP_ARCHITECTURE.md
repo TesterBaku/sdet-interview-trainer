@@ -2,47 +2,43 @@
 
 ## Architecture Style
 
-The MVP is a static-first responsive web app.
+A static-first, client-rendered web app with no backend.
 
 ```text
-Next.js UI
+Next.js (App Router)
   ↓
-Static JSON content
+Static JSON content (250 questions, 10 topics)
   ↓
-localStorage progress
+localStorage (per-question progress)
+  ↓
+Vercel Analytics (page-view telemetry only)
 ```
 
-No backend is required for MVP.
+All data lives in the browser. Static content is bundled at build time; user progress is in localStorage.
 
 ## Main Modules
 
-### 1. Content Module
+### 1. Content module
 
-Responsible for:
-
-- Loading topics
-- Loading questions
-- Filtering questions by topic
-- Filtering questions by type
-
-Files:
+Loads and filters topics/questions from JSON.
 
 ```text
 data/topics.json
-data/questions/*.json
+data/questions/*.json        (10 files, 25 questions each)
 lib/questionUtils.ts
 ```
 
-### 2. Progress Module
+Key exports in `lib/questionUtils.ts`:
+- `topics`, `allQuestions` — static data
+- `getTopic(topicId)`, `getQuestionsByTopic(topicId)`, `getQuestion(id)`
+- `getFlashcardQuestions(topicId)`, `getQuizQuestions(topicId)`, `getInterviewQuestions(topicId)`
+- `getCodingQuestions()`, `getCodingQuestionsByTopic(topicId)`
+- `getWeakTopicIds(records)`
+- `getDailyPlan(date?)` — deterministic per-UTC-day 10-item plan, 5 sections
 
-Responsible for:
+### 2. Progress module
 
-- Reading progress from localStorage
-- Writing progress to localStorage
-- Marking question status
-- Calculating progress summaries
-
-Files:
+Reads/writes per-question progress to localStorage.
 
 ```text
 lib/progress.ts
@@ -50,94 +46,111 @@ lib/storage.ts
 types/Progress.ts
 ```
 
-### 3. Practice Modes
+Key exports:
+- `useProgress()` hook → `{ progress, isLoaded, updateQuestion }`
+- `getRecord(progress, questionId)`
+- `markQuestionStatus(progress, questionId, status)`
+- `summarizeProgress(progress, questionIds?)` — totals + per-status counts + percentComplete; accepts a filtered ID list for per-type/per-topic summaries
+- `summarizeTopicProgress(progress, topicId)`
 
-Responsible for:
+### 3. Practice modes
 
-- Flashcards
-- Quiz
-- Mock Interview
-- Coding Gym
+| Route | Purpose |
+|---|---|
+| `/flashcards/[topicId]` | Reveal-answer flashcards, known/review/weak status, blocked Finish on last unmarked card |
+| `/quiz/[topicId]`       | Single-choice MCQ with explanation, idempotent save, completion banner |
+| `/mock-interview/[topicId]` | Textarea + 60–90s/4-step answer guide + reveal model answer + self-rate + Back to topic on last prompt |
+| `/coding-gym`           | All coding tasks; `?topic=<id>` filters to one topic; sandbox draft auto-saves per task |
 
-Routes:
+### 4. Aggregator surfaces
 
-```text
-/flashcards/[topicId]
-/quiz/[topicId]
-/mock-interview/[topicId]
-/coding-gym
-```
+| Route | Purpose |
+|---|---|
+| `/`               | Home: hero + Daily Practice banner + 3-card grid + progress summary + weak topics |
+| `/topics`         | All 10 topics with per-topic progress |
+| `/topics/[topicId]` | Topic detail with 4–5 action cards (Coding Tasks card only shown if topic has coding questions) |
+| `/daily-practice` | Today's 10-item rotating plan, 5 sections, completion tracker |
+| `/review`         | All weak + review-later questions across topics, filterable by status/type/topic via URL query |
+| `/progress`       | Overall + per-type (Coding / Quiz / Mock Interview) + per-topic breakdown |
 
-### 4. UI Components
+### 5. Shared helpers
 
-Reusable components:
+- `lib/practiceHref.ts` — `practiceHref(question)` maps a question to the right practice mode URL (used by `/review` and `/daily-practice`)
+- `lib/codeWorkspace.ts` — per-question coding draft persistence
 
-```text
-Navigation
-TopicCard
-ProgressSummary
-QuestionCard
-Flashcard
-QuizQuestion
-CodingTaskCard
-StatusButtons
-```
-
-## Data Flow
-
-### Flashcard Flow
+### 6. UI components
 
 ```text
-User opens topic
-↓
-App loads topic questions
-↓
-User reveals answer
-↓
-User marks status
-↓
-Status saved to localStorage
-↓
-Progress updates
+Navigation         sticky top bar, 6 links (Home, Daily, Topics, Coding Gym, Review, Progress)
+TopicCard          topic preview tile with progress
+ProgressSummary    bar + 5-stat grid (Total/Completed/Known/Review/Weak)
+QuestionCard       prompt container used by quiz and mock interview
+Flashcard          card container for flashcard mode
+QuizQuestion       MCQ option list + submit/save flow
+CodingTaskCard     coding problem + sandbox + reveal hint/solution + status
+StatusButtons      Known / Review / Weak buttons (shared)
+PwaInit            registers service worker on first load
 ```
 
-### Quiz Flow
+## Data flow
+
+### Flashcard / Quiz / Mock Interview flow
 
 ```text
-User opens quiz
+User opens practice mode
 ↓
-App loads quiz questions
+Component loads filtered questions for the topic
 ↓
-User selects answer
+User answers / reveals / marks status
 ↓
-App checks correctAnswer
+useProgress.updateQuestion(id, status)
 ↓
-App shows explanation
+markQuestionStatus → writeProgress (localStorage)
 ↓
-Progress saved
+State re-renders with new progress
 ```
 
-### Coding Gym Flow
+### Coding Gym flow
 
 ```text
-User opens Coding Gym
+User opens /coding-gym (optionally with ?topic=<id>)
 ↓
-App loads all coding questions
+getCodingQuestions() or getCodingQuestionsByTopic(topic.id)
 ↓
-User opens task
+For each task: load draft via readCodeDraft(id)
 ↓
-User reveals hint/solution
+User edits sandbox → writeCodeDraft(id, text) on each keystroke
 ↓
-User marks status
+User reveals hint/solution, then marks status
 ```
 
-## Storage Strategy
-
-Use localStorage key:
+### Daily Practice flow
 
 ```text
-sdet-interview-trainer-progress
+User opens /daily-practice
+↓
+getDailyPlan(new Date()) → 5 sections of questions, seeded by UTC day
+↓
+For each item: getRecord(progress, id) → render status badge if marked
+↓
+User clicks item → practiceHref(question) routes to the right mode
 ```
+
+### Review queue flow
+
+```text
+User opens /review (optionally with ?status= &type= &topic= )
+↓
+Filter progress.records to weak + review only
+↓
+Apply status/type/topic filters from URL (validated against known values)
+↓
+For each match: link via practiceHref(question)
+```
+
+## Storage strategy
+
+localStorage key: `sdet-interview-trainer-progress`
 
 Data shape:
 
@@ -148,15 +161,34 @@ Data shape:
       "questionId": "python-coding-001",
       "status": "known",
       "attempts": 2,
-      "lastReviewedAt": "2026-05-20T00:00:00.000Z"
+      "lastReviewedAt": "2026-05-21T00:00:00.000Z"
     }
-  ]
+  ],
+  "completedQuestions": 1,
+  "weakQuestions": 0,
+  "reviewQuestions": 0
 }
 ```
 
-## Future Architecture
+A second key per coding question stores the user's sandbox draft:
+`sdet-interview-trainer-code-answer:<questionId>`
 
-Phase 2 can add:
+## SEO / security
+
+- Per-page `<title>` and OpenGraph metadata via Next.js `metadata` / `generateMetadata` exports
+- `app/sitemap.ts` generates 44 URLs (static + per-topic)
+- `app/robots.ts` allows all crawlers, points to sitemap
+- Security headers in `next.config.ts`: `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin`, `Permissions-Policy: camera=(), microphone=(), geolocation=()`, `X-DNS-Prefetch-Control: on`
+
+## Testing
+
+`tests/functional/sdet-trainer.spec.ts` — 31 Playwright tests covering navigation, flashcard/quiz/mock-interview/coding-gym flows, mobile viewport overflow, SEO meta, sitemap/robots, security headers, daily practice stability, review queue filtering, and per-topic coding tasks.
+
+CI runs lint → typecheck → all tests on every PR.
+
+## Future architecture
+
+Phase 2 candidates:
 
 ```text
 Supabase or Firebase
@@ -166,4 +198,5 @@ AI mock interview evaluation
 Voice recording
 Public content library
 Admin content editor
+Deep-link per-question (jump directly into the question marked weak)
 ```

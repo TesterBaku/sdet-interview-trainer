@@ -1,5 +1,8 @@
 # Start Here
 
+> **Status (2026-05-21):** ✅ **Historical.** These were the original kickoff instructions for setting up an empty project. The app is now built and deployed. For current setup steps see the "Local development" section of [README.md](README.md).
+
+
 ## Your Project Path
 
 ```text
