@@ -5,17 +5,11 @@ import { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { allQuestions, topics } from "@/lib/questionUtils";
 import { useProgress } from "@/lib/progress";
+import { practiceHref } from "@/lib/practiceHref";
 import type { Question } from "@/types/Question";
 
 type StatusFilter = "all" | "weak" | "review";
 type TypeFilter = "all" | "coding" | "interview";
-
-function practiceHref(question: Question): string {
-  if (question.type === "coding") return `/coding-gym?topic=${question.topicId}`;
-  if (question.type === "quiz") return `/quiz/${question.topicId}`;
-  if (question.type === "interview" || question.type === "scenario") return `/mock-interview/${question.topicId}`;
-  return `/flashcards/${question.topicId}`;
-}
 
 function ReviewInner() {
   const searchParams = useSearchParams();

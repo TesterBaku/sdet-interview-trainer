@@ -27,6 +27,22 @@ export function HomeClient() {
         </div>
       </section>
 
+      <Link
+        className="block rounded-[2.5rem] border border-brass/40 bg-brass/15 p-6 shadow-panel transition hover:-translate-y-1 sm:p-8"
+        href="/daily-practice"
+      >
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="text-sm font-black uppercase tracking-[0.28em] text-brass">Today&rsquo;s Plan</p>
+            <h2 className="mt-2 font-display text-3xl font-black text-blueprint sm:text-4xl">Start Daily Practice</h2>
+            <p className="mt-2 max-w-2xl text-ink/75">
+              10 focused items: 3 coding · 2 SQL · 2 Playwright/Selenium · 2 API/CI/AWS · 1 strategy.
+            </p>
+          </div>
+          <span className="self-start rounded-full bg-ink px-5 py-3 font-bold text-paper sm:self-auto">Open plan →</span>
+        </div>
+      </Link>
+
       <div className="grid gap-5 lg:grid-cols-3">
         <Link className="rounded-[2rem] bg-ink p-6 text-paper shadow-panel transition hover:-translate-y-1" href={`/topics/${nextTopic.id}`}>
           <p className="text-sm font-bold uppercase tracking-[0.2em] text-paper/60">Continue Practice</p>
