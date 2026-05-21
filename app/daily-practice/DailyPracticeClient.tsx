@@ -3,14 +3,7 @@
 import Link from "next/link";
 import { getDailyPlan } from "@/lib/questionUtils";
 import { getRecord, useProgress } from "@/lib/progress";
-import type { Question } from "@/types/Question";
-
-function practiceHref(question: Question): string {
-  if (question.type === "coding") return `/coding-gym?topic=${question.topicId}`;
-  if (question.type === "quiz") return `/quiz/${question.topicId}`;
-  if (question.type === "interview" || question.type === "scenario") return `/mock-interview/${question.topicId}`;
-  return `/flashcards/${question.topicId}`;
-}
+import { practiceHref } from "@/lib/practiceHref";
 
 const dateFormatter = new Intl.DateTimeFormat("en-US", {
   weekday: "long",

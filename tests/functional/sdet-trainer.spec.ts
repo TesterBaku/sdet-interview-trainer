@@ -427,10 +427,10 @@ test("daily practice plan is stable across reloads on the same day", async ({ pa
   await clearAppState(page);
   await page.goto("/daily-practice");
 
-  const firstItemTitles = await page.locator("li p.font-bold").allTextContents();
+  const firstItemTitles = await page.locator("main section ul li p.font-bold").allTextContents();
 
   await page.reload();
-  const reloadedTitles = await page.locator("li p.font-bold").allTextContents();
+  const reloadedTitles = await page.locator("main section ul li p.font-bold").allTextContents();
 
   expect(reloadedTitles).toEqual(firstItemTitles);
 });
