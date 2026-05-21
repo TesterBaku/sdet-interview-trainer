@@ -106,14 +106,9 @@ next.config.ts                         security headers
 
 ## Documentation files
 
-| File | Purpose | Status |
-|---|---|---|
-| `README.md` | This file — current state of the app | Active |
-| `APP_ARCHITECTURE.md` | Module overview, routes, data flow | Active |
-| `DATA_SCHEMA.md` | TypeScript types for Topic / Question / Progress | Active |
-| `PROJECT_REQUIREMENTS.md` | Original product requirements | Active reference |
-| `CONTENT_PLAN.md` | Content build plan | Complete (250/250 questions shipped) |
-| `MVP_ROADMAP.md` | Phase plan from build kickoff | Phases 0-6 complete |
-| `CODEX_IMPLEMENTATION_PLAN.md` | Pre-build setup steps | Historical — kept for reference |
-| `START_HERE.md` | Pre-build setup steps | Historical — kept for reference |
-| `AGENTS.md` | Working agreements for agent-assisted development | Active |
+| File | Purpose |
+|---|---|
+| `README.md` | This file — current state of the app |
+| `APP_ARCHITECTURE.md` | Module overview, routes, data flow, storage shape |
+| `DATA_SCHEMA.md` | TypeScript types for Topic / Question / Progress |
+| `AGENTS.md` | Working agreements for agent-assisted development |
