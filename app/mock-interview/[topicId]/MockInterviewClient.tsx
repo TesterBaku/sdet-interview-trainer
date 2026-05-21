@@ -93,9 +93,15 @@ export function MockInterviewClient() {
           </div>
         ) : null}
       </QuestionCard>
-      <button className="rounded-full bg-ink px-5 py-3 font-bold text-paper disabled:opacity-40 focus-ring" disabled={index === questions.length - 1} onClick={nextQuestion} type="button">
-        Next prompt
-      </button>
+      {index === questions.length - 1 ? (
+        <Link className="inline-block rounded-full bg-ink px-5 py-3 font-bold text-paper focus-ring" href={`/topics/${topic.id}`}>
+          Back to topic
+        </Link>
+      ) : (
+        <button className="rounded-full bg-ink px-5 py-3 font-bold text-paper focus-ring" onClick={nextQuestion} type="button">
+          Next prompt
+        </button>
+      )}
     </div>
   );
 }

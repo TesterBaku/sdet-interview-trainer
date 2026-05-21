@@ -219,6 +219,26 @@ test("mock interview accepts an answer, reveals model guidance, and saves self-r
     });
 });
 
+test("mock interview last prompt shows Back to topic link instead of disabled Next", async ({ page }) => {
+  await clearAppState(page);
+  await page.goto("/mock-interview/python-coding");
+
+  // python-coding has 5 interview questions; navigate to the last one
+  const totalPrompts = await page.getByText(/Prompt \d+ of (\d+)/).textContent();
+  const total = Number(totalPrompts?.match(/of (\d+)/)?.[1] ?? 1);
+
+  for (let i = 0; i < total - 1; i++) {
+    await page.getByRole("button", { name: "Next prompt" }).click();
+  }
+
+  await expect(page.getByText(`Prompt ${total} of ${total}`)).toBeVisible();
+  await expect(page.getByRole("button", { name: "Next prompt" })).not.toBeVisible();
+  await expect(page.getByRole("link", { name: "Back to topic" }).last()).toBeVisible();
+
+  await page.getByRole("link", { name: "Back to topic" }).last().click();
+  await expect(page).toHaveURL("/topics/python-coding");
+});
+
 test("coding gym supports sandbox drafts, reveal controls, status save, and draft persistence", async ({ page }) => {
   await clearAppState(page);
   await page.goto("/coding-gym");
