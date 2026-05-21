@@ -1,11 +1,17 @@
 "use client";
 
+import { Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import { CodingTaskCard } from "@/components/CodingTaskCard";
-import { getCodingQuestions } from "@/lib/questionUtils";
+import { getCodingQuestions, getTopic } from "@/lib/questionUtils";
 import { getRecord, useProgress } from "@/lib/progress";
 
-export function CodingGymClient() {
-  const questions = getCodingQuestions();
+function CodingGymInner() {
+  const searchParams = useSearchParams();
+  const topicId = searchParams.get("topic") ?? "";
+  const topic = topicId ? getTopic(topicId) : undefined;
+  const allCoding = getCodingQuestions();
+  const questions = topic ? allCoding.filter((q) => q.topicId === topic.id) : allCoding;
   const { progress, updateQuestion } = useProgress();
 
   return (
@@ -17,17 +23,39 @@ export function CodingGymClient() {
           Practice coding tasks from Python, Java, SQL/PostgreSQL, Playwright, Selenium, and API testing. No live code
           runner is needed for the MVP; focus on recognizing patterns and explaining tradeoffs.
         </p>
+        {topic ? (
+          <div className="mt-5 flex flex-wrap items-center gap-3 rounded-2xl bg-paper/70 p-4">
+            <span className="font-bold text-blueprint">
+              Showing {questions.length} {questions.length === 1 ? "task" : "tasks"} for {topic.title}
+            </span>
+            <a className="text-sm font-bold text-signal underline focus-ring" href="/coding-gym">
+              Show all topics
+            </a>
+          </div>
+        ) : null}
       </header>
-      <div className="grid gap-5 lg:grid-cols-2">
-        {questions.map((question) => (
-          <CodingTaskCard
-            currentStatus={getRecord(progress, question.id)?.status}
-            key={question.id}
-            onMark={(status) => updateQuestion(question.id, status)}
-            question={question}
-          />
-        ))}
-      </div>
+      {questions.length === 0 ? (
+        <p className="rounded-2xl bg-white/80 p-6">No coding tasks found for this topic.</p>
+      ) : (
+        <div className="grid gap-5 lg:grid-cols-2">
+          {questions.map((question) => (
+            <CodingTaskCard
+              currentStatus={getRecord(progress, question.id)?.status}
+              key={question.id}
+              onMark={(status) => updateQuestion(question.id, status)}
+              question={question}
+            />
+          ))}
+        </div>
+      )}
     </div>
+  );
+}
+
+export function CodingGymClient() {
+  return (
+    <Suspense fallback={<div className="rounded-2xl bg-white/80 p-6">Loading…</div>}>
+      <CodingGymInner />
+    </Suspense>
   );
 }

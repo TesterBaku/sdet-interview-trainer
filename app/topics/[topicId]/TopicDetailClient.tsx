@@ -3,15 +3,13 @@
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { ProgressSummary } from "@/components/ProgressSummary";
-import { getFlashcardQuestions, getInterviewQuestions, getQuizQuestions, getTopic } from "@/lib/questionUtils";
+import { getCodingQuestionsByTopic, getTopic } from "@/lib/questionUtils";
 import { summarizeTopicProgress, useProgress } from "@/lib/progress";
 
 export function TopicDetailClient() {
   const params = useParams<{ topicId: string }>();
   const topic = getTopic(params.topicId);
-  const flashcardCount = getFlashcardQuestions(params.topicId).length;
-  const quizCount = getQuizQuestions(params.topicId).length;
-  const interviewCount = getInterviewQuestions(params.topicId).length;
+  const codingCount = getCodingQuestionsByTopic(params.topicId).length;
   const { progress } = useProgress();
 
   if (!topic) {
@@ -21,10 +19,35 @@ export function TopicDetailClient() {
   const summary = summarizeTopicProgress(progress, topic.id);
 
   const actions = [
-    { href: `/flashcards/${topic.id}`, title: "Flashcards", body: `Covers all ${flashcardCount} non-coding questions — includes the quiz and interview prompts below.` },
-    { href: `/quiz/${topic.id}`, title: "Quiz", body: `${quizCount} multiple-choice checks with explanations.` },
-    { href: `/mock-interview/${topic.id}`, title: "Mock Interview", body: `${interviewCount} interview/scenario prompts with self-rating.` },
-    { href: `/flashcards/${topic.id}`, title: "Review Weak Questions", body: "Revisit all flashcard questions and mark weak items as you improve." }
+    {
+      href: `/flashcards/${topic.id}`,
+      title: "Flashcards",
+      body: "Review quiz, interview, and scenario questions one card at a time.",
+    },
+    {
+      href: `/quiz/${topic.id}`,
+      title: "Quiz",
+      body: "Practice multiple-choice checks with explanations.",
+    },
+    {
+      href: `/mock-interview/${topic.id}`,
+      title: "Mock Interview",
+      body: "Practice interview and scenario prompts with self-rating.",
+    },
+    ...(codingCount > 0
+      ? [
+          {
+            href: `/coding-gym?topic=${topic.id}`,
+            title: "Coding Tasks",
+            body: "Practice hands-on coding problems for this topic.",
+          },
+        ]
+      : []),
+    {
+      href: `/flashcards/${topic.id}`,
+      title: "Review Weak Questions",
+      body: "Revisit weak and review-later questions for this topic.",
+    },
   ];
 
   return (

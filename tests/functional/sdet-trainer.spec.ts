@@ -360,6 +360,42 @@ test("progress page reflects saved localStorage records", async ({ page }) => {
   await expect(page.getByText("8%").first()).toBeVisible();
 });
 
+// ── Per-topic coding tasks ───────────────────────────────────────────────────
+
+test("topic detail shows Coding Tasks card for topics with coding questions", async ({ page }) => {
+  await clearAppState(page);
+  await page.goto("/topics/python-coding");
+
+  const codingCard = page.getByRole("link", { name: /Coding Tasks/ });
+  await expect(codingCard).toBeVisible();
+  await expect(codingCard).toHaveAttribute("href", "/coding-gym?topic=python-coding");
+});
+
+test("topic detail omits Coding Tasks card for topics without coding questions", async ({ page }) => {
+  await clearAppState(page);
+  await page.goto("/topics/aws");
+
+  await expect(page.getByRole("link", { name: /Flashcards/ })).toBeVisible();
+  await expect(page.getByRole("link", { name: /Coding Tasks/ })).toHaveCount(0);
+});
+
+test("coding gym filters tasks when ?topic= query is set", async ({ page }) => {
+  await clearAppState(page);
+  await page.goto("/coding-gym?topic=python-coding");
+
+  await expect(page.getByText(/Showing 13 tasks for Python Coding/i)).toBeVisible();
+
+  const cards = page.locator("article");
+  await expect(cards).toHaveCount(13);
+
+  await page.getByRole("link", { name: "Show all topics" }).click();
+  await expect(page).toHaveURL("/coding-gym");
+  // back to unfiltered view: more than 13 tasks total
+  await expect(page.locator("article").first()).toBeVisible();
+  const totalCards = await page.locator("article").count();
+  expect(totalCards).toBeGreaterThan(13);
+});
+
 // ── Mobile viewport regression ───────────────────────────────────────────────
 
 test("coding gym cards do not overflow the viewport on mobile", async ({ page }) => {

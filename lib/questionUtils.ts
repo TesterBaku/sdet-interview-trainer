@@ -63,6 +63,10 @@ export function getCodingQuestions(): Question[] {
   return allQuestions.filter((question) => question.type === "coding");
 }
 
+export function getCodingQuestionsByTopic(topicId: string): Question[] {
+  return getQuestionsByTopic(topicId).filter((question) => question.type === "coding");
+}
+
 export function getWeakTopicIds(records: { questionId: string; status: string }[]): string[] {
   const weakQuestionIds = new Set(
     records.filter((record) => record.status === "weak").map((record) => record.questionId)
