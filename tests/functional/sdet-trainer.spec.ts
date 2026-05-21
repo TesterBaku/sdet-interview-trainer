@@ -339,3 +339,22 @@ test("progress page reflects saved localStorage records", async ({ page }) => {
   await expect(page.getByText("2/25 completed, 1 weak")).toBeVisible();
   await expect(page.getByText("8%").first()).toBeVisible();
 });
+
+// ── Mobile viewport regression ───────────────────────────────────────────────
+
+test("coding gym cards do not overflow the viewport on mobile", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/coding-gym");
+
+  const bodyOverflow = await page.evaluate(() => document.body.scrollWidth > document.documentElement.clientWidth);
+  expect(bodyOverflow).toBe(false);
+
+  const cards = page.locator("article");
+  const count = await cards.count();
+  for (let i = 0; i < count; i++) {
+    const box = await cards.nth(i).boundingBox();
+    if (box) {
+      expect(box.width).toBeLessThanOrEqual(390);
+    }
+  }
+});
