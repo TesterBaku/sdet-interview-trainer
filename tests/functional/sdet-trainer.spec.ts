@@ -248,6 +248,61 @@ test("coding gym supports sandbox drafts, reveal controls, status save, and draf
     });
 });
 
+// ── SEO, sitemap, and robots tests ──────────────────────────────────────────
+
+test("each major page has a descriptive <title>", async ({ page }) => {
+  await page.goto("/");
+  await expect(page).toHaveTitle(/SDET Interview Trainer/);
+
+  await page.goto("/topics");
+  await expect(page).toHaveTitle(/All Topics.*SDET Interview Trainer/i);
+
+  await page.goto("/topics/python-coding");
+  await expect(page).toHaveTitle(/Python Coding.*SDET Interview Trainer/i);
+
+  await page.goto("/flashcards/python-coding");
+  await expect(page).toHaveTitle(/Python Coding.*Flashcards.*SDET Interview Trainer/i);
+
+  await page.goto("/quiz/python-coding");
+  await expect(page).toHaveTitle(/Python Coding.*Quiz.*SDET Interview Trainer/i);
+
+  await page.goto("/mock-interview/python-coding");
+  await expect(page).toHaveTitle(/Python Coding.*Mock Interview.*SDET Interview Trainer/i);
+
+  await page.goto("/coding-gym");
+  await expect(page).toHaveTitle(/Coding Gym.*SDET Interview Trainer/i);
+
+  await page.goto("/progress");
+  await expect(page).toHaveTitle(/Your Progress.*SDET Interview Trainer/i);
+});
+
+test("home page has OpenGraph meta tags", async ({ page }) => {
+  await page.goto("/");
+  const ogTitle = page.locator('meta[property="og:title"]');
+  const ogDesc = page.locator('meta[property="og:description"]');
+  await expect(ogTitle).toHaveAttribute("content", /SDET Interview Trainer/);
+  await expect(ogDesc).toHaveAttribute("content", /.+/);
+});
+
+test("sitemap.xml is reachable and contains topic URLs", async ({ page }) => {
+  const response = await page.goto("/sitemap.xml");
+  expect(response?.status()).toBe(200);
+  const body = await page.content();
+  expect(body).toContain("python-coding");
+  expect(body).toContain("flashcards");
+  expect(body).toContain("quiz");
+  expect(body).toContain("mock-interview");
+});
+
+test("robots.txt is reachable and allows crawling", async ({ page }) => {
+  const response = await page.goto("/robots.txt");
+  expect(response?.status()).toBe(200);
+  const body = await page.content();
+  expect(body).toContain("sitemap.xml");
+});
+
+// ── Progress page ────────────────────────────────────────────────────────────
+
 test("progress page reflects saved localStorage records", async ({ page }) => {
   await clearAppState(page);
   await page.evaluate(
