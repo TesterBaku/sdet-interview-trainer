@@ -358,3 +358,13 @@ test("coding gym cards do not overflow the viewport on mobile", async ({ page })
     }
   }
 });
+
+// ── Security headers ─────────────────────────────────────────────────────────
+
+test("responses include required security headers", async ({ request }) => {
+  const response = await request.get("/");
+  expect(response.headers()["x-frame-options"]).toBe("DENY");
+  expect(response.headers()["x-content-type-options"]).toBe("nosniff");
+  expect(response.headers()["referrer-policy"]).toBe("strict-origin-when-cross-origin");
+  expect(response.headers()["permissions-policy"]).toContain("camera=()");
+});
