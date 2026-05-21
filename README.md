@@ -21,7 +21,9 @@ QA Automation / SDET interview practice app — flashcards, quizzes, mock interv
 **10 topics, 250 questions (25 per topic):**
 Python Coding · Java Coding · SQL / PostgreSQL · Selenium · Playwright (Python & TypeScript) · API Testing · Test Automation Strategy · CI/CD · AWS
 
-**6 practice surfaces:**
+**Practice modes (4):** Flashcards · Quiz · Mock Interview · Coding Gym
+**Aggregator pages (4):** Daily Practice · Topics · Review Queue · Progress
+
 | Route | Purpose |
 |---|---|
 | `/daily-practice` | A 10-item daily mix that rotates every UTC day (3 coding · 2 SQL · 2 Playwright/Selenium · 2 API/CI/AWS · 1 strategy) |
@@ -82,7 +84,7 @@ app/
   review/                              global weak/review queue
   progress/                            progress breakdown
   layout.tsx                           root layout, SEO, Analytics
-  sitemap.ts                           dynamic sitemap (44 URLs)
+  sitemap.ts                           dynamic sitemap (46 URLs: 6 static + 10 topics × 4)
   robots.ts                            robots.txt
   manifest.ts, icon.tsx, apple-icon.tsx  PWA assets
 

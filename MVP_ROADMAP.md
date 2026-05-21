@@ -33,7 +33,6 @@ Created local folder, placed docs, initialized Next.js app.
 - known/review/weak status
 - Progress summary component
 - Topic progress percentage
-- Per-type progress breakdowns (Coding / Quiz / Mock Interview)
 
 ## ✅ Phase 5 — Content Expansion
 

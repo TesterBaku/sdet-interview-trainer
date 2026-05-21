@@ -176,7 +176,7 @@ A second key per coding question stores the user's sandbox draft:
 ## SEO / security
 
 - Per-page `<title>` and OpenGraph metadata via Next.js `metadata` / `generateMetadata` exports
-- `app/sitemap.ts` generates 44 URLs (static + per-topic)
+- `app/sitemap.ts` generates 46 URLs (6 static routes + 10 topics × 4 dynamic routes)
 - `app/robots.ts` allows all crawlers, points to sitemap
 - Security headers in `next.config.ts`: `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin`, `Permissions-Policy: camera=(), microphone=(), geolocation=()`, `X-DNS-Prefetch-Control: on`
 
