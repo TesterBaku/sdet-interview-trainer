@@ -28,7 +28,7 @@ export function CodingTaskCard({ question, currentStatus, onMark }: CodingTaskCa
   }
 
   return (
-    <article className="rounded-[2rem] border border-ink/10 bg-white/80 p-6 shadow-panel">
+    <article className="min-w-0 overflow-hidden rounded-[2rem] border border-ink/10 bg-white/80 p-4 shadow-panel sm:p-6">
       <div className="flex flex-wrap items-center gap-2">
         <span className="rounded-full bg-blueprint px-3 py-1 text-xs font-bold uppercase tracking-[0.16em] text-paper">
           {question.topicTitle}
@@ -43,11 +43,11 @@ export function CodingTaskCard({ question, currentStatus, onMark }: CodingTaskCa
       <div className="mt-5 grid gap-3 md:grid-cols-2">
         <div className="rounded-2xl bg-paper/80 p-4">
           <h3 className="text-sm font-black uppercase tracking-[0.18em] text-ink/55">Input</h3>
-          <pre className="mt-2 whitespace-pre-wrap text-sm">{question.inputExample}</pre>
+          <pre className="mt-2 whitespace-pre-wrap break-all text-sm">{question.inputExample}</pre>
         </div>
         <div className="rounded-2xl bg-paper/80 p-4">
           <h3 className="text-sm font-black uppercase tracking-[0.18em] text-ink/55">Expected output</h3>
-          <pre className="mt-2 whitespace-pre-wrap text-sm">{question.expectedOutput}</pre>
+          <pre className="mt-2 whitespace-pre-wrap break-all text-sm">{question.expectedOutput}</pre>
         </div>
       </div>
 
@@ -93,7 +93,7 @@ export function CodingTaskCard({ question, currentStatus, onMark }: CodingTaskCa
       {showHint ? <p className="mt-4 rounded-2xl bg-brass/10 p-4 text-ink/80">{question.hint}</p> : null}
       {showSolution ? (
         <div className="mt-4 space-y-4">
-          <pre className="overflow-x-auto rounded-2xl bg-ink p-4 text-sm text-paper">{question.solution}</pre>
+          <pre className="max-w-full overflow-x-auto rounded-2xl bg-ink p-4 text-sm text-paper">{question.solution}</pre>
           <p className="leading-7 text-ink/75">{question.explanation}</p>
           {question.commonMistakes?.length ? (
             <div>
