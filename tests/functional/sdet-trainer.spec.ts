@@ -326,6 +326,9 @@ test("each major page has a descriptive <title>", async ({ page }) => {
 
   await page.goto("/progress");
   await expect(page).toHaveTitle(/Your Progress.*SDET Interview Trainer/i);
+
+  await page.goto("/review");
+  await expect(page).toHaveTitle(/Review Queue.*SDET Interview Trainer/i);
 });
 
 test("home page has OpenGraph meta tags", async ({ page }) => {
@@ -390,6 +393,67 @@ test("progress page reflects saved localStorage records", async ({ page }) => {
   await expect(page.getByRole("heading", { name: "Track readiness by topic" })).toBeVisible();
   await expect(page.getByText("2/25 completed, 1 weak")).toBeVisible();
   await expect(page.getByText("8%").first()).toBeVisible();
+});
+
+// ── Progress breakdown + /review route ──────────────────────────────────────
+
+test("progress page shows per-type breakdown sections and link to review queue", async ({ page }) => {
+  await clearAppState(page);
+  await page.goto("/progress");
+
+  await expect(page.getByRole("heading", { name: "Overall Progress" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Coding Progress" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Quiz Progress" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Mock Interview Progress" })).toBeVisible();
+  await expect(page.getByRole("link", { name: /Open Review/ })).toHaveAttribute("href", "/review");
+});
+
+test("review page lists weak and review questions and filters by status", async ({ page }) => {
+  await page.goto("/");
+  await page.evaluate(
+    ([key, value]) => window.localStorage.setItem(key, value),
+    [
+      progressKey,
+      JSON.stringify({
+        records: [
+          { questionId: "python-coding-001", status: "weak", attempts: 1, lastReviewedAt: new Date().toISOString() },
+          { questionId: "python-coding-002", status: "review", attempts: 1, lastReviewedAt: new Date().toISOString() },
+          { questionId: "python-coding-003", status: "known", attempts: 1, lastReviewedAt: new Date().toISOString() },
+        ],
+        completedQuestions: 3,
+        weakQuestions: 1,
+        reviewQuestions: 1,
+      }),
+    ]
+  );
+
+  await page.goto("/review");
+
+  // Default: both flagged questions are visible (weak + review), known is excluded
+  await expect(page.getByRole("heading", { name: "2 questions" })).toBeVisible();
+
+  // Filter to weak only
+  await page.getByRole("link", { name: "Weak only" }).click();
+  await expect(page).toHaveURL(/status=weak/);
+  await expect(page.getByRole("heading", { name: "1 question" })).toBeVisible();
+
+  // Reset to all
+  await page.getByRole("link", { name: "All statuses" }).click();
+  await expect(page).toHaveURL("/review");
+  await expect(page.getByRole("heading", { name: "2 questions" })).toBeVisible();
+});
+
+test("review queue empty state renders when no flagged questions exist", async ({ page }) => {
+  await clearAppState(page);
+  await page.goto("/review");
+
+  await expect(page.getByRole("heading", { name: "0 questions" })).toBeVisible();
+  await expect(page.getByText(/Nothing matches these filters/)).toBeVisible();
+});
+
+test("navigation includes a Review link", async ({ page }) => {
+  await page.goto("/");
+  await expect(page.getByRole("link", { name: "Review", exact: true })).toBeVisible();
 });
 
 // ── Per-topic coding tasks ───────────────────────────────────────────────────
