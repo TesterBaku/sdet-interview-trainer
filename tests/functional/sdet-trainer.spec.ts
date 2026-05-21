@@ -217,6 +217,22 @@ test("quiz preserves correctness and final save is idempotent", async ({ page })
   expect(lastRecord.attempts).toBe(1);
 });
 
+test("mock interview shows answer-structure guidance before the textarea", async ({ page }) => {
+  await clearAppState(page);
+  await page.goto("/mock-interview/python-coding");
+
+  // Guidance is visible before any reveal
+  await expect(page.getByText("Try to answer in 60–90 seconds.")).toBeVisible();
+  await expect(page.getByText("Direct answer")).toBeVisible();
+  await expect(page.getByText("Tool or technique")).toBeVisible();
+  await expect(page.getByText("Real project example")).toBeVisible();
+  await expect(page.getByText("Tradeoff or limitation")).toBeVisible();
+
+  // Guidance stays visible after revealing the model answer
+  await page.getByRole("button", { name: "Reveal model answer" }).click();
+  await expect(page.getByText("Try to answer in 60–90 seconds.")).toBeVisible();
+});
+
 test("mock interview accepts an answer, reveals model guidance, and saves self-rating", async ({ page }) => {
   await clearAppState(page);
   await page.goto("/mock-interview/python-coding");

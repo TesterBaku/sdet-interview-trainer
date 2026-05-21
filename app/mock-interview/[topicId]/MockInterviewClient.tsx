@@ -17,6 +17,13 @@ const checklist = [
   "Did I avoid rambling?"
 ];
 
+const answerStructure = [
+  "Direct answer",
+  "Tool or technique",
+  "Real project example",
+  "Tradeoff or limitation"
+];
+
 export function MockInterviewClient() {
   const params = useParams<{ topicId: string }>();
   const topic = getTopic(params.topicId);
@@ -51,7 +58,17 @@ export function MockInterviewClient() {
         <p className="font-bold text-ink/60">Prompt {index + 1} of {questions.length}</p>
       </header>
       <QuestionCard question={question}>
-        <label className="block">
+        <aside className="rounded-2xl border border-brass/30 bg-brass/10 p-4">
+          <p className="text-sm font-black uppercase tracking-[0.18em] text-brass">Answer guide</p>
+          <p className="mt-2 font-bold text-blueprint">Try to answer in 60–90 seconds.</p>
+          <p className="mt-2 text-sm text-ink/70">Use this structure:</p>
+          <ol className="mt-2 list-decimal space-y-1 pl-5 text-sm text-ink/80">
+            {answerStructure.map((step) => (
+              <li key={step}>{step}</li>
+            ))}
+          </ol>
+        </aside>
+        <label className="mt-4 block">
           <span className="font-bold">Your answer</span>
           <textarea
             className="mt-2 min-h-24 w-full rounded-2xl border border-ink/10 bg-paper/70 p-4 leading-7 outline-none focus:border-signal sm:min-h-40"
