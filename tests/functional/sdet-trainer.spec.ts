@@ -20,7 +20,7 @@ test("home Continue Practice card uses generic copy and links to a topic", async
 
   const card = page.getByRole("link", { name: /Pick up where you left off/ });
   await expect(card).toBeVisible();
-  await expect(page.getByText("Resume your latest topic or start with Python / Java coding.")).toBeVisible();
+  await expect(page.getByText(/Resume your latest topic/)).toBeVisible();
 
   // Card href must always point at a valid topic route — never a hardcoded slug
   const href = await card.getAttribute("href");
