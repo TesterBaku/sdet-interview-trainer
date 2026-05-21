@@ -1,67 +1,119 @@
 # SDET Interview Trainer
 
-Target local project path:
+QA Automation / SDET interview practice app — flashcards, quizzes, mock interviews, coding tasks, plus a daily focused plan and a global review queue.
 
-```text
-C:\Rufat_docs\Projects\interview_prep_app
-```
+**Live:** https://sdet-interview-trainer.vercel.app
 
-## Purpose
+## Tech stack
 
-SDET Interview Trainer is a responsive web app for technical interview preparation focused on:
-
-- Mid-level QA Automation
-- Senior SDET
-- Coding confidence
-- Python and Java coding practice
-- Playwright, Selenium, API testing, SQL, CI/CD, AWS, and test automation strategy
-
-The app is for personal use first, with a future path to a polished public/free version.
-
-## MVP Summary
-
-Build a responsive web app with:
-
-- Next.js
+- Next.js 16 (App Router) + React 19
 - TypeScript
 - Tailwind CSS
-- Static JSON content
-- localStorage progress tracking
-- No login for MVP
-- No AI integration for MVP
+- Static JSON content (no backend)
+- localStorage for progress
+- `@vercel/analytics` for page-view tracking
+- PWA-installable (manifest + service worker)
+- Playwright for functional tests
+- GitHub Actions CI (lint → typecheck → 31 Playwright tests on every PR)
 
-## First Batch Topics
+## Features
 
-1. Python Coding for QA/SDET
-2. Java Coding for QA/SDET
-3. SQL / PostgreSQL
-4. Selenium
-5. Playwright with Python
-6. Playwright with TypeScript
-7. API Testing
-8. Test Automation Strategy
-9. CI/CD for QA/SDET
-10. AWS Basics for QA/SDET
+**10 topics, 250 questions (25 per topic):**
+Python Coding · Java Coding · SQL / PostgreSQL · Selenium · Playwright (Python & TypeScript) · API Testing · Test Automation Strategy · CI/CD · AWS
 
-## MVP Practice Modes
+**Practice modes (4):** Flashcards · Quiz · Mock Interview · Coding Gym
+**Aggregator pages (4):** Daily Practice · Topics · Review Queue · Progress
 
-1. Flashcards
-2. Quiz
-3. Mock Interview
-4. Coding Gym
+| Route | Purpose |
+|---|---|
+| `/daily-practice` | A 10-item daily mix that rotates every UTC day (3 coding · 2 SQL · 2 Playwright/Selenium · 2 API/CI/AWS · 1 strategy) |
+| `/topics` and `/topics/[topicId]` | Browse topics, see per-topic progress, jump into any practice mode |
+| `/flashcards/[topicId]` | Reveal-answer flashcards with known/review/weak status |
+| `/quiz/[topicId]` | Multiple choice with explanations and correctness feedback |
+| `/mock-interview/[topicId]` | Type an answer, get a 60–90s structure guide, reveal model answer, self-rate |
+| `/coding-gym` | All coding tasks; supports `?topic=<id>` to scope to one topic |
+| `/review` | Global queue of all questions marked weak or review-later, with status/type/topic filters |
+| `/progress` | Overall + per-type (coding / quiz / mock interview) + per-topic breakdowns |
 
-## Development Approach
-
-Start with the app shell and 3 sample questions per topic. After the UI and progress tracking work, expand each topic to 25 questions.
-
-## Recommended Start Commands
-
-From PowerShell:
+## Local development
 
 ```powershell
-cd C:\Rufat_docs\Projects\interview_prep_app
-npx create-next-app@latest . --typescript --tailwind --eslint --app --src-dir false --import-alias "@/*"
+git clone https://github.com/TesterBaku/sdet-interview-trainer
+cd sdet-interview-trainer
+npm install
 npm run dev
 ```
 
-Then provide this folder to Codex and ask it to follow `CODEX_IMPLEMENTATION_PLAN.md`.
+Open http://localhost:3000.
+
+### Scripts
+
+| Command | What it does |
+|---|---|
+| `npm run dev` | Start dev server with Turbopack |
+| `npm run build` | Production build + typecheck |
+| `npm run lint` | ESLint (zero warnings policy) |
+| `npm run test:functional` | Run all Playwright tests headlessly |
+
+### CI / regression
+
+Every pull request and every push to `main` runs `.github/workflows/regression.yml`:
+1. `npm install`
+2. `npx playwright install --with-deps chromium`
+3. `npm run lint` (max-warnings=0)
+4. `npx tsc --noEmit`
+5. `npm run test:functional` (31 tests)
+
+A green CI is required to merge.
+
+## Deployment
+
+Vercel auto-deploys `main` to the production URL above. PR previews are generated automatically for every branch.
+
+## Repository layout
+
+```text
+app/
+  page.tsx + HomeClient.tsx            home with Daily Practice banner
+  topics/                              topic list + detail
+  flashcards/[topicId]/                flashcard mode
+  quiz/[topicId]/                      quiz mode
+  mock-interview/[topicId]/            mock interview mode
+  coding-gym/                          coding tasks (supports ?topic=)
+  daily-practice/                      today's 10-item plan
+  review/                              global weak/review queue
+  progress/                            progress breakdown
+  layout.tsx                           root layout, SEO, Analytics
+  sitemap.ts                           dynamic sitemap (46 URLs: 6 static + 10 topics × 4)
+  robots.ts                            robots.txt
+  manifest.ts, icon.tsx, apple-icon.tsx  PWA assets
+
+components/                            reusable UI primitives
+data/
+  topics.json                          10 topic definitions
+  questions/*.json                     250 questions across 10 files
+lib/
+  questionUtils.ts                     content access + daily plan
+  progress.ts                          progress hooks + summaries
+  practiceHref.ts                      question → practice mode mapping
+  storage.ts                           localStorage read/write
+  codeWorkspace.ts                     coding gym draft persistence
+types/                                 Topic / Question / Progress
+tests/functional/                      Playwright spec
+.github/workflows/regression.yml       CI
+next.config.ts                         security headers
+```
+
+## Documentation files
+
+| File | Purpose | Status |
+|---|---|---|
+| `README.md` | This file — current state of the app | Active |
+| `APP_ARCHITECTURE.md` | Module overview, routes, data flow | Active |
+| `DATA_SCHEMA.md` | TypeScript types for Topic / Question / Progress | Active |
+| `PROJECT_REQUIREMENTS.md` | Original product requirements | Active reference |
+| `CONTENT_PLAN.md` | Content build plan | Complete (250/250 questions shipped) |
+| `MVP_ROADMAP.md` | Phase plan from build kickoff | Phases 0-6 complete |
+| `CODEX_IMPLEMENTATION_PLAN.md` | Pre-build setup steps | Historical — kept for reference |
+| `START_HERE.md` | Pre-build setup steps | Historical — kept for reference |
+| `AGENTS.md` | Working agreements for agent-assisted development | Active |

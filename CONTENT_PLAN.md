@@ -1,10 +1,12 @@
 # Content Plan — SDET Interview Trainer
 
+> **Status (2026-05-21):** ✅ **Content complete.** All 10 topics shipped with 25 questions each (250 total). This document is preserved as a reference for question themes and structure.
+
 ## Content Strategy
 
-Do not write all 250 questions before the app is usable.
+Originally: build the app first with 3 sample questions per topic, then expand.
 
-Build the app first with 3 sample questions per topic. Then expand content topic by topic.
+Outcome: shipped MVP with 3 questions per topic in `4ec0e6a Initial SDET interview trainer MVP`, then expanded to 25/topic across PRs #2 and #5.
 
 ## MVP Topic List
 
