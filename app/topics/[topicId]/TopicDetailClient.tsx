@@ -21,7 +21,7 @@ export function TopicDetailClient() {
   const summary = summarizeTopicProgress(progress, topic.id);
 
   const actions = [
-    { href: `/flashcards/${topic.id}`, title: "Flashcards", body: `${flashcardCount} questions with answer reveal and status tracking.` },
+    { href: `/flashcards/${topic.id}`, title: "Flashcards", body: `Covers all ${flashcardCount} non-coding questions — includes the quiz and interview prompts below.` },
     { href: `/quiz/${topic.id}`, title: "Quiz", body: `${quizCount} multiple-choice checks with explanations.` },
     { href: `/mock-interview/${topic.id}`, title: "Mock Interview", body: `${interviewCount} interview/scenario prompts with self-rating.` },
     { href: `/flashcards/${topic.id}`, title: "Review Weak Questions", body: "Revisit all flashcard questions and mark weak items as you improve." }
