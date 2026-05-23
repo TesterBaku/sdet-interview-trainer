@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { QuestionCard } from "@/components/QuestionCard";
 import { StatusButtons } from "@/components/StatusButtons";
@@ -26,13 +26,21 @@ const answerStructure = [
 
 export function MockInterviewClient() {
   const params = useParams<{ topicId: string }>();
+  const searchParams = useSearchParams();
   const topic = getTopic(params.topicId);
   const questions = getInterviewQuestions(params.topicId);
-  const [index, setIndex] = useState(0);
+  const [index, setIndex] = useState(() => {
+    const requestedQuestionId = searchParams.get("question");
+    const requestedIndex = requestedQuestionId
+      ? questions.findIndex((question) => question.id === requestedQuestionId)
+      : -1;
+    return requestedIndex >= 0 ? requestedIndex : 0;
+  });
   const [answer, setAnswer] = useState("");
   const [showModelAnswer, setShowModelAnswer] = useState(false);
   const { progress, updateQuestion } = useProgress();
   const question = questions[index];
+  const textareaId = question ? `mock-answer-${question.id}` : "mock-answer";
 
   if (!topic || !question) {
     return <p className="rounded-2xl bg-white/80 p-6">No mock interview questions found for this topic.</p>;
@@ -68,10 +76,12 @@ export function MockInterviewClient() {
             ))}
           </ol>
         </aside>
-        <label className="mt-4 block">
+        <label className="mt-4 block" htmlFor={textareaId}>
           <span className="font-bold">Your answer</span>
           <textarea
             className="mt-2 min-h-24 w-full rounded-2xl border border-ink/10 bg-paper/70 p-4 leading-7 outline-none focus:border-signal sm:min-h-40"
+            id={textareaId}
+            name={textareaId}
             onChange={(event) => setAnswer(event.target.value)}
             placeholder="Write your answer as if you are speaking to an interviewer..."
             value={answer}

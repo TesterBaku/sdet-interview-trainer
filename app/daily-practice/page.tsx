@@ -8,5 +8,5 @@ export const metadata: Metadata = {
 };
 
 export default function DailyPracticePage() {
-  return <DailyPracticeClient />;
+  return <DailyPracticeClient todayIso={new Date().toISOString().slice(0, 10)} />;
 }

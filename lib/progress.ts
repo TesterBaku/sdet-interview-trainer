@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useSyncExternalStore } from "react";
 import { allQuestions, getQuestionsByTopic } from "@/lib/questionUtils";
-import { readProgress, writeProgress } from "@/lib/storage";
+import { PROGRESS_STORAGE_KEY, emptyProgress, readProgress, subscribeToProgress, writeProgress } from "@/lib/storage";
 import type { AppProgress, ProgressRecord, ProgressSummary, QuestionStatus } from "@/types/Progress";
 
 function normalizeProgress(records: ProgressRecord[]): AppProgress {
@@ -63,14 +63,23 @@ export function summarizeTopicProgress(progress: AppProgress, topicId: string): 
 }
 
 export function useProgress() {
-  const [progress, setProgress] = useState<AppProgress>(() => readProgress());
+  const snapshot = useSyncExternalStore(
+    subscribeToProgress,
+    () => window.localStorage.getItem(PROGRESS_STORAGE_KEY) ?? JSON.stringify(emptyProgress),
+    () => JSON.stringify(emptyProgress)
+  );
+
+  const progress = useMemo(() => {
+    try {
+      const parsed = JSON.parse(snapshot) as AppProgress;
+      return normalizeProgress(Array.isArray(parsed.records) ? parsed.records : []);
+    } catch {
+      return emptyProgress;
+    }
+  }, [snapshot]);
 
   function updateQuestion(questionId: string, status: QuestionStatus) {
-    setProgress((currentProgress) => {
-      const nextProgress = markQuestionStatus(currentProgress, questionId, status);
-      writeProgress(nextProgress);
-      return nextProgress;
-    });
+    writeProgress(markQuestionStatus(readProgress(), questionId, status));
   }
 
   return { progress, isLoaded: true, updateQuestion };

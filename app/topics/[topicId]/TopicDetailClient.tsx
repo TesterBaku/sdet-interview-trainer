@@ -44,7 +44,7 @@ export function TopicDetailClient() {
         ]
       : []),
     {
-      href: `/flashcards/${topic.id}`,
+      href: `/review?topic=${topic.id}`,
       title: "Review Weak Questions",
       body: "Revisit weak and review-later questions for this topic.",
     },

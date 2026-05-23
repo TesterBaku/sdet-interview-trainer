@@ -9,11 +9,17 @@ const dateFormatter = new Intl.DateTimeFormat("en-US", {
   weekday: "long",
   month: "long",
   day: "numeric",
+  timeZone: "UTC",
 });
 
-export function DailyPracticeClient() {
-  const plan = getDailyPlan();
-  const today = dateFormatter.format(new Date());
+type DailyPracticeClientProps = {
+  todayIso: string;
+};
+
+export function DailyPracticeClient({ todayIso }: DailyPracticeClientProps) {
+  const todayDate = new Date(`${todayIso}T00:00:00.000Z`);
+  const plan = getDailyPlan(todayDate);
+  const today = dateFormatter.format(todayDate);
   const { progress } = useProgress();
 
   const allItems = plan.flatMap((section) => section.questions);

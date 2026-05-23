@@ -1,9 +1,16 @@
 import { expect, test } from "@playwright/test";
+import type { Page } from "@playwright/test";
 
 const progressKey = "sdet-interview-trainer-progress";
 const codeDraftKey = "sdet-interview-trainer-code-answer:python-coding-001";
+const dailyDateFormatter = new Intl.DateTimeFormat("en-US", {
+  weekday: "long",
+  month: "long",
+  day: "numeric",
+  timeZone: "UTC"
+});
 
-async function clearAppState(page: { goto: (url: string) => Promise<unknown>; evaluate: <T, A>(fn: (arg: A) => T, arg: A) => Promise<T> }) {
+async function clearAppState(page: Page) {
   await page.goto("/");
   await page.evaluate(
     ([progressStorageKey, draftStorageKey]) => {
@@ -11,6 +18,30 @@ async function clearAppState(page: { goto: (url: string) => Promise<unknown>; ev
       window.localStorage.removeItem(draftStorageKey);
     },
     [progressKey, codeDraftKey]
+  );
+}
+
+async function seedProgress(
+  page: Page,
+  records: { questionId: string; status: "known" | "weak" | "review"; attempts?: number }[]
+) {
+  await page.goto("/");
+  await page.evaluate(
+    ([key, value]) => window.localStorage.setItem(key, value),
+    [
+      progressKey,
+      JSON.stringify({
+        records: records.map((record) => ({
+          questionId: record.questionId,
+          status: record.status,
+          attempts: record.attempts ?? 1,
+          lastReviewedAt: new Date().toISOString()
+        })),
+        completedQuestions: records.length,
+        weakQuestions: records.filter((record) => record.status === "weak").length,
+        reviewQuestions: records.filter((record) => record.status === "review").length
+      })
+    ]
   );
 }
 
@@ -237,7 +268,10 @@ test("mock interview accepts an answer, reveals model guidance, and saves self-r
   await clearAppState(page);
   await page.goto("/mock-interview/python-coding");
 
-  await page.getByPlaceholder("Write your answer as if you are speaking to an interviewer...").fill("I would validate contract and business fields.");
+  const answerBox = page.getByPlaceholder("Write your answer as if you are speaking to an interviewer...");
+  await expect(answerBox).toHaveAttribute("id", "mock-answer-python-coding-003");
+  await expect(answerBox).toHaveAttribute("name", "mock-answer-python-coding-003");
+  await answerBox.fill("I would validate contract and business fields.");
   await page.getByRole("button", { name: "Reveal model answer" }).click();
   await expect(page.getByRole("heading", { name: "Model answer" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Self-review checklist" })).toBeVisible();
@@ -277,7 +311,10 @@ test("coding gym supports sandbox drafts, reveal controls, status save, and draf
 
   const firstTask = page.locator("article").filter({ hasText: "Find duplicate values" });
   await expect(firstTask.getByRole("heading", { name: "Answer sandbox" })).toBeVisible();
-  await firstTask.getByPlaceholder("Write your python answer here...").fill("def find_duplicates(items):\n    return []");
+  const answerBox = firstTask.getByPlaceholder("Write your python answer here...");
+  await expect(answerBox).toHaveAttribute("id", "code-answer-python-coding-001");
+  await expect(answerBox).toHaveAttribute("name", "code-answer-python-coding-001");
+  await answerBox.fill("def find_duplicates(items):\n    return []");
   await expect(firstTask.getByText(/\d+ chars/i)).toBeVisible();
   await expect(firstTask.getByRole("button", { name: "Clear draft" })).toBeEnabled();
   await expect.poll(async () => page.evaluate((key) => window.localStorage.getItem(key), codeDraftKey)).toContain("find_duplicates");
@@ -435,6 +472,38 @@ test("daily practice plan is stable across reloads on the same day", async ({ pa
   expect(reloadedTitles).toEqual(firstItemTitles);
 });
 
+test("daily practice deep-links each item to the exact question", async ({ page }) => {
+  await clearAppState(page);
+  await page.goto("/daily-practice");
+
+  const firstItem = page.locator("main section ul li a").first();
+  const title = (await firstItem.locator("p.font-bold").textContent())?.trim();
+  expect(title).toBeTruthy();
+
+  const href = await firstItem.getAttribute("href");
+  expect(href).toMatch(/[?&]question=/);
+
+  await firstItem.click();
+  await expect(page).toHaveURL(href!);
+  await expect(page.locator("article").first().getByRole("heading", { name: title! })).toBeVisible();
+});
+
+test("daily practice does not emit React hydration errors", async ({ page }) => {
+  const hydrationErrors: string[] = [];
+  page.on("console", (message) => {
+    const text = message.text();
+    if (message.type() === "error" && /hydration|Minified React error #418|Text content does not match/i.test(text)) {
+      hydrationErrors.push(text);
+    }
+  });
+
+  await clearAppState(page);
+  await page.goto("/daily-practice");
+  await expect(page.getByRole("heading", { name: dailyDateFormatter.format(new Date()) })).toBeVisible();
+
+  expect(hydrationErrors).toEqual([]);
+});
+
 test("navigation includes a Daily link", async ({ page }) => {
   await page.goto("/");
   await expect(page.getByRole("link", { name: "Daily", exact: true })).toBeVisible();
@@ -488,6 +557,52 @@ test("review page lists weak and review questions and filters by status", async 
   await expect(page.getByRole("heading", { name: "2 questions" })).toBeVisible();
 });
 
+test("review queue deep-links coding, quiz, and interview items to exact questions", async ({ page }) => {
+  await seedProgress(page, [
+    { questionId: "python-coding-004", status: "weak" },
+    { questionId: "python-coding-013", status: "review" },
+    { questionId: "python-coding-019", status: "weak" },
+  ]);
+
+  await page.goto("/review");
+
+  const codingLink = page.getByRole("link", { name: /Normalize and compare strings/ });
+  await expect(codingLink).toHaveAttribute("href", "/coding-gym?topic=python-coding&question=python-coding-004");
+  await codingLink.click();
+  await expect(page.locator("article").first().getByRole("heading", { name: "Normalize and compare strings" })).toBeVisible();
+
+  await page.goto("/review");
+  const quizLink = page.getByRole("link", { name: /What does json.loads/ });
+  await expect(quizLink).toHaveAttribute("href", "/quiz/python-coding?question=python-coding-013");
+  await quizLink.click();
+  await expect(page.getByText("What does json.loads() return when given the string")).toBeVisible();
+
+  await page.goto("/review");
+  const interviewLink = page.getByRole("link", { name: /design reusable Python test utility functions/ });
+  await expect(interviewLink).toHaveAttribute("href", "/mock-interview/python-coding?question=python-coding-019");
+  await interviewLink.click();
+  await expect(page.getByText("How do you design reusable Python test utility functions")).toBeVisible();
+});
+
+test("review queue supports quiz-only filtering", async ({ page }) => {
+  await seedProgress(page, [
+    { questionId: "python-coding-004", status: "weak" },
+    { questionId: "python-coding-013", status: "review" },
+    { questionId: "python-coding-019", status: "weak" },
+  ]);
+
+  await page.goto("/review");
+  const quizChip = page.getByRole("link", { name: "Quiz only" });
+  await expect(quizChip).toHaveAttribute("href", "/review?type=quiz");
+
+  await quizChip.click();
+  await expect(page).toHaveURL("/review?type=quiz");
+  await expect(page.getByRole("heading", { name: "1 question" })).toBeVisible();
+  await expect(page.getByRole("link", { name: /What does json.loads/ })).toBeVisible();
+  await expect(page.getByText("Normalize and compare strings")).not.toBeVisible();
+  await expect(page.getByText("How do you design reusable Python test utility functions")).not.toBeVisible();
+});
+
 test("review queue empty state renders when no flagged questions exist", async ({ page }) => {
   await clearAppState(page);
   await page.goto("/review");
@@ -533,6 +648,9 @@ test("topic detail shows Coding Tasks card for topics with coding questions", as
   const codingCard = page.getByRole("link", { name: /Coding Tasks/ });
   await expect(codingCard).toBeVisible();
   await expect(codingCard).toHaveAttribute("href", "/coding-gym?topic=python-coding");
+
+  await expect(page.getByRole("link", { name: /Flashcards/ })).toHaveAttribute("href", "/flashcards/python-coding");
+  await expect(page.getByRole("link", { name: /Review Weak Questions/ })).toHaveAttribute("href", "/review?topic=python-coding");
 });
 
 test("topic detail omits Coding Tasks card for topics without coding questions", async ({ page }) => {
@@ -558,6 +676,16 @@ test("coding gym filters tasks when ?topic= query is set", async ({ page }) => {
   await expect(page.locator("article").first()).toBeVisible();
   const totalCards = await page.locator("article").count();
   expect(totalCards).toBeGreaterThan(13);
+});
+
+test("coding gym opens a requested task first when question query is set", async ({ page }) => {
+  await clearAppState(page);
+  await page.goto("/coding-gym?topic=java-coding&question=java-coding-007");
+
+  await expect(page.getByText(/Showing 11 tasks for Java Coding/i)).toBeVisible();
+  await expect(
+    page.locator("article").first().getByRole("heading", { name: "Build a Selenium-style explicit wait helper" })
+  ).toBeVisible();
 });
 
 test("coding gym falls back to all tasks when ?topic= is unknown", async ({ page }) => {

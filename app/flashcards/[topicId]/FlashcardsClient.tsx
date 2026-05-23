@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { Flashcard } from "@/components/Flashcard";
 import { getFlashcardQuestions, getTopic } from "@/lib/questionUtils";
@@ -9,9 +9,16 @@ import { getRecord, useProgress } from "@/lib/progress";
 
 export function FlashcardsClient() {
   const params = useParams<{ topicId: string }>();
+  const searchParams = useSearchParams();
   const topic = getTopic(params.topicId);
   const questions = getFlashcardQuestions(params.topicId);
-  const [index, setIndex] = useState(0);
+  const [index, setIndex] = useState(() => {
+    const requestedQuestionId = searchParams.get("question");
+    const requestedIndex = requestedQuestionId
+      ? questions.findIndex((question) => question.id === requestedQuestionId)
+      : -1;
+    return requestedIndex >= 0 ? requestedIndex : 0;
+  });
   const { progress, updateQuestion } = useProgress();
   const question = questions[index];
 

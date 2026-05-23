@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { getTopic } from "@/lib/questionUtils";
 import { MockInterviewClient } from "@/app/mock-interview/[topicId]/MockInterviewClient";
 
@@ -17,5 +18,9 @@ export async function generateMetadata({ params }: { params: Promise<{ topicId: 
 }
 
 export default function MockInterviewPage() {
-  return <MockInterviewClient />;
+  return (
+    <Suspense fallback={<div className="rounded-2xl bg-white/80 p-6">Loading...</div>}>
+      <MockInterviewClient />
+    </Suspense>
+  );
 }
