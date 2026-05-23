@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { getTopic } from "@/lib/questionUtils";
 import { FlashcardsClient } from "@/app/flashcards/[topicId]/FlashcardsClient";
 
@@ -15,5 +16,9 @@ export async function generateMetadata({ params }: { params: Promise<{ topicId: 
 }
 
 export default function FlashcardsPage() {
-  return <FlashcardsClient />;
+  return (
+    <Suspense fallback={<div className="rounded-2xl bg-white/80 p-6">Loading...</div>}>
+      <FlashcardsClient />
+    </Suspense>
+  );
 }

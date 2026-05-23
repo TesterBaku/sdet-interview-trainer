@@ -41,3 +41,13 @@ export function writeProgress(progress: AppProgress): void {
   window.localStorage.setItem(PROGRESS_STORAGE_KEY, JSON.stringify(progress));
   window.dispatchEvent(new Event(PROGRESS_CHANGE_EVENT));
 }
+
+export function subscribeToProgress(onStoreChange: () => void): () => void {
+  window.addEventListener(PROGRESS_CHANGE_EVENT, onStoreChange);
+  window.addEventListener("storage", onStoreChange);
+
+  return () => {
+    window.removeEventListener(PROGRESS_CHANGE_EVENT, onStoreChange);
+    window.removeEventListener("storage", onStoreChange);
+  };
+}

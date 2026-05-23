@@ -9,14 +9,15 @@ import { practiceHref } from "@/lib/practiceHref";
 import type { Question } from "@/types/Question";
 
 type StatusFilter = "all" | "weak" | "review";
-type TypeFilter = "all" | "coding" | "interview";
+type TypeFilter = "all" | "coding" | "interview" | "quiz";
 
 function ReviewInner() {
   const searchParams = useSearchParams();
   const rawStatus = searchParams.get("status");
   const status: StatusFilter = rawStatus === "weak" || rawStatus === "review" ? rawStatus : "all";
   const rawType = searchParams.get("type");
-  const typeFilter: TypeFilter = rawType === "coding" || rawType === "interview" ? rawType : "all";
+  const typeFilter: TypeFilter =
+    rawType === "coding" || rawType === "interview" || rawType === "quiz" ? rawType : "all";
   const rawTopic = searchParams.get("topic");
   const topicFilter = rawTopic && topics.some((t) => t.id === rawTopic) ? rawTopic : "all";
   const { progress } = useProgress();
@@ -36,6 +37,7 @@ function ReviewInner() {
       if (typeFilter === "all") return true;
       if (typeFilter === "coding") return item.question.type === "coding";
       if (typeFilter === "interview") return item.question.type === "interview" || item.question.type === "scenario";
+      if (typeFilter === "quiz") return item.question.type === "quiz";
       return true;
     })
     .filter((item) => (topicFilter === "all" ? true : item.question.topicId === topicFilter));
@@ -60,6 +62,7 @@ function ReviewInner() {
     { label: "All types", href: chipHref({ type: "all" }), active: typeFilter === "all" },
     { label: "Coding only", href: chipHref({ type: "coding" }), active: typeFilter === "coding" },
     { label: "Interview only", href: chipHref({ type: "interview" }), active: typeFilter === "interview" },
+    { label: "Quiz only", href: chipHref({ type: "quiz" }), active: typeFilter === "quiz" },
   ];
 
   return (

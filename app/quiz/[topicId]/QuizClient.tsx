@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { QuizQuestion } from "@/components/QuizQuestion";
 import { getQuizQuestions, getTopic } from "@/lib/questionUtils";
@@ -9,9 +9,16 @@ import { useProgress } from "@/lib/progress";
 
 export function QuizClient() {
   const params = useParams<{ topicId: string }>();
+  const searchParams = useSearchParams();
   const topic = getTopic(params.topicId);
   const questions = getQuizQuestions(params.topicId);
-  const [index, setIndex] = useState(0);
+  const [index, setIndex] = useState(() => {
+    const requestedQuestionId = searchParams.get("question");
+    const requestedIndex = requestedQuestionId
+      ? questions.findIndex((question) => question.id === requestedQuestionId)
+      : -1;
+    return requestedIndex >= 0 ? requestedIndex : 0;
+  });
   const [isComplete, setIsComplete] = useState(false);
   const { updateQuestion } = useProgress();
   const question = questions[index];

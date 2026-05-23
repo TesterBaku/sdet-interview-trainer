@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useSyncExternalStore } from "react";
 import { StatusButtons } from "@/components/StatusButtons";
-import { clearCodeDraft, readCodeDraft, writeCodeDraft } from "@/lib/codeWorkspace";
+import { clearCodeDraft, readCodeDraft, subscribeToCodeDraft, writeCodeDraft } from "@/lib/codeWorkspace";
 import type { Question } from "@/types/Question";
 import type { QuestionStatus } from "@/types/Progress";
 
@@ -15,15 +15,18 @@ type CodingTaskCardProps = {
 export function CodingTaskCard({ question, currentStatus, onMark }: CodingTaskCardProps) {
   const [showHint, setShowHint] = useState(false);
   const [showSolution, setShowSolution] = useState(false);
-  const [draft, setDraft] = useState(() => readCodeDraft(question.id));
+  const textareaId = `code-answer-${question.id}`;
+  const draft = useSyncExternalStore(
+    (onStoreChange) => subscribeToCodeDraft(question.id, onStoreChange),
+    () => readCodeDraft(question.id),
+    () => ""
+  );
 
   function updateDraft(nextDraft: string) {
-    setDraft(nextDraft);
     writeCodeDraft(question.id, nextDraft);
   }
 
   function resetDraft() {
-    setDraft("");
     clearCodeDraft(question.id);
   }
 
@@ -77,8 +80,13 @@ export function CodingTaskCard({ question, currentStatus, onMark }: CodingTaskCa
             Clear draft
           </button>
         </div>
+        <label className="mt-4 block text-sm font-bold text-paper/80" htmlFor={textareaId}>
+          Your answer
+        </label>
         <textarea
-          className="mt-4 min-h-48 w-full resize-y rounded-2xl border border-paper/10 bg-[#0b1118] p-4 font-mono text-sm leading-6 text-[#f3e8d2] outline-none placeholder:text-paper/35 focus:border-brass sm:min-h-72"
+          className="mt-2 min-h-48 w-full resize-y rounded-2xl border border-paper/10 bg-[#0b1118] p-4 font-mono text-sm leading-6 text-[#f3e8d2] outline-none placeholder:text-paper/35 focus:border-brass sm:min-h-72"
+          id={textareaId}
+          name={textareaId}
           onChange={(event) => updateDraft(event.target.value)}
           placeholder={`Write your ${question.solutionLanguage ?? "code"} answer here...`}
           spellCheck={false}

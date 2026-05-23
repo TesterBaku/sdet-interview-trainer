@@ -9,8 +9,15 @@ import { getRecord, useProgress } from "@/lib/progress";
 function CodingGymInner() {
   const searchParams = useSearchParams();
   const topicId = searchParams.get("topic") ?? "";
+  const requestedQuestionId = searchParams.get("question") ?? "";
   const topic = topicId ? getTopic(topicId) : undefined;
   const questions = topic ? getCodingQuestionsByTopic(topic.id) : getCodingQuestions();
+  const orderedQuestions = requestedQuestionId
+    ? [
+        ...questions.filter((question) => question.id === requestedQuestionId),
+        ...questions.filter((question) => question.id !== requestedQuestionId),
+      ]
+    : questions;
   const { progress, updateQuestion } = useProgress();
 
   return (
@@ -25,7 +32,7 @@ function CodingGymInner() {
         {topic ? (
           <div className="mt-5 flex flex-wrap items-center gap-3 rounded-2xl bg-paper/70 p-4">
             <span className="font-bold text-blueprint">
-              Showing {questions.length} {questions.length === 1 ? "task" : "tasks"} for {topic.title}
+              Showing {orderedQuestions.length} {orderedQuestions.length === 1 ? "task" : "tasks"} for {topic.title}
             </span>
             <a className="text-sm font-bold text-signal underline focus-ring" href="/coding-gym">
               Show all topics
@@ -33,11 +40,11 @@ function CodingGymInner() {
           </div>
         ) : null}
       </header>
-      {questions.length === 0 ? (
+      {orderedQuestions.length === 0 ? (
         <p className="rounded-2xl bg-white/80 p-6">No coding tasks found for this topic.</p>
       ) : (
         <div className="grid gap-5 lg:grid-cols-2">
-          {questions.map((question) => (
+          {orderedQuestions.map((question) => (
             <CodingTaskCard
               currentStatus={getRecord(progress, question.id)?.status}
               key={question.id}
