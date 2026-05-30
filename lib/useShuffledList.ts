@@ -9,7 +9,7 @@ export function useShuffledList<T>(source: T[]) {
 
   function toggle(onReset?: () => void) {
     const next = !shuffled;
-    setList(next ? shuffleArray([...source]) : [...source]);
+    setList(next ? shuffleArray(source) : [...source]);
     setShuffled(next);
     onReset?.();
   }
