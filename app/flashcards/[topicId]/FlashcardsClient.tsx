@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useParams, useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Flashcard } from "@/components/Flashcard";
 import { getFlashcardQuestions, getTopic, shuffleArray } from "@/lib/questionUtils";
 import { getRecord, useProgress } from "@/lib/progress";
@@ -11,7 +11,7 @@ export function FlashcardsClient() {
   const params = useParams<{ topicId: string }>();
   const searchParams = useSearchParams();
   const topic = getTopic(params.topicId);
-  const questions = getFlashcardQuestions(params.topicId);
+  const questions = useMemo(() => getFlashcardQuestions(params.topicId), [params.topicId]);
   const [displayQuestions, setDisplayQuestions] = useState(questions);
   const [shuffled, setShuffled] = useState(false);
   const [index, setIndex] = useState(() => {
@@ -33,8 +33,9 @@ export function FlashcardsClient() {
   }
 
   function toggleShuffle() {
-    setDisplayQuestions(shuffled ? [...questions] : shuffleArray([...questions]));
-    setShuffled((s) => !s);
+    const next = !shuffled;
+    setDisplayQuestions(next ? shuffleArray([...questions]) : [...questions]);
+    setShuffled(next);
     setIndex(0);
   }
 

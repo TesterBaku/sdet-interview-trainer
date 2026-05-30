@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useParams, useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { QuizQuestion } from "@/components/QuizQuestion";
 import { getQuizQuestions, getTopic, shuffleArray } from "@/lib/questionUtils";
 import { useProgress } from "@/lib/progress";
@@ -11,7 +11,7 @@ export function QuizClient() {
   const params = useParams<{ topicId: string }>();
   const searchParams = useSearchParams();
   const topic = getTopic(params.topicId);
-  const questions = getQuizQuestions(params.topicId);
+  const questions = useMemo(() => getQuizQuestions(params.topicId), [params.topicId]);
   const [displayQuestions, setDisplayQuestions] = useState(questions);
   const [shuffled, setShuffled] = useState(false);
   const [index, setIndex] = useState(() => {
@@ -30,8 +30,9 @@ export function QuizClient() {
   }
 
   function toggleShuffle() {
-    setDisplayQuestions(shuffled ? [...questions] : shuffleArray([...questions]));
-    setShuffled((s) => !s);
+    const next = !shuffled;
+    setDisplayQuestions(next ? shuffleArray([...questions]) : [...questions]);
+    setShuffled(next);
     setIndex(0);
     setIsComplete(false);
   }

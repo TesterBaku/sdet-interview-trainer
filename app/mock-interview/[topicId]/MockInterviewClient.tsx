@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useParams, useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { QuestionCard } from "@/components/QuestionCard";
 import { StatusButtons } from "@/components/StatusButtons";
 import { getInterviewQuestions, getTopic, shuffleArray } from "@/lib/questionUtils";
@@ -28,7 +28,7 @@ export function MockInterviewClient() {
   const params = useParams<{ topicId: string }>();
   const searchParams = useSearchParams();
   const topic = getTopic(params.topicId);
-  const questions = getInterviewQuestions(params.topicId);
+  const questions = useMemo(() => getInterviewQuestions(params.topicId), [params.topicId]);
   const [displayQuestions, setDisplayQuestions] = useState(questions);
   const [shuffled, setShuffled] = useState(false);
   const [index, setIndex] = useState(() => {
@@ -49,8 +49,9 @@ export function MockInterviewClient() {
   }
 
   function toggleShuffle() {
-    setDisplayQuestions(shuffled ? [...questions] : shuffleArray([...questions]));
-    setShuffled((s) => !s);
+    const next = !shuffled;
+    setDisplayQuestions(next ? shuffleArray([...questions]) : [...questions]);
+    setShuffled(next);
     setIndex(0);
     setAnswer("");
     setShowModelAnswer(false);
