@@ -5,7 +5,8 @@ import { useParams, useSearchParams } from "next/navigation";
 import { useMemo, useState } from "react";
 import { QuestionCard } from "@/components/QuestionCard";
 import { StatusButtons } from "@/components/StatusButtons";
-import { getInterviewQuestions, getTopic, shuffleArray } from "@/lib/questionUtils";
+import { getInterviewQuestions, getTopic } from "@/lib/questionUtils";
+import { useShuffledList } from "@/lib/useShuffledList";
 import { getRecord, useProgress } from "@/lib/progress";
 import type { QuestionStatus } from "@/types/Progress";
 
@@ -29,8 +30,7 @@ export function MockInterviewClient() {
   const searchParams = useSearchParams();
   const topic = getTopic(params.topicId);
   const questions = useMemo(() => getInterviewQuestions(params.topicId), [params.topicId]);
-  const [displayQuestions, setDisplayQuestions] = useState(questions);
-  const [shuffled, setShuffled] = useState(false);
+  const { list: displayQuestions, shuffled, toggle } = useShuffledList(questions);
   const [index, setIndex] = useState(() => {
     const requestedQuestionId = searchParams.get("question");
     const requestedIndex = requestedQuestionId
@@ -46,15 +46,6 @@ export function MockInterviewClient() {
 
   if (!topic || !question) {
     return <p className="rounded-2xl bg-white/80 p-6">No mock interview questions found for this topic.</p>;
-  }
-
-  function toggleShuffle() {
-    const next = !shuffled;
-    setDisplayQuestions(next ? shuffleArray([...questions]) : [...questions]);
-    setShuffled(next);
-    setIndex(0);
-    setAnswer("");
-    setShowModelAnswer(false);
   }
 
   function rate(status: QuestionStatus) {
@@ -77,7 +68,7 @@ export function MockInterviewClient() {
         <div className="flex items-center gap-3">
           <button
             className={`rounded-full border px-4 py-2 text-sm font-bold shadow-panel focus-ring transition ${shuffled ? "border-signal/40 bg-signal/10 text-signal" : "border-ink/15 bg-white/80 text-ink"}`}
-            onClick={toggleShuffle}
+            onClick={() => toggle(() => { setIndex(0); setAnswer(""); setShowModelAnswer(false); })}
             type="button"
           >
             {shuffled ? "Reset order" : "Shuffle"}
