@@ -15,9 +15,21 @@
     "solutionLanguage": "java",
     "solution": "public static Map<String, Integer> countWords(List<String> words) {\n    Map<String, Integer> counts = new HashMap<>();\n    for (String word : words) {\n        counts.put(word, counts.getOrDefault(word, 0) + 1);\n    }\n    return counts;\n}",
     "explanation": "HashMap stores each word as a key and updates the count as the list is scanned once.",
-    "commonMistakes": ["Forgetting getOrDefault", "Using == for string comparison", "Not handling an empty list"],
-    "followUps": ["How would you make it case-insensitive?", "What is the time complexity?", "How would you test it with JUnit?"],
-    "tags": ["java", "hashmap", "frequency"]
+    "commonMistakes": [
+      "Forgetting getOrDefault",
+      "Using == for string comparison",
+      "Not handling an empty list"
+    ],
+    "followUps": [
+      "How would you make it case-insensitive?",
+      "What is the time complexity?",
+      "How would you test it with JUnit?"
+    ],
+    "tags": [
+      "java",
+      "hashmap",
+      "frequency"
+    ]
   },
   {
     "id": "java-coding-002",
@@ -27,10 +39,19 @@
     "type": "quiz",
     "difficulty": "easy",
     "question": "Which Java collection prevents duplicate values?",
-    "choices": ["ArrayList", "HashSet", "LinkedList", "HashMap"],
+    "choices": [
+      "ArrayList",
+      "HashSet",
+      "LinkedList",
+      "HashMap"
+    ],
     "correctAnswer": "HashSet",
     "explanation": "A HashSet stores unique elements and is commonly used for duplicate detection.",
-    "tags": ["java", "collection", "hashset"]
+    "tags": [
+      "java",
+      "collection",
+      "hashset"
+    ]
   },
   {
     "id": "java-coding-003",
@@ -43,8 +64,16 @@
     "shortAnswer": "Group utilities by responsibility, keep them stateless when possible, and avoid hiding test intent behind overly generic methods.",
     "interviewAnswer": "I create small focused utilities such as ApiAssertions, Waits, TestDataFactory, or JsonHelpers. Each utility has clear ownership and avoids mixing unrelated behavior. If a helper starts encoding workflow logic, I usually move that into a page object, service object, or fixture layer instead.",
     "realProjectExample": "In a Selenium framework I kept locator waits in a Waits class, browser actions in page objects, and API payload builders in factories so tests remained readable.",
-    "followUps": ["When should helper logic become a class?", "How do you avoid static utility abuse?", "How would you test utilities?"],
-    "tags": ["java", "framework", "utilities"]
+    "followUps": [
+      "When should helper logic become a class?",
+      "How do you avoid static utility abuse?",
+      "How would you test utilities?"
+    ],
+    "tags": [
+      "java",
+      "framework",
+      "utilities"
+    ]
   },
   {
     "id": "java-coding-004",
@@ -62,9 +91,21 @@
     "solutionLanguage": "java",
     "solution": "public static boolean isPalindrome(String s) {\n    if (s == null) return false;\n    String lower = s.toLowerCase();\n    String reversed = new StringBuilder(lower).reverse().toString();\n    return lower.equals(reversed);\n}",
     "explanation": "Converting to lowercase normalises the comparison. StringBuilder.reverse() creates the mirror string in one call. .equals() performs a content comparison, unlike ==.",
-    "commonMistakes": ["Using == instead of .equals() to compare strings", "Not handling a null input", "Forgetting to lowercase before comparison"],
-    "followUps": ["How would you extend this to ignore spaces and punctuation?", "How would you test boundary cases like an empty string or a single character?", "What is the space complexity of this solution?"],
-    "tags": ["java", "strings", "palindrome"]
+    "commonMistakes": [
+      "Using == instead of .equals() to compare strings",
+      "Not handling a null input",
+      "Forgetting to lowercase before comparison"
+    ],
+    "followUps": [
+      "How would you extend this to ignore spaces and punctuation?",
+      "How would you test boundary cases like an empty string or a single character?",
+      "What is the space complexity of this solution?"
+    ],
+    "tags": [
+      "java",
+      "strings",
+      "palindrome"
+    ]
   },
   {
     "id": "java-coding-005",
@@ -82,9 +123,22 @@
     "solutionLanguage": "java",
     "solution": "public static List<String> findDuplicates(List<String> items) {\n    Set<String> seen = new HashSet<>();\n    Set<String> duplicates = new HashSet<>();\n    for (String item : items) {\n        if (!seen.add(item)) {\n            duplicates.add(item);\n        }\n    }\n    return new ArrayList<>(duplicates);\n}",
     "explanation": "Set.add() returns false when the element is already present. Using a second HashSet for duplicates ensures each duplicate is reported only once regardless of how many times it appears.",
-    "commonMistakes": ["Returning the same value multiple times if it appears 3+ times", "Using a List for duplicates which can contain the same entry twice", "Mutating the original list"],
-    "followUps": ["How would you return the count of each duplicate?", "How would you test this with JUnit 5 parameterized tests?", "What if the list is very large — does your solution still perform well?"],
-    "tags": ["java", "hashset", "duplicates", "arraylist"]
+    "commonMistakes": [
+      "Returning the same value multiple times if it appears 3+ times",
+      "Using a List for duplicates which can contain the same entry twice",
+      "Mutating the original list"
+    ],
+    "followUps": [
+      "How would you return the count of each duplicate?",
+      "How would you test this with JUnit 5 parameterized tests?",
+      "What if the list is very large — does your solution still perform well?"
+    ],
+    "tags": [
+      "java",
+      "hashset",
+      "duplicates",
+      "arraylist"
+    ]
   },
   {
     "id": "java-coding-006",
@@ -102,9 +156,22 @@
     "solutionLanguage": "java",
     "solution": "public static List<String> validateRequiredFields(Map<String, String> data, List<String> required) {\n    List<String> invalid = new ArrayList<>();\n    for (String field : required) {\n        String value = data.get(field);\n        if (value == null || value.isBlank()) {\n            invalid.add(field);\n        }\n    }\n    return invalid;\n}",
     "explanation": "data.get() returns null when the key is absent. String.isBlank() (Java 11+) covers both empty and whitespace-only strings. Both cases represent an invalid field, so they are grouped together.",
-    "commonMistakes": ["Using isEmpty() instead of isBlank(), missing whitespace-only values", "Not checking for null before calling isBlank()", "Returning true/false instead of the list of offending fields, which makes debugging harder"],
-    "followUps": ["How would you extend this to validate field formats with a regex?", "How would you integrate this into a REST-Assured response validator?", "What would a good JUnit 5 test class for this method look like?"],
-    "tags": ["java", "hashmap", "validation", "api-testing"]
+    "commonMistakes": [
+      "Using isEmpty() instead of isBlank(), missing whitespace-only values",
+      "Not checking for null before calling isBlank()",
+      "Returning true/false instead of the list of offending fields, which makes debugging harder"
+    ],
+    "followUps": [
+      "How would you extend this to validate field formats with a regex?",
+      "How would you integrate this into a REST-Assured response validator?",
+      "What would a good JUnit 5 test class for this method look like?"
+    ],
+    "tags": [
+      "java",
+      "hashmap",
+      "validation",
+      "api-testing"
+    ]
   },
   {
     "id": "java-coding-007",
@@ -122,9 +189,22 @@
     "solutionLanguage": "java",
     "solution": "public static boolean waitForCondition(BooleanSupplier condition, long timeoutMs) {\n    long start = System.currentTimeMillis();\n    while (System.currentTimeMillis() - start < timeoutMs) {\n        if (condition.getAsBoolean()) {\n            return true;\n        }\n        try {\n            Thread.sleep(500);\n        } catch (InterruptedException e) {\n            Thread.currentThread().interrupt();\n            return false;\n        }\n    }\n    return condition.getAsBoolean();\n}",
     "explanation": "The loop polls at 500 ms intervals until the timeout elapses. A final check after the loop handles the edge case where the condition becomes true exactly at the boundary. Restoring the interrupt flag is important so the caller is not silently swallowing the interrupt signal.",
-    "commonMistakes": ["Not restoring the interrupt flag after catching InterruptedException", "Forgetting the final boundary check after the loop exits", "Using Thread.sleep inside a loop without a try-catch"],
-    "followUps": ["How does this compare to Selenium's FluentWait?", "How would you add a custom polling interval parameter?", "How would you write a unit test for this method without real UI elements?"],
-    "tags": ["java", "selenium", "waits", "functional-interface"]
+    "commonMistakes": [
+      "Not restoring the interrupt flag after catching InterruptedException",
+      "Forgetting the final boundary check after the loop exits",
+      "Using Thread.sleep inside a loop without a try-catch"
+    ],
+    "followUps": [
+      "How does this compare to Selenium's FluentWait?",
+      "How would you add a custom polling interval parameter?",
+      "How would you write a unit test for this method without real UI elements?"
+    ],
+    "tags": [
+      "java",
+      "selenium",
+      "waits",
+      "functional-interface"
+    ]
   },
   {
     "id": "java-coding-008",
@@ -142,9 +222,22 @@
     "solutionLanguage": "java",
     "solution": "public static List<Object> extractField(List<Map<String, Object>> rows, String key) {\n    List<Object> result = new ArrayList<>();\n    for (Map<String, Object> row : rows) {\n        if (row.containsKey(key)) {\n            result.add(row.get(key));\n        }\n    }\n    return result;\n}",
     "explanation": "containsKey guards against missing keys so nulls from absent entries are not included. The return type is List<Object> to match the generic map value type used when deserialising JSON.",
-    "commonMistakes": ["Adding null when the key is missing instead of skipping the row", "Casting to String too early and getting a ClassCastException for numeric values", "Not handling a null or empty input list"],
-    "followUps": ["How would you write this using Java Streams?", "How would you assert that all rows contain the key in an API test?", "How would you handle nested keys like 'address.city'?"],
-    "tags": ["java", "arraylist", "hashmap", "api-testing"]
+    "commonMistakes": [
+      "Adding null when the key is missing instead of skipping the row",
+      "Casting to String too early and getting a ClassCastException for numeric values",
+      "Not handling a null or empty input list"
+    ],
+    "followUps": [
+      "How would you write this using Java Streams?",
+      "How would you assert that all rows contain the key in an API test?",
+      "How would you handle nested keys like 'address.city'?"
+    ],
+    "tags": [
+      "java",
+      "arraylist",
+      "hashmap",
+      "api-testing"
+    ]
   },
   {
     "id": "java-coding-009",
@@ -162,9 +255,23 @@
     "solutionLanguage": "java",
     "solution": "import java.util.Objects;\n\npublic static Map<String, String> diffMaps(Map<String, Object> expected, Map<String, Object> actual) {\n    Map<String, String> diffs = new LinkedHashMap<>();\n    for (String key : expected.keySet()) {\n        if (!actual.containsKey(key)) {\n            diffs.put(\"MISSING: \" + key, \"expected '\" + expected.get(key) + \"', got nothing\");\n        } else if (!Objects.equals(expected.get(key), actual.get(key))) {\n            diffs.put(\"MISMATCH: \" + key, \"expected '\" + expected.get(key) + \"', got '\" + actual.get(key) + \"'\");\n        }\n    }\n    for (String key : actual.keySet()) {\n        if (!expected.containsKey(key)) {\n            diffs.put(\"EXTRA: \" + key, \"not in expected\");\n        }\n    }\n    return diffs;\n}",
     "explanation": "The first loop covers missing keys and value mismatches. The second loop catches keys present in actual but not expected. Objects.equals handles null values safely. LinkedHashMap preserves insertion order for readable assertion messages.",
-    "commonMistakes": ["Using == instead of Objects.equals() which fails for Integer or null values", "Only comparing expected keys and missing the extra-key scenario", "Returning a boolean instead of a detailed diff map that makes failures obvious in reports"],
-    "followUps": ["How would you integrate this into a custom REST-Assured response assertion?", "How would you handle nested maps recursively?", "How would you ignore certain keys like timestamps in the comparison?"],
-    "tags": ["java", "hashmap", "api-testing", "validation", "comparison"]
+    "commonMistakes": [
+      "Using == instead of Objects.equals() which fails for Integer or null values",
+      "Only comparing expected keys and missing the extra-key scenario",
+      "Returning a boolean instead of a detailed diff map that makes failures obvious in reports"
+    ],
+    "followUps": [
+      "How would you integrate this into a custom REST-Assured response assertion?",
+      "How would you handle nested maps recursively?",
+      "How would you ignore certain keys like timestamps in the comparison?"
+    ],
+    "tags": [
+      "java",
+      "hashmap",
+      "api-testing",
+      "validation",
+      "comparison"
+    ]
   },
   {
     "id": "java-coding-010",
@@ -182,9 +289,22 @@
     "solutionLanguage": "java",
     "solution": "public static List<String> removeDuplicates(List<String> items) {\n    return new ArrayList<>(new LinkedHashSet<>(items));\n}",
     "explanation": "LinkedHashSet maintains insertion order while enforcing uniqueness. Wrapping it back in an ArrayList produces the expected List return type. The entire operation is O(n).",
-    "commonMistakes": ["Using HashSet which loses order", "Implementing a manual nested loop that is O(n²)", "Modifying the original list instead of returning a new one"],
-    "followUps": ["What is the difference between HashSet and LinkedHashSet?", "How would you remove duplicates case-insensitively?", "When might preserving order matter in a test data scenario?"],
-    "tags": ["java", "arraylist", "linkedhashset", "duplicates"]
+    "commonMistakes": [
+      "Using HashSet which loses order",
+      "Implementing a manual nested loop that is O(n²)",
+      "Modifying the original list instead of returning a new one"
+    ],
+    "followUps": [
+      "What is the difference between HashSet and LinkedHashSet?",
+      "How would you remove duplicates case-insensitively?",
+      "When might preserving order matter in a test data scenario?"
+    ],
+    "tags": [
+      "java",
+      "arraylist",
+      "linkedhashset",
+      "duplicates"
+    ]
   },
   {
     "id": "java-coding-011",
@@ -202,9 +322,23 @@
     "solutionLanguage": "java",
     "solution": "public class RequestPayloadBuilder {\n    private final Map<String, Object> fields = new LinkedHashMap<>();\n\n    public RequestPayloadBuilder withField(String key, Object value) {\n        fields.put(key, value);\n        return this;\n    }\n\n    public Map<String, Object> build() {\n        return new LinkedHashMap<>(fields);\n    }\n}",
     "explanation": "The fluent interface (returning this) enables readable chain calls in tests. Returning a copy from build() prevents callers from accidentally mutating internal state. LinkedHashMap preserves field order which aids in JSON serialisation predictability.",
-    "commonMistakes": ["Returning the same internal map reference from build(), allowing mutation", "Not returning this from withField(), breaking the chain", "Using a static field which would cause test pollution across instances"],
-    "followUps": ["How would you add a withNullableField that skips null values?", "How would you serialize this map to a JSON string for an HTTP request body?", "How does the builder pattern improve test readability compared to raw maps?"],
-    "tags": ["java", "oop", "builder-pattern", "test-data", "hashmap"]
+    "commonMistakes": [
+      "Returning the same internal map reference from build(), allowing mutation",
+      "Not returning this from withField(), breaking the chain",
+      "Using a static field which would cause test pollution across instances"
+    ],
+    "followUps": [
+      "How would you add a withNullableField that skips null values?",
+      "How would you serialize this map to a JSON string for an HTTP request body?",
+      "How does the builder pattern improve test readability compared to raw maps?"
+    ],
+    "tags": [
+      "java",
+      "oop",
+      "builder-pattern",
+      "test-data",
+      "hashmap"
+    ]
   },
   {
     "id": "java-coding-012",
@@ -217,8 +351,18 @@
     "shortAnswer": "Use ArrayList when order matters or duplicates are meaningful. Use HashSet when you need fast membership checks and uniqueness guarantees.",
     "interviewAnswer": "The choice comes down to three questions: does order matter, can duplicates exist, and what operations will be most frequent? ArrayList preserves insertion order and allows duplicates, so it is the right choice for things like an ordered list of test steps, an HTTP request log, or a sequence of page actions where position carries meaning. HashSet gives O(1) average-time contains() checks and automatically enforces uniqueness, making it ideal for lookup-heavy scenarios such as checking whether a required field is in a set of valid values, or tracking which test IDs have already been executed to avoid reruns. A common mistake is using ArrayList for membership checks inside a loop — each contains() is O(n), so checking 50 expected fields against an ArrayList of 1000 actuals is 50,000 comparisons, while a HashSet makes it 50.",
     "realProjectExample": "In an API response validator I initially stored expected JSON field names in an ArrayList and called actualFields.contains(name) in a loop. For large response schemas this was noticeably slow. Switching the actual fields to a HashSet<String> cut the validation time by roughly 20x for responses with 200+ fields and made the intent of the code clearer.",
-    "followUps": ["What does LinkedHashSet give you that HashSet does not?", "When would you use a TreeSet instead?", "How do you pick a collection for a concurrent test environment?"],
-    "tags": ["java", "arraylist", "hashset", "collections", "performance"]
+    "followUps": [
+      "What does LinkedHashSet give you that HashSet does not?",
+      "When would you use a TreeSet instead?",
+      "How do you pick a collection for a concurrent test environment?"
+    ],
+    "tags": [
+      "java",
+      "arraylist",
+      "hashset",
+      "collections",
+      "performance"
+    ]
   },
   {
     "id": "java-coding-013",
@@ -236,7 +380,12 @@
     ],
     "correctAnswer": "The equals() method",
     "explanation": "ArrayList.contains() iterates the list and calls equals() on each element. This means custom objects must override equals() for correct behaviour. hashCode() is used by hash-based collections like HashSet and HashMap, not ArrayList.",
-    "tags": ["java", "arraylist", "equals", "collections"]
+    "tags": [
+      "java",
+      "arraylist",
+      "equals",
+      "collections"
+    ]
   },
   {
     "id": "java-coding-014",
@@ -254,7 +403,12 @@
     ],
     "correctAnswer": "true, true",
     "explanation": "String literals in Java are interned — the JVM places both 'hello' literals in the string pool, so a and b point to the same object, making == return true. equals() compares content and also returns true. If the strings were created with new String('hello'), == would return false while equals() would still return true.",
-    "tags": ["java", "strings", "equality", "string-pool"]
+    "tags": [
+      "java",
+      "strings",
+      "equality",
+      "string-pool"
+    ]
   },
   {
     "id": "java-coding-015",
@@ -272,7 +426,12 @@
     ],
     "correctAnswer": "Both entries are stored in the same bucket using a linked list or tree",
     "explanation": "A hash collision means two keys hash to the same bucket index. Java's HashMap handles this by storing both entries in that bucket — as a linked list for small buckets, or as a balanced tree (since Java 8) when the bucket size exceeds 8. The correct entry is found using equals() during lookup.",
-    "tags": ["java", "hashmap", "hash-collision", "internals"]
+    "tags": [
+      "java",
+      "hashmap",
+      "hash-collision",
+      "internals"
+    ]
   },
   {
     "id": "java-coding-016",
@@ -290,7 +449,12 @@
     ],
     "correctAnswer": "List<String> list = new ArrayList<>();",
     "explanation": "Programming to the interface (List<String>) is the idiomatic Java style and allows swapping the implementation without changing caller code. The diamond operator <> on the right side lets the compiler infer the type argument. The third option is wrong because List is an interface and cannot be instantiated with new.",
-    "tags": ["java", "arraylist", "generics", "best-practices"]
+    "tags": [
+      "java",
+      "arraylist",
+      "generics",
+      "best-practices"
+    ]
   },
   {
     "id": "java-coding-017",
@@ -308,7 +472,12 @@
     ],
     "correctAnswer": "HashMap allows null keys and values; Hashtable does not allow null keys or values",
     "explanation": "HashMap allows one null key and multiple null values and is not thread-safe. Hashtable is a legacy synchronized class that throws NullPointerException on null keys or values. In modern Java, ConcurrentHashMap is preferred over Hashtable for thread-safe use cases.",
-    "tags": ["java", "hashmap", "hashtable", "thread-safety"]
+    "tags": [
+      "java",
+      "hashmap",
+      "hashtable",
+      "thread-safety"
+    ]
   },
   {
     "id": "java-coding-018",
@@ -326,7 +495,12 @@
     ],
     "correctAnswer": "The compiler enforces that item and the list elements are the same type, catching type mismatches at compile time",
     "explanation": "With List<Object> you could pass a List<String> and an Integer item without a compile error, only to get a false assertion at runtime. The generic parameter T constrains both arguments to the same type so the compiler rejects mismatched calls early. Generics are erased at runtime (type erasure) so there is no performance difference.",
-    "tags": ["java", "generics", "type-safety", "methods"]
+    "tags": [
+      "java",
+      "generics",
+      "type-safety",
+      "methods"
+    ]
   },
   {
     "id": "java-coding-019",
@@ -344,7 +518,12 @@
     ],
     "correctAnswer": "for (Map.Entry<String, Integer> entry : map.entrySet()) { String k = entry.getKey(); int v = entry.getValue(); }",
     "explanation": "entrySet() returns a Set of Map.Entry pairs, each holding a key and a value. This is the most efficient iteration pattern because it retrieves the value directly without a second map lookup. Iterating the map object directly is a compile error; maps do not implement Iterable.",
-    "tags": ["java", "hashmap", "iteration", "map-entry"]
+    "tags": [
+      "java",
+      "hashmap",
+      "iteration",
+      "map-entry"
+    ]
   },
   {
     "id": "java-coding-020",
@@ -357,8 +536,18 @@
     "shortAnswer": "An interface defines a contract with no state; an abstract class can hold shared state and partial implementations. Use an interface for capability contracts and an abstract class for shared base behaviour.",
     "interviewAnswer": "An interface is a pure contract — it specifies what a class must do but holds no instance state (fields must be static and final). Since Java 8, interfaces can have default methods, but the intent is still a capability contract. An abstract class can have instance fields, constructors, and concrete methods, so it is better suited when multiple subclasses share common behaviour. In test frameworks I use an interface like Validatable or Reportable when I want to enforce that multiple unrelated classes support a capability. I use an abstract class like BasePage or BaseApiClient when pages or clients genuinely share setup code — like driver initialisation or base URL configuration — that would be wrong to duplicate.",
     "realProjectExample": "In a Selenium framework I had a BasePage abstract class holding the WebDriver reference and a waitForPageLoad() method. All page objects extended it. Separately I defined a Navigable interface with methods like navigateTo() and getTitle() so pages that supported direct URL navigation could be identified and driven uniformly from test scenarios.",
-    "followUps": ["Can a class implement multiple interfaces but only extend one abstract class?", "What does the default keyword on an interface method do?", "How would you decide which to use for a new PageObject base?"],
-    "tags": ["java", "oop", "interface", "abstract-class", "framework-design"]
+    "followUps": [
+      "Can a class implement multiple interfaces but only extend one abstract class?",
+      "What does the default keyword on an interface method do?",
+      "How would you decide which to use for a new PageObject base?"
+    ],
+    "tags": [
+      "java",
+      "oop",
+      "interface",
+      "abstract-class",
+      "framework-design"
+    ]
   },
   {
     "id": "java-coding-021",
@@ -371,8 +560,18 @@
     "shortAnswer": "Define helper methods with generic type parameters so the compiler enforces consistent types at the call site, eliminating runtime ClassCastExceptions.",
     "interviewAnswer": "The core idea is to move type checks from runtime to compile time. Instead of writing assertFieldEquals(Object expected, Object actual), I write <T> void assertFieldEquals(T expected, T actual, String fieldName). Now the compiler rejects a call where expected is a String and actual is an Integer. For collection helpers I use bounded wildcards: <T extends Comparable<T>> void assertSorted(List<T> list) ensures the elements support ordering before the method body even runs. In API validation I use a generic ResponseValidator<T> class where T is the deserialized response type — this lets me write validators for UserResponse or OrderResponse that are fully typed without duplication. The pattern also works well with AssertJ's AbstractAssert hierarchy when writing custom assertions.",
     "realProjectExample": "On a microservices project I wrote a class ApiAssert<T> with a method hasField(Function<T, Object> extractor, Object expectedValue). The Function parameter let callers write ApiAssert.of(response).hasField(UserResponse::getEmail, 'test@example.com') which was both type-safe and readable. No unchecked casts anywhere in the assertion layer.",
-    "followUps": ["What is type erasure and how does it affect generics at runtime?", "What is the difference between List<? extends T> and List<? super T>?", "How would you test a generic helper method itself with JUnit 5?"],
-    "tags": ["java", "generics", "type-safety", "assertions", "framework-design"]
+    "followUps": [
+      "What is type erasure and how does it affect generics at runtime?",
+      "What is the difference between List<? extends T> and List<? super T>?",
+      "How would you test a generic helper method itself with JUnit 5?"
+    ],
+    "tags": [
+      "java",
+      "generics",
+      "type-safety",
+      "assertions",
+      "framework-design"
+    ]
   },
   {
     "id": "java-coding-022",
@@ -385,8 +584,18 @@
     "shortAnswer": "Use factory classes to create test data programmatically, scope it tightly to each test, and clean up via API or database in teardown rather than relying on shared fixtures.",
     "interviewAnswer": "The biggest test data problems at scale are interference between parallel tests and stale data from failed runs. My approach has three parts. First, I create data via API in a TestDataFactory class rather than SQL inserts, because the API enforces business rules and mirrors real usage. Second, I scope every piece of data to the test that created it — I store created resource IDs in a list during the test and delete them in an @AfterEach method. Third, for expensive data like tenant setups I use @BeforeAll with class-scoped state and ensure cleanup still runs even if tests fail by using try-finally in the setup method. For parallel test runs I rely on unique identifiers — usually UUID-based usernames or emails — so tests never share a resource by accident.",
     "realProjectExample": "On a SaaS platform we had 50 parallel API tests each needing a unique user. I built a UserFactory that called the registration endpoint and returned a UserFixture record with the credentials and user ID. Each test held its fixture locally, and an @AfterEach hook called userFactory.delete(fixture.userId()). Failed runs left no orphaned users because the JUnit extension lifecycle guaranteed teardown even on assertion failures.",
-    "followUps": ["How do you handle test data in an environment where you don't have API access to create data?", "What is the trade-off between using a shared test database versus an in-memory database per test run?", "How do you prevent test data from leaking between parallel test threads?"],
-    "tags": ["java", "test-data", "lifecycle", "oop", "api-testing"]
+    "followUps": [
+      "How do you handle test data in an environment where you don't have API access to create data?",
+      "What is the trade-off between using a shared test database versus an in-memory database per test run?",
+      "How do you prevent test data from leaking between parallel test threads?"
+    ],
+    "tags": [
+      "java",
+      "test-data",
+      "lifecycle",
+      "oop",
+      "api-testing"
+    ]
   },
   {
     "id": "java-coding-023",
@@ -399,8 +608,18 @@
     "shortAnswer": "If equals() is not overridden, object identity is compared instead of value equality, causing assertions on domain objects to fail even when their fields match. hashCode() must be overridden together with equals() for correct collection behaviour.",
     "interviewAnswer": "By default, Object.equals() uses reference equality (==). This means two separately constructed objects with identical fields are not equal unless equals() is overridden. In tests this causes assertThat(actualUser).isEqualTo(expectedUser) to fail even when every field matches, leading to false negatives. The hashCode() contract says that objects considered equal must return the same hash code. If you override equals() but not hashCode(), objects that are logically equal will not be found in a HashSet and will produce incorrect HashMap lookups — which can silently corrupt your test data structures. Modern Java makes this easy: use @Override equals()/hashCode() generated by the IDE, or switch to records which automatically generate them based on all fields.",
     "realProjectExample": "We had a test that placed expected UserResponse objects into a Set and then checked whether the actual API responses were all in the set. The original UserResponse class did not override equals() or hashCode(). Every contains() call returned false even with matching data. Adding @Override equals() and hashCode() (generated from id and email fields) fixed the test immediately with no other changes.",
-    "followUps": ["What is the advantage of using Java records for test data objects?", "If you override equals() to compare only the 'id' field, what should hashCode() be based on?", "How does AssertJ's usingRecursiveComparison() avoid needing equals() overrides?"],
-    "tags": ["java", "equals", "hashcode", "oop", "assertions"]
+    "followUps": [
+      "What is the advantage of using Java records for test data objects?",
+      "If you override equals() to compare only the 'id' field, what should hashCode() be based on?",
+      "How does AssertJ's usingRecursiveComparison() avoid needing equals() overrides?"
+    ],
+    "tags": [
+      "java",
+      "equals",
+      "hashcode",
+      "oop",
+      "assertions"
+    ]
   },
   {
     "id": "java-coding-024",
@@ -418,9 +637,23 @@
     "solutionLanguage": "java",
     "solution": "public static Map<String, String> parseQueryString(String query) {\n    Map<String, String> params = new LinkedHashMap<>();\n    if (query == null || query.isBlank()) {\n        return params;\n    }\n    String cleaned = query.startsWith(\"?\") ? query.substring(1) : query;\n    for (String pair : cleaned.split(\"&\")) {\n        String[] parts = pair.split(\"=\", 2);\n        String key = parts[0].trim();\n        String value = parts.length > 1 ? parts[1].trim() : \"\";\n        if (!key.isEmpty()) {\n            params.put(key, value);\n        }\n    }\n    return params;\n}",
     "explanation": "split('=', 2) limits the split to at most 2 parts so a value containing '=' (e.g. a base64 token) is not truncated. The limit of 2 in split handles values that themselves contain '=' characters. LinkedHashMap preserves query string order which can matter for debug output.",
-    "commonMistakes": ["Using split('=') without a limit, truncating base64 values that contain '='", "Not stripping leading '?' causing the first key to start with '?'", "Returning null for missing values instead of an empty string, causing NullPointerExceptions later"],
-    "followUps": ["How would you handle URL-encoded values like 'name=John%20Doe'?", "How would you use this in a REST-Assured test to validate redirect URLs?", "How would you handle repeated keys like 'tag=java&tag=qa'?"],
-    "tags": ["java", "strings", "hashmap", "url-parsing", "api-testing"]
+    "commonMistakes": [
+      "Using split('=') without a limit, truncating base64 values that contain '='",
+      "Not stripping leading '?' causing the first key to start with '?'",
+      "Returning null for missing values instead of an empty string, causing NullPointerExceptions later"
+    ],
+    "followUps": [
+      "How would you handle URL-encoded values like 'name=John%20Doe'?",
+      "How would you use this in a REST-Assured test to validate redirect URLs?",
+      "How would you handle repeated keys like 'tag=java&tag=qa'?"
+    ],
+    "tags": [
+      "java",
+      "strings",
+      "hashmap",
+      "url-parsing",
+      "api-testing"
+    ]
   },
   {
     "id": "java-coding-025",
@@ -438,8 +671,766 @@
     "solutionLanguage": "java",
     "solution": "public static Map<String, List<Map<String, Object>>> groupByField(\n        List<Map<String, Object>> rows, String field) {\n    Map<String, List<Map<String, Object>>> grouped = new LinkedHashMap<>();\n    for (Map<String, Object> row : rows) {\n        Object rawKey = row.get(field);\n        String key = (rawKey != null) ? rawKey.toString() : \"__unknown__\";\n        grouped.computeIfAbsent(key, k -> new ArrayList<>()).add(row);\n    }\n    return grouped;\n}",
     "explanation": "computeIfAbsent initialises an empty list the first time a group key is seen, then returns the list so the row can be appended in a single expression. toString() on the key handles Integer and Boolean field values without a ClassCastException. '__unknown__' sentinel avoids silently losing rows with a missing field.",
-    "commonMistakes": ["Using putIfAbsent which returns the existing value but does not allow immediate chaining of .add()", "Casting rawKey directly to String and getting ClassCastException on numeric field values", "Silently discarding rows that are missing the group field"],
-    "followUps": ["How would you write this using Java Streams and Collectors.groupingBy()?", "How would you assert the grouping is correct in a JUnit 5 test?", "How would you extend this to group by multiple fields?"],
-    "tags": ["java", "hashmap", "arraylist", "grouping", "api-testing"]
+    "commonMistakes": [
+      "Using putIfAbsent which returns the existing value but does not allow immediate chaining of .add()",
+      "Casting rawKey directly to String and getting ClassCastException on numeric field values",
+      "Silently discarding rows that are missing the group field"
+    ],
+    "followUps": [
+      "How would you write this using Java Streams and Collectors.groupingBy()?",
+      "How would you assert the grouping is correct in a JUnit 5 test?",
+      "How would you extend this to group by multiple fields?"
+    ],
+    "tags": [
+      "java",
+      "hashmap",
+      "arraylist",
+      "grouping",
+      "api-testing"
+    ]
+  },
+  {
+    "id": "java-coding-026",
+    "topicId": "java-coding",
+    "topicTitle": "Java Coding for QA/SDET",
+    "level": "mid",
+    "type": "coding",
+    "difficulty": "medium",
+    "title": "Filter and collect API response objects with Java Streams",
+    "question": "Write a Java method using Streams that filters a list of maps to keep only rows where a specified field equals a given value, then collects the matching rows into a new list.",
+    "problem": "Given a List<Map<String, Object>> and a field name plus expected value, return a new list containing only the maps where that field equals the expected value. Use the Java Streams API.",
+    "inputExample": "rows = [{\"status\":\"active\",\"id\":1},{\"status\":\"inactive\",\"id\":2},{\"status\":\"active\",\"id\":3}], field = \"status\", value = \"active\"",
+    "expectedOutput": "[{status=active, id=1}, {status=active, id=3}]",
+    "hint": "Use stream().filter(...).collect(Collectors.toList()). Inside filter, call Objects.equals() on the map value to handle nulls safely.",
+    "solutionLanguage": "java",
+    "solution": "import java.util.*;\nimport java.util.stream.*;\n\npublic static List<Map<String, Object>> filterByField(\n        List<Map<String, Object>> rows, String field, Object value) {\n    return rows.stream()\n               .filter(row -> Objects.equals(row.get(field), value))\n               .collect(Collectors.toList());\n}",
+    "explanation": "stream().filter() creates a lazy pipeline that evaluates each predicate only when the terminal collect() is reached. Objects.equals() handles the case where the field is absent (row.get() returns null) without throwing a NullPointerException. The original list is not mutated.",
+    "commonMistakes": [
+      "Using == or .equals() directly on row.get() which throws NPE when the key is absent",
+      "Forgetting to import java.util.stream.Collectors",
+      "Returning the stream instead of calling collect(), leaving the pipeline unconsumed"
+    ],
+    "followUps": [
+      "How would you chain a second filter for a different field?",
+      "How would you collect the results into a Map grouped by a different field using the same stream?",
+      "When should you prefer a for-loop over streams for readability in test code?"
+    ],
+    "tags": [
+      "java",
+      "streams",
+      "lambda",
+      "api-testing",
+      "collections"
+    ]
+  },
+  {
+    "id": "java-coding-027",
+    "topicId": "java-coding",
+    "topicTitle": "Java Coding for QA/SDET",
+    "level": "mid",
+    "type": "coding",
+    "difficulty": "medium",
+    "title": "Partition test results into passed and failed using Streams",
+    "question": "Write a Java method that partitions a list of test result strings (each either 'PASS' or 'FAIL') into two groups using Collectors.partitioningBy(), returning a map with Boolean keys.",
+    "problem": "Given a List<String> of test statuses, return a Map<Boolean, List<String>> where true maps to passing results and false maps to failing results.",
+    "inputExample": "[\"PASS\", \"FAIL\", \"PASS\", \"PASS\", \"FAIL\"]",
+    "expectedOutput": "{true=[PASS, PASS, PASS], false=[FAIL, FAIL]}",
+    "hint": "Use Collectors.partitioningBy(status -> status.equals(\"PASS\")) as the terminal collector.",
+    "solutionLanguage": "java",
+    "solution": "import java.util.*;\nimport java.util.stream.*;\n\npublic static Map<Boolean, List<String>> partitionResults(List<String> statuses) {\n    return statuses.stream()\n                   .collect(Collectors.partitioningBy(s -> s.equals(\"PASS\")));\n}",
+    "explanation": "partitioningBy() always produces a map with exactly two keys — true and false — even if one partition is empty. This is more semantically clear than groupingBy() when the grouping criterion is a binary condition. In test reporting, the true partition gives you pass count and the false partition gives you failures to investigate.",
+    "commonMistakes": [
+      "Using groupingBy() with \"PASS\" and \"FAIL\" strings when a boolean partition is more descriptive",
+      "Forgetting that partitioningBy always returns both true and false keys, making null checks unnecessary",
+      "Not importing Collectors, causing a compile error"
+    ],
+    "followUps": [
+      "How would you get only the count of failures using Collectors.partitioningBy() with a downstream collector?",
+      "How would you extend this to handle a third status like 'SKIP'?",
+      "How would you assert the partition counts in a JUnit 5 test?"
+    ],
+    "tags": [
+      "java",
+      "streams",
+      "collectors",
+      "partitioningBy",
+      "test-reporting"
+    ]
+  },
+  {
+    "id": "java-coding-028",
+    "topicId": "java-coding",
+    "topicTitle": "Java Coding for QA/SDET",
+    "level": "mid",
+    "type": "coding",
+    "difficulty": "medium",
+    "title": "Group test cases by category using Collectors.groupingBy",
+    "question": "Write a Java method that groups a list of test case names by their category prefix (the part before the first underscore) using Collectors.groupingBy().",
+    "problem": "Given a list of test case names like [\"login_validUser\", \"login_invalidPassword\", \"checkout_emptyCart\"], group them by the prefix before the first underscore and return a Map<String, List<String>>.",
+    "inputExample": "[\"login_validUser\", \"login_invalidPassword\", \"checkout_emptyCart\", \"checkout_outOfStock\"]",
+    "expectedOutput": "{login=[login_validUser, login_invalidPassword], checkout=[checkout_emptyCart, checkout_outOfStock]}",
+    "hint": "Use Collectors.groupingBy(name -> name.split(\"_\")[0]) as the classifier function.",
+    "solutionLanguage": "java",
+    "solution": "import java.util.*;\nimport java.util.stream.*;\n\npublic static Map<String, List<String>> groupByCategory(List<String> testNames) {\n    return testNames.stream()\n                    .collect(Collectors.groupingBy(name -> name.split(\"_\", 2)[0]));\n}",
+    "explanation": "groupingBy() applies the classifier function to each element and builds a map from the result to a list of matching elements. split(\"_\", 2) limits the split to two parts so test names with multiple underscores (like checkout_empty_cart) produce the correct prefix. The downstream collector defaults to Collectors.toList().",
+    "commonMistakes": [
+      "Using split(\"_\") without a limit, which is fine here but a habit that breaks for values with multiple underscores when you need just the first part",
+      "Forgetting that groupingBy preserves all elements — no filtering happens",
+      "Confusing groupingBy (multiple groups) with partitioningBy (exactly two groups)"
+    ],
+    "followUps": [
+      "How would you count the number of tests per category instead of listing them?",
+      "How would you sort the keys of the resulting map alphabetically?",
+      "How would you handle test names that contain no underscore?"
+    ],
+    "tags": [
+      "java",
+      "streams",
+      "groupingBy",
+      "collectors",
+      "test-management"
+    ]
+  },
+  {
+    "id": "java-coding-029",
+    "topicId": "java-coding",
+    "topicTitle": "Java Coding for QA/SDET",
+    "level": "mid",
+    "type": "coding",
+    "difficulty": "medium",
+    "title": "Safe Optional unwrapping in test data extraction",
+    "question": "Write a Java method that safely extracts a nested string field from a Map<String, Object> using Optional, returning a default value when the field is absent or null.",
+    "problem": "Given a map and a field name, return the field's string value if it is present and non-blank, or the provided default string otherwise. Use Optional to avoid explicit null checks.",
+    "inputExample": "map = {\"env\": \"staging\"}, field = \"region\", defaultValue = \"us-east-1\"",
+    "expectedOutput": "\"us-east-1\"",
+    "hint": "Use Optional.ofNullable(map.get(field)).map(Object::toString).filter(s -> !s.isBlank()).orElse(defaultValue).",
+    "solutionLanguage": "java",
+    "solution": "import java.util.*;\n\npublic static String getOrDefault(Map<String, Object> map, String field, String defaultValue) {\n    return Optional.ofNullable(map.get(field))\n                   .map(Object::toString)\n                   .filter(s -> !s.isBlank())\n                   .orElse(defaultValue);\n}",
+    "explanation": "Optional.ofNullable wraps the value and handles null without a NullPointerException. map(Object::toString) converts non-null values to strings. filter removes blank strings. orElse supplies the fallback. The chain is readable and avoids a cascade of if-null checks that can be missed during code review.",
+    "commonMistakes": [
+      "Using Optional.of() instead of ofNullable(), which throws NullPointerException when the field is absent",
+      "Calling .get() on the Optional without checking isPresent(), which defeats the purpose of Optional",
+      "Forgetting the filter step so a blank string is returned instead of the default"
+    ],
+    "followUps": [
+      "When would you use orElseGet() instead of orElse()?",
+      "How would you throw a descriptive test exception when a required field is absent using orElseThrow()?",
+      "What are the performance implications of Optional.orElse() vs orElseGet() when the default is expensive to compute?"
+    ],
+    "tags": [
+      "java",
+      "optional",
+      "null-safety",
+      "test-data",
+      "streams"
+    ]
+  },
+  {
+    "id": "java-coding-030",
+    "topicId": "java-coding",
+    "topicTitle": "Java Coding for QA/SDET",
+    "level": "mid",
+    "type": "coding",
+    "difficulty": "medium",
+    "title": "Capture and assert method arguments with Mockito ArgumentCaptor",
+    "question": "Write a JUnit 5 test that uses Mockito's ArgumentCaptor to verify the exact payload passed to a service method when a controller action is triggered.",
+    "problem": "Given an EmailService interface with a method sendWelcome(String email, String name), and a UserController that calls emailService.sendWelcome after registering a user, write a test that verifies the email and name arguments using ArgumentCaptor.",
+    "inputExample": "controller.register(\"alice@example.com\", \"Alice\")",
+    "expectedOutput": "emailService.sendWelcome was called with email=\"alice@example.com\" and name=\"Alice\"",
+    "hint": "Use @Captor ArgumentCaptor<String> or ArgumentCaptor.forClass(String.class). Call verify(mock).method(captor.capture()) then inspect captor.getValue().",
+    "solutionLanguage": "java",
+    "solution": "import org.junit.jupiter.api.Test;\nimport org.mockito.ArgumentCaptor;\nimport org.mockito.Mockito;\nimport static org.assertj.core.api.Assertions.assertThat;\n\nclass UserControllerTest {\n\n    @Test\n    void register_shouldSendWelcomeEmailWithCorrectArguments() {\n        EmailService emailService = Mockito.mock(EmailService.class);\n        UserController controller = new UserController(emailService);\n\n        controller.register(\"alice@example.com\", \"Alice\");\n\n        ArgumentCaptor<String> emailCaptor = ArgumentCaptor.forClass(String.class);\n        ArgumentCaptor<String> nameCaptor = ArgumentCaptor.forClass(String.class);\n        Mockito.verify(emailService).sendWelcome(emailCaptor.capture(), nameCaptor.capture());\n\n        assertThat(emailCaptor.getValue()).isEqualTo(\"alice@example.com\");\n        assertThat(nameCaptor.getValue()).isEqualTo(\"Alice\");\n    }\n}",
+    "explanation": "ArgumentCaptor intercepts the arguments actually passed to a mocked method call. This is more precise than Mockito.verify(mock).method(eq(\"alice@...\")) when you want to inspect complex objects or when the argument is built internally and not visible at the call site. verify() fails if the method was not called at all, so the capture and assertion together confirm both invocation and correctness.",
+    "commonMistakes": [
+      "Calling captor.getValue() before calling verify(), which throws IllegalStateException",
+      "Using a single captor for both String arguments and checking getAllValues() in the wrong order",
+      "Forgetting that verify() defaults to times(1), so the test also asserts the method was called exactly once"
+    ],
+    "followUps": [
+      "How would you capture an argument that is a complex object like a UserDTO?",
+      "When is ArgumentCaptor preferable to Mockito.eq() matchers?",
+      "How would you use captor.getAllValues() when the method is called multiple times?"
+    ],
+    "tags": [
+      "java",
+      "mockito",
+      "argumentcaptor",
+      "unit-testing",
+      "mocking"
+    ]
+  },
+  {
+    "id": "java-coding-031",
+    "topicId": "java-coding",
+    "topicTitle": "Java Coding for QA/SDET",
+    "level": "mid",
+    "type": "coding",
+    "difficulty": "medium",
+    "title": "Write a JUnit 5 parameterized test with @MethodSource",
+    "question": "Write a JUnit 5 parameterized test that verifies a validateEmail(String email) method returns the correct boolean for a variety of valid and invalid email addresses.",
+    "problem": "Implement a @ParameterizedTest using @MethodSource that provides pairs of (email, expectedResult) and asserts that validateEmail() returns the expected boolean for each pair.",
+    "inputExample": "validateEmail(\"user@example.com\") == true, validateEmail(\"bad-email\") == false",
+    "expectedOutput": "All parameterized test cases pass",
+    "hint": "Provide a static Stream<Arguments> method annotated with nothing special. Reference it in @MethodSource(\"provideEmailCases\"). Use Arguments.of(email, expected).",
+    "solutionLanguage": "java",
+    "solution": "import org.junit.jupiter.params.ParameterizedTest;\nimport org.junit.jupiter.params.provider.Arguments;\nimport org.junit.jupiter.params.provider.MethodSource;\nimport java.util.stream.Stream;\nimport static org.assertj.core.api.Assertions.assertThat;\n\nclass EmailValidatorTest {\n\n    static Stream<Arguments> provideEmailCases() {\n        return Stream.of(\n            Arguments.of(\"user@example.com\", true),\n            Arguments.of(\"admin@company.org\", true),\n            Arguments.of(\"bad-email\", false),\n            Arguments.of(\"\", false),\n            Arguments.of(null, false),\n            Arguments.of(\"missing@domain\", false)\n        );\n    }\n\n    @ParameterizedTest(name = \"[{index}] email={0} -> {1}\")\n    @MethodSource(\"provideEmailCases\")\n    void validateEmail_shouldReturnExpectedResult(String email, boolean expected) {\n        assertThat(EmailValidator.validateEmail(email)).isEqualTo(expected);\n    }\n}",
+    "explanation": "MethodSource allows arbitrary objects and multiple arguments per case, unlike @CsvSource which is limited to strings. The name attribute customises the test display name in reports so failures clearly show which input caused the problem. Static is required because JUnit 5 creates a new test instance per test by default.",
+    "commonMistakes": [
+      "Making the data provider method non-static, causing a JUnit 5 resolution error",
+      "Returning a List instead of a Stream — both work with MethodSource but Stream is the idiomatic choice",
+      "Forgetting to add @ParameterizedTest alongside @MethodSource, which causes the method to be skipped silently"
+    ],
+    "followUps": [
+      "When would you choose @CsvSource over @MethodSource?",
+      "How would you load parameterized data from a JSON or CSV file?",
+      "How do you name individual test cases so failures are readable in CI reports?"
+    ],
+    "tags": [
+      "java",
+      "junit5",
+      "parameterized-tests",
+      "methodsource",
+      "test-design"
+    ]
+  },
+  {
+    "id": "java-coding-032",
+    "topicId": "java-coding",
+    "topicTitle": "Java Coding for QA/SDET",
+    "level": "mid",
+    "type": "coding",
+    "difficulty": "hard",
+    "title": "Regex-based response field validator",
+    "question": "Write a Java method that validates that a string value matches a given regular expression pattern and returns a descriptive error message string when it does not match, or null when it does.",
+    "problem": "Implement validatePattern(String fieldName, String value, String regex) that returns null on a match or a human-readable failure message on a mismatch. This is used in API response validation pipelines.",
+    "inputExample": "validatePattern(\"orderId\", \"ORD-12345\", \"^ORD-\\\\d{5}$\")",
+    "expectedOutput": "null (match) or \"Field 'orderId' value 'abc' does not match pattern '^ORD-\\\\d{5}$'\" (mismatch)",
+    "hint": "Use Pattern.compile(regex).matcher(value).matches(). Return null on success and a formatted String on failure. Guard against null value.",
+    "solutionLanguage": "java",
+    "solution": "import java.util.regex.Pattern;\n\npublic static String validatePattern(String fieldName, String value, String regex) {\n    if (value == null) {\n        return String.format(\"Field '%s' is null, cannot match pattern '%s'\", fieldName, regex);\n    }\n    boolean matches = Pattern.compile(regex).matcher(value).matches();\n    if (matches) {\n        return null;\n    }\n    return String.format(\"Field '%s' value '%s' does not match pattern '%s'\", fieldName, value, regex);\n}",
+    "explanation": "Returning null for success and a message for failure lets callers collect all errors before failing, enabling soft-assertion style validation. Pattern.compile().matcher().matches() checks the full string against the regex (anchored implicitly), which is appropriate for field-level validation. Compiling inside the method is fine for occasional calls; for high-frequency validation, compile and cache the Pattern as a constant.",
+    "commonMistakes": [
+      "Using String.matches() which recompiles the pattern on every call and is less explicit about anchoring",
+      "Confusing find() (partial match) with matches() (full string match), causing false positives",
+      "Not handling a null value argument, which throws a NullPointerException in matcher()"
+    ],
+    "followUps": [
+      "How would you cache compiled patterns to avoid recompilation overhead in a large test suite?",
+      "How would you use this in a loop to validate every field in an API response map?",
+      "How would you write a JUnit 5 test that asserts the returned message contains the field name?"
+    ],
+    "tags": [
+      "java",
+      "regex",
+      "validation",
+      "api-testing",
+      "pattern"
+    ]
+  },
+  {
+    "id": "java-coding-033",
+    "topicId": "java-coding",
+    "topicTitle": "Java Coding for QA/SDET",
+    "level": "senior",
+    "type": "coding",
+    "difficulty": "hard",
+    "title": "Jackson JSON deserialization for API response validation",
+    "question": "Write a Java method that deserializes a JSON string into a Map<String, Object> using Jackson's ObjectMapper and returns an empty map on parse failure instead of throwing.",
+    "problem": "Implement parseJson(String json) that uses ObjectMapper to deserialize JSON into Map<String, Object>. Catch JsonProcessingException and return an empty map rather than propagating the exception, logging the error message.",
+    "inputExample": "parseJson(\"{\\\"status\\\":\\\"ok\\\",\\\"code\\\":200}\")",
+    "expectedOutput": "{status=ok, code=200}",
+    "hint": "Use objectMapper.readValue(json, new TypeReference<Map<String, Object>>() {}) and catch JsonProcessingException.",
+    "solutionLanguage": "java",
+    "solution": "import com.fasterxml.jackson.core.JsonProcessingException;\nimport com.fasterxml.jackson.core.type.TypeReference;\nimport com.fasterxml.jackson.databind.ObjectMapper;\nimport java.util.*;\n\npublic class JsonHelper {\n\n    private static final ObjectMapper MAPPER = new ObjectMapper();\n\n    public static Map<String, Object> parseJson(String json) {\n        if (json == null || json.isBlank()) {\n            return Collections.emptyMap();\n        }\n        try {\n            return MAPPER.readValue(json, new TypeReference<Map<String, Object>>() {});\n        } catch (JsonProcessingException e) {\n            System.err.println(\"Failed to parse JSON: \" + e.getOriginalMessage());\n            return Collections.emptyMap();\n        }\n    }\n}",
+    "explanation": "TypeReference<Map<String, Object>> preserves generic type information at runtime, which type erasure would otherwise lose. A static ObjectMapper is reused because creating one per call is expensive. Returning an empty map rather than null prevents NullPointerExceptions in downstream validation code. Logging the original message (not the full stack trace) keeps test output clean while still providing diagnostic context.",
+    "commonMistakes": [
+      "Creating a new ObjectMapper() on every call — it is thread-safe and expensive to initialise",
+      "Using a raw TypeReference without the generic parameter, getting Map<Object,Object> instead of Map<String,Object>",
+      "Returning null on failure, which forces every caller to null-check the result"
+    ],
+    "followUps": [
+      "How would you deserialize into a typed POJO instead of a raw Map?",
+      "How would you configure ObjectMapper to ignore unknown fields when deserializing API responses?",
+      "How would you write a test that asserts parseJson() returns an empty map for invalid JSON?"
+    ],
+    "tags": [
+      "java",
+      "jackson",
+      "json",
+      "api-testing",
+      "objectmapper"
+    ]
+  },
+  {
+    "id": "java-coding-034",
+    "topicId": "java-coding",
+    "topicTitle": "Java Coding for QA/SDET",
+    "level": "senior",
+    "type": "coding",
+    "difficulty": "hard",
+    "title": "Write test results to a file using Java NIO",
+    "question": "Write a Java method that appends a test result line to a report file using Java NIO's Files API, creating the file if it does not exist.",
+    "problem": "Implement appendResult(Path reportFile, String testName, String status) that writes a line formatted as '[PASS] testName' or '[FAIL] testName' with a timestamp to the file. Create the file and parent directories if needed.",
+    "inputExample": "appendResult(Paths.get(\"reports/results.txt\"), \"login_validUser\", \"PASS\")",
+    "expectedOutput": "Line appended: \"2026-05-29T10:00:00 [PASS] login_validUser\"",
+    "hint": "Use Files.createDirectories() for the parent, then Files.write() with StandardOpenOption.CREATE and APPEND. Use LocalDateTime.now() for the timestamp.",
+    "solutionLanguage": "java",
+    "solution": "import java.io.IOException;\nimport java.nio.file.*;\nimport java.time.LocalDateTime;\nimport java.time.format.DateTimeFormatter;\nimport java.util.List;\n\npublic static void appendResult(Path reportFile, String testName, String status) throws IOException {\n    if (reportFile.getParent() != null) {\n        Files.createDirectories(reportFile.getParent());\n    }\n    String timestamp = LocalDateTime.now()\n            .format(DateTimeFormatter.ofPattern(\"yyyy-MM-dd'T'HH:mm:ss\"));\n    String line = String.format(\"%s [%s] %s%n\", timestamp, status, testName);\n    Files.write(reportFile, List.of(line),\n            StandardOpenOption.CREATE,\n            StandardOpenOption.APPEND);\n}",
+    "explanation": "Files.createDirectories() is idempotent — it does nothing if the directories already exist. StandardOpenOption.CREATE creates the file on first call and APPEND ensures subsequent calls add lines rather than overwrite. %n produces the platform-appropriate line separator. LocalDateTime provides a human-readable timestamp without timezone complexity, which is suitable for local test reports.",
+    "commonMistakes": [
+      "Using FileWriter without StandardOpenOption.APPEND, overwriting the file on each call",
+      "Not creating parent directories, causing NoSuchFileException when the reports folder does not exist",
+      "Using System.lineSeparator() as a literal string instead of %n in String.format"
+    ],
+    "followUps": [
+      "How would you write the entire results list atomically at the end of a test run instead of appending incrementally?",
+      "How would you read the file back and assert a specific test result appears in it?",
+      "What would you change to write JSON lines instead of plain text?"
+    ],
+    "tags": [
+      "java",
+      "nio",
+      "file-io",
+      "test-reporting",
+      "date-time"
+    ]
+  },
+  {
+    "id": "java-coding-035",
+    "topicId": "java-coding",
+    "topicTitle": "Java Coding for QA/SDET",
+    "level": "senior",
+    "type": "coding",
+    "difficulty": "hard",
+    "title": "Thread-safe polling counter for parallel test helpers",
+    "question": "Implement a thread-safe call counter class that test helpers use to record how many times a stub was invoked across parallel test threads.",
+    "problem": "Create a class InvocationCounter with an increment() method and a getCount() method that work correctly under concurrent access from multiple threads. Demonstrate usage with two threads each incrementing 1000 times.",
+    "inputExample": "Two threads each call counter.increment() 1000 times concurrently",
+    "expectedOutput": "counter.getCount() == 2000",
+    "hint": "Use AtomicInteger for the counter field. Its incrementAndGet() is lock-free and thread-safe without synchronized.",
+    "solutionLanguage": "java",
+    "solution": "import java.util.concurrent.atomic.AtomicInteger;\n\npublic class InvocationCounter {\n\n    private final AtomicInteger count = new AtomicInteger(0);\n\n    public void increment() {\n        count.incrementAndGet();\n    }\n\n    public int getCount() {\n        return count.get();\n    }\n\n    public void reset() {\n        count.set(0);\n    }\n\n    // Demo\n    public static void main(String[] args) throws InterruptedException {\n        InvocationCounter counter = new InvocationCounter();\n        Thread t1 = new Thread(() -> {\n            for (int i = 0; i < 1000; i++) counter.increment();\n        });\n        Thread t2 = new Thread(() -> {\n            for (int i = 0; i < 1000; i++) counter.increment();\n        });\n        t1.start(); t2.start();\n        t1.join();  t2.join();\n        System.out.println(counter.getCount()); // 2000\n    }\n}",
+    "explanation": "AtomicInteger uses CPU-level compare-and-swap (CAS) operations to provide thread safety without locking. A plain int or even volatile int would lose increments under concurrent access because increment is a read-modify-write operation, not atomic. AtomicInteger is the idiomatic choice for counters shared across threads, and is far simpler than synchronized methods for this use case.",
+    "commonMistakes": [
+      "Using a plain int field which loses increments due to race conditions",
+      "Using volatile int which fixes visibility but not atomicity — two threads can still read the same value before either writes back",
+      "Using synchronized on increment() but forgetting to synchronize getCount(), causing a stale read"
+    ],
+    "followUps": [
+      "When would you choose a LongAdder over AtomicInteger for high-contention counters?",
+      "How would you write a JUnit 5 test that verifies the counter is correct with 10 threads?",
+      "What is the difference between volatile and AtomicInteger in terms of guarantees?"
+    ],
+    "tags": [
+      "java",
+      "thread-safety",
+      "atomic",
+      "concurrency",
+      "test-helpers"
+    ]
+  },
+  {
+    "id": "java-coding-036",
+    "topicId": "java-coding",
+    "topicTitle": "Java Coding for QA/SDET",
+    "level": "mid",
+    "type": "coding",
+    "difficulty": "medium",
+    "title": "Java 8 date/time comparison for test data validation",
+    "question": "Write a Java method that checks whether a date string (ISO-8601) represents a date that is within the last N days from today, returning true if so.",
+    "problem": "Given a date string like '2026-05-25' and an integer days, return true if the parsed date is between (today - days) and today inclusive. Use java.time.",
+    "inputExample": "isWithinLastDays(\"2026-05-27\", 7) when today is 2026-05-29",
+    "expectedOutput": "true",
+    "hint": "Parse with LocalDate.parse(), get LocalDate.now(), then use date.isAfter(cutoff.minusDays(1)) && !date.isAfter(today).",
+    "solutionLanguage": "java",
+    "solution": "import java.time.LocalDate;\n\npublic static boolean isWithinLastDays(String dateStr, int days) {\n    LocalDate date = LocalDate.parse(dateStr);\n    LocalDate today = LocalDate.now();\n    LocalDate cutoff = today.minusDays(days);\n    return !date.isBefore(cutoff) && !date.isAfter(today);\n}",
+    "explanation": "java.time.LocalDate is immutable and thread-safe, unlike the legacy java.util.Date. minusDays() computes the lower bound. The inclusive range check !isBefore(cutoff) && !isAfter(today) covers both boundary dates. Parsing throws DateTimeParseException on an invalid format, which is intentional — bad dates should fail loudly in test validation.",
+    "commonMistakes": [
+      "Using java.util.Date and SimpleDateFormat, which are mutable and not thread-safe",
+      "Comparing dates with == instead of isBefore/isAfter/isEqual",
+      "Forgetting that minusDays() returns a new LocalDate; LocalDate is immutable"
+    ],
+    "followUps": [
+      "How would you handle a date-time string with a timezone like '2026-05-29T10:00:00Z'?",
+      "How would you assert in a JUnit 5 test that an API response 'createdAt' field is within the last 24 hours?",
+      "How does LocalDate.now() behave in a CI environment running in a different timezone?"
+    ],
+    "tags": [
+      "java",
+      "date-time",
+      "localdate",
+      "validation",
+      "api-testing"
+    ]
+  },
+  {
+    "id": "java-coding-037",
+    "topicId": "java-coding",
+    "topicTitle": "Java Coding for QA/SDET",
+    "level": "senior",
+    "type": "coding",
+    "difficulty": "hard",
+    "title": "Custom test exception with context fields",
+    "question": "Implement a custom exception class TestValidationException that carries the field name, expected value, and actual value as structured fields, and formats them into a readable message automatically.",
+    "problem": "Create TestValidationException extends RuntimeException with constructor parameters: String fieldName, Object expected, Object actual. The exception message should be auto-formatted as: 'Assertion failed for field [fieldName]: expected [expected] but got [actual]'.",
+    "inputExample": "throw new TestValidationException(\"status\", \"active\", \"inactive\")",
+    "expectedOutput": "Exception message: \"Assertion failed for field 'status': expected 'active' but got 'inactive'\"",
+    "hint": "Call super(formattedMessage) from the constructor. Add getter methods so test reporters can extract individual fields without parsing the message string.",
+    "solutionLanguage": "java",
+    "solution": "public class TestValidationException extends RuntimeException {\n\n    private final String fieldName;\n    private final Object expected;\n    private final Object actual;\n\n    public TestValidationException(String fieldName, Object expected, Object actual) {\n        super(String.format(\n            \"Assertion failed for field '%s': expected '%s' but got '%s'\",\n            fieldName, expected, actual));\n        this.fieldName = fieldName;\n        this.expected = expected;\n        this.actual = actual;\n    }\n\n    public TestValidationException(String fieldName, Object expected, Object actual, Throwable cause) {\n        super(String.format(\n            \"Assertion failed for field '%s': expected '%s' but got '%s'\",\n            fieldName, expected, actual), cause);\n        this.fieldName = fieldName;\n        this.expected = expected;\n        this.actual = actual;\n    }\n\n    public String getFieldName() { return fieldName; }\n    public Object getExpected()  { return expected; }\n    public Object getActual()    { return actual; }\n}",
+    "explanation": "Extending RuntimeException makes it unchecked, so callers don't need throws declarations. Storing structured fields (not just a message string) allows test listeners and reporters to extract fieldName, expected, and actual programmatically. The second constructor with a Throwable cause supports wrapping lower-level exceptions while preserving the chain. Formatting in the constructor ensures the message is consistent regardless of where the exception is logged.",
+    "commonMistakes": [
+      "Extending Exception (checked) instead of RuntimeException, forcing try-catch blocks everywhere in test code",
+      "Only storing the formatted message string and losing the structured fields, making programmatic inspection impossible",
+      "Forgetting to add the cause-accepting constructor, which breaks exception chaining"
+    ],
+    "followUps": [
+      "How would you add a list of all failed fields to a single exception instead of one per field?",
+      "How would you assert in JUnit 5 that a method throws TestValidationException with a specific fieldName?",
+      "When would you prefer a custom exception over AssertJ's AssertionError?"
+    ],
+    "tags": [
+      "java",
+      "exceptions",
+      "custom-exception",
+      "test-framework",
+      "oop"
+    ]
+  },
+  {
+    "id": "java-coding-038",
+    "topicId": "java-coding",
+    "topicTitle": "Java Coding for QA/SDET",
+    "level": "mid",
+    "type": "coding",
+    "difficulty": "medium",
+    "title": "AssertJ fluent assertions on a list of API response objects",
+    "question": "Write a JUnit 5 test method that uses AssertJ to assert that a list of Order objects returned by an API is non-empty, sorted by ID, and contains at least one order with status 'SHIPPED'.",
+    "problem": "Given List<Order> orders where Order has int getId() and String getStatus(), write a single fluent assertion chain using AssertJ that checks: list is not empty, IDs are in ascending order, and at least one status equals 'SHIPPED'.",
+    "inputExample": "orders = [Order(id=1,status=PROCESSING), Order(id=2,status=SHIPPED), Order(id=3,status=DELIVERED)]",
+    "expectedOutput": "All assertions pass",
+    "hint": "Use assertThat(orders).isNotEmpty().extracting(Order::getId).isSorted(). Then use assertThat(orders).extracting(Order::getStatus).contains(\"SHIPPED\").",
+    "solutionLanguage": "java",
+    "solution": "import org.assertj.core.api.Assertions;\nimport java.util.List;\n\nvoid ordersResponse_shouldBeNonEmptySortedAndContainShipped(List<Order> orders) {\n    Assertions.assertThat(orders)\n              .isNotEmpty()\n              .extracting(Order::getId)\n              .isSorted();\n\n    Assertions.assertThat(orders)\n              .extracting(Order::getStatus)\n              .contains(\"SHIPPED\");\n}",
+    "explanation": "AssertJ's extracting() maps each object in the list to a field value, returning an AbstractListAssert on the extracted values. isSorted() verifies natural ascending order. Separating the ID and status assertions into two chains is cleaner than a single complex chain. AssertJ failure messages include the full list contents by default, making diagnosis faster than standard JUnit assertions.",
+    "commonMistakes": [
+      "Using assertTrue(orders.stream().anyMatch(...)) which produces a cryptic failure message with no context",
+      "Calling extracting() with a string field name instead of a method reference, losing compile-time safety",
+      "Chaining isSorted() directly after extracting(Order::getStatus) instead of extracting(Order::getId)"
+    ],
+    "followUps": [
+      "How would you assert that all orders have a non-null status using allSatisfy()?",
+      "How would you use usingRecursiveComparison() to compare two Order objects field by field?",
+      "When would you use SoftAssertions instead of chained assertThat() calls?"
+    ],
+    "tags": [
+      "java",
+      "assertj",
+      "fluent-assertions",
+      "junit5",
+      "api-testing"
+    ]
+  },
+  {
+    "id": "java-coding-039",
+    "topicId": "java-coding",
+    "topicTitle": "Java Coding for QA/SDET",
+    "level": "senior",
+    "type": "coding",
+    "difficulty": "hard",
+    "title": "Soft assertions to collect all failures in an API response check",
+    "question": "Write a JUnit 5 test method that uses AssertJ SoftAssertions to validate multiple fields of an API response map and reports ALL failures in one shot rather than stopping at the first.",
+    "problem": "Given Map<String, Object> response, use SoftAssertions to assert: 'status' equals 'OK', 'code' equals 200, 'data' is not null, and 'message' starts with 'Success'. All failures should appear in a single assertion error.",
+    "inputExample": "response = {\"status\":\"ERROR\",\"code\":500,\"data\":null,\"message\":\"Internal error\"}",
+    "expectedOutput": "SoftAssertionError listing all 4 mismatches at once",
+    "hint": "Use SoftAssertions.assertSoftly(softly -> { softly.assertThat(...).isEqualTo(...); ... }); The lambda collects failures and throws after all assertions run.",
+    "solutionLanguage": "java",
+    "solution": "import org.assertj.core.api.SoftAssertions;\nimport java.util.Map;\n\nvoid apiResponse_shouldHaveAllExpectedFields(Map<String, Object> response) {\n    SoftAssertions.assertSoftly(softly -> {\n        softly.assertThat(response.get(\"status\"))\n              .as(\"status field\")\n              .isEqualTo(\"OK\");\n\n        softly.assertThat(response.get(\"code\"))\n              .as(\"code field\")\n              .isEqualTo(200);\n\n        softly.assertThat(response.get(\"data\"))\n              .as(\"data field\")\n              .isNotNull();\n\n        softly.assertThat(response.get(\"message\").toString())\n              .as(\"message field\")\n              .startsWith(\"Success\");\n    });\n}",
+    "explanation": "assertSoftly() collects all assertion failures inside the lambda and throws a single SoftAssertionError at the end listing every mismatch. Without soft assertions, the first failed assertThat() throws immediately and subsequent fields are never checked, forcing multiple test runs to discover all problems. The as() call labels each assertion so failures identify which field failed without requiring the developer to decode the full value.",
+    "commonMistakes": [
+      "Using regular Assertions.assertThat() inside the lambda instead of softly.assertThat(), which stops at the first failure",
+      "Not calling assertSoftly() — using new SoftAssertions() directly without calling assertAll() at the end",
+      "Calling response.get(\"message\").toString() when 'message' could be null, causing NPE inside the lambda"
+    ],
+    "followUps": [
+      "How does SoftAssertions differ from JUnit 5's assertAll()?",
+      "When is it harmful to use soft assertions — are there cases where hard failure is better?",
+      "How would you add a custom failure description that includes the full response map?"
+    ],
+    "tags": [
+      "java",
+      "soft-assertions",
+      "assertj",
+      "api-testing",
+      "junit5"
+    ]
+  },
+  {
+    "id": "java-coding-040",
+    "topicId": "java-coding",
+    "topicTitle": "Java Coding for QA/SDET",
+    "level": "mid",
+    "type": "interview",
+    "difficulty": "medium",
+    "question": "How do you use Mockito's when/thenReturn and verify in a unit test, and what is the difference between stubbing and verification?",
+    "shortAnswer": "Stubbing (when/thenReturn) controls what a mock returns when called. Verification (verify) asserts that a method was called with expected arguments. Stubbing sets up behaviour; verification checks interaction happened.",
+    "interviewAnswer": "Stubbing means programming a mock to return a specific value or throw an exception when a method is invoked. You write when(mock.method(args)).thenReturn(value) before the act phase. Verification means asserting after the act that the mock was called as expected: verify(mock, times(1)).method(args). The key distinction is timing and intent: stubbing is setup, verification is assertion. A common mistake is verifying everything that was stubbed — if the production code must call the method to produce the right result, a failing assertion on the result already proves the call happened. Explicit verify() adds value when the call itself is the observable outcome, such as sending an email or persisting a record, where you cannot infer it from a return value.",
+    "realProjectExample": "In an order service test I stubbed inventoryService.getStock(sku) to return 0 and verified orderService.reject(orderId) was called once. The stub controlled the condition; the verify confirmed the side-effect behavior the business rule required.",
+    "followUps": [
+      "What is the difference between thenReturn and thenAnswer?",
+      "When would you use verifyNoMoreInteractions()?",
+      "What does times(0) mean in a verify call?"
+    ],
+    "tags": [
+      "java",
+      "mockito",
+      "stubbing",
+      "verification",
+      "unit-testing"
+    ]
+  },
+  {
+    "id": "java-coding-041",
+    "topicId": "java-coding",
+    "topicTitle": "Java Coding for QA/SDET",
+    "level": "senior",
+    "type": "interview",
+    "difficulty": "hard",
+    "question": "How do you use Java reflection to inspect and invoke private methods in test helpers, and what are the risks?",
+    "shortAnswer": "Reflection lets tests call private methods via Method.setAccessible(true), but it breaks encapsulation, is brittle to refactoring, and is usually a sign the class under test needs restructuring.",
+    "interviewAnswer": "Reflection access works like this: get the method with clazz.getDeclaredMethod(name, paramTypes), call setAccessible(true) to bypass visibility, then invoke it with method.invoke(instance, args). I use this sparingly — usually only for legacy code I cannot modify, or for testing a JUnit extension or framework utility where the private method IS the intended API, just not public by design. The risks are real: the test becomes coupled to the implementation, not the contract. A rename or inline refactor breaks the test without any compile error. In InaccessibleObjectException scenarios (Java 9+ module system) reflection is blocked entirely unless the module opens the package. My preferred alternative is to extract the private logic into a package-private method or a separate class with a package-private visibility level and test it directly.",
+    "realProjectExample": "On a legacy payment gateway adapter I had to test a private buildSignature() method because it was called only from a public method whose full integration required a live network. I used reflection for that test, but I also filed a refactoring ticket to extract the signature logic into a separate SignatureBuilder class with package-private scope so the test could reach it without reflection.",
+    "followUps": [
+      "What exception is thrown when reflection is blocked by the Java module system?",
+      "How would you test private logic without reflection?",
+      "Is setAccessible(true) safe in a parallel test environment?"
+    ],
+    "tags": [
+      "java",
+      "reflection",
+      "testing",
+      "encapsulation",
+      "legacy-code"
+    ]
+  },
+  {
+    "id": "java-coding-042",
+    "topicId": "java-coding",
+    "topicTitle": "Java Coding for QA/SDET",
+    "level": "mid",
+    "type": "interview",
+    "difficulty": "medium",
+    "question": "What are JUnit 5 extensions and when would you write a custom one for a test framework?",
+    "shortAnswer": "JUnit 5 extensions implement lifecycle callbacks (BeforeEach, AfterEach, etc.) via the Extension interface. Write a custom extension when you need reusable setup/teardown logic that applies across many test classes without inheritance.",
+    "interviewAnswer": "JUnit 5 replaces JUnit 4 runners and rules with a single Extension API. An extension can implement one or more interfaces like BeforeEachCallback, AfterEachCallback, ParameterResolver, or TestExecutionExceptionHandler. You register it with @ExtendWith(MyExtension.class) on a test class or globally via the service loader. I write custom extensions when I have cross-cutting concerns: for example, a DatabaseCleanupExtension that truncates tables after each test, a TestRetryExtension that retries flaky network calls up to three times, or a ReportingExtension that logs test start and end times to a test rail system. The rule of thumb is: if the same @BeforeEach/@AfterEach block appears in three or more test classes, it belongs in an extension.",
+    "realProjectExample": "I wrote a SeleniumDriverExtension that implemented BeforeEachCallback and AfterEachCallback. Before each test it initialized the WebDriver based on a @Browser annotation on the method; after each test it captured a screenshot if the test failed and then quit the driver. Adding @ExtendWith(SeleniumDriverExtension.class) to any page object test class was all that was needed — no inheritance required.",
+    "followUps": [
+      "How does a ParameterResolver extension inject values into test method parameters?",
+      "Can you apply multiple extensions to one test class?",
+      "How would you share state between the before and after callbacks of the same extension?"
+    ],
+    "tags": [
+      "java",
+      "junit5",
+      "extensions",
+      "framework-design",
+      "lifecycle"
+    ]
+  },
+  {
+    "id": "java-coding-043",
+    "topicId": "java-coding",
+    "topicTitle": "Java Coding for QA/SDET",
+    "level": "senior",
+    "type": "interview",
+    "difficulty": "hard",
+    "question": "How do you design a typed test data builder using generics to serve multiple entity types in a shared test framework?",
+    "shortAnswer": "Use a generic abstract builder base class with a self-referential type parameter (the curiously recurring template pattern) so subclasses inherit with() methods while returning the concrete subclass type, enabling fluent chaining without casting.",
+    "interviewAnswer": "The challenge with fluent builders in a hierarchy is that base class with*() methods return the base type, breaking the chain when you call a subclass method. The solution is: abstract class BaseBuilder<T, SELF extends BaseBuilder<T, SELF>>. Each with*() method returns (SELF) this. Subclasses declare class UserBuilder extends BaseBuilder<User, UserBuilder> and get all base methods for free with the correct return type. In a shared test framework I place shared fields — id, createdAt, environment — in the BaseBuilder, and entity-specific fields (email for UserBuilder, amount for OrderBuilder) in the subclass. The build() method is abstract and forces each subclass to assemble the correct domain object. This scales well: adding a new entity type requires a new subclass, not changes to existing builders.",
+    "realProjectExample": "On an e-commerce automation project I built BaseEntityBuilder with withId(String id) and withCreatedAt(LocalDate date). UserBuilder and ProductBuilder extended it. Tests read as: new UserBuilder().withId(\"u1\").withEmail(\"a@b.com\").withRole(ADMIN).build(), where withRole() returned UserBuilder, not BaseEntityBuilder, so no cast was needed.",
+    "followUps": [
+      "What is the curiously recurring template pattern and why is it used in builder hierarchies?",
+      "How would you enforce that build() validates required fields before constructing the object?",
+      "How does this approach compare to using Lombok's @Builder for test objects?"
+    ],
+    "tags": [
+      "java",
+      "generics",
+      "builder-pattern",
+      "oop",
+      "test-data",
+      "framework-design"
+    ]
+  },
+  {
+    "id": "java-coding-044",
+    "topicId": "java-coding",
+    "topicTitle": "Java Coding for QA/SDET",
+    "level": "mid",
+    "type": "quiz",
+    "difficulty": "medium",
+    "question": "In Mockito, what is the difference between @Mock and @Spy?",
+    "choices": [
+      "@Mock creates a full stub that returns defaults; @Spy wraps a real object and calls real methods unless stubbed",
+      "@Mock calls real methods by default; @Spy returns null for all methods unless told otherwise",
+      "@Mock requires @RunWith(MockitoJUnitRunner.class); @Spy works without any runner",
+      "@Mock and @Spy are identical — @Spy is just a shorthand alias introduced in Mockito 3"
+    ],
+    "correctAnswer": "@Mock creates a full stub that returns defaults; @Spy wraps a real object and calls real methods unless stubbed",
+    "explanation": "A @Mock is a complete replacement — all methods return default values (null, 0, false, empty collections) unless explicitly stubbed. A @Spy wraps an actual instance of the class and delegates real method calls to it, so only the methods you stub are overridden. Use @Spy when you want to test a class mostly for real but need to intercept one or two methods, for example to avoid a network call inside an otherwise real business method.",
+    "tags": [
+      "java",
+      "mockito",
+      "mock",
+      "spy",
+      "unit-testing"
+    ]
+  },
+  {
+    "id": "java-coding-045",
+    "topicId": "java-coding",
+    "topicTitle": "Java Coding for QA/SDET",
+    "level": "mid",
+    "type": "quiz",
+    "difficulty": "medium",
+    "question": "Which Java Stream terminal operation returns the first element of a stream wrapped in an Optional?",
+    "choices": [
+      "stream.findFirst()",
+      "stream.getFirst()",
+      "stream.first()",
+      "stream.peek()"
+    ],
+    "correctAnswer": "stream.findFirst()",
+    "explanation": "findFirst() is a short-circuiting terminal operation that returns an Optional<T> containing the first element, or Optional.empty() if the stream is empty. peek() is an intermediate operation used for debugging. getFirst() and first() do not exist in the Java Stream API.",
+    "tags": [
+      "java",
+      "streams",
+      "optional",
+      "api",
+      "collections"
+    ]
+  },
+  {
+    "id": "java-coding-046",
+    "topicId": "java-coding",
+    "topicTitle": "Java Coding for QA/SDET",
+    "level": "mid",
+    "type": "quiz",
+    "difficulty": "easy",
+    "question": "In JUnit 5, which annotation runs a method once before all tests in a class?",
+    "choices": [
+      "@BeforeEach",
+      "@BeforeAll",
+      "@BeforeClass",
+      "@SetupClass"
+    ],
+    "correctAnswer": "@BeforeAll",
+    "explanation": "@BeforeAll replaces JUnit 4's @BeforeClass. The annotated method runs once before any test in the class. It must be static (or non-static if the test class uses @TestInstance(Lifecycle.PER_CLASS)). @BeforeEach runs before every individual test method. @BeforeClass and @SetupClass do not exist in JUnit 5.",
+    "tags": [
+      "java",
+      "junit5",
+      "lifecycle",
+      "annotations",
+      "test-setup"
+    ]
+  },
+  {
+    "id": "java-coding-047",
+    "topicId": "java-coding",
+    "topicTitle": "Java Coding for QA/SDET",
+    "level": "senior",
+    "type": "quiz",
+    "difficulty": "hard",
+    "question": "What is the purpose of Collectors.toUnmodifiableList() introduced in Java 10, and when is it preferable in test code?",
+    "choices": [
+      "It creates a sorted list from the stream elements in natural order",
+      "It collects stream elements into a List that throws UnsupportedOperationException on mutation attempts",
+      "It deduplicates the stream before collecting, similar to distinct()",
+      "It is identical to Collectors.toList() — the names are interchangeable aliases"
+    ],
+    "correctAnswer": "It collects stream elements into a List that throws UnsupportedOperationException on mutation attempts",
+    "explanation": "Collectors.toUnmodifiableList() returns a List that cannot be modified after creation, unlike Collectors.toList() which returns a mutable ArrayList. In test helpers that return reference data (expected field names, valid status codes), returning an unmodifiable list prevents accidental mutation that could cause test pollution across test methods sharing the reference.",
+    "tags": [
+      "java",
+      "streams",
+      "collectors",
+      "immutability",
+      "java10"
+    ]
+  },
+  {
+    "id": "java-coding-048",
+    "topicId": "java-coding",
+    "topicTitle": "Java Coding for QA/SDET",
+    "level": "mid",
+    "type": "scenario",
+    "difficulty": "medium",
+    "question": "Your team's REST API test suite runs fine locally but intermittently fails in CI with 'Element not found' or 'Status 404' errors that do not reproduce locally. The tests use hard-coded Thread.sleep() calls for timing. How would you rewrite the wait strategy and what Java constructs would you introduce?",
+    "shortAnswer": "Replace Thread.sleep() with a polling wait helper using a BooleanSupplier or Callable, backed by System.currentTimeMillis() or an Awaitility library call, so tests wait exactly as long as needed.",
+    "interviewAnswer": "Hard-coded sleeps fail in CI because the environment is slower or under resource pressure, so the fixed duration is sometimes too short. The fix is a polling wait: define a maximum timeout and a polling interval, then repeatedly check the condition until it is true or the timeout expires. In Java I either write a custom waitForCondition(BooleanSupplier condition, Duration timeout, Duration poll) — similar to the one in this question bank — or use the Awaitility library which provides a fluent DSL: await().atMost(5, SECONDS).pollInterval(500, MILLISECONDS).until(() -> response.getStatus().equals(\"PROCESSED\")). For API tests specifically I also check whether the slow condition is actually a race condition on the server side: if the API is asynchronous, polling a status endpoint is correct; if the API is synchronous but slow, the CI environment's network latency needs investigation independently.",
+    "realProjectExample": "Our order-processing tests were sleeping 3 seconds for status to change to 'COMPLETED'. In CI on a shared runner this was sometimes not enough. I replaced the sleep with Awaitility polling every 500ms up to 10 seconds. The tests became both faster on a good day (stopping as soon as the status changed) and more reliable on a slow day (using the full 10s budget). Overall test suite time dropped 18%.",
+    "followUps": [
+      "How would you decide on the right timeout value for a polling wait?",
+      "How does Awaitility differ from Selenium's FluentWait?",
+      "When is a hard sleep actually the right approach?"
+    ],
+    "tags": [
+      "java",
+      "waits",
+      "polling",
+      "ci-cd",
+      "api-testing",
+      "flaky-tests"
+    ]
+  },
+  {
+    "id": "java-coding-049",
+    "topicId": "java-coding",
+    "topicTitle": "Java Coding for QA/SDET",
+    "level": "senior",
+    "type": "scenario",
+    "difficulty": "hard",
+    "question": "You are building a JDBC test utility that seeds and cleans up database rows before and after each test. You need the cleanup to always run even if seeding or the test itself throws an exception. How would you structure the Java code and which JUnit 5 mechanism guarantees teardown?",
+    "shortAnswer": "Implement a JUnit 5 extension with AfterEachCallback that executes the cleanup SQL. Store the seeded row IDs in the extension's context store and delete them in afterEach, using try-finally if needed inside the JDBC calls.",
+    "interviewAnswer": "The key requirement is guaranteed cleanup even on failure. @AfterEach in JUnit 5 runs after every test regardless of pass or fail, but if it is declared in the test class itself, exceptions in @BeforeEach can prevent it from running in some configurations. A JUnit 5 AfterEachCallback extension is more reliable because JUnit guarantees it runs even when the test or BeforeEach threw. Inside the extension I use the ExtensionContext Store to pass the list of seeded IDs from the before to the after callback without using instance fields, which would be unsafe in parallel execution. The JDBC cleanup itself should use try-finally to close connections — ideally via a try-with-resources block on the Connection. If multiple rows must be deleted, I catch individual DeleteException instances and collect them, throwing a summary exception at the end so all IDs are attempted regardless of one failure.",
+    "realProjectExample": "I built a @SeedData annotation and a DatabaseSeedExtension. The extension read the annotation's SQL file, executed the INSERT statements in BeforeEachCallback, stored the generated primary keys in the ExtensionContext, and deleted them in AfterEachCallback using parameterized DELETE statements. Tests ran in parallel with no cross-contamination because each test's IDs were stored in the test's own ExtensionContext node.",
+    "followUps": [
+      "How does ExtensionContext.Store namespace work in JUnit 5?",
+      "What is the difference between using @AfterEach in the test class versus implementing AfterEachCallback in an extension?",
+      "How would you handle a situation where the database is unavailable and the cleanup cannot run?"
+    ],
+    "tags": [
+      "java",
+      "junit5",
+      "jdbc",
+      "database-testing",
+      "extensions",
+      "cleanup"
+    ]
+  },
+  {
+    "id": "java-coding-050",
+    "topicId": "java-coding",
+    "topicTitle": "Java Coding for QA/SDET",
+    "level": "senior",
+    "type": "scenario",
+    "difficulty": "hard",
+    "question": "Your team added a new required field to an API response. Ten existing tests start failing with NullPointerException when accessing that field. How do you update the test utilities to handle missing fields gracefully while still failing loudly when the field is truly required?",
+    "shortAnswer": "Introduce an Optional-based accessor in your response helper for optional fields, and a separate mandatory accessor that throws a descriptive TestValidationException when the field is absent. Tests that need the field use the mandatory accessor; exploratory tests use the optional one.",
+    "interviewAnswer": "The root problem is that one accessor is serving two different semantics: required and optional. When a field is required, the test should fail with a clear message like 'Field createdBy is required but absent'. When a field is optional, a missing value should return Optional.empty() and the test should decide how to handle it. I create two utility methods on my response helper: getString(String field) returns Optional<String>, and getRequiredString(String field) either returns the value or throws TestValidationException with the field name. For the ten failing tests I identify which were testing the new field (they should use getRequiredString) and which just happened to access it incidentally (they should use getString or remove the access if it's not relevant to their assertion). I also add a JUnit 5 parameterized test specifically for the new required field to prevent future regressions.",
+    "realProjectExample": "After a backend schema change we had 15 failing tests. I audited each one: 8 were genuinely testing the new 'assignedTo' field and should fail if it's absent, so I changed those to getRequiredString('assignedTo'). The other 7 were incidentally printing the field to a log statement. I removed those log lines entirely — the tests passed again and we had clearer test intent.",
+    "followUps": [
+      "How would you add a schema contract test that detects missing required fields across the whole response automatically?",
+      "How does your approach scale when the API response has 50 fields?",
+      "How would you prevent this class of failure in the future using consumer-driven contract testing?"
+    ],
+    "tags": [
+      "java",
+      "optional",
+      "api-testing",
+      "test-maintenance",
+      "schema-validation",
+      "exceptions"
+    ]
   }
 ]

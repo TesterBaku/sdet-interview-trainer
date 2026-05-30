@@ -2,16 +2,18 @@
 
 import Link from "next/link";
 import { useParams, useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Flashcard } from "@/components/Flashcard";
-import { getFlashcardQuestions, getTopic } from "@/lib/questionUtils";
+import { getFlashcardQuestions, getTopic, shuffleArray } from "@/lib/questionUtils";
 import { getRecord, useProgress } from "@/lib/progress";
 
 export function FlashcardsClient() {
   const params = useParams<{ topicId: string }>();
   const searchParams = useSearchParams();
   const topic = getTopic(params.topicId);
-  const questions = getFlashcardQuestions(params.topicId);
+  const questions = useMemo(() => getFlashcardQuestions(params.topicId), [params.topicId]);
+  const [displayQuestions, setDisplayQuestions] = useState(questions);
+  const [shuffled, setShuffled] = useState(false);
   const [index, setIndex] = useState(() => {
     const requestedQuestionId = searchParams.get("question");
     const requestedIndex = requestedQuestionId
@@ -20,7 +22,7 @@ export function FlashcardsClient() {
     return requestedIndex >= 0 ? requestedIndex : 0;
   });
   const { progress, updateQuestion } = useProgress();
-  const question = questions[index];
+  const question = displayQuestions[index];
 
   if (!topic) {
     return <p className="rounded-2xl bg-white/80 p-6">Topic not found.</p>;
@@ -28,6 +30,13 @@ export function FlashcardsClient() {
 
   if (!question) {
     return <p className="rounded-2xl bg-white/80 p-6">No flashcards available for this topic.</p>;
+  }
+
+  function toggleShuffle() {
+    const next = !shuffled;
+    setDisplayQuestions(next ? shuffleArray([...questions]) : [...questions]);
+    setShuffled(next);
+    setIndex(0);
   }
 
   return (
@@ -39,9 +48,18 @@ export function FlashcardsClient() {
           </Link>
           <h1 className="mt-2 font-display text-3xl font-black text-blueprint sm:text-5xl">{topic.title} Flashcards</h1>
         </div>
-        <p className="font-bold text-ink/60">
-          Card {index + 1} of {questions.length}
-        </p>
+        <div className="flex items-center gap-3">
+          <button
+            className={`rounded-full border px-4 py-2 text-sm font-bold shadow-panel focus-ring transition ${shuffled ? "border-signal/40 bg-signal/10 text-signal" : "border-ink/15 bg-white/80 text-ink"}`}
+            onClick={toggleShuffle}
+            type="button"
+          >
+            {shuffled ? "Reset order" : "Shuffle"}
+          </button>
+          <p className="font-bold text-ink/60">
+            Card {index + 1} of {displayQuestions.length}
+          </p>
+        </div>
       </header>
       <Flashcard
         currentStatus={getRecord(progress, question.id)?.status}
@@ -58,7 +76,7 @@ export function FlashcardsClient() {
         >
           Previous
         </button>
-        {index === questions.length - 1 ? (
+        {index === displayQuestions.length - 1 ? (
           // A card marked in a prior session is already counted as completed,
           // so cross-session records satisfy the gate intentionally.
           (getRecord(progress, question.id)?.status ?? "new") !== "new" ? (

@@ -10,8 +10,16 @@
     "shortAnswer": "Fast checks first, then build, unit tests, API/component tests, smoke UI tests, reports, and optional full regression later.",
     "interviewAnswer": "I want the earliest failures to be cheap and clear. A typical pipeline runs lint/static checks, unit tests, build, API or integration tests, then a small smoke UI suite. Longer regression suites can run nightly or before release depending on risk.",
     "realProjectExample": "In one pipeline, PRs ran lint, unit tests, API tests, and 20 smoke UI tests. Full browser regression ran nightly with reports posted to Slack.",
-    "followUps": ["Where do you put flaky tests?", "How do you handle test reports?", "How do secrets get managed?"],
-    "tags": ["ci", "pipeline", "quality gates"]
+    "followUps": [
+      "Where do you put flaky tests?",
+      "How do you handle test reports?",
+      "How do secrets get managed?"
+    ],
+    "tags": [
+      "ci",
+      "pipeline",
+      "quality gates"
+    ]
   },
   {
     "id": "cicd-002",
@@ -21,10 +29,19 @@
     "type": "quiz",
     "difficulty": "easy",
     "question": "Where should API keys and passwords be stored in CI?",
-    "choices": ["Committed test config", "CI secret store", "README", "Hard-coded constants"],
+    "choices": [
+      "Committed test config",
+      "CI secret store",
+      "README",
+      "Hard-coded constants"
+    ],
     "correctAnswer": "CI secret store",
     "explanation": "Secrets should be stored in the CI/CD platform's secret management system and injected at runtime.",
-    "tags": ["ci", "secrets", "security"]
+    "tags": [
+      "ci",
+      "secrets",
+      "security"
+    ]
   },
   {
     "id": "cicd-003",
@@ -37,8 +54,16 @@
     "shortAnswer": "Compare environment, dependencies, browser versions, secrets, test data, parallelism, and artifacts.",
     "interviewAnswer": "I start by pulling CI artifacts: logs, screenshots, traces, videos, and environment metadata. Then I compare dependency versions, browser images, timeouts, env vars, data setup, and parallel execution. The goal is to reproduce the CI shape locally or in a disposable runner.",
     "realProjectExample": "A Playwright test only failed in CI because the container timezone differed from local. We made date assertions timezone-aware.",
-    "followUps": ["What artifacts are most useful?", "How do you debug parallel-only failures?", "How do you prevent environment drift?"],
-    "tags": ["ci", "debugging", "artifacts"]
+    "followUps": [
+      "What artifacts are most useful?",
+      "How do you debug parallel-only failures?",
+      "How do you prevent environment drift?"
+    ],
+    "tags": [
+      "ci",
+      "debugging",
+      "artifacts"
+    ]
   },
   {
     "id": "cicd-004",
@@ -56,7 +81,11 @@
     ],
     "correctAnswer": "Verify the build is not catastrophically broken before deeper testing",
     "explanation": "Smoke tests are a fast, shallow safety net. They confirm core functionality is intact so expensive regression suites are not wasted on a broken build.",
-    "tags": ["ci", "smoke tests", "pipeline"]
+    "tags": [
+      "ci",
+      "smoke tests",
+      "pipeline"
+    ]
   },
   {
     "id": "cicd-005",
@@ -66,10 +95,19 @@
     "type": "quiz",
     "difficulty": "easy",
     "question": "In GitHub Actions, what keyword defines a job that runs only when a previous job succeeds?",
-    "choices": ["triggers", "needs", "depends_on", "after"],
+    "choices": [
+      "triggers",
+      "needs",
+      "depends_on",
+      "after"
+    ],
     "correctAnswer": "needs",
     "explanation": "The `needs` keyword in a GitHub Actions workflow job creates an explicit dependency, meaning the job will only start after all listed jobs have completed successfully.",
-    "tags": ["github actions", "pipeline", "ci"]
+    "tags": [
+      "github actions",
+      "pipeline",
+      "ci"
+    ]
   },
   {
     "id": "cicd-006",
@@ -87,7 +125,11 @@
     ],
     "correctAnswer": "Split tests into parallel jobs using a matrix or sharding strategy",
     "explanation": "Parallel execution via matrix builds or test sharding distributes test load across multiple runners, reducing wall-clock time proportionally to the number of shards.",
-    "tags": ["parallel execution", "ci", "performance"]
+    "tags": [
+      "parallel execution",
+      "ci",
+      "performance"
+    ]
   },
   {
     "id": "cicd-007",
@@ -105,7 +147,11 @@
     ],
     "correctAnswer": "It blocks a build from advancing when defined thresholds are not met",
     "explanation": "A quality gate is a pass/fail check — for example, minimum code coverage, zero critical bugs, or a test pass rate above 95% — that must be satisfied before the pipeline proceeds to the next stage or deployment.",
-    "tags": ["quality gates", "ci", "pipeline"]
+    "tags": [
+      "quality gates",
+      "ci",
+      "pipeline"
+    ]
   },
   {
     "id": "cicd-008",
@@ -123,7 +169,11 @@
     ],
     "correctAnswer": "Quarantine the test and investigate root cause before re-enabling it",
     "explanation": "Quarantining prevents flaky tests from blocking valid builds while preserving the test's existence. Investigation may reveal async timing issues, test data conflicts, or environment problems that need proper fixes.",
-    "tags": ["flaky tests", "ci", "test maintenance"]
+    "tags": [
+      "flaky tests",
+      "ci",
+      "test maintenance"
+    ]
   },
   {
     "id": "cicd-009",
@@ -133,10 +183,19 @@
     "type": "quiz",
     "difficulty": "easy",
     "question": "Which file format is most commonly used to define pipelines in GitHub Actions?",
-    "choices": ["JSON", "XML", "YAML", "TOML"],
+    "choices": [
+      "JSON",
+      "XML",
+      "YAML",
+      "TOML"
+    ],
     "correctAnswer": "YAML",
     "explanation": "GitHub Actions workflows are defined in YAML files stored in the `.github/workflows/` directory of the repository.",
-    "tags": ["github actions", "ci", "pipeline"]
+    "tags": [
+      "github actions",
+      "ci",
+      "pipeline"
+    ]
   },
   {
     "id": "cicd-010",
@@ -154,7 +213,12 @@
     ],
     "correctAnswer": "Parallelize across shards, run only impacted tests on PRs, and move full regression to a scheduled nightly run",
     "explanation": "The highest-impact approach combines sharding to divide work, selective test execution on PRs to reduce scope, and offloading the full suite to a scheduled run so PR pipelines stay fast without losing regression coverage.",
-    "tags": ["parallel execution", "pipeline", "performance", "quality gates"]
+    "tags": [
+      "parallel execution",
+      "pipeline",
+      "performance",
+      "quality gates"
+    ]
   },
   {
     "id": "cicd-011",
@@ -172,7 +236,11 @@
     ],
     "correctAnswer": "It runs steps after the main stages regardless of build result, such as publishing reports",
     "explanation": "The `post` block in a Jenkinsfile allows you to define actions that run after all stages complete — for example, publishing HTML reports, sending Slack notifications, or archiving artifacts — whether the build passed or failed.",
-    "tags": ["jenkins", "pipeline", "test reports"]
+    "tags": [
+      "jenkins",
+      "pipeline",
+      "test reports"
+    ]
   },
   {
     "id": "cicd-012",
@@ -190,7 +258,11 @@
     ],
     "correctAnswer": "${{ secrets.SECRET_NAME }}",
     "explanation": "GitHub Actions uses the `${{ secrets.SECRET_NAME }}` expression syntax to access secrets stored in repository or organization settings and inject them as environment variables.",
-    "tags": ["github actions", "secrets", "environment variables"]
+    "tags": [
+      "github actions",
+      "secrets",
+      "environment variables"
+    ]
   },
   {
     "id": "cicd-013",
@@ -203,8 +275,17 @@
     "shortAnswer": "Generate machine-readable reports (JUnit XML, Allure, HTML), archive them as artifacts, and integrate with a reporting plugin or dashboard.",
     "interviewAnswer": "Most CI tools can consume JUnit XML natively and display pass/fail summaries inline. On top of that I use Allure or pytest-html for human-readable reports and archive them as pipeline artifacts so they persist after the run. For GitHub Actions I use the `dorny/test-reporter` action. In Jenkins, the JUnit publisher plugin handles it. For trend visibility I integrate with Allure TestOps or a shared dashboard so the team can track flakiness over sprints.",
     "realProjectExample": "We had Playwright output JUnit XML, published it through the GitHub Actions test reporter action, and sent an Allure HTML report link to our Slack QA channel on each nightly run. Stakeholders could see pass rates without accessing the CI system.",
-    "followUps": ["How do you handle reports when tests run in parallel across multiple shards?", "How do you make report history visible over time?", "What do you do if report generation itself fails?"],
-    "tags": ["test reports", "ci", "pipeline", "artifacts"]
+    "followUps": [
+      "How do you handle reports when tests run in parallel across multiple shards?",
+      "How do you make report history visible over time?",
+      "What do you do if report generation itself fails?"
+    ],
+    "tags": [
+      "test reports",
+      "ci",
+      "pipeline",
+      "artifacts"
+    ]
   },
   {
     "id": "cicd-014",
@@ -217,8 +298,17 @@
     "shortAnswer": "Use environment-specific variable groups or contexts in the CI system; never commit environment-specific values to the repo.",
     "interviewAnswer": "I use the CI platform's environment or context feature — GitHub Actions environments, Jenkins credential bindings, or GitLab CI environment scopes — to hold per-environment values. Shared non-secret config like base URLs goes in pipeline variables, while secrets go into the secret store scoped per environment. Tests read them as standard environment variables at runtime. I avoid `.env` files in the repo entirely for anything sensitive.",
     "realProjectExample": "In GitLab CI we defined three environments — dev, staging, prod — each with its own `BASE_URL` variable and database credentials secret. The test stage pulled the correct set based on the target environment so the same test suite covered all three without code changes.",
-    "followUps": ["How do you prevent staging secrets from leaking into a dev run?", "What happens if an env var is missing at runtime?", "How do you audit which secrets a pipeline has access to?"],
-    "tags": ["environment variables", "secrets", "pipeline", "ci"]
+    "followUps": [
+      "How do you prevent staging secrets from leaking into a dev run?",
+      "What happens if an env var is missing at runtime?",
+      "How do you audit which secrets a pipeline has access to?"
+    ],
+    "tags": [
+      "environment variables",
+      "secrets",
+      "pipeline",
+      "ci"
+    ]
   },
   {
     "id": "cicd-015",
@@ -231,8 +321,17 @@
     "shortAnswer": "Quarantine flaky tests, allow limited retries, track flakiness metrics, and enforce a fix-or-delete policy.",
     "interviewAnswer": "My strategy has three layers. First, quarantine: flaky tests are tagged and moved to a non-blocking job so they cannot hold up PRs. Second, limited retries: I allow one automatic retry at the runner level to distinguish true failures from transient noise, but I never use high retry counts to mask real issues. Third, accountability: I track flakiness rate per test in a dashboard and set a threshold — any test flaky more than 3% of runs in a sprint gets a Jira ticket assigned to the owning team with a deadline. Tests that are not fixed in two sprints get deleted.",
     "realProjectExample": "On a Playwright project I added a `@flaky` marker and a separate GitHub Actions job that ran quarantined tests without the `continue-on-error: false` flag. A weekly Slack summary listed the top 10 flaky tests by failure rate. Within a quarter we reduced flaky failures by 80%.",
-    "followUps": ["How do you determine if a retry is legitimate?", "How do you prevent new flaky tests from being introduced?", "What's your definition of 'fixed' for a flaky test?"],
-    "tags": ["flaky tests", "ci", "test maintenance", "quality gates"]
+    "followUps": [
+      "How do you determine if a retry is legitimate?",
+      "How do you prevent new flaky tests from being introduced?",
+      "What's your definition of 'fixed' for a flaky test?"
+    ],
+    "tags": [
+      "flaky tests",
+      "ci",
+      "test maintenance",
+      "quality gates"
+    ]
   },
   {
     "id": "cicd-016",
@@ -245,8 +344,18 @@
     "shortAnswer": "Shard tests across multiple runners using Playwright's built-in sharding, merge reports afterward, and tune shard count based on target pipeline duration.",
     "interviewAnswer": "Playwright supports native sharding via `--shard=N/M`. I set up a matrix strategy in the workflow where each matrix job receives a different shard index. For 500 tests across 5 shards, each job runs ~100 tests. After all shards complete, a merge job downloads all shard artifacts and uses `playwright merge-reports` to produce a unified HTML and JUnit report. I also enable GitHub Actions job caching for node_modules and Playwright browsers to cut setup time. Shard count is tuned to hit a target wall-clock time — typically under 8 minutes for PR pipelines.",
     "realProjectExample": "We sharded a 450-test Playwright suite across 6 runners in GitHub Actions. Total runtime dropped from 38 minutes to under 7. The merge job published a combined Allure report to GitHub Pages, giving the team a single link per run.",
-    "followUps": ["How do you distribute tests evenly when some tests are much slower?", "How does sharding interact with test fixtures that create shared state?", "How do you handle a shard job that times out?"],
-    "tags": ["parallel execution", "github actions", "playwright", "pipeline", "test reports"]
+    "followUps": [
+      "How do you distribute tests evenly when some tests are much slower?",
+      "How does sharding interact with test fixtures that create shared state?",
+      "How do you handle a shard job that times out?"
+    ],
+    "tags": [
+      "parallel execution",
+      "github actions",
+      "playwright",
+      "pipeline",
+      "test reports"
+    ]
   },
   {
     "id": "cicd-017",
@@ -259,8 +368,17 @@
     "shortAnswer": "A quality gate is a pass/fail threshold that blocks promotion if test pass rate, coverage, or other metrics fall below a defined minimum.",
     "interviewAnswer": "A quality gate is a binary check that lives in the pipeline: the build either meets the bar or it does not advance. As an SDET I define and own the test-related gates. Common ones include: test pass rate above 98%, no new critical severity defects from static analysis, and API contract tests all green. In GitHub Actions I implement these as required status checks — if the check fails, the PR cannot be merged. In SonarQube I configure the Quality Gate profile and link it to the pipeline via the SonarQube GitHub Action, failing the build if the gate is breached.",
     "realProjectExample": "I added a quality gate that blocked staging deployments if the smoke test pass rate dropped below 100% or any contract test failed. This caught two breaking API changes before they reached staging users.",
-    "followUps": ["How do you handle emergency bypasses of a quality gate?", "Who should own a quality gate definition?", "How do you balance strictness with delivery speed?"],
-    "tags": ["quality gates", "ci", "pipeline", "test strategy"]
+    "followUps": [
+      "How do you handle emergency bypasses of a quality gate?",
+      "Who should own a quality gate definition?",
+      "How do you balance strictness with delivery speed?"
+    ],
+    "tags": [
+      "quality gates",
+      "ci",
+      "pipeline",
+      "test strategy"
+    ]
   },
   {
     "id": "cicd-018",
@@ -273,8 +391,18 @@
     "shortAnswer": "Tier tests by execution speed and risk, run fast tiers on every PR, schedule full regression nightly, and actively prune obsolete tests.",
     "interviewAnswer": "I split the suite into tiers. Tier 1 — smoke — runs on every PR, must complete in under 5 minutes, covers the top 15 to 20 critical paths. Tier 2 — regression — runs on merges to main or on a schedule, targets moderate risk paths, completes in under 20 minutes with parallelism. Tier 3 — extended regression — runs nightly, includes edge cases and data-heavy scenarios. Each tier is tagged, and CI pipelines trigger only the relevant tier. On the maintenance side, I enforce a rule: any test that has not caught a bug in 6 months and covers a stable area gets reviewed for deletion or merging with another test. This keeps the suite lean and the CI feedback loop fast.",
     "realProjectExample": "On a React/Node project we had 600 Cypress tests all running on every PR, taking 55 minutes. I re-tagged them into three tiers, moved tiers 2 and 3 to scheduled runs, and reduced PR pipeline time to 9 minutes without losing coverage on critical paths.",
-    "followUps": ["How do you decide which tests belong in the smoke tier?", "What do you do when a tier-3 test catches a critical bug?", "How do you prevent tier creep where everything ends up in tier 1?"],
-    "tags": ["regression tests", "pipeline", "test strategy", "parallel execution", "ci"]
+    "followUps": [
+      "How do you decide which tests belong in the smoke tier?",
+      "What do you do when a tier-3 test catches a critical bug?",
+      "How do you prevent tier creep where everything ends up in tier 1?"
+    ],
+    "tags": [
+      "regression tests",
+      "pipeline",
+      "test strategy",
+      "parallel execution",
+      "ci"
+    ]
   },
   {
     "id": "cicd-019",
@@ -287,8 +415,18 @@
     "shortAnswer": "Move the full regression suite off the PR trigger, run only a fast smoke suite on PRs, and schedule regression to run on merge to main or nightly.",
     "interviewAnswer": "The core problem is that a slow pipeline destroys the feedback loop and creates pressure to skip it entirely. My first step is to separate concerns: PRs should only run fast checks — lint, unit tests, and a focused smoke suite — with a target of under 8 minutes. Full regression moves to a post-merge trigger on main or a scheduled nightly run. I use tags or test annotations to split the suites cleanly and add a required status check in GitHub that only requires the smoke job, not regression. I communicate the change to the team with the tradeoff clearly stated: regression is still run frequently, just not on every PR. I also add a dashboard link in Slack so failed nightly regressions are visible without anyone having to check CI.",
     "realProjectExample": "After making this split on a previous project, PR pipeline time dropped from 40 minutes to 6. Developer bypass behavior stopped within a week, and nightly regression failures were still caught within hours because of the Slack notification.",
-    "followUps": ["What if a regression-only test finds a bug that gets merged before it runs?", "How do you communicate the risk of this tradeoff to non-technical stakeholders?", "How do you enforce the smoke vs regression split as the team keeps adding tests?"],
-    "tags": ["regression tests", "smoke tests", "pipeline", "ci", "quality gates"]
+    "followUps": [
+      "What if a regression-only test finds a bug that gets merged before it runs?",
+      "How do you communicate the risk of this tradeoff to non-technical stakeholders?",
+      "How do you enforce the smoke vs regression split as the team keeps adding tests?"
+    ],
+    "tags": [
+      "regression tests",
+      "smoke tests",
+      "pipeline",
+      "ci",
+      "quality gates"
+    ]
   },
   {
     "id": "cicd-020",
@@ -301,8 +439,18 @@
     "shortAnswer": "Add a post-deployment smoke test stage that runs against the live staging environment after each deployment and gates promotion to production.",
     "interviewAnswer": "The gap is between 'tests pass against a test double' and 'the service is actually running and reachable.' I close it by adding a post-deploy verification stage in the pipeline. After the deployment step completes, a lightweight smoke job hits real staging endpoints — healthcheck, login, one critical API call — and only marks the deployment successful if those pass. This stage uses the real staging URL and credentials from the CI secret store. I also add a rollback trigger: if post-deploy smoke fails, the pipeline fires the rollback step automatically rather than leaving staging broken. Longer-term, I also look at whether the original tests were running against a live-like environment or against mocks, and adjust the environment strategy.",
     "realProjectExample": "After a backend team changed the deployment config and broke service discovery, our unit and API tests passed because they mocked the service layer. I added a post-deploy healthcheck job in the GitLab CI pipeline. It caught the next two misconfigurations within minutes of deployment rather than when QA manually verified staging.",
-    "followUps": ["How do you prevent post-deploy smoke from being bypassed under release pressure?", "What do you do if staging is intermittently unhealthy and the smoke fails for environment reasons?", "How would you extend this to a canary or blue/green deployment model?"],
-    "tags": ["smoke tests", "pipeline", "build failures", "ci", "environment variables"]
+    "followUps": [
+      "How do you prevent post-deploy smoke from being bypassed under release pressure?",
+      "What do you do if staging is intermittently unhealthy and the smoke fails for environment reasons?",
+      "How would you extend this to a canary or blue/green deployment model?"
+    ],
+    "tags": [
+      "smoke tests",
+      "pipeline",
+      "build failures",
+      "ci",
+      "environment variables"
+    ]
   },
   {
     "id": "cicd-021",
@@ -315,8 +463,18 @@
     "shortAnswer": "Revoke the key immediately, rotate all affected credentials, purge from git history, then add secret scanning and pre-commit hooks to prevent recurrence.",
     "interviewAnswer": "Immediate response: revoke the exposed key at the provider before doing anything else — exposure time is the top priority. Then rotate any other credentials that may have been visible in the same context. Next, remove the key from git history using `git filter-repo` or BFG Repo Cleaner and force-push. Scrub the CI build logs through the CI platform's log deletion API if available. File an incident report documenting the timeline and exposure window. For prevention: enable GitHub's secret scanning feature which automatically detects common key patterns in pushes and PRs. Add a pre-commit hook using `detect-secrets` or `truffleHog` to catch secrets before they reach the remote. Update the team's definition of done to include a secrets check. Make the CI system redact known secret patterns in log output. Review the pipeline itself to ensure secrets are injected via the secret store and never echoed in steps.",
     "realProjectExample": "On one project a Slack webhook URL was committed in a test config file. We rotated it immediately, added `detect-secrets` as a pre-commit hook to the repo, enabled GitHub's push protection, and added a pipeline step that ran `truffleHog` on each PR. No further incidents in six months.",
-    "followUps": ["How do you handle secrets that are embedded in container images pushed to a registry?", "What is your process for rotating secrets across many environments without downtime?", "How do you balance developer convenience with strict secret controls?"],
-    "tags": ["secrets", "security", "ci", "pipeline", "environment variables"]
+    "followUps": [
+      "How do you handle secrets that are embedded in container images pushed to a registry?",
+      "What is your process for rotating secrets across many environments without downtime?",
+      "How do you balance developer convenience with strict secret controls?"
+    ],
+    "tags": [
+      "secrets",
+      "security",
+      "ci",
+      "pipeline",
+      "environment variables"
+    ]
   },
   {
     "id": "cicd-022",
@@ -329,8 +487,17 @@
     "shortAnswer": "Correlate failures to shared resources, execution order, timing, or environment instability — then isolate and fix the underlying cause rather than adding retries.",
     "interviewAnswer": "Random flakiness across different tests on each run is a pattern that usually points to one of three causes: shared state, timing, or environment instability. My diagnosis approach: first, pull all failure logs and screenshots and look for patterns — same error message, same test file, same time of day, same runner? Second, check for test isolation issues — tests sharing a database, test user account, or browser session that causes interference when run in parallel. Third, look at timing: are failures concentrated near the start of the run when services are warming up, or toward the end when resource limits may be hit? Fourth, check the CI runner health — CPU throttling, memory pressure, or network timeouts in a shared runner pool. I add verbose logging to the next 10 runs, group failures by error type, and check correlation with parallel worker count. I deliberately lower the shard count to run tests more sequentially to see if flakiness drops, which confirms a shared state or resource contention issue.",
     "realProjectExample": "Random failures in a Selenium suite turned out to be caused by a shared test user account — parallel tests were logging in with the same credentials and invalidating each other's sessions. Adding per-worker unique test users eliminated the flakiness entirely.",
-    "followUps": ["How do you communicate to the team while the investigation is ongoing?", "At what point do you add retries as a tactical measure?", "How do you prevent shared-state test pollution in a large suite?"],
-    "tags": ["flaky tests", "ci", "parallel execution", "debugging"]
+    "followUps": [
+      "How do you communicate to the team while the investigation is ongoing?",
+      "At what point do you add retries as a tactical measure?",
+      "How do you prevent shared-state test pollution in a large suite?"
+    ],
+    "tags": [
+      "flaky tests",
+      "ci",
+      "parallel execution",
+      "debugging"
+    ]
   },
   {
     "id": "cicd-023",
@@ -343,8 +510,18 @@
     "shortAnswer": "Start with non-blocking test jobs, prove value with quick wins, then progressively harden gates once the team trusts the suite.",
     "interviewAnswer": "The key is to not block delivery first — earn trust before adding gates. Week 1: add a test job to the pipeline set to `continue-on-error: true` or the equivalent. It runs but does not block anything. This surfaces existing failures and gets the team used to seeing test results without fear. Week 2–3: write a small smoke suite covering the top 5 most-reported production bugs. These are high-credibility tests that demonstrate immediate value. Week 4: show the team a report: 'here are 3 times these tests would have caught a production issue.' Make the case for a soft gate. Month 2: convert the smoke suite to a required status check on PRs. At this point the team has seen the suite catch real issues and trusts it. Continue expanding incrementally, adding a regression tier over the following sprints. Every time a test catches a real bug, document it visibly — that's the social proof that sustains the program.",
     "realProjectExample": "I joined a startup where the only CI was a Docker build. I added a non-blocking pytest API smoke suite in week one. Within three weeks it had already caught two breaking changes that would have gone to production. By month two the team was asking me to add more tests, not resisting the process.",
-    "followUps": ["How do you handle team members who see the tests as slowing them down?", "What do you do when the first real gate causes a delayed release?", "How do you prioritize which tests to write first in a zero-coverage codebase?"],
-    "tags": ["pipeline", "ci", "smoke tests", "quality gates", "test strategy"]
+    "followUps": [
+      "How do you handle team members who see the tests as slowing them down?",
+      "What do you do when the first real gate causes a delayed release?",
+      "How do you prioritize which tests to write first in a zero-coverage codebase?"
+    ],
+    "tags": [
+      "pipeline",
+      "ci",
+      "smoke tests",
+      "quality gates",
+      "test strategy"
+    ]
   },
   {
     "id": "cicd-024",
@@ -357,8 +534,18 @@
     "shortAnswer": "Temporarily disable or mock the failing test to unblock PRs, track the external dependency separately, and restore the real test when the API recovers.",
     "interviewAnswer": "The core problem is conflating an external dependency failure with a code quality failure. The team should not be blocked by an outage they do not control. Immediate action: skip or disable the specific test with a clear comment and a Jira ticket reference so it is not forgotten. If the CI system supports it, move the test to a non-blocking job group. Better long-term action: that test should be exercising the integration contract, not depending on production availability of a third party. I'd introduce a mock or a recorded response fixture for CI runs, and run the live third-party test only in a nightly or pre-release job where a failure is an alert rather than a blocker. This also protects the pipeline from rate limits and latency variability from external APIs.",
     "realProjectExample": "A payment gateway our team tested against had a 2-hour outage that killed every PR pipeline for the morning. I moved the payment tests to a separate non-blocking job and added a WireMock stub for CI. From that point on, external API outages no longer impacted the team's velocity.",
-    "followUps": ["How do you keep the mock synchronized with the real API contract?", "Who is responsible for monitoring the non-blocking external API test job?", "How do you decide which external dependencies get mocked versus tested live?"],
-    "tags": ["build failures", "ci", "pipeline", "test strategy", "flaky tests"]
+    "followUps": [
+      "How do you keep the mock synchronized with the real API contract?",
+      "Who is responsible for monitoring the non-blocking external API test job?",
+      "How do you decide which external dependencies get mocked versus tested live?"
+    ],
+    "tags": [
+      "build failures",
+      "ci",
+      "pipeline",
+      "test strategy",
+      "flaky tests"
+    ]
   },
   {
     "id": "cicd-025",
@@ -371,7 +558,694 @@
     "shortAnswer": "Give each service its own independent pipeline, test each service in isolation with contract tests, and run cross-service integration tests in a separate composed environment pipeline.",
     "interviewAnswer": "In a monolith the single pipeline was correct. In microservices, a single pipeline becomes a bottleneck and creates false dependencies between services. The redesign has three levels. Level 1 — per-service pipelines: each microservice repository has its own CI pipeline that runs lint, unit tests, component tests, and contract tests (using Pact or a similar tool) independently. A failing service pipeline does not block others. Level 2 — contract verification: after a service publishes its consumer-driven contract, the pipeline of the providing service verifies it. This catches breaking API changes before integration. Level 3 — composed environment tests: on a schedule or on a merge to main, a separate pipeline spins up a Docker Compose or Kubernetes-based environment with all services, runs cross-service smoke and integration tests, and publishes results. This level catches orchestration and network issues. Secrets and environment configs are scoped per service, not shared globally, which reduces blast radius when a credential is rotated.",
     "realProjectExample": "Migrating a Django monolith to eight Node microservices, I set up per-service GitHub Actions workflows with Pact contract testing between the auth service and all its consumers. The composed integration pipeline ran nightly in a Docker Compose stack. We caught three breaking contract violations during migration that would have caused production incidents.",
-    "followUps": ["How do you manage test data setup in a composed multi-service test environment?", "How do you handle a scenario where contract tests pass but integration tests fail?", "What is your strategy when 8 service pipelines are all broken at once due to a shared infrastructure issue?"],
-    "tags": ["pipeline", "ci", "regression tests", "smoke tests", "quality gates", "build failures"]
+    "followUps": [
+      "How do you manage test data setup in a composed multi-service test environment?",
+      "How do you handle a scenario where contract tests pass but integration tests fail?",
+      "What is your strategy when 8 service pipelines are all broken at once due to a shared infrastructure issue?"
+    ],
+    "tags": [
+      "pipeline",
+      "ci",
+      "regression tests",
+      "smoke tests",
+      "quality gates",
+      "build failures"
+    ]
+  },
+  {
+    "id": "cicd-026",
+    "topicId": "cicd",
+    "topicTitle": "CI/CD for QA/SDET",
+    "level": "mid",
+    "type": "quiz",
+    "difficulty": "easy",
+    "question": "In GitHub Actions, what is the purpose of a matrix strategy?",
+    "choices": [
+      "It stores encrypted secrets for different environments",
+      "It runs a job multiple times with different variable combinations, such as OS or browser versions",
+      "It defines the order in which pipeline stages execute",
+      "It archives build artifacts across multiple runs"
+    ],
+    "correctAnswer": "It runs a job multiple times with different variable combinations, such as OS or browser versions",
+    "explanation": "A matrix strategy in GitHub Actions lets you parameterize a job definition. The runner creates one job instance per combination of matrix values, enabling cross-browser, cross-OS, or cross-version test runs without duplicating workflow YAML.",
+    "tags": [
+      "github actions",
+      "matrix builds",
+      "parallel execution",
+      "ci"
+    ]
+  },
+  {
+    "id": "cicd-027",
+    "topicId": "cicd",
+    "topicTitle": "CI/CD for QA/SDET",
+    "level": "mid",
+    "type": "quiz",
+    "difficulty": "easy",
+    "question": "In GitLab CI/CD, what keyword makes a job run only on a specific branch?",
+    "choices": [
+      "trigger",
+      "only / rules",
+      "needs",
+      "extends"
+    ],
+    "correctAnswer": "only / rules",
+    "explanation": "GitLab CI uses the `only` keyword (or the newer `rules` block) to restrict when a job runs. For example, `only: - main` limits the job to the main branch. The `rules` syntax offers more expressive conditions including regex and variable checks.",
+    "tags": [
+      "gitlab ci",
+      "pipeline",
+      "ci"
+    ]
+  },
+  {
+    "id": "cicd-028",
+    "topicId": "cicd",
+    "topicTitle": "CI/CD for QA/SDET",
+    "level": "mid",
+    "type": "quiz",
+    "difficulty": "medium",
+    "question": "Which Docker build feature reduces CI pipeline build time by reusing unchanged image layers?",
+    "choices": [
+      "Multi-stage builds",
+      "BuildKit layer caching",
+      "Docker Compose override files",
+      "Container health checks"
+    ],
+    "correctAnswer": "BuildKit layer caching",
+    "explanation": "Docker BuildKit caches each image layer keyed to its Dockerfile instruction and context. In CI, mounting or exporting the cache between runs means unchanged layers (e.g., dependency installation) are restored from cache instead of rebuilt, often cutting build time by 60-80%.",
+    "tags": [
+      "docker",
+      "ci",
+      "pipeline",
+      "performance"
+    ]
+  },
+  {
+    "id": "cicd-029",
+    "topicId": "cicd",
+    "topicTitle": "CI/CD for QA/SDET",
+    "level": "mid",
+    "type": "quiz",
+    "difficulty": "medium",
+    "question": "What is the main difference between blue-green and canary deployment strategies?",
+    "choices": [
+      "Blue-green deploys to all users at once by switching traffic between two identical environments; canary gradually shifts a small percentage of traffic to the new version",
+      "Blue-green uses feature flags; canary uses DNS switching",
+      "Canary is only for database migrations; blue-green is for stateless services",
+      "Blue-green requires Kubernetes; canary works only with bare-metal servers"
+    ],
+    "correctAnswer": "Blue-green deploys to all users at once by switching traffic between two identical environments; canary gradually shifts a small percentage of traffic to the new version",
+    "explanation": "In blue-green, two identical production environments exist simultaneously. After validating the new version, all traffic is switched instantly and the old environment is kept as a rollback target. Canary incrementally routes a small percentage of real traffic to the new version, allowing monitoring before full rollout.",
+    "tags": [
+      "deployment strategies",
+      "blue-green",
+      "canary",
+      "cicd"
+    ]
+  },
+  {
+    "id": "cicd-030",
+    "topicId": "cicd",
+    "topicTitle": "CI/CD for QA/SDET",
+    "level": "senior",
+    "type": "quiz",
+    "difficulty": "medium",
+    "question": "In a monorepo CI strategy, which technique ensures only the services affected by a code change have their pipelines triggered?",
+    "choices": [
+      "Running the full test suite for all services on every commit",
+      "Path-based filtering or change detection to trigger only affected service pipelines",
+      "Scheduling all service pipelines to run nightly regardless of changes",
+      "Using a single shared test database for all services to detect cross-service impact"
+    ],
+    "correctAnswer": "Path-based filtering or change detection to trigger only affected service pipelines",
+    "explanation": "Monorepos can trigger wasteful full-pipeline runs. Path filters (e.g., GitHub Actions `paths:` or Nx affected commands) inspect which files changed and restrict pipeline execution to only the services or packages whose source files were modified, keeping CI fast as the repo grows.",
+    "tags": [
+      "monorepo",
+      "ci",
+      "pipeline",
+      "performance"
+    ]
+  },
+  {
+    "id": "cicd-031",
+    "topicId": "cicd",
+    "topicTitle": "CI/CD for QA/SDET",
+    "level": "mid",
+    "type": "quiz",
+    "difficulty": "easy",
+    "question": "What does 'pipeline as code' mean?",
+    "choices": [
+      "The pipeline is configured through a graphical drag-and-drop UI and exported as a binary",
+      "Pipeline configuration is stored as version-controlled text files alongside the application code",
+      "Pipeline steps are compiled into machine code before execution",
+      "Only DevOps engineers are allowed to modify pipeline configuration"
+    ],
+    "correctAnswer": "Pipeline configuration is stored as version-controlled text files alongside the application code",
+    "explanation": "Pipeline as code means defining your CI/CD workflow in files (e.g., Jenkinsfile, .github/workflows/*.yml, .gitlab-ci.yml) that live in the repository. This enables code review, history tracking, branching, and reuse of pipeline definitions the same way application code is managed.",
+    "tags": [
+      "pipeline",
+      "ci",
+      "pipeline as code"
+    ]
+  },
+  {
+    "id": "cicd-032",
+    "topicId": "cicd",
+    "topicTitle": "CI/CD for QA/SDET",
+    "level": "senior",
+    "type": "quiz",
+    "difficulty": "hard",
+    "question": "A security scanner finds a critical vulnerability in a third-party library used only in test code. Which response is most appropriate in a CI pipeline?",
+    "choices": [
+      "Ignore it because the library is only used in tests and never ships to production",
+      "Fail the pipeline immediately and block all merges until the library is updated or the finding is explicitly waived with documented justification",
+      "Remove all security scanning from the pipeline to prevent false positives",
+      "Move all test dependencies to production dependencies so they receive the same version pinning"
+    ],
+    "correctAnswer": "Fail the pipeline immediately and block all merges until the library is updated or the finding is explicitly waived with documented justification",
+    "explanation": "Test-only libraries can still introduce supply-chain risk if they are executed in CI environments with access to secrets or production credentials. Best practice is to fail on critical findings and require an explicit, documented waiver. This maintains audit trails and prevents security debt from accumulating silently.",
+    "tags": [
+      "security scanning",
+      "ci",
+      "pipeline",
+      "quality gates"
+    ]
+  },
+  {
+    "id": "cicd-033",
+    "topicId": "cicd",
+    "topicTitle": "CI/CD for QA/SDET",
+    "level": "senior",
+    "type": "interview",
+    "difficulty": "medium",
+    "question": "How do you integrate SonarQube into a CI pipeline, and what quality gate conditions do you recommend for a QA-owned pipeline?",
+    "shortAnswer": "Run the SonarQube scanner as a pipeline step, wait for the analysis result via the Quality Gate API, and fail the build if conditions like coverage regression or new critical issues are breached.",
+    "interviewAnswer": "Integration has two parts: the scanner step and the gate check. In the pipeline I add a SonarQube scan step after unit tests so that coverage data is already generated. The scanner sends results to the SonarQube server and the pipeline then polls the Quality Gate API using the task ID returned by the scanner. For a QA-owned gate I configure conditions at the 'new code' scope rather than overall: new code coverage must be at or above the project baseline, no new blocker or critical bugs, and no new security hotspots. This 'new code' focus means legacy technical debt does not block new PRs, which keeps developer trust high. I wire the gate result as a required status check in GitHub so it blocks merge on failure.",
+    "realProjectExample": "On a Spring Boot project I set the SonarQube Quality Gate to require 80% coverage on new code and zero new critical bugs. The scanner ran after pytest and the gate check added only 45 seconds to the pipeline. It caught three new critical nullability bugs in the first two weeks that code review had missed.",
+    "followUps": [
+      "How do you handle the first run on a large legacy codebase with thousands of existing issues?",
+      "What is the difference between a SonarQube quality gate and a quality profile?",
+      "How do you prevent teams from marking every issue as 'false positive' to pass the gate?"
+    ],
+    "tags": [
+      "sonarqube",
+      "quality gates",
+      "ci",
+      "pipeline",
+      "security scanning"
+    ]
+  },
+  {
+    "id": "cicd-034",
+    "topicId": "cicd",
+    "topicTitle": "CI/CD for QA/SDET",
+    "level": "senior",
+    "type": "interview",
+    "difficulty": "hard",
+    "question": "How do you design an environment promotion strategy from dev through staging to production, and where do automated tests fit at each stage?",
+    "shortAnswer": "Promote artifacts — not source code — through immutable environment tiers; run progressively deeper automated tests at each promotion gate.",
+    "interviewAnswer": "The principle is to promote the same artifact, not rebuild it. The pipeline builds and tags a Docker image or deployment package once. It is then deployed to dev automatically on merge to main. After dev deployment, a post-deploy smoke suite runs against the live dev environment. Promotion to staging is gated on a passing smoke suite plus any contract tests. In staging, a full regression suite runs, including performance baseline checks. Promotion to production requires the staging regression suite to be green and a manual approval from the release manager or an automated approval if all gates pass and the change is low-risk. At each environment tier the configuration changes but the artifact does not. Secrets are injected at deploy time from the CI secret store per environment.",
+    "realProjectExample": "At one company I designed a three-tier promotion pipeline in GitLab CI. Dev deployed on every main merge with a 5-minute smoke gate. Staging required a 30-minute regression suite pass. Production had a manual approval step plus an automated canary health check. We had zero production rollbacks for six months after adopting this model.",
+    "followUps": [
+      "How do you handle a case where staging data differs so much from production that staging tests pass but production fails?",
+      "What is your rollback trigger at each promotion stage?",
+      "How do you manage feature flags that span multiple promotion environments?"
+    ],
+    "tags": [
+      "environment promotion",
+      "pipeline",
+      "cicd",
+      "smoke tests",
+      "regression tests"
+    ]
+  },
+  {
+    "id": "cicd-035",
+    "topicId": "cicd",
+    "topicTitle": "CI/CD for QA/SDET",
+    "level": "senior",
+    "type": "interview",
+    "difficulty": "hard",
+    "question": "How do feature flags interact with your CI/CD pipeline and test strategy?",
+    "shortAnswer": "Feature flags decouple deployment from release; tests must cover both flag-on and flag-off code paths, and pipelines should validate flag configurations as part of the deploy.",
+    "interviewAnswer": "Feature flags let you ship code to production without activating it for users, which is powerful but creates testing complexity. In the pipeline I treat flag configuration as a first-class artifact: the list of flags and their default states lives in version control and changes to it go through the same review and pipeline as code changes. For testing, any test that exercises a flagged feature must be parameterized to run in both flag-on and flag-off states. I use a test fixture or environment variable to toggle the flag in CI without depending on the live flag service, which prevents flakiness from external state. Post-deployment, a smoke test validates that the flag service is reachable and that the new flag was registered correctly. I also add a pipeline check that flags older than a defined age are removed from the config, preventing flag debt accumulation.",
+    "realProjectExample": "On a checkout feature that was behind a flag for three months, I set up parameterized pytest fixtures that ran the checkout test suite twice — once with the flag on, once off. The pipeline caught a regression where the flag-off path broke silently while development was focused on the new flagged behavior.",
+    "followUps": [
+      "How do you handle a feature flag that gates a database migration?",
+      "What is your process for removing a feature flag after it is fully rolled out?",
+      "How do you prevent the test suite from doubling in size as flag-parameterized tests accumulate?"
+    ],
+    "tags": [
+      "feature flags",
+      "pipeline",
+      "cicd",
+      "test strategy",
+      "ci"
+    ]
+  },
+  {
+    "id": "cicd-036",
+    "topicId": "cicd",
+    "topicTitle": "CI/CD for QA/SDET",
+    "level": "senior",
+    "type": "interview",
+    "difficulty": "medium",
+    "question": "What is infrastructure drift detection and how do you incorporate it into a CI/CD pipeline?",
+    "shortAnswer": "Infrastructure drift is the divergence between declared infrastructure-as-code state and actual cloud resource state; it is detected by running plan/diff commands in CI and alerting or blocking on detected changes.",
+    "interviewAnswer": "Drift happens when someone modifies a cloud resource manually outside of the IaC tool — for example, changing a security group rule directly in the AWS console while Terraform believes the old rule is in place. To detect this I add a scheduled CI job that runs `terraform plan` or `pulumi preview` against the live environment in read-only mode. If the plan output shows a diff between desired and actual state, the job fails and fires an alert to the team. I do not let this block deployments automatically because some drift may be intentional, but it requires a human decision within a defined SLA. For PR pipelines I also run `terraform validate` and `terraform plan` against a test workspace to catch configuration errors before they reach any environment. This is not a test suite concern directly, but as an SDET I care about it because environment drift is a common cause of CI-passes/staging-fails incidents.",
+    "realProjectExample": "We had a recurring issue where a staging database parameter group was being manually tweaked by developers to unblock testing, causing our Terraform state to diverge. I added a nightly `terraform plan` job to GitLab CI that posted a Slack alert on any detected drift. Within two weeks the team established a PR workflow for all infrastructure changes instead of manual console edits.",
+    "followUps": [
+      "How do you distinguish intentional drift from accidental changes?",
+      "What is your process for reconciling drift once it is detected?",
+      "How do you prevent false positives from transient cloud state like autoscaling groups?"
+    ],
+    "tags": [
+      "infrastructure drift",
+      "ci",
+      "pipeline",
+      "cicd",
+      "environment variables"
+    ]
+  },
+  {
+    "id": "cicd-037",
+    "topicId": "cicd",
+    "topicTitle": "CI/CD for QA/SDET",
+    "level": "senior",
+    "type": "scenario",
+    "difficulty": "hard",
+    "question": "You are implementing a canary deployment. After routing 5% of traffic to the new version, key error rate metrics spike to 3x baseline. Your pipeline has no automated rollback. What do you do immediately and what do you add to prevent this in future releases?",
+    "shortAnswer": "Immediately re-route all traffic to the stable version manually, then add automated rollback triggers based on error rate thresholds to the deployment pipeline.",
+    "interviewAnswer": "Immediate action: switch 100% of traffic back to the stable version using the load balancer or feature flag, depending on how the canary is implemented. This takes priority over investigation. Notify the team and open an incident. Only after traffic is restored do I investigate the 3x error spike — pull logs from the canary instances, compare error types against the pre-deployment baseline, and identify whether it is a code regression or an environmental factor. For the pipeline fix: I add a post-canary validation step that monitors the new version for 5 minutes after initial traffic shift. If error rate or p95 latency exceeds thresholds defined in the pipeline config, the pipeline automatically calls the deployment platform's rollback API and marks the run as failed. These thresholds are configurable per service, not hardcoded, so high-traffic services can have tighter tolerances. I also add a pre-deployment chaos check: run a synthetic transaction against the new version in a staging-like environment before any canary traffic is shifted.",
+    "realProjectExample": "After a canary caused a payment processing error spike I had to manually roll back via the AWS ALB target group weights. I then added a GitHub Actions post-deploy step that polled CloudWatch metrics for 5 minutes and triggered a rollback Lambda on threshold breach. The next three canary deployments rolled back automatically twice, both legitimately.",
+    "followUps": [
+      "How do you set sensible rollback thresholds for a brand-new service with no baseline?",
+      "What do you do if the rollback itself fails?",
+      "How does your canary validation strategy change for a service with very low traffic?"
+    ],
+    "tags": [
+      "canary",
+      "deployment strategies",
+      "rollback",
+      "pipeline",
+      "cicd"
+    ]
+  },
+  {
+    "id": "cicd-038",
+    "topicId": "cicd",
+    "topicTitle": "CI/CD for QA/SDET",
+    "level": "senior",
+    "type": "scenario",
+    "difficulty": "hard",
+    "question": "Your team uses a monorepo with 12 services. Every pull request triggers the full test suite for all 12 services, taking 90 minutes. How do you redesign the CI strategy to make PRs fast without losing coverage?",
+    "shortAnswer": "Use change detection to run only affected service pipelines on PRs, plus a nightly full-suite run to catch cross-service regressions.",
+    "interviewAnswer": "The root cause is that the pipeline lacks change awareness. My redesign has three parts. First, change detection: I introduce a step at the start of every pipeline that diffs the changed files against the base branch and outputs a list of affected service directories. Tools like Nx, Turborepo, or a custom script using `git diff --name-only` can do this. Second, dynamic job generation: the pipeline uses the change list to conditionally trigger only the affected service pipelines. In GitHub Actions I use a matrix built from the change detection output. In GitLab CI I use `needs` with `rules` to skip jobs whose path did not change. Third, safety net: a scheduled nightly pipeline runs the full suite for all 12 services to catch cross-service regressions that change detection might miss. Any failure in the nightly run generates a Jira ticket assigned to the relevant team. PRs see 5-10 minute pipelines; the full suite runs once a night.",
+    "realProjectExample": "On a Node.js monorepo with 8 services, I implemented Nx affected detection. Average PR pipeline time dropped from 55 minutes to 8. The team's CI bypass behavior stopped completely within a week. We kept a nightly full-suite run and it caught two cross-service type compatibility issues in the first month.",
+    "followUps": [
+      "What do you do when a shared library changes and potentially affects all 12 services?",
+      "How do you ensure the nightly full-suite failures are acted on and not ignored?",
+      "How does your strategy handle a PR that touches only a configuration file shared by all services?"
+    ],
+    "tags": [
+      "monorepo",
+      "ci",
+      "pipeline",
+      "parallel execution",
+      "performance"
+    ]
+  },
+  {
+    "id": "cicd-039",
+    "topicId": "cicd",
+    "topicTitle": "CI/CD for QA/SDET",
+    "level": "senior",
+    "type": "scenario",
+    "difficulty": "medium",
+    "question": "A new security policy requires all container images used in CI to be scanned for known CVEs before any test stage runs. How do you implement this without significantly slowing down PR pipelines?",
+    "shortAnswer": "Run image scanning in parallel with or before the test stage using a lightweight scanner, cache scan results for unchanged image digests, and fail the pipeline only on critical or high CVEs.",
+    "interviewAnswer": "The key is to not add the scan sequentially before tests — that would add pure latency. Instead I pull the image and start the scan in parallel with dependency installation or other setup steps that happen before tests anyway. I use Trivy or Grype because they are fast, open-source, and produce machine-readable output. The scan step checks the image digest: if the same digest was scanned and passed in the last 24 hours, the cached result is used and the step completes in seconds. I configure the severity filter to fail only on critical or high CVEs with a known fix available, not on informational or low findings that would generate noise without actionable remediation. The scan result is published as a pipeline artifact alongside test reports so security teams have visibility without needing CI access.",
+    "realProjectExample": "We added Trivy scanning to a GitHub Actions pipeline for a Python service. Using digest-based caching, 90% of PR runs completed the scan in under 10 seconds by hitting cache. The full scan on a fresh image took 35 seconds and ran in parallel with `pip install`, adding zero net latency to the pipeline.",
+    "followUps": [
+      "How do you handle a CVE that has no fix available yet but is still rated critical?",
+      "How do you prevent developers from bypassing the scan by using older cached image versions?",
+      "Who is responsible for remediating a CVE found in a base image you do not control?"
+    ],
+    "tags": [
+      "security scanning",
+      "docker",
+      "ci",
+      "pipeline",
+      "quality gates"
+    ]
+  },
+  {
+    "id": "cicd-040",
+    "topicId": "cicd",
+    "topicTitle": "CI/CD for QA/SDET",
+    "level": "mid",
+    "type": "coding",
+    "difficulty": "medium",
+    "title": "Parse JUnit XML and Check Pass Rate",
+    "question": "Write a Python function that parses a JUnit XML test results file and returns True if the test pass rate meets or exceeds a minimum threshold, or False otherwise.",
+    "problem": "Given the path to a JUnit XML file and a float `min_pass_rate` (e.g. 0.95 for 95%), parse the XML to extract the total number of tests and the number of failures plus errors. Calculate the pass rate and return True if it is >= min_pass_rate. Return False if the file is missing, malformed, or the pass rate is below the threshold. The function signature is: check_pass_rate(xml_path: str, min_pass_rate: float) -> bool",
+    "inputExample": "check_pass_rate('results.xml', 0.95)",
+    "expectedOutput": "True if 95% or more tests passed, False otherwise",
+    "hint": "Use xml.etree.ElementTree to parse the XML. The root <testsuite> element has 'tests', 'failures', and 'errors' attributes.",
+    "solutionLanguage": "python",
+    "solution": "import xml.etree.ElementTree as ET\\n\\ndef check_pass_rate(xml_path: str, min_pass_rate: float) -> bool:\\n    try:\\n        tree = ET.parse(xml_path)\\n        root = tree.getroot()\\n        # Handle both <testsuite> root and <testsuites> wrapper\\n        if root.tag == 'testsuites':\\n            suites = root.findall('testsuite')\\n        else:\\n            suites = [root]\\n\\n        total_tests = 0\\n        total_failures = 0\\n        total_errors = 0\\n\\n        for suite in suites:\\n            total_tests += int(suite.get('tests', 0))\\n            total_failures += int(suite.get('failures', 0))\\n            total_errors += int(suite.get('errors', 0))\\n\\n        if total_tests == 0:\\n            return False\\n\\n        pass_count = total_tests - total_failures - total_errors\\n        pass_rate = pass_count / total_tests\\n        return pass_rate >= min_pass_rate\\n\\n    except (FileNotFoundError, ET.ParseError):\\n        return False",
+    "explanation": "ElementTree parses the XML without external dependencies. The function handles both a bare <testsuite> root and a <testsuites> wrapper containing multiple suites, which are both valid JUnit XML forms. Pass rate is computed as (total - failures - errors) / total. Edge cases like missing file, malformed XML, and zero tests all return False safely.",
+    "commonMistakes": [
+      "Forgetting to handle the <testsuites> wrapper — some runners emit this instead of a bare <testsuite> root",
+      "Not converting attribute values from strings to integers before arithmetic",
+      "Dividing by zero when the test count is 0",
+      "Not catching ET.ParseError for malformed XML files"
+    ],
+    "followUps": [
+      "How would you extend this to aggregate results from multiple XML files across shards?",
+      "How do you fail a GitHub Actions step using this function's return value?"
+    ],
+    "tags": [
+      "cicd",
+      "python",
+      "test reports",
+      "quality gates",
+      "pipeline"
+    ]
+  },
+  {
+    "id": "cicd-041",
+    "topicId": "cicd",
+    "topicTitle": "CI/CD for QA/SDET",
+    "level": "mid",
+    "type": "coding",
+    "difficulty": "medium",
+    "title": "Retry a Flaky Shell Command with Exponential Backoff",
+    "question": "Write a Python function that runs a shell command and retries it with exponential backoff if it fails. Return True if the command eventually succeeds, False if it fails after all retries.",
+    "problem": "Given a command as a list of strings (e.g. ['pytest', 'tests/']), a maximum number of retries, and a base delay in seconds, run the command using subprocess. If it exits with a non-zero code, wait base_delay * 2^attempt seconds and retry. Return True on success (exit code 0), False after exhausting all retries. The function signature is: run_with_retry(cmd: list, max_retries: int = 3, base_delay: float = 2.0) -> bool",
+    "inputExample": "run_with_retry(['pytest', 'tests/smoke/'], max_retries=3, base_delay=2.0)",
+    "expectedOutput": "True if the command succeeds within the allowed retries, False otherwise",
+    "hint": "Use subprocess.run() and check returncode. Use time.sleep() for the delay. Calculate delay as base_delay * (2 ** attempt).",
+    "solutionLanguage": "python",
+    "solution": "import subprocess\\nimport time\\n\\ndef run_with_retry(cmd: list, max_retries: int = 3, base_delay: float = 2.0) -> bool:\\n    for attempt in range(max_retries + 1):\\n        result = subprocess.run(cmd)\\n        if result.returncode == 0:\\n            return True\\n        if attempt < max_retries:\\n            delay = base_delay * (2 ** attempt)\\n            print(f'Attempt {attempt + 1} failed. Retrying in {delay:.1f}s...')\\n            time.sleep(delay)\\n        else:\\n            print(f'Command failed after {max_retries + 1} attempts.')\\n    return False",
+    "explanation": "The loop runs up to max_retries + 1 times (initial attempt plus retries). On failure, it sleeps for base_delay * 2^attempt before the next try: 2s, 4s, 8s for base_delay=2 and 3 retries. On success it returns True immediately. After exhausting all retries it returns False. Using subprocess.run() without shell=True is safer because it avoids shell injection.",
+    "commonMistakes": [
+      "Using shell=True unnecessarily, which introduces shell injection risk when cmd contains user input",
+      "Sleeping after the last failed attempt — the sleep should only happen between retries, not after the final failure",
+      "Using a fixed delay instead of exponential backoff, which wastes time or overwhelms a flaky service",
+      "Not printing diagnostic output so CI logs show which attempt failed"
+    ],
+    "followUps": [
+      "How would you add a jitter to the backoff to avoid thundering herd when multiple parallel jobs retry simultaneously?",
+      "How do you distinguish a retriable failure (transient network error) from a non-retriable failure (test assertion error)?"
+    ],
+    "tags": [
+      "cicd",
+      "python",
+      "flaky tests",
+      "pipeline",
+      "automation"
+    ]
+  },
+  {
+    "id": "cicd-042",
+    "topicId": "cicd",
+    "topicTitle": "CI/CD for QA/SDET",
+    "level": "mid",
+    "type": "coding",
+    "difficulty": "medium",
+    "title": "Detect Changed Service Directories in a Monorepo",
+    "question": "Write a Python function that uses git to identify which service directories were modified between the current branch and a base branch, enabling targeted CI pipeline triggering in a monorepo.",
+    "problem": "Given a list of service directory names (e.g. ['auth-service', 'payment-service', 'ui']) and a base branch name (default 'main'), run `git diff --name-only <base>...HEAD` and return a list of service names whose directories contain at least one changed file. The function signature is: get_affected_services(services: list, base_branch: str = 'main') -> list",
+    "inputExample": "get_affected_services(['auth-service', 'payment-service', 'ui'], base_branch='main')",
+    "expectedOutput": "['auth-service'] if only files under auth-service/ were modified",
+    "hint": "Run git diff --name-only using subprocess, split the output by newlines, then check if each changed file path starts with a service directory name.",
+    "solutionLanguage": "python",
+    "solution": "import subprocess\\n\\ndef get_affected_services(services: list, base_branch: str = 'main') -> list:\\n    try:\\n        result = subprocess.run(\\n            ['git', 'diff', '--name-only', f'{base_branch}...HEAD'],\\n            capture_output=True,\\n            text=True,\\n            check=True\\n        )\\n    except subprocess.CalledProcessError:\\n        # If git diff fails (e.g. base branch not found), return all services\\n        return list(services)\\n\\n    changed_files = [line.strip() for line in result.stdout.splitlines() if line.strip()]\\n    affected = []\\n    for service in services:\\n        prefix = service.rstrip('/') + '/'\\n        if any(f.startswith(prefix) or f == service for f in changed_files):\\n            affected.append(service)\\n    return affected",
+    "explanation": "The three-dot syntax `base...HEAD` gives all commits on the current branch that are not on base, producing an accurate diff for a PR. Each changed file path is checked against service directory prefixes (e.g. 'auth-service/'). On CalledProcessError the function falls back to returning all services, which is safe — it over-triggers rather than skipping necessary tests.",
+    "commonMistakes": [
+      "Using two dots (`base..HEAD`) instead of three dots (`base...HEAD`) — two-dot diff includes commits from the base branch since the fork point, producing incorrect results",
+      "Not appending a trailing slash when checking prefixes, causing 'auth-service-v2' to match 'auth-service'",
+      "Not handling the case where git diff fails (e.g. shallow clone with insufficient history)"
+    ],
+    "followUps": [
+      "How do you handle a change to a shared library directory that every service depends on?",
+      "How would you integrate this function's output into a GitHub Actions matrix?"
+    ],
+    "tags": [
+      "cicd",
+      "python",
+      "monorepo",
+      "pipeline",
+      "automation"
+    ]
+  },
+  {
+    "id": "cicd-043",
+    "topicId": "cicd",
+    "topicTitle": "CI/CD for QA/SDET",
+    "level": "senior",
+    "type": "coding",
+    "difficulty": "hard",
+    "title": "Poll a Deployment Health Endpoint with Timeout",
+    "question": "Write a Python function that polls a deployment health endpoint after a deployment completes. It should return True when the service becomes healthy, or raise a TimeoutError if it does not become healthy within a deadline.",
+    "problem": "Given a `health_url` string, a `timeout_seconds` int, and a `poll_interval` float (default 5.0), poll the URL with HTTP GET requests. If the response status code is 200 and the JSON body contains `{'status': 'healthy'}`, return True. If the timeout expires before a healthy response is received, raise a TimeoutError with a descriptive message. The function signature is: wait_for_healthy(health_url: str, timeout_seconds: int, poll_interval: float = 5.0) -> bool",
+    "inputExample": "wait_for_healthy('https://staging.example.com/health', timeout_seconds=120, poll_interval=5.0)",
+    "expectedOutput": "True when healthy, raises TimeoutError after 120 seconds",
+    "hint": "Use time.monotonic() to track elapsed time. Use the requests library for HTTP. Catch requests.RequestException to handle connection errors during startup without crashing.",
+    "solutionLanguage": "python",
+    "solution": "import time\\nimport requests\\n\\ndef wait_for_healthy(health_url: str, timeout_seconds: int, poll_interval: float = 5.0) -> bool:\\n    deadline = time.monotonic() + timeout_seconds\\n    attempt = 0\\n    while time.monotonic() < deadline:\\n        attempt += 1\\n        try:\\n            response = requests.get(health_url, timeout=10)\\n            if response.status_code == 200:\\n                data = response.json()\\n                if data.get('status') == 'healthy':\\n                    print(f'Service healthy after {attempt} attempt(s).')\\n                    return True\\n                print(f'Attempt {attempt}: status={data.get(\\\"status\\\", \\\"unknown\\\")}')\\n            else:\\n                print(f'Attempt {attempt}: HTTP {response.status_code}')\\n        except requests.RequestException as e:\\n            print(f'Attempt {attempt}: connection error - {e}')\\n\\n        remaining = deadline - time.monotonic()\\n        if remaining <= 0:\\n            break\\n        time.sleep(min(poll_interval, remaining))\\n\\n    raise TimeoutError(\\n        f'Service at {health_url} did not become healthy within {timeout_seconds}s '\\n        f'after {attempt} attempt(s).'\\n    )",
+    "explanation": "time.monotonic() is used instead of time.time() to avoid issues with system clock adjustments. The requests.get timeout parameter prevents the function from hanging indefinitely on a slow response. RequestException is caught broadly to handle connection refused, DNS errors, and SSL errors during container startup. The sleep is capped at remaining time to avoid overshooting the deadline. A TimeoutError is the appropriate built-in exception for this failure mode.",
+    "commonMistakes": [
+      "Using time.time() instead of time.monotonic(), which can jump backward on clock corrections",
+      "Not setting a timeout on the requests.get() call, allowing it to hang indefinitely",
+      "Not catching requests.RequestException — a connection refused error during startup will crash the script instead of retrying",
+      "Sleeping poll_interval even when less time remains, causing the function to exceed its timeout contract"
+    ],
+    "followUps": [
+      "How do you integrate this function into a GitHub Actions post-deploy step so a failed health check fails the workflow?",
+      "How would you extend this to check multiple endpoints across microservices in parallel?"
+    ],
+    "tags": [
+      "cicd",
+      "python",
+      "pipeline",
+      "smoke tests",
+      "deployment strategies"
+    ]
+  },
+  {
+    "id": "cicd-044",
+    "topicId": "cicd",
+    "topicTitle": "CI/CD for QA/SDET",
+    "level": "mid",
+    "type": "coding",
+    "difficulty": "medium",
+    "title": "Split Test Files into N Shards",
+    "question": "Write a Python function that takes a list of test file paths and a number of shards, and returns the subset of test files assigned to a specific shard index for parallel CI execution.",
+    "problem": "Given a list of test file paths, an integer `shard_index` (zero-based), and an integer `total_shards`, return the list of files assigned to that shard. Distribute files round-robin across shards to keep shard sizes balanced. If total_shards is less than 1 or shard_index is out of range, raise a ValueError. The function signature is: get_shard_files(files: list, shard_index: int, total_shards: int) -> list",
+    "inputExample": "get_shard_files(['test_a.py', 'test_b.py', 'test_c.py', 'test_d.py', 'test_e.py'], shard_index=1, total_shards=3)",
+    "expectedOutput": "['test_b.py', 'test_e.py']",
+    "hint": "Use list slicing with a step: files[shard_index::total_shards] distributes files round-robin across shards.",
+    "solutionLanguage": "python",
+    "solution": "def get_shard_files(files: list, shard_index: int, total_shards: int) -> list:\\n    if total_shards < 1:\\n        raise ValueError(f'total_shards must be >= 1, got {total_shards}')\\n    if not (0 <= shard_index < total_shards):\\n        raise ValueError(\\n            f'shard_index must be in range [0, {total_shards - 1}], got {shard_index}'\\n        )\\n    return files[shard_index::total_shards]",
+    "explanation": "The slice `files[shard_index::total_shards]` starts at shard_index and takes every total_shards-th element. For 5 files and 3 shards: shard 0 gets indices 0,3 -> test_a, test_d; shard 1 gets indices 1,4 -> test_b, test_e; shard 2 gets index 2 -> test_c. This round-robin distribution naturally balances shards without requiring duration data. For duration-aware sharding you would sort files by historical execution time first.",
+    "commonMistakes": [
+      "Using modulo assignment (file_index % total_shards == shard_index) in a loop instead of the more elegant slice syntax",
+      "Using 1-based shard indexing inconsistently — decide zero-based or one-based and document it clearly",
+      "Not sorting the file list before sharding, which makes shard assignment non-deterministic across runs if directory listing order changes"
+    ],
+    "followUps": [
+      "How would you modify this to distribute tests by estimated execution time rather than count?",
+      "How do you collect and store per-file execution times across CI runs to enable duration-aware sharding?"
+    ],
+    "tags": [
+      "cicd",
+      "python",
+      "parallel execution",
+      "pipeline",
+      "test sharding"
+    ]
+  },
+  {
+    "id": "cicd-045",
+    "topicId": "cicd",
+    "topicTitle": "CI/CD for QA/SDET",
+    "level": "senior",
+    "type": "coding",
+    "difficulty": "hard",
+    "title": "Detect and Report Flaky Tests from Multiple CI Run Results",
+    "question": "Write a Python function that analyzes a list of per-run test result dictionaries and identifies tests that pass in some runs and fail in others (flaky tests).",
+    "problem": "Given a list of run result dicts, each with the shape {'run_id': str, 'results': {test_name: bool}}, return a dict mapping each flaky test name to its failure rate as a float rounded to 2 decimal places. A test is flaky if it appears in at least 2 runs and has both passing and failing results. Tests that always pass or always fail are not flaky. The function signature is: find_flaky_tests(runs: list) -> dict",
+    "inputExample": "find_flaky_tests([{'run_id': 'r1', 'results': {'test_login': True, 'test_checkout': False}}, {'run_id': 'r2', 'results': {'test_login': False, 'test_checkout': False}}, {'run_id': 'r3', 'results': {'test_login': True, 'test_checkout': False}}])",
+    "expectedOutput": "{'test_login': 0.33}  # test_login failed in 1 of 3 runs; test_checkout always fails so it is not flaky",
+    "hint": "Collect all pass/fail results per test name across runs, then check if both True and False appear in the collected values.",
+    "solutionLanguage": "python",
+    "solution": "from collections import defaultdict\\n\\ndef find_flaky_tests(runs: list) -> dict:\\n    test_outcomes = defaultdict(list)  # test_name -> [True, False, ...]\\n\\n    for run in runs:\\n        for test_name, passed in run.get('results', {}).items():\\n            test_outcomes[test_name].append(passed)\\n\\n    flaky = {}\\n    for test_name, outcomes in test_outcomes.items():\\n        if len(outcomes) < 2:\\n            continue  # Need at least 2 runs to determine flakiness\\n        if True in outcomes and False in outcomes:\\n            failure_rate = round(outcomes.count(False) / len(outcomes), 2)\\n            flaky[test_name] = failure_rate\\n\\n    return flaky",
+    "explanation": "The function aggregates all outcomes per test across runs using a defaultdict of lists. A test is flaky only if it has at least 2 observations and has both True (pass) and False (fail) in its outcomes. The failure rate is the proportion of failing runs, rounded to 2 decimal places. Tests that only fail are consistently broken — not flaky — and are excluded. This distinction matters because flaky tests need investigation while consistently failing tests need a fix.",
+    "commonMistakes": [
+      "Marking a test as flaky if it fails in any single run — a test that always fails is broken, not flaky",
+      "Not filtering out tests seen in only one run, which cannot be assessed for flakiness",
+      "Calculating flakiness rate as passes/total instead of failures/total, inverting the metric",
+      "Not using defaultdict or similar, leading to KeyError when a test name is seen for the first time"
+    ],
+    "followUps": [
+      "How would you persist these flakiness metrics to a database across sprints to track trends?",
+      "How do you automatically create Jira tickets for tests whose failure rate exceeds a threshold?"
+    ],
+    "tags": [
+      "cicd",
+      "python",
+      "flaky tests",
+      "pipeline",
+      "test maintenance"
+    ]
+  },
+  {
+    "id": "cicd-046",
+    "topicId": "cicd",
+    "topicTitle": "CI/CD for QA/SDET",
+    "level": "senior",
+    "type": "coding",
+    "difficulty": "hard",
+    "title": "Validate Required GitHub Actions Secrets Are Set",
+    "question": "Write a Python function that checks a list of required secret names against environment variables and returns a report indicating which secrets are present and which are missing.",
+    "problem": "Given a list of secret names that should be injected as environment variables (e.g. ['DB_PASSWORD', 'API_KEY', 'SLACK_WEBHOOK']), check os.environ for each one. Return a dict with two keys: 'present' (list of names that are set and non-empty) and 'missing' (list of names that are absent or empty). If any secrets are missing, also print a warning message listing them. The function signature is: audit_secrets(required_secrets: list) -> dict",
+    "inputExample": "audit_secrets(['DB_PASSWORD', 'API_KEY', 'SLACK_WEBHOOK'])",
+    "expectedOutput": "{'present': ['DB_PASSWORD', 'API_KEY'], 'missing': ['SLACK_WEBHOOK']}",
+    "hint": "Use os.environ.get() to check each variable. A variable is considered missing if it is absent or its value is an empty string.",
+    "solutionLanguage": "python",
+    "solution": "import os\\n\\ndef audit_secrets(required_secrets: list) -> dict:\\n    present = []\\n    missing = []\\n\\n    for secret in required_secrets:\\n        value = os.environ.get(secret, '')\\n        if value.strip():\\n            present.append(secret)\\n        else:\\n            missing.append(secret)\\n\\n    if missing:\\n        print(f'WARNING: The following required secrets are not set: {missing}')\\n        print('Pipeline steps that depend on these secrets will fail.')\\n\\n    return {'present': present, 'missing': missing}",
+    "explanation": "os.environ.get(secret, '') returns an empty string for both unset and present-but-empty variables. The .strip() call treats whitespace-only values as missing, which catches accidentally set-to-space variables. The function prints a clear warning so CI logs are actionable without the caller having to inspect the return value. The return dict enables programmatic use — e.g., a pipeline step can call the function and exit with code 1 if 'missing' is non-empty.",
+    "commonMistakes": [
+      "Using `secret in os.environ` without checking for empty string — a variable set to '' passes the membership check but is effectively unset",
+      "Printing secret values in the warning message — this would expose secrets in CI logs",
+      "Raising an exception inside the function instead of returning a dict — the caller should decide whether missing secrets are fatal"
+    ],
+    "followUps": [
+      "How would you extend this to validate that secrets match an expected format (e.g. a Slack webhook URL must start with https://hooks.slack.com/)?",
+      "How do you integrate this check as the first step of a GitHub Actions workflow before any other steps run?"
+    ],
+    "tags": [
+      "cicd",
+      "python",
+      "secrets",
+      "pipeline",
+      "ci"
+    ]
+  },
+  {
+    "id": "cicd-047",
+    "topicId": "cicd",
+    "topicTitle": "CI/CD for QA/SDET",
+    "level": "mid",
+    "type": "coding",
+    "difficulty": "easy",
+    "title": "Extract Failed Test Names from a pytest Log",
+    "question": "Write a Python function that parses raw pytest terminal output and returns a list of unique failed test node IDs.",
+    "problem": "Given a multi-line string of pytest terminal output, extract all test node IDs that appear in FAILED lines. A FAILED line has the format: `FAILED path/to/test_file.py::TestClass::test_method - ErrorType: message`. Return a sorted list of unique test node IDs (the part before the space-dash-space separator). The function signature is: extract_failed_tests(log_output: str) -> list",
+    "inputExample": "extract_failed_tests('FAILED tests/test_login.py::TestLogin::test_invalid_password - AssertionError\\nPASSED tests/test_login.py::TestLogin::test_valid_password\\nFAILED tests/test_login.py::TestLogin::test_invalid_password - AssertionError')",
+    "expectedOutput": "['tests/test_login.py::TestLogin::test_invalid_password']",
+    "hint": "Split the output into lines and filter for lines starting with 'FAILED'. Split each matched line on ' - ' and take the first part after removing the 'FAILED ' prefix.",
+    "solutionLanguage": "python",
+    "solution": "def extract_failed_tests(log_output: str) -> list:\\n    failed = set()\\n    for line in log_output.splitlines():\\n        stripped = line.strip()\\n        if stripped.startswith('FAILED '):\\n            # Format: 'FAILED path::test - ErrorType: message'\\n            test_part = stripped[len('FAILED '):]\\n            node_id = test_part.split(' - ')[0].strip()\\n            if node_id:\\n                failed.add(node_id)\\n    return sorted(failed)",
+    "explanation": "Splitting on ' - ' with maxsplit=1 (implicitly via [0]) isolates the node ID from the error description. Using a set deduplicates node IDs when the same test appears multiple times in the log (e.g. from retry output). Returning sorted() gives deterministic output. This function is useful in CI scripts that need to post failed test names to a Slack message or create Jira tickets.",
+    "commonMistakes": [
+      "Using str.split('-') without spaces, which incorrectly splits node IDs containing hyphens (common in file names)",
+      "Not deduplicating — retried tests can produce duplicate FAILED lines in the same log",
+      "Not stripping lines before the startswith check, causing tests to be missed when log lines have leading spaces"
+    ],
+    "followUps": [
+      "How would you modify this to also capture the error message associated with each failed test?",
+      "How do you handle pytest output when --tb=no is set and failure lines look different?"
+    ],
+    "tags": [
+      "cicd",
+      "python",
+      "test reports",
+      "pipeline",
+      "automation"
+    ]
+  },
+  {
+    "id": "cicd-048",
+    "topicId": "cicd",
+    "topicTitle": "CI/CD for QA/SDET",
+    "level": "mid",
+    "type": "coding",
+    "difficulty": "medium",
+    "title": "Generate a GitHub Actions Matrix from a Service List",
+    "question": "Write a Python function that generates a GitHub Actions matrix JSON string from a list of service names, suitable for use in a workflow's matrix strategy.",
+    "problem": "Given a list of service name strings (e.g. ['auth', 'payment', 'ui']), produce a JSON string representing a GitHub Actions matrix object with a single dimension named 'service'. If the list is empty, raise a ValueError. The output format must be: {\"include\": [{\"service\": \"auth\"}, {\"service\": \"payment\"}, {\"service\": \"ui\"}]}. The function signature is: build_matrix_json(services: list) -> str",
+    "inputExample": "build_matrix_json(['auth', 'payment', 'ui'])",
+    "expectedOutput": "\"{\\\"include\\\": [{\\\"service\\\": \\\"auth\\\"}, {\\\"service\\\": \\\"payment\\\"}, {\\\"service\\\": \\\"ui\\\"}]}\"",
+    "hint": "Use json.dumps() to produce valid JSON. Build the matrix dict as {'include': [{'service': s} for s in services]}.",
+    "solutionLanguage": "python",
+    "solution": "import json\\n\\ndef build_matrix_json(services: list) -> str:\\n    if not services:\\n        raise ValueError('services list must not be empty')\\n    matrix = {\\n        'include': [{'service': s} for s in services]\\n    }\\n    return json.dumps(matrix)",
+    "explanation": "GitHub Actions supports an 'include' list in a matrix to define explicit combinations. Using json.dumps ensures proper JSON encoding including escaping. This function is typically called in a CI script that outputs the matrix to GITHUB_OUTPUT: `print(f'matrix={build_matrix_json(affected_services)}')`. A subsequent workflow job reads this output and uses it as `strategy: matrix: ${{ fromJSON(needs.detect.outputs.matrix) }}`.",
+    "commonMistakes": [
+      "Building the JSON by hand with string formatting instead of json.dumps, risking invalid JSON if service names contain special characters",
+      "Using a flat list format like {'service': ['auth', 'payment']} instead of the 'include' list format — the flat format does not support additional per-service metadata",
+      "Not validating that the services list is non-empty — an empty matrix causes a GitHub Actions parsing error"
+    ],
+    "followUps": [
+      "How would you extend the matrix to include both service name and environment (dev/staging) as dimensions?",
+      "How do you limit the GitHub Actions matrix to a maximum of 20 entries, which is the platform limit?"
+    ],
+    "tags": [
+      "cicd",
+      "python",
+      "github actions",
+      "monorepo",
+      "pipeline"
+    ]
+  },
+  {
+    "id": "cicd-049",
+    "topicId": "cicd",
+    "topicTitle": "CI/CD for QA/SDET",
+    "level": "senior",
+    "type": "interview",
+    "difficulty": "hard",
+    "question": "How do you design a rollback strategy for automated deployments, and what role does your test suite play in triggering and validating a rollback?",
+    "shortAnswer": "Define automated rollback triggers based on post-deploy smoke test failures or metric thresholds, keep the previous artifact available, and validate the rolled-back state with the same smoke suite.",
+    "interviewAnswer": "A good rollback strategy has three parts: trigger, mechanism, and validation. For the trigger I rely on the post-deploy smoke suite first — if it fails within a configurable window after deployment, the pipeline fires the rollback automatically. For canary deployments I add metric-based triggers: if error rate or p95 latency exceed thresholds for more than two consecutive measurement intervals, the rollback fires without waiting for a human. The mechanism depends on the platform: in Kubernetes it is `kubectl rollout undo`; in ECS it is updating the service to the previous task definition revision; in a blue-green model it is switching the load balancer target group back to the blue environment. Critically, the previous artifact must still be available and not reused for other deployments. For validation, after rollback completes I run the same smoke suite against the restored state to confirm it is actually healthy. A rollback is not complete until the smoke suite passes on the old version. I log rollback events with the triggering reason, deployment ID, duration, and resulting smoke result so we can trend rollback frequency and investigate root causes.",
+    "realProjectExample": "On a Node.js API we had a deployment pipeline in GitHub Actions that ran a 3-minute smoke suite after each deploy. Three weeks in, a deployment broke the authentication endpoint. The smoke suite failed, the pipeline called the ECS rollback API, waited 2 minutes for stabilization, then re-ran the smoke suite. The whole incident — deploy, failure detection, rollback, validation — took 7 minutes with zero manual intervention. The on-call engineer received a Slack alert with the full rollback timeline.",
+    "followUps": [
+      "How do you handle a rollback when the new deployment includes a database migration?",
+      "What do you do if the rollback itself fails?",
+      "How do you prevent teams from relying on rollbacks as a substitute for thorough pre-deployment testing?"
+    ],
+    "tags": [
+      "rollback",
+      "deployment strategies",
+      "pipeline",
+      "smoke tests",
+      "cicd"
+    ]
+  },
+  {
+    "id": "cicd-050",
+    "topicId": "cicd",
+    "topicTitle": "CI/CD for QA/SDET",
+    "level": "senior",
+    "type": "interview",
+    "difficulty": "hard",
+    "question": "How do you monitor a CI/CD pipeline itself — not just the application — and what metrics do you track to detect pipeline health problems early?",
+    "shortAnswer": "Track pipeline duration trends, failure rates by stage, queue wait times, flaky job rates, and artifact size growth — alert on regressions before they impact developer velocity.",
+    "interviewAnswer": "I treat the pipeline as a product that needs observability. The metrics I track fall into four categories. Duration: wall-clock time per stage and total pipeline duration. A 20% increase week-over-week triggers an investigation — it usually means a dependency install step is getting slower or a new test was added to the wrong tier. Failure rates: I track failure rate by stage so I can distinguish test failures from infrastructure failures. A spike in runner-setup failures at 2am usually means runner capacity is exhausted or a runner image was updated. Queue wait time: if jobs sit in the queue for more than 3 minutes on average, I request additional runner capacity or evaluate job concurrency limits. Flaky job rate: separate from flaky tests, I track jobs that are re-run by developers without code changes — high re-run rates indicate environment instability. Artifact size: growing artifact stores silently increase storage costs and download times. I set alerts on artifact size growth of more than 10% per sprint and enforce retention policies. I build these metrics from the CI platform's API or webhook events into a simple dashboard in Grafana or a shared spreadsheet, and review them in sprint retrospectives.",
+    "realProjectExample": "On one project I noticed from GitHub Actions API data that our average PR pipeline time had grown from 6 minutes to 14 minutes over two months. Drilling into stage durations revealed that the `npm install` step had grown from 45 seconds to 4 minutes because cache invalidation was happening on every run after a package-lock.json format change. Fixing the cache key reduced it back to under 7 minutes total.",
+    "followUps": [
+      "What is your process when pipeline metrics show a regression but no one can identify the cause?",
+      "How do you set meaningful alert thresholds for a team that is rapidly growing its test suite?",
+      "How do you balance pipeline observability investment against feature delivery priorities?"
+    ],
+    "tags": [
+      "pipeline",
+      "ci",
+      "cicd",
+      "performance",
+      "quality gates"
+    ]
   }
 ]
