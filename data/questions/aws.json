@@ -10,8 +10,16 @@
     "shortAnswer": "CloudWatch helps inspect logs, metrics, alarms, and runtime behavior for tests and deployed services.",
     "interviewAnswer": "CloudWatch is useful when validating deployments and debugging failures in cloud environments. An SDET can use logs and metrics to confirm service behavior, identify backend errors behind UI/API failures, and provide better defect evidence.",
     "realProjectExample": "When an API smoke test returned 500, CloudWatch logs showed a missing environment variable in the deployed Lambda.",
-    "followUps": ["What logs would you attach to a bug?", "How do metrics help testing?", "How do you debug a Lambda failure?"],
-    "tags": ["aws", "cloudwatch", "debugging"]
+    "followUps": [
+      "What logs would you attach to a bug?",
+      "How do metrics help testing?",
+      "How do you debug a Lambda failure?"
+    ],
+    "tags": [
+      "aws",
+      "cloudwatch",
+      "debugging"
+    ]
   },
   {
     "id": "aws-002",
@@ -21,10 +29,19 @@
     "type": "quiz",
     "difficulty": "easy",
     "question": "Which AWS service is commonly used to store files and test artifacts?",
-    "choices": ["S3", "IAM", "VPC", "Route 53"],
+    "choices": [
+      "S3",
+      "IAM",
+      "VPC",
+      "Route 53"
+    ],
     "correctAnswer": "S3",
     "explanation": "S3 is object storage and is often used for reports, screenshots, videos, and exported data.",
-    "tags": ["aws", "s3", "artifacts"]
+    "tags": [
+      "aws",
+      "s3",
+      "artifacts"
+    ]
   },
   {
     "id": "aws-003",
@@ -37,8 +54,16 @@
     "shortAnswer": "Check environment variables, secrets, IAM permissions, deployment version, logs, and service health.",
     "interviewAnswer": "I would inspect deployment metadata and CloudWatch logs first, then verify the expected environment variables or secret references exist in the target environment. If the service reads from SSM or Secrets Manager, I would check IAM permissions and resource names.",
     "realProjectExample": "A staging smoke test failed because ECS task definitions referenced a renamed secret. The app started but failed on the first API call.",
-    "followUps": ["How do you validate deployment config automatically?", "What should smoke tests cover?", "How do IAM failures appear in logs?"],
-    "tags": ["aws", "deployment", "configuration"]
+    "followUps": [
+      "How do you validate deployment config automatically?",
+      "What should smoke tests cover?",
+      "How do IAM failures appear in logs?"
+    ],
+    "tags": [
+      "aws",
+      "deployment",
+      "configuration"
+    ]
   },
   {
     "id": "aws-004",
@@ -48,10 +73,19 @@
     "type": "quiz",
     "difficulty": "easy",
     "question": "What does S3 stand for in AWS?",
-    "choices": ["Simple Storage Service", "Secure Static Service", "Scalable Server Storage", "Standard Storage System"],
+    "choices": [
+      "Simple Storage Service",
+      "Secure Static Service",
+      "Scalable Server Storage",
+      "Standard Storage System"
+    ],
     "correctAnswer": "Simple Storage Service",
     "explanation": "S3 stands for Simple Storage Service. It is AWS's object storage solution used to store and retrieve any amount of data, including test artifacts like screenshots, logs, and reports.",
-    "tags": ["aws", "s3", "fundamentals"]
+    "tags": [
+      "aws",
+      "s3",
+      "fundamentals"
+    ]
   },
   {
     "id": "aws-005",
@@ -61,10 +95,19 @@
     "type": "quiz",
     "difficulty": "easy",
     "question": "Which AWS service lets you run code in response to events without managing servers?",
-    "choices": ["AWS Lambda", "Amazon EC2", "AWS Fargate", "Amazon EKS"],
+    "choices": [
+      "AWS Lambda",
+      "Amazon EC2",
+      "AWS Fargate",
+      "Amazon EKS"
+    ],
     "correctAnswer": "AWS Lambda",
     "explanation": "AWS Lambda is a serverless compute service that runs code in response to triggers such as API Gateway calls, S3 events, or scheduled CloudWatch Events. SDETs may encounter Lambda as the backend for APIs they test.",
-    "tags": ["aws", "lambda", "serverless"]
+    "tags": [
+      "aws",
+      "lambda",
+      "serverless"
+    ]
   },
   {
     "id": "aws-006",
@@ -74,10 +117,19 @@
     "type": "quiz",
     "difficulty": "easy",
     "question": "What is the primary purpose of IAM in AWS?",
-    "choices": ["Manage who can access AWS resources and what actions they can perform", "Monitor application logs and metrics", "Store files and static assets", "Run containerized workloads"],
+    "choices": [
+      "Manage who can access AWS resources and what actions they can perform",
+      "Monitor application logs and metrics",
+      "Store files and static assets",
+      "Run containerized workloads"
+    ],
     "correctAnswer": "Manage who can access AWS resources and what actions they can perform",
     "explanation": "IAM (Identity and Access Management) controls authentication and authorization in AWS. For SDETs, IAM is relevant because CI/CD pipelines and test runners need IAM roles or users with the right permissions to deploy, read logs, or upload artifacts.",
-    "tags": ["aws", "iam", "permissions"]
+    "tags": [
+      "aws",
+      "iam",
+      "permissions"
+    ]
   },
   {
     "id": "aws-007",
@@ -87,10 +139,20 @@
     "type": "quiz",
     "difficulty": "medium",
     "question": "An SDET needs to read CloudWatch logs from a CI/CD pipeline step. What must be configured in AWS?",
-    "choices": ["An IAM role or user with logs:GetLogEvents and logs:DescribeLogGroups permissions", "A VPC endpoint for the CI server", "An S3 bucket policy allowing read from the pipeline", "A Lambda function that proxies log requests"],
+    "choices": [
+      "An IAM role or user with logs:GetLogEvents and logs:DescribeLogGroups permissions",
+      "A VPC endpoint for the CI server",
+      "An S3 bucket policy allowing read from the pipeline",
+      "A Lambda function that proxies log requests"
+    ],
     "correctAnswer": "An IAM role or user with logs:GetLogEvents and logs:DescribeLogGroups permissions",
     "explanation": "To read CloudWatch logs programmatically, the caller (CI pipeline, test script, or human) needs an IAM identity with the appropriate CloudWatch Logs read permissions. Without these, API calls will receive AccessDenied errors.",
-    "tags": ["aws", "iam", "cloudwatch", "ci-cd"]
+    "tags": [
+      "aws",
+      "iam",
+      "cloudwatch",
+      "ci-cd"
+    ]
   },
   {
     "id": "aws-008",
@@ -100,10 +162,20 @@
     "type": "quiz",
     "difficulty": "medium",
     "question": "Where are environment variables for an ECS Fargate container typically defined?",
-    "choices": ["In the ECS task definition", "In the S3 bucket policy", "In the CloudWatch alarm configuration", "In the Lambda function runtime settings"],
+    "choices": [
+      "In the ECS task definition",
+      "In the S3 bucket policy",
+      "In the CloudWatch alarm configuration",
+      "In the Lambda function runtime settings"
+    ],
     "correctAnswer": "In the ECS task definition",
     "explanation": "For ECS Fargate, environment variables are defined in the container definition section of the task definition. SDETs validating deployments should know to check task definition revisions when environment-related failures occur.",
-    "tags": ["aws", "ecs", "fargate", "environment-variables"]
+    "tags": [
+      "aws",
+      "ecs",
+      "fargate",
+      "environment-variables"
+    ]
   },
   {
     "id": "aws-009",
@@ -113,10 +185,20 @@
     "type": "quiz",
     "difficulty": "medium",
     "question": "A Lambda function is returning errors in production but passes all local tests. Which CloudWatch feature is most useful for diagnosing this?",
-    "choices": ["CloudWatch Logs Insights", "CloudWatch Dashboards", "CloudWatch Synthetics", "CloudWatch Contributor Insights"],
+    "choices": [
+      "CloudWatch Logs Insights",
+      "CloudWatch Dashboards",
+      "CloudWatch Synthetics",
+      "CloudWatch Contributor Insights"
+    ],
     "correctAnswer": "CloudWatch Logs Insights",
     "explanation": "CloudWatch Logs Insights lets you run queries against log data using a purpose-built query syntax. It is ideal for quickly searching Lambda execution logs for error messages, stack traces, or patterns across a time range — far more efficient than manually browsing log streams.",
-    "tags": ["aws", "cloudwatch", "lambda", "debugging"]
+    "tags": [
+      "aws",
+      "cloudwatch",
+      "lambda",
+      "debugging"
+    ]
   },
   {
     "id": "aws-010",
@@ -126,10 +208,20 @@
     "type": "quiz",
     "difficulty": "hard",
     "question": "Your test suite uploads Allure reports to S3 after each CI run. Users outside your AWS account need read access to a specific report URL. What is the correct approach?",
-    "choices": ["Generate a pre-signed S3 URL with a time-limited expiry", "Make the entire S3 bucket publicly readable", "Add external users as IAM users in your account", "Copy the report to a public EC2 web server"],
+    "choices": [
+      "Generate a pre-signed S3 URL with a time-limited expiry",
+      "Make the entire S3 bucket publicly readable",
+      "Add external users as IAM users in your account",
+      "Copy the report to a public EC2 web server"
+    ],
     "correctAnswer": "Generate a pre-signed S3 URL with a time-limited expiry",
     "explanation": "Pre-signed URLs grant temporary, scoped access to a specific S3 object without making the bucket public or creating IAM users for external parties. They are the standard, secure mechanism for sharing test artifacts with stakeholders.",
-    "tags": ["aws", "s3", "security", "artifacts"]
+    "tags": [
+      "aws",
+      "s3",
+      "security",
+      "artifacts"
+    ]
   },
   {
     "id": "aws-011",
@@ -139,10 +231,20 @@
     "type": "quiz",
     "difficulty": "medium",
     "question": "Which CloudWatch concept groups related log entries from a single execution of a Lambda or container?",
-    "choices": ["Log stream", "Log group", "Metric filter", "Alarm"],
+    "choices": [
+      "Log stream",
+      "Log group",
+      "Metric filter",
+      "Alarm"
+    ],
     "correctAnswer": "Log stream",
     "explanation": "A log stream represents a sequence of log events from a single source, such as one Lambda invocation or one container instance. Log groups aggregate multiple streams for the same service. SDETs reading Lambda failure logs typically navigate to the relevant log stream for a specific invocation.",
-    "tags": ["aws", "cloudwatch", "lambda", "logs"]
+    "tags": [
+      "aws",
+      "cloudwatch",
+      "lambda",
+      "logs"
+    ]
   },
   {
     "id": "aws-012",
@@ -152,10 +254,20 @@
     "type": "quiz",
     "difficulty": "hard",
     "question": "What is the key difference between ECS and Fargate from a QA environment perspective?",
-    "choices": ["Fargate removes the need to manage underlying EC2 instances, so environment setup is fully defined in task definitions", "Fargate only supports Windows containers while ECS supports Linux", "ECS cannot run multiple containers simultaneously", "Fargate requires manual capacity planning while ECS scales automatically"],
+    "choices": [
+      "Fargate removes the need to manage underlying EC2 instances, so environment setup is fully defined in task definitions",
+      "Fargate only supports Windows containers while ECS supports Linux",
+      "ECS cannot run multiple containers simultaneously",
+      "Fargate requires manual capacity planning while ECS scales automatically"
+    ],
     "correctAnswer": "Fargate removes the need to manage underlying EC2 instances, so environment setup is fully defined in task definitions",
     "explanation": "ECS is the orchestration layer; Fargate is the serverless compute engine that removes the need to provision and manage EC2 instances. For QA environments, Fargate means the full environment spec (image, env vars, CPU, memory) lives in the task definition, making it easier to reproduce and audit.",
-    "tags": ["aws", "ecs", "fargate", "test-environments"]
+    "tags": [
+      "aws",
+      "ecs",
+      "fargate",
+      "test-environments"
+    ]
   },
   {
     "id": "aws-013",
@@ -168,8 +280,17 @@
     "shortAnswer": "Store test artifacts, reports, screenshots, and test data files in S3 so they are centrally accessible across CI runs and environments.",
     "interviewAnswer": "I would configure the test framework to upload artifacts to S3 at the end of each run — this includes HTML reports, Allure results, screenshots of failures, and any exported data files. Using S3 means anyone on the team can access results without SSH access to a build server, and results persist independently of the CI job. I would also use S3 for stable test data files that multiple environments need to read, rather than committing large binaries to the repo.",
     "realProjectExample": "Our Cypress runs uploaded failure screenshots and videos to a versioned S3 prefix. The PR comment included direct links generated from pre-signed URLs, so reviewers could inspect failures without leaving GitHub.",
-    "followUps": ["How would you organize S3 keys for test artifacts?", "How long would you retain test reports in S3?", "How do you handle S3 access in CI without exposing credentials?"],
-    "tags": ["aws", "s3", "artifacts", "test-automation"]
+    "followUps": [
+      "How would you organize S3 keys for test artifacts?",
+      "How long would you retain test reports in S3?",
+      "How do you handle S3 access in CI without exposing credentials?"
+    ],
+    "tags": [
+      "aws",
+      "s3",
+      "artifacts",
+      "test-automation"
+    ]
   },
   {
     "id": "aws-014",
@@ -182,8 +303,18 @@
     "shortAnswer": "Check version metadata in the deployment — such as the container image tag in ECS, the Lambda function version/alias, or a health endpoint that returns a build version.",
     "interviewAnswer": "Before kicking off a test suite, I add a pre-test step that confirms the deployed version matches what the pipeline built. For ECS, I can query the running task definition to read the image tag. For Lambda, I read the function configuration to confirm the expected alias or version. Most well-designed services expose a /health or /version endpoint that returns a build hash I can assert against. If the version does not match, I fail the pipeline early rather than running tests against a stale deployment.",
     "realProjectExample": "We had a regression where tests passed against yesterday's build because the deployment step silently failed. Adding a version check step caught this pattern and saved hours of false-positive debugging.",
-    "followUps": ["What would a deployment validation smoke test look like?", "How do you handle blue-green deployments in test?", "What is a canary release and how does it affect testing?"],
-    "tags": ["aws", "deployment", "ecs", "lambda", "validation"]
+    "followUps": [
+      "What would a deployment validation smoke test look like?",
+      "How do you handle blue-green deployments in test?",
+      "What is a canary release and how does it affect testing?"
+    ],
+    "tags": [
+      "aws",
+      "deployment",
+      "ecs",
+      "lambda",
+      "validation"
+    ]
   },
   {
     "id": "aws-015",
@@ -196,8 +327,18 @@
     "shortAnswer": "Store test data files or seeds in S3 or a secrets manager, load them during test setup, and clean up after each run.",
     "interviewAnswer": "For binary or sensitive test data, I store files in S3 under a controlled test-data prefix and load them in test setup via the AWS SDK or CLI. For credentials or tokens, I use AWS Secrets Manager or SSM Parameter Store and retrieve values at runtime using the IAM role granted to the CI runner. I never hard-code data inline in tests or commit files that exceed a few kilobytes to the repo. After each run, teardown scripts remove any data created during the test to prevent state bleed between runs.",
     "realProjectExample": "Our integration tests needed a 50 MB seed database for a data pipeline. We stored it in S3, downloaded it in the CI setup step using the pipeline's IAM role, and deleted the local copy in teardown. This kept the repo clean and the test environment reproducible.",
-    "followUps": ["How do you keep test data in sync with schema changes?", "How would you manage test data for parallel test runs?", "What are the risks of sharing test data between environments?"],
-    "tags": ["aws", "s3", "test-data", "iam", "secrets"]
+    "followUps": [
+      "How do you keep test data in sync with schema changes?",
+      "How would you manage test data for parallel test runs?",
+      "What are the risks of sharing test data between environments?"
+    ],
+    "tags": [
+      "aws",
+      "s3",
+      "test-data",
+      "iam",
+      "secrets"
+    ]
   },
   {
     "id": "aws-016",
@@ -210,8 +351,18 @@
     "shortAnswer": "Create a CloudWatch metric filter on error log patterns, a metric alarm on that filter or on Lambda error metrics, and an SNS topic that notifies Slack or email.",
     "interviewAnswer": "As an SDET involved in production quality, I would define a metric filter that counts ERROR or 5xx patterns in CloudWatch logs and publishes to a custom metric. Then I create a CloudWatch Alarm that fires when the error rate exceeds a threshold — for example, more than 1% of requests resulting in errors over a five-minute window. The alarm sends to an SNS topic that is subscribed by a Slack channel webhook or a PagerDuty integration. I would also baseline the alarm thresholds from pre-deployment metrics so post-deployment spikes are meaningful, not just noise.",
     "realProjectExample": "After a zero-downtime deploy, error rates spiked for two minutes due to a connection pool misconfiguration. The CloudWatch alarm fired within three minutes, which was faster than any manual smoke test would have caught it.",
-    "followUps": ["What is the difference between a metric filter and a metric alarm?", "How would you reduce false positives on these alarms?", "How does this complement post-deployment smoke tests?"],
-    "tags": ["aws", "cloudwatch", "monitoring", "alerting", "deployment"]
+    "followUps": [
+      "What is the difference between a metric filter and a metric alarm?",
+      "How would you reduce false positives on these alarms?",
+      "How does this complement post-deployment smoke tests?"
+    ],
+    "tags": [
+      "aws",
+      "cloudwatch",
+      "monitoring",
+      "alerting",
+      "deployment"
+    ]
   },
   {
     "id": "aws-017",
@@ -224,8 +375,18 @@
     "shortAnswer": "Use a combination of unit tests with mocked AWS SDK calls, contract tests, and integration tests that invoke the real Lambda function in a dedicated test environment.",
     "interviewAnswer": "I break the testing into layers. At the unit level, I mock the Lambda handler's dependencies — external service calls, DynamoDB clients, S3 clients — using a library like moto for Python or aws-sdk-mock for Node.js. This tests business logic without any AWS cost. At the integration level, I deploy the Lambda to a dedicated test environment and invoke it directly via the AWS SDK or through the API Gateway it is wired to, asserting on the response and any side effects in downstream services. For contract testing, if the Lambda is consumed by a frontend or another service, I use Pact or OpenAPI-based contract validation to confirm the interface stays stable. CloudWatch logs for each test invocation give me observability into what the Lambda actually executed.",
     "realProjectExample": "We had a Lambda that processed S3 upload events. Unit tests mocked the S3 event payload and the downstream DynamoDB write. Integration tests uploaded a real file to a test S3 bucket and verified the Lambda wrote the expected record within a polling timeout. This two-layer approach caught both logic bugs and IAM permission issues.",
-    "followUps": ["How do you handle Lambda cold starts in test timing?", "How do you test Lambda concurrency and throttling?", "What tools help you invoke Lambda directly outside of its trigger?"],
-    "tags": ["aws", "lambda", "testing-strategy", "integration-testing", "mocking"]
+    "followUps": [
+      "How do you handle Lambda cold starts in test timing?",
+      "How do you test Lambda concurrency and throttling?",
+      "What tools help you invoke Lambda directly outside of its trigger?"
+    ],
+    "tags": [
+      "aws",
+      "lambda",
+      "testing-strategy",
+      "integration-testing",
+      "mocking"
+    ]
   },
   {
     "id": "aws-018",
@@ -238,8 +399,19 @@
     "shortAnswer": "Provision separate namespaces or services per run using dynamic naming, use environment-specific secrets and databases, and tear down resources after the run completes.",
     "interviewAnswer": "The key is ensuring each test run owns its data and services independently. For ECS, I use dynamic service names or namespaces derived from the build ID or branch name, so two concurrent runs never share a service endpoint. Each run gets its own database schema or isolated DynamoDB table, seeded fresh before tests. Environment variables passed to the task definition point to these isolated resources. After the run, a cleanup step tears down the ECS service and deletes test data. For cost control, I set a TTL-based cleanup Lambda or CloudWatch Events rule that nukes stale environments older than a defined window. Container images come from ECR and are tagged by commit SHA for traceability.",
     "realProjectExample": "When we moved from sequential staging runs to parallel feature branch environments, we started using Terraform with a workspace per branch. Each workspace created an isolated ECS service and RDS snapshot. Cleanup ran on PR merge or after 24 hours. Parallel test time dropped from 40 minutes to 10.",
-    "followUps": ["How do you manage database migrations for ephemeral environments?", "How do you prevent cost runaway from forgotten test environments?", "How does service discovery work when service names are dynamic?"],
-    "tags": ["aws", "ecs", "fargate", "test-environments", "isolation", "parallel-testing"]
+    "followUps": [
+      "How do you manage database migrations for ephemeral environments?",
+      "How do you prevent cost runaway from forgotten test environments?",
+      "How does service discovery work when service names are dynamic?"
+    ],
+    "tags": [
+      "aws",
+      "ecs",
+      "fargate",
+      "test-environments",
+      "isolation",
+      "parallel-testing"
+    ]
   },
   {
     "id": "aws-019",
@@ -252,8 +424,19 @@
     "shortAnswer": "Check CloudWatch logs for the failing service, review ECS task health and stopped task reasons, look for infrastructure or configuration changes in CloudTrail, and verify downstream dependencies.",
     "interviewAnswer": "First, I check CloudWatch Logs for the ECS service to see if errors appear at the application layer. If tasks are stopping, the stopped-task reason in the ECS console or CLI often gives a direct cause — out of memory, failed health check, or connectivity issue. Next, I look at CloudTrail to see if any infrastructure changes happened overnight, such as a security group rule change, VPC modification, or a task definition update by a pipeline that ran outside business hours. I also check if a dependent service or RDS instance had maintenance, since AWS can perform scheduled maintenance that temporarily takes a resource offline. Finally, I verify whether the timeout parameters in the test framework or load balancer listener rules changed.",
     "realProjectExample": "A regression run failed every night for a week. CloudTrail showed that an automated security scan was modifying a security group outbound rule at 2 AM, blocking egress to the database. No deployment had occurred, but an infra automation job was the culprit.",
-    "followUps": ["How do you distinguish a test environment issue from an application bug?", "What CloudWatch metrics would you look at for an ECS service?", "How would you automate this diagnostic process for future failures?"],
-    "tags": ["aws", "ecs", "fargate", "debugging", "cloudwatch", "investigation"]
+    "followUps": [
+      "How do you distinguish a test environment issue from an application bug?",
+      "What CloudWatch metrics would you look at for an ECS service?",
+      "How would you automate this diagnostic process for future failures?"
+    ],
+    "tags": [
+      "aws",
+      "ecs",
+      "fargate",
+      "debugging",
+      "cloudwatch",
+      "investigation"
+    ]
   },
   {
     "id": "aws-020",
@@ -266,8 +449,18 @@
     "shortAnswer": "Upload screenshots to S3 with a structured prefix per run. Use pre-signed URLs or a private bucket with team IAM access. Consider retention policy, cost, and accidental public exposure.",
     "interviewAnswer": "I would configure the test runner to upload screenshots to S3 under a key like `screenshots/{branch}/{build-id}/{test-name}.png` at the end of each run. The bucket stays private. For sharing, I generate pre-signed URLs with a one-week expiry and post them in the pull request or Slack notification. I would not make the bucket public because it could expose sensitive application state visible in screenshots. For the CI pipeline, I would use an IAM role with s3:PutObject scoped to that specific bucket — no wildcard permissions. I would also set an S3 lifecycle rule to delete objects older than 30 days to control storage costs.",
     "realProjectExample": "Previously, screenshots lived only on the CI server and were deleted after seven days. After moving to S3, we retained 30 days of history, which helped us identify a UI regression that had actually started six builds earlier.",
-    "followUps": ["How would you organize S3 keys to make browsing artifacts easy?", "What lifecycle policy would you set and why?", "How do pre-signed URLs differ from making objects publicly readable?"],
-    "tags": ["aws", "s3", "artifacts", "security", "test-automation"]
+    "followUps": [
+      "How would you organize S3 keys to make browsing artifacts easy?",
+      "What lifecycle policy would you set and why?",
+      "How do pre-signed URLs differ from making objects publicly readable?"
+    ],
+    "tags": [
+      "aws",
+      "s3",
+      "artifacts",
+      "security",
+      "test-automation"
+    ]
   },
   {
     "id": "aws-021",
@@ -280,8 +473,19 @@
     "shortAnswer": "Use CloudWatch Logs Insights to find invocation errors, check Lambda concurrency limits, inspect timeout settings, and review API Gateway logs. Recommend load testing in staging and adding concurrency alarms.",
     "interviewAnswer": "502 errors from API Gateway backed by Lambda typically mean the Lambda either timed out, was throttled, or threw an unhandled exception. I start with CloudWatch Logs Insights to query Lambda error and timeout events during the production failure window. I also check the Lambda Throttles metric — if concurrency is hitting the account or function limit, requests queue or drop, causing 502s. Next, I review the Lambda timeout setting versus actual execution duration in CloudWatch to see if the function is taking longer under load. On the API Gateway side, I enable execution logging to capture detailed request and response data. For prevention, I recommend running load tests in staging that replicate production concurrency levels, setting a CloudWatch alarm on Lambda Throttles and Errors, and implementing reserved concurrency with a graceful fallback rather than letting requests fail silently.",
     "realProjectExample": "A Lambda processing image uploads had a 10-second timeout that was fine in staging with low load. Under production traffic, downstream S3 writes slowed and Lambda executions exceeded the timeout. A load test in staging with realistic concurrency would have caught this. We increased the timeout, added a concurrency alarm, and recommended the dev team add retry logic with exponential backoff on the client.",
-    "followUps": ["How would you design a load test for a Lambda-backed API?", "What is the difference between Lambda throttling and Lambda errors in CloudWatch?", "How does reserved concurrency differ from provisioned concurrency?"],
-    "tags": ["aws", "lambda", "cloudwatch", "load-testing", "debugging", "production"]
+    "followUps": [
+      "How would you design a load test for a Lambda-backed API?",
+      "What is the difference between Lambda throttling and Lambda errors in CloudWatch?",
+      "How does reserved concurrency differ from provisioned concurrency?"
+    ],
+    "tags": [
+      "aws",
+      "lambda",
+      "cloudwatch",
+      "load-testing",
+      "debugging",
+      "production"
+    ]
   },
   {
     "id": "aws-022",
@@ -294,8 +498,19 @@
     "shortAnswer": "Define gates for environment readiness, test execution, artifact publishing, and cleanup. Include health checks, smoke tests, pass rate thresholds, and TTL-based cleanup to prevent orphan environments.",
     "interviewAnswer": "I would define four gates. First, an environment readiness gate: after ECS services start, poll the health check endpoint until all tasks report healthy or fail the pipeline after a timeout — this prevents running tests against a partially deployed environment. Second, a smoke test gate: run a minimal set of critical-path API and UI checks to confirm the feature under test works end-to-end before executing the full suite. Third, a test quality gate: require a minimum pass rate (for example, 95%) and zero failures on P0 tests before marking the branch eligible for merge. Fourth, a cleanup gate: on pipeline completion — pass or fail — run a teardown step that deletes ECS services, task definitions, and test data. Add a CloudWatch Events rule that flags environments older than 24 hours as orphans and sends an alert so no environment leaks costs indefinitely.",
     "realProjectExample": "We implemented this model for a microservices project with six feature teams. Each branch got an isolated ECS environment. The quality gates cut production incidents caused by environment drift from four per quarter to zero over two quarters.",
-    "followUps": ["How do you handle flaky tests in a gate that blocks merge?", "How do you version the infrastructure templates used per branch?", "What is the cost model for running per-branch environments?"],
-    "tags": ["aws", "ecs", "fargate", "test-environments", "quality-gates", "ci-cd"]
+    "followUps": [
+      "How do you handle flaky tests in a gate that blocks merge?",
+      "How do you version the infrastructure templates used per branch?",
+      "What is the cost model for running per-branch environments?"
+    ],
+    "tags": [
+      "aws",
+      "ecs",
+      "fargate",
+      "test-environments",
+      "quality-gates",
+      "ci-cd"
+    ]
   },
   {
     "id": "aws-023",
@@ -308,8 +523,19 @@
     "shortAnswer": "Check IAM policy changes in CloudTrail, verify the ECS task role or Lambda execution role still has required permissions, and confirm no SCPs or resource-based policies were modified.",
     "interviewAnswer": "AccessDenied with no code change immediately points to an IAM or configuration change. My first step is CloudTrail — I filter for IAM events over the past week including AttachRolePolicy, DetachRolePolicy, PutRolePolicy, and DeleteRolePolicy for the roles used by the service. If the ECS task definition was updated, I compare the current task role ARN against last week's. Next I check if a Service Control Policy at the organization level was updated, since SCPs can silently restrict permissions even when the role policy looks correct. I also verify the resource-based policies on any services being called — an S3 bucket policy or a Lambda resource policy could have been tightened. To speed up future diagnostics, I recommend exporting IAM policy snapshots to S3 as part of the deployment pipeline so there is always a before-and-after diff available.",
     "realProjectExample": "A staging environment started returning AccessDenied on DynamoDB reads after a routine IAM audit. The audit script had removed an inline policy from the ECS task role treating it as unused. CloudTrail confirmed the removal timestamp matched the start of failures. The policy was restored and smoke tests passed immediately.",
-    "followUps": ["How do you write a smoke test that proactively catches permission regressions?", "What is the difference between an IAM policy and a resource-based policy?", "How would you use AWS Config to detect IAM drift?"],
-    "tags": ["aws", "iam", "cloudtrail", "deployment", "debugging", "permissions"]
+    "followUps": [
+      "How do you write a smoke test that proactively catches permission regressions?",
+      "What is the difference between an IAM policy and a resource-based policy?",
+      "How would you use AWS Config to detect IAM drift?"
+    ],
+    "tags": [
+      "aws",
+      "iam",
+      "cloudtrail",
+      "deployment",
+      "debugging",
+      "permissions"
+    ]
   },
   {
     "id": "aws-024",
@@ -322,8 +548,18 @@
     "shortAnswer": "Identify environment variables, AWS service endpoints, credentials, and container image versions that differ between local and ECS. Recommend using Docker locally with the same env vars as the ECS task definition.",
     "interviewAnswer": "The first thing I look for is environmental asymmetry. I pull the ECS task definition and compare the environment variables it injects to what developers have locally — differences in API URLs, feature flags, or mock service settings are the most common culprits. I also check if the ECS service is connecting to a real dependent service like a database or queue that local machines mock or stub differently. I review the CloudWatch logs for the failing test scenarios to see if the ECS environment logs anything developers do not reproduce. My recommendation is to document all environment variables from the task definition in a .env.example file, provide a docker-compose setup that mirrors the ECS container configuration, and add a test setup check that asserts required environment variables are set and logs their values — without secrets — so failures are self-diagnosing.",
     "realProjectExample": "Tests failed locally because developers used a stub payment service URL while ECS hit a real sandbox. Adding a required PAYMENT_SERVICE_URL variable with an assertion in test setup made the discrepancy visible in one run instead of a day of debugging.",
-    "followUps": ["How do you manage secrets for local development safely?", "What is the risk of developers running tests against production AWS services?", "How would you use Docker Compose to replicate the ECS environment locally?"],
-    "tags": ["aws", "ecs", "environment-variables", "local-dev", "test-environments"]
+    "followUps": [
+      "How do you manage secrets for local development safely?",
+      "What is the risk of developers running tests against production AWS services?",
+      "How would you use Docker Compose to replicate the ECS environment locally?"
+    ],
+    "tags": [
+      "aws",
+      "ecs",
+      "environment-variables",
+      "local-dev",
+      "test-environments"
+    ]
   },
   {
     "id": "aws-025",
@@ -336,7 +572,699 @@
     "shortAnswer": "Knowing Lambda allows you to include the invocation ID, relevant CloudWatch log stream, error type, and execution duration in the bug report — giving developers exactly the context they need to reproduce and fix the issue.",
     "interviewAnswer": "When a Lambda-backed API returns an error, the response often includes an X-Amzn-RequestId or similar header that maps directly to a CloudWatch log stream. If I know this, I can navigate to the exact log stream, find the stack trace or error message from that specific invocation, and attach it to the bug report. This eliminates the back-and-forth where developers ask for logs and testers do not know where to look. I also note the AWS region, the function name, and the approximate invocation time so developers can find the event without searching. A bug report that says 'API returned 500 at 14:32 UTC, CloudWatch log stream /aws/lambda/my-function with request ID abc-123 shows NullPointerException at line 45' is far more actionable than 'the button does not work'.",
     "realProjectExample": "I added a test utility that extracted the request ID from the API response headers and automatically appended the CloudWatch Logs deep-link to every failed API assertion. Developer time-to-fix dropped noticeably because they never had to ask for logs.",
-    "followUps": ["Where in an HTTP response would you find the Lambda request ID?", "What other information should always appear in a cloud service bug report?", "How do you find the right log stream when you only have a timestamp?"],
-    "tags": ["aws", "lambda", "cloudwatch", "bug-reporting", "defect-quality"]
+    "followUps": [
+      "Where in an HTTP response would you find the Lambda request ID?",
+      "What other information should always appear in a cloud service bug report?",
+      "How do you find the right log stream when you only have a timestamp?"
+    ],
+    "tags": [
+      "aws",
+      "lambda",
+      "cloudwatch",
+      "bug-reporting",
+      "defect-quality"
+    ]
+  },
+  {
+    "id": "aws-026",
+    "topicId": "aws",
+    "topicTitle": "AWS",
+    "level": "mid",
+    "type": "quiz",
+    "difficulty": "easy",
+    "question": "Which EC2 purchasing option is most cost-effective for a long-running dedicated QA environment that runs 24/7 for at least one year?",
+    "choices": [
+      "Reserved Instances (1-year term, no upfront)",
+      "On-Demand Instances",
+      "Spot Instances",
+      "Dedicated Hosts"
+    ],
+    "correctAnswer": "Reserved Instances (1-year term, no upfront)",
+    "explanation": "Reserved Instances offer up to 72% discount compared to On-Demand pricing in exchange for a 1 or 3-year commitment. For a stable QA environment that runs continuously, this is the best cost option. Spot Instances are cheaper but can be interrupted, making them unsuitable for persistent test environments. Dedicated Hosts are for compliance licensing needs and are more expensive.",
+    "tags": [
+      "aws",
+      "ec2",
+      "cost-optimization",
+      "reserved-instances"
+    ]
+  },
+  {
+    "id": "aws-027",
+    "topicId": "aws",
+    "topicTitle": "AWS",
+    "level": "mid",
+    "type": "quiz",
+    "difficulty": "easy",
+    "question": "Which AWS service allows you to publish messages to multiple subscribers simultaneously using a fan-out pattern?",
+    "choices": [
+      "Amazon SNS (Simple Notification Service)",
+      "Amazon SQS (Simple Queue Service)",
+      "Amazon Kinesis",
+      "AWS Step Functions"
+    ],
+    "correctAnswer": "Amazon SNS (Simple Notification Service)",
+    "explanation": "SNS is a pub/sub messaging service that delivers messages to all subscribed endpoints simultaneously — including SQS queues, Lambda functions, HTTP endpoints, and email. This fan-out pattern is commonly used when one event (such as an order placed) needs to trigger multiple downstream processes. SDETs testing event-driven systems should understand whether their system uses SNS, SQS, or both.",
+    "tags": [
+      "aws",
+      "sns",
+      "messaging",
+      "fan-out"
+    ]
+  },
+  {
+    "id": "aws-028",
+    "topicId": "aws",
+    "topicTitle": "AWS",
+    "level": "mid",
+    "type": "quiz",
+    "difficulty": "medium",
+    "question": "What is the key difference between an SQS standard queue and an SQS FIFO queue that matters most when testing message ordering?",
+    "choices": [
+      "FIFO queues guarantee exactly-once delivery and message ordering; standard queues guarantee at-least-once delivery with best-effort ordering",
+      "Standard queues support higher throughput than FIFO but guarantee message order",
+      "FIFO queues support unlimited throughput while standard queues cap at 300 messages per second",
+      "Standard queues encrypt messages by default while FIFO queues do not"
+    ],
+    "correctAnswer": "FIFO queues guarantee exactly-once delivery and message ordering; standard queues guarantee at-least-once delivery with best-effort ordering",
+    "explanation": "SQS standard queues are highly scalable but can deliver messages out of order and may deliver a message more than once. FIFO queues enforce strict ordering and exactly-once processing within a message group. When writing tests for order-sensitive workflows (such as financial transactions or sequential state machine steps), use a FIFO queue and assert on message sequence explicitly.",
+    "tags": [
+      "aws",
+      "sqs",
+      "messaging",
+      "fifo",
+      "testing"
+    ]
+  },
+  {
+    "id": "aws-029",
+    "topicId": "aws",
+    "topicTitle": "AWS",
+    "level": "mid",
+    "type": "quiz",
+    "difficulty": "easy",
+    "question": "Which AWS service provides a managed relational database with automatic failover and up to 15 read replicas, billed based on actual consumption?",
+    "choices": [
+      "Amazon Aurora Serverless",
+      "Amazon RDS MySQL",
+      "Amazon DynamoDB",
+      "Amazon Redshift"
+    ],
+    "correctAnswer": "Amazon Aurora Serverless",
+    "explanation": "Aurora Serverless automatically scales compute capacity based on actual database load and charges per ACU-second consumed rather than for a fixed instance size. This makes it attractive for ephemeral test environments where databases may be idle for long periods. Standard RDS charges for uptime regardless of usage, and DynamoDB is a NoSQL service.",
+    "tags": [
+      "aws",
+      "aurora",
+      "rds",
+      "serverless",
+      "test-environments"
+    ]
+  },
+  {
+    "id": "aws-030",
+    "topicId": "aws",
+    "topicTitle": "AWS",
+    "level": "senior",
+    "type": "quiz",
+    "difficulty": "medium",
+    "question": "An SDET wants to verify that a CloudWatch alarm transitions from INSUFFICIENT_DATA to ALARM within 5 minutes after a new deployment causes elevated error rates. Which approach is correct?",
+    "choices": [
+      "Inject synthetic errors after deployment and poll the alarm state using the CloudWatch DescribeAlarms API until the expected state is reached",
+      "Read the alarm history from the CloudWatch console and manually confirm the transition",
+      "Deploy a Lambda function that continuously publishes ALARM state to the alarm",
+      "Set the alarm threshold to zero so it always fires and verify it fires"
+    ],
+    "correctAnswer": "Inject synthetic errors after deployment and poll the alarm state using the CloudWatch DescribeAlarms API until the expected state is reached",
+    "explanation": "Testing a CloudWatch alarm requires triggering the real condition (elevated errors) and then asserting that the alarm transitions through the expected states. The DescribeAlarms API returns the current state and can be polled in a loop with a timeout. Manually reading the console is not automatable, and forcing the alarm state bypasses the metric evaluation logic you actually want to validate.",
+    "tags": [
+      "aws",
+      "cloudwatch",
+      "alarms",
+      "testing",
+      "automation"
+    ]
+  },
+  {
+    "id": "aws-031",
+    "topicId": "aws",
+    "topicTitle": "AWS",
+    "level": "mid",
+    "type": "quiz",
+    "difficulty": "medium",
+    "question": "Which AWS service should an SDET use to retrieve a database password at test runtime without hardcoding credentials in the test code?",
+    "choices": [
+      "AWS Secrets Manager",
+      "Amazon S3",
+      "AWS CloudTrail",
+      "AWS Config"
+    ],
+    "correctAnswer": "AWS Secrets Manager",
+    "explanation": "Secrets Manager stores and rotates sensitive values like database passwords, API keys, and tokens. At runtime, test code calls the GetSecretValue API using the CI runner's IAM role to retrieve the credential. This avoids hardcoding credentials in source code or CI environment variable plain text. SSM Parameter Store with SecureString is a lower-cost alternative for simpler use cases.",
+    "tags": [
+      "aws",
+      "secrets-manager",
+      "credentials",
+      "security",
+      "test-data"
+    ]
+  },
+  {
+    "id": "aws-032",
+    "topicId": "aws",
+    "topicTitle": "AWS",
+    "level": "senior",
+    "type": "quiz",
+    "difficulty": "hard",
+    "question": "Your team uses AWS Config rules to enforce that all S3 buckets have versioning enabled. How would you validate that Config is correctly detecting non-compliant buckets created during testing?",
+    "choices": [
+      "Create a test S3 bucket without versioning, trigger a Config evaluation, then assert the bucket appears as NON_COMPLIANT in the GetComplianceDetailsByResource API response",
+      "Enable S3 versioning on all buckets and confirm Config shows COMPLIANT for all resources",
+      "Delete the Config rule and recreate it to force a fresh evaluation",
+      "Check the S3 console to confirm versioning status matches the Config dashboard"
+    ],
+    "correctAnswer": "Create a test S3 bucket without versioning, trigger a Config evaluation, then assert the bucket appears as NON_COMPLIANT in the GetComplianceDetailsByResource API response",
+    "explanation": "To validate a Config rule works as intended, you need a positive test (non-compliant resource) and a negative test (compliant resource). Creating a bucket without versioning and asserting NON_COMPLIANT is the positive test. The GetComplianceDetailsByResource API provides programmatic assertions. This is especially important in regulated environments where Config rules are a compliance control.",
+    "tags": [
+      "aws",
+      "config",
+      "compliance",
+      "s3",
+      "testing"
+    ]
+  },
+  {
+    "id": "aws-033",
+    "topicId": "aws",
+    "topicTitle": "AWS",
+    "level": "mid",
+    "type": "interview",
+    "difficulty": "easy",
+    "question": "How does AWS Parameter Store differ from Secrets Manager, and when would you choose one over the other for test configuration?",
+    "shortAnswer": "Parameter Store is lower cost and suited for non-sensitive config values; Secrets Manager adds automatic rotation and is preferred for credentials and API keys.",
+    "interviewAnswer": "Both services store key-value configuration securely, but they serve slightly different needs. Parameter Store is free for standard parameters and uses SecureString (KMS-encrypted) for sensitive values — it is a good fit for feature flags, environment URLs, and non-rotating config values my tests need at runtime. Secrets Manager costs more per secret but provides built-in rotation, audit logging per access, and native integration with RDS for password rotation. For test credentials like database passwords or third-party API tokens that need to rotate automatically, I choose Secrets Manager. For static config like the base URL of a staging environment, Parameter Store is the right tool. In my test framework, I abstract both behind a config loader so switching is transparent.",
+    "realProjectExample": "We stored the staging API base URL and feature flag values in Parameter Store (free tier) and the test database password and payment sandbox API key in Secrets Manager with a 30-day rotation schedule. The CI pipeline had an IAM role that could access both, keeping credentials out of the pipeline definition entirely.",
+    "followUps": [
+      "How do you handle Secrets Manager secret rotation in tests that cache the credential?",
+      "What IAM permissions are needed to read from Parameter Store?",
+      "How would you validate that a secret has been rotated successfully?"
+    ],
+    "tags": [
+      "aws",
+      "parameter-store",
+      "secrets-manager",
+      "configuration",
+      "credentials"
+    ]
+  },
+  {
+    "id": "aws-034",
+    "topicId": "aws",
+    "topicTitle": "AWS",
+    "level": "mid",
+    "type": "interview",
+    "difficulty": "medium",
+    "question": "How would you use CloudTrail to investigate a test failure caused by an unexpected change to AWS infrastructure?",
+    "shortAnswer": "Query CloudTrail for API events in the relevant time window, filter by resource type and event name, and identify which principal made the change and when.",
+    "interviewAnswer": "CloudTrail records every AWS API call made in an account, including who made it, what resource was affected, and what the request and response looked like. When a test fails due to suspected infrastructure change — a security group modification, a secret deletion, or an IAM policy update — I go to CloudTrail and filter for the relevant resource name and time window. I look at the userIdentity field to see whether the change was made by a human, a CI pipeline role, or an automated process. I then cross-reference the change timestamp with the test failure timestamp to confirm causality. For recurring investigations, I can create CloudWatch Logs metric filters on CloudTrail data events to alert on specific API calls like DeleteSecret or AuthorizeSecurityGroupIngress so the team is notified before tests start failing.",
+    "realProjectExample": "A test that read from a DynamoDB table started failing with ResourceNotFoundException. CloudTrail showed that a developer had deleted the test table by running a cleanup script against the wrong environment. The 10-minute investigation became a playbook for environment isolation.",
+    "followUps": [
+      "How long does CloudTrail retain event history by default?",
+      "What is the difference between management events and data events in CloudTrail?",
+      "How would you set up a CloudWatch alarm based on a CloudTrail event?"
+    ],
+    "tags": [
+      "aws",
+      "cloudtrail",
+      "investigation",
+      "debugging",
+      "infrastructure"
+    ]
+  },
+  {
+    "id": "aws-035",
+    "topicId": "aws",
+    "topicTitle": "AWS",
+    "level": "senior",
+    "type": "interview",
+    "difficulty": "medium",
+    "question": "How do you test an application that uses ElastiCache (Redis) as a caching layer without depending on a shared cache instance?",
+    "shortAnswer": "Spin up a local Redis instance via Docker for unit and integration tests, use a dedicated ElastiCache cluster per test environment for staging, and flush or key-prefix per test run to prevent cache pollution.",
+    "interviewAnswer": "ElastiCache introduces state between requests, which makes tests order-dependent if not handled carefully. For unit and local integration tests, I use a Redis Docker container rather than ElastiCache so tests run without AWS access and remain fast and free. For staging integration tests, I provision a dedicated ElastiCache cluster per environment using Terraform or CloudFormation — shared clusters risk cache bleed between teams. Within a test run, I either flush the database in setup and teardown, or prefix every cache key with a unique run ID so parallel runs never collide. I also write explicit tests that verify caching behavior: one test confirms a cache hit returns a value without hitting the origin, and another confirms a TTL expiry causes a fresh fetch. These tests validate the caching logic rather than just the data being returned.",
+    "realProjectExample": "Our API cached user profile data for 60 seconds. Tests that ran sequentially were order-dependent because a stale cached profile from test 1 affected test 2. Adding a unique key prefix per test and a setup flush eliminated all ordering issues and made the suite safe to run in parallel.",
+    "followUps": [
+      "How would you test cache invalidation logic?",
+      "What are the risks of running tests against a shared ElastiCache instance?",
+      "How do you measure cache hit rate in CloudWatch and what thresholds would you alert on?"
+    ],
+    "tags": [
+      "aws",
+      "elasticache",
+      "redis",
+      "caching",
+      "integration-testing"
+    ]
+  },
+  {
+    "id": "aws-036",
+    "topicId": "aws",
+    "topicTitle": "AWS",
+    "level": "senior",
+    "type": "interview",
+    "difficulty": "hard",
+    "question": "How would you design a load test for an API deployed behind API Gateway and backed by Lambda, and what AWS metrics would you monitor during the run?",
+    "shortAnswer": "Use a load testing tool (Locust, k6, or AWS Distributed Load Testing) to ramp concurrent users, and monitor API Gateway 4xx/5xx rates, Lambda throttles, duration p99, and downstream service saturation in CloudWatch.",
+    "interviewAnswer": "I start by defining realistic traffic shapes based on production data — ramp rate, peak concurrency, and request distribution across endpoints. For execution, tools like Locust or k6 run from EC2 or Fargate instances inside the VPC to avoid NAT bottlenecks. During the test I monitor API Gateway metrics: Count, 4XXError, 5XXError, and IntegrationLatency. On the Lambda side I watch Throttles, Errors, Duration (p50/p95/p99), and ConcurrentExecutions. If the API calls DynamoDB or RDS, I watch their consumed capacity and connection count respectively. I set alarms before the test starts so any threshold breach is immediately visible rather than discovered after the run. After the test I analyze CloudWatch metrics and Lambda cold start frequency to determine if provisioned concurrency is needed. The load test result becomes a baseline for future releases — if a new release degrades p99 latency by more than 20%, the pipeline fails.",
+    "realProjectExample": "A payment API passed functional tests but failed under a 500 concurrent user load. Lambda was hitting the account concurrency limit and throttling requests. We requested a concurrency limit increase, added provisioned concurrency for the critical Lambda, and re-ran the test. The 502 error rate dropped from 8% to zero.",
+    "followUps": [
+      "How do you distinguish Lambda throttling from Lambda errors in CloudWatch metrics?",
+      "How would you use AWS Distributed Load Testing Solution for this?",
+      "What is the impact of Lambda cold starts on p99 latency under load?"
+    ],
+    "tags": [
+      "aws",
+      "load-testing",
+      "lambda",
+      "api-gateway",
+      "cloudwatch",
+      "performance"
+    ]
+  },
+  {
+    "id": "aws-037",
+    "topicId": "aws",
+    "topicTitle": "AWS",
+    "level": "mid",
+    "type": "scenario",
+    "difficulty": "medium",
+    "question": "Your team receives a PagerDuty alert that an SQS queue depth has grown to 50,000 messages during a test run. Tests are passing, but the queue is not draining. What is your investigation and what do you recommend?",
+    "shortAnswer": "Check whether the consumer Lambda or ECS service is running, review DLQ for failed messages, inspect CloudWatch Lambda errors and throttle metrics, and verify the consumer has correct SQS permissions.",
+    "interviewAnswer": "A growing queue depth with passing tests suggests the producer is working but the consumer is not processing messages. I start by checking whether the consumer Lambda or worker service is running and healthy. If Lambda is the consumer, I check CloudWatch for Lambda invocation errors, throttling, and the NumberOfMessagesSentToDLQ metric — messages moved to the dead-letter queue indicate processing failures. I also check if the Lambda has the correct event source mapping enabled and the right IAM permissions for sqs:ReceiveMessage and sqs:DeleteMessage. If the consumer is an ECS service, I check if the tasks are healthy and whether a recent deployment stopped the workers without restarting them. For prevention, I recommend adding a CloudWatch alarm on ApproximateNumberOfMessagesVisible with a threshold based on expected processing capacity so the team is notified before the backlog becomes problematic.",
+    "realProjectExample": "During a load test we forgot to re-enable the consumer Lambda event source mapping after a maintenance window. The queue depth grew for two hours before anyone noticed. We added an alarm at a depth of 500 messages that fires within two minutes of consumer failure, catching it before it affects users.",
+    "followUps": [
+      "How do you test that a DLQ is correctly receiving failed messages?",
+      "What is the difference between ApproximateNumberOfMessagesVisible and ApproximateAgeOfOldestMessage in SQS?",
+      "How would you write an automated test that validates end-to-end message processing from SQS to database?"
+    ],
+    "tags": [
+      "aws",
+      "sqs",
+      "messaging",
+      "monitoring",
+      "debugging",
+      "dlq"
+    ]
+  },
+  {
+    "id": "aws-038",
+    "topicId": "aws",
+    "topicTitle": "AWS",
+    "level": "senior",
+    "type": "scenario",
+    "difficulty": "hard",
+    "question": "You need to validate cross-region replication for an S3 bucket that stores critical test artifacts. How do you write an automated test that confirms objects replicate within the expected SLA?",
+    "shortAnswer": "Upload an object to the source bucket, record the timestamp, then poll the destination bucket in the target region until the object appears or a timeout is exceeded, then assert the replication lag is within the SLA.",
+    "interviewAnswer": "Cross-region replication is eventually consistent, so the test must tolerate a delay but enforce a maximum. I write the test as follows: first, upload a uniquely named object to the source bucket with a timestamp in its metadata. Then, using a boto3 client configured for the destination region, I poll the destination bucket for that object key in a loop with a configurable interval — typically 5-second retries. I measure elapsed time from upload to first successful head-object response and assert it is within the agreed SLA, for example 60 seconds. If the SLA is exceeded I fail the test and include the elapsed time in the assertion message for clear reporting. I also assert the replicated object's ETag and metadata match the source to confirm content integrity, not just presence. This test runs as part of infrastructure validation after any S3 replication configuration change.",
+    "realProjectExample": "We had an SLA of two-minute replication for a compliance archive bucket. The automated test caught a misconfiguration during a Terraform module upgrade where the replication rule was accidentally scoped to a prefix that did not match our object keys. Replication silently stopped and the test caught it within the first pipeline run after the change.",
+    "followUps": [
+      "How do you handle eventual consistency in other AWS services during testing?",
+      "What IAM permissions are needed to read from a cross-region replicated bucket?",
+      "How would you test that delete markers are also replicated when delete replication is enabled?"
+    ],
+    "tags": [
+      "aws",
+      "s3",
+      "cross-region-replication",
+      "integration-testing",
+      "sla"
+    ]
+  },
+  {
+    "id": "aws-039",
+    "topicId": "aws",
+    "topicTitle": "AWS",
+    "level": "senior",
+    "type": "scenario",
+    "difficulty": "hard",
+    "question": "Your CloudFormation stack for a QA environment fails to create with a ROLLBACK_COMPLETE status. The team wants to redeploy quickly. What is your process, and how do you prevent this in future runs?",
+    "shortAnswer": "Read the CloudFormation stack events to identify the specific failing resource and error, delete the rolled-back stack, fix the template or resource configuration, and add a pre-deployment template validation step to CI.",
+    "interviewAnswer": "ROLLBACK_COMPLETE means the stack creation attempted but failed, and CloudFormation rolled back all resources. The stack cannot be updated — it must be deleted and recreated. My first step is to read the CloudFormation stack events sorted by timestamp to find the first resource that failed, as it will show the root cause error message. Common causes include resource naming conflicts, IAM permission gaps, resource limits exceeded, or invalid parameter values. Once I identify the cause, I fix the template or parameter input and delete the failed stack before redeploying. For prevention, I add a cfn-lint validation step to the CI pipeline that catches syntax and structural errors before deployment. I also run aws cloudformation validate-template as an early gate. For parameter errors, I add a pre-deploy script that validates parameter values against expected patterns — for example, confirming a VPC ID parameter matches the expected format before attempting to create resources that depend on it.",
+    "realProjectExample": "A QA environment stack failed because a security group rule referenced a VPC that existed in a different region than the stack was being deployed to. The error was in the stack events but hidden by 12 subsequent rollback events. Adding cfn-lint and a VPC existence check to the deployment pipeline caught this class of error before any future runs reached CloudFormation.",
+    "followUps": [
+      "How does CloudFormation change sets help prevent deployment failures?",
+      "What is the difference between ROLLBACK_COMPLETE and UPDATE_ROLLBACK_COMPLETE?",
+      "How would you use CloudFormation stack policies to protect critical resources during updates?"
+    ],
+    "tags": [
+      "aws",
+      "cloudformation",
+      "test-environments",
+      "debugging",
+      "infrastructure-as-code"
+    ]
+  },
+  {
+    "id": "aws-040",
+    "topicId": "aws",
+    "topicTitle": "AWS",
+    "level": "mid",
+    "type": "coding",
+    "difficulty": "easy",
+    "title": "List CloudWatch Log Groups for a Service",
+    "question": "Write a Python function that lists all CloudWatch log group names that start with a given prefix.",
+    "problem": "Given a prefix string (e.g., '/aws/lambda/'), the function should return a list of all log group names in the current AWS region that begin with that prefix. Use boto3 and handle pagination correctly.",
+    "inputExample": "list_log_groups('/aws/lambda/')",
+    "expectedOutput": "A list of strings, e.g. ['/aws/lambda/my-function', '/aws/lambda/another-function']",
+    "hint": "Use the CloudWatch Logs describe_log_groups API with the logGroupNamePrefix parameter. The response is paginated — use a while loop with the nextToken to collect all results.",
+    "solutionLanguage": "python",
+    "solution": "import boto3\n\ndef list_log_groups(prefix: str) -> list[str]:\n    client = boto3.client('logs')\n    log_group_names = []\n    kwargs = {'logGroupNamePrefix': prefix, 'limit': 50}\n\n    while True:\n        response = client.describe_log_groups(**kwargs)\n        for group in response.get('logGroups', []):\n            log_group_names.append(group['logGroupName'])\n        next_token = response.get('nextToken')\n        if not next_token:\n            break\n        kwargs['nextToken'] = next_token\n\n    return log_group_names",
+    "explanation": "describe_log_groups accepts a logGroupNamePrefix to filter results server-side, which is more efficient than fetching all groups and filtering locally. Because AWS paginates this API (50 results max per call), the while loop checks for a nextToken in each response and passes it into the next call. When nextToken is absent the loop exits with a complete list.",
+    "commonMistakes": [
+      "Forgetting to handle pagination and only returning the first page of results",
+      "Filtering by prefix in Python after fetching all groups, which is slow on large accounts",
+      "Using the wrong key name 'next_token' instead of 'nextToken' from the response dict"
+    ],
+    "followUps": [
+      "How would you modify this to also return the retention policy for each log group?"
+    ],
+    "tags": [
+      "aws",
+      "python",
+      "boto3",
+      "cloudwatch",
+      "logs"
+    ]
+  },
+  {
+    "id": "aws-041",
+    "topicId": "aws",
+    "topicTitle": "AWS",
+    "level": "mid",
+    "type": "coding",
+    "difficulty": "medium",
+    "title": "Poll SQS Queue Until Message Appears",
+    "question": "Write a Python function that polls an SQS queue for a message matching a given body substring, with a configurable timeout.",
+    "problem": "Given a queue URL, a substring to match in the message body, and a timeout in seconds, the function should poll the queue using long polling, return the first matching message body as a string, and raise a TimeoutError if no matching message is found within the timeout. The function must also delete the message from the queue after consuming it.",
+    "inputExample": "wait_for_sqs_message('https://sqs.us-east-1.amazonaws.com/123456789/my-queue', 'order_created', timeout=30)",
+    "expectedOutput": "The full message body string of the first message containing 'order_created', or raises TimeoutError",
+    "hint": "Use receive_message with WaitTimeSeconds=10 for long polling. Loop until the timeout is exceeded using time.time(). Call delete_message with the ReceiptHandle after consuming the message.",
+    "solutionLanguage": "python",
+    "solution": "import boto3\nimport time\n\ndef wait_for_sqs_message(queue_url: str, body_contains: str, timeout: int = 30) -> str:\n    client = boto3.client('sqs')\n    deadline = time.time() + timeout\n\n    while time.time() < deadline:\n        remaining = deadline - time.time()\n        wait_seconds = min(10, max(1, int(remaining)))\n        response = client.receive_message(\n            QueueUrl=queue_url,\n            MaxNumberOfMessages=10,\n            WaitTimeSeconds=wait_seconds\n        )\n        for message in response.get('Messages', []):\n            if body_contains in message['Body']:\n                client.delete_message(\n                    QueueUrl=queue_url,\n                    ReceiptHandle=message['ReceiptHandle']\n                )\n                return message['Body']\n\n    raise TimeoutError(\n        f\"No message containing '{body_contains}' found in '{queue_url}' within {timeout}s\"\n    )",
+    "explanation": "Long polling (WaitTimeSeconds up to 20) reduces empty responses and API calls compared to short polling. The loop checks a deadline rather than a fixed iteration count so the timeout is wall-clock accurate. The remaining time cap ensures the final receive call does not wait longer than the remaining budget. Deleting the message with its ReceiptHandle removes it from the queue so other consumers do not re-process it.",
+    "commonMistakes": [
+      "Using WaitTimeSeconds=0 (short polling) which hammers the API and misses messages",
+      "Not deleting the message after reading, causing it to become visible again after the visibility timeout",
+      "Checking for exact body equality instead of substring match, causing missed messages with metadata wrappers"
+    ],
+    "followUps": [
+      "How would you adapt this to parse the message body as JSON before matching?"
+    ],
+    "tags": [
+      "aws",
+      "python",
+      "boto3",
+      "sqs",
+      "messaging",
+      "testing"
+    ]
+  },
+  {
+    "id": "aws-042",
+    "topicId": "aws",
+    "topicTitle": "AWS",
+    "level": "mid",
+    "type": "coding",
+    "difficulty": "medium",
+    "title": "Get SSM Parameter Store Value",
+    "question": "Write a Python function that retrieves a SecureString parameter from AWS Systems Manager Parameter Store and returns the decrypted value.",
+    "problem": "Given a parameter name string, the function should call the SSM GetParameter API with decryption enabled and return the parameter value as a plain string. If the parameter does not exist, return None instead of raising an exception.",
+    "inputExample": "get_parameter('/myapp/test/db_password')",
+    "expectedOutput": "The decrypted string value of the parameter, or None if the parameter does not exist",
+    "hint": "Use boto3 ssm client get_parameter with WithDecryption=True. Catch the ClientError exception and check the error code for 'ParameterNotFound' to return None gracefully.",
+    "solutionLanguage": "python",
+    "solution": "import boto3\nfrom botocore.exceptions import ClientError\n\ndef get_parameter(name: str) -> str | None:\n    client = boto3.client('ssm')\n    try:\n        response = client.get_parameter(\n            Name=name,\n            WithDecryption=True\n        )\n        return response['Parameter']['Value']\n    except ClientError as e:\n        if e.response['Error']['Code'] == 'ParameterNotFound':\n            return None\n        raise",
+    "explanation": "WithDecryption=True is required to retrieve SecureString parameters in plain text — without it, the value is returned as the encrypted ciphertext. The function only silences ParameterNotFound so callers can handle a missing parameter without try-except at every call site. All other ClientErrors (such as AccessDenied) are re-raised so they surface clearly.",
+    "commonMistakes": [
+      "Omitting WithDecryption=True and returning the raw ciphertext instead of the plain value",
+      "Catching all exceptions with a bare except and hiding real permission errors",
+      "Using the wrong key path in the response dict (e.g., 'parameter' lowercase instead of 'Parameter')"
+    ],
+    "followUps": [
+      "How would you retrieve multiple parameters efficiently using get_parameters_by_path?"
+    ],
+    "tags": [
+      "aws",
+      "python",
+      "boto3",
+      "ssm",
+      "parameter-store",
+      "secrets"
+    ]
+  },
+  {
+    "id": "aws-043",
+    "topicId": "aws",
+    "topicTitle": "AWS",
+    "level": "senior",
+    "type": "coding",
+    "difficulty": "medium",
+    "title": "Verify DynamoDB Item Written by Event",
+    "question": "Write a Python function that waits for a DynamoDB item with a specific partition key to appear, polling with a configurable timeout.",
+    "problem": "Given a table name, a partition key name, a partition key value, and a timeout in seconds, the function should poll DynamoDB using get_item until the item exists and return the item as a dict. If the item does not appear within the timeout, raise a TimeoutError. The function should also accept an optional sort key name and value for tables with a composite key.",
+    "inputExample": "wait_for_dynamo_item('orders', 'order_id', 'ORD-9876', timeout=20)",
+    "expectedOutput": "A dict representing the DynamoDB item with all attributes, or raises TimeoutError",
+    "hint": "Use the DynamoDB resource or client get_item. Build the Key dict from the provided key arguments. Poll in a loop sleeping 1 second between attempts. Check for the 'Item' key in the response to know if the item exists.",
+    "solutionLanguage": "python",
+    "solution": "import boto3\nimport time\n\ndef wait_for_dynamo_item(\n    table_name: str,\n    pk_name: str,\n    pk_value: str,\n    timeout: int = 30,\n    sk_name: str | None = None,\n    sk_value: str | None = None\n) -> dict:\n    dynamodb = boto3.resource('dynamodb')\n    table = dynamodb.Table(table_name)\n    key = {pk_name: pk_value}\n    if sk_name and sk_value:\n        key[sk_name] = sk_value\n\n    deadline = time.time() + timeout\n    while time.time() < deadline:\n        response = table.get_item(Key=key)\n        item = response.get('Item')\n        if item is not None:\n            return item\n        time.sleep(1)\n\n    raise TimeoutError(\n        f\"Item {key} not found in table '{table_name}' within {timeout}s\"\n    )",
+    "explanation": "Using the DynamoDB resource (boto3.resource) instead of the low-level client handles type deserialization automatically, returning Python native types rather than DynamoDB's AttributeValue format. The Key dict is built dynamically to support both simple and composite key schemas. Polling with a 1-second sleep is appropriate for integration tests asserting on asynchronous writes — a higher sleep interval reduces DynamoDB read costs at the expense of assertion speed.",
+    "commonMistakes": [
+      "Using the low-level client without a TypeDeserializer and getting raw DynamoDB JSON like {'S': 'value'} instead of 'value'",
+      "Forgetting to include the sort key in the Key dict for composite-key tables, which raises a ValidationException",
+      "Not checking response.get('Item') and assuming the item always exists on the first call"
+    ],
+    "followUps": [
+      "How would you extend this to also assert specific attribute values on the returned item?"
+    ],
+    "tags": [
+      "aws",
+      "python",
+      "boto3",
+      "dynamodb",
+      "integration-testing",
+      "polling"
+    ]
+  },
+  {
+    "id": "aws-044",
+    "topicId": "aws",
+    "topicTitle": "AWS",
+    "level": "senior",
+    "type": "coding",
+    "difficulty": "hard",
+    "title": "Invoke Lambda and Assert Response",
+    "question": "Write a Python function that invokes a Lambda function synchronously, asserts the response status code is 200 and the payload matches an expected dict, and returns the parsed response payload.",
+    "problem": "Given a Lambda function name, an input event dict, and an expected output dict, the function should invoke the Lambda synchronously, parse the response Payload stream as JSON, assert the StatusCode is 200 and the function did not return a FunctionError, and assert that all key-value pairs in the expected dict appear in the actual response payload. Return the full parsed payload dict on success.",
+    "inputExample": "invoke_and_assert_lambda('process-order', {'order_id': 'ORD-001'}, {'status': 'processed'})",
+    "expectedOutput": "The full parsed Lambda response payload dict if all assertions pass; raises AssertionError on mismatch",
+    "hint": "Use boto3 lambda client invoke with InvocationType='RequestResponse'. Read and decode the Payload StreamingBody with response['Payload'].read(). Use json.loads to parse it. Check for the FunctionError key in the response to detect Lambda-level errors.",
+    "solutionLanguage": "python",
+    "solution": "import boto3\nimport json\n\ndef invoke_and_assert_lambda(\n    function_name: str,\n    event: dict,\n    expected: dict\n) -> dict:\n    client = boto3.client('lambda')\n    response = client.invoke(\n        FunctionName=function_name,\n        InvocationType='RequestResponse',\n        Payload=json.dumps(event).encode('utf-8')\n    )\n\n    status_code = response['StatusCode']\n    assert status_code == 200, (\n        f\"Lambda invocation returned HTTP status {status_code}, expected 200\"\n    )\n\n    function_error = response.get('FunctionError')\n    assert function_error is None, (\n        f\"Lambda returned FunctionError='{function_error}'\"\n    )\n\n    payload = json.loads(response['Payload'].read().decode('utf-8'))\n\n    for key, value in expected.items():\n        assert key in payload, f\"Key '{key}' not found in Lambda response payload\"\n        assert payload[key] == value, (\n            f\"Expected payload['{key}'] == {value!r}, got {payload[key]!r}\"\n        )\n\n    return payload",
+    "explanation": "StatusCode 200 confirms the invocation API call succeeded, but it does not indicate whether the Lambda function itself succeeded — that is indicated by the absence of FunctionError. FunctionError is set to 'Handled' or 'Unhandled' when the Lambda throws an exception, even though the HTTP status is still 200. Reading FunctionError before parsing the payload prevents confusing an error payload with a valid response. The expected dict is checked as a subset so the test remains stable when the Lambda adds new fields.",
+    "commonMistakes": [
+      "Treating StatusCode 200 as proof the Lambda function succeeded without checking FunctionError",
+      "Calling response['Payload'].read() twice — the StreamingBody can only be read once",
+      "Asserting exact payload equality instead of subset match, causing tests to break when Lambda adds new response fields"
+    ],
+    "followUps": [
+      "How would you adapt this for async Lambda invocations (InvocationType='Event')?"
+    ],
+    "tags": [
+      "aws",
+      "python",
+      "boto3",
+      "lambda",
+      "integration-testing",
+      "assertions"
+    ]
+  },
+  {
+    "id": "aws-045",
+    "topicId": "aws",
+    "topicTitle": "AWS",
+    "level": "senior",
+    "type": "coding",
+    "difficulty": "hard",
+    "title": "Query CloudWatch Logs Insights",
+    "question": "Write a Python function that runs a CloudWatch Logs Insights query on a given log group for the last N minutes and returns the matching log lines as a list of strings.",
+    "problem": "Given a log group name, a Logs Insights query string, and a lookback window in minutes, the function should start a query, poll until it completes, and return the results as a list of strings extracted from the '@message' field of each result row. Raise a RuntimeError if the query fails or times out after 60 seconds of polling.",
+    "inputExample": "query_logs('/aws/lambda/my-function', 'fields @message | filter @message like /ERROR/ | limit 20', lookback_minutes=5)",
+    "expectedOutput": "A list of log message strings matching the query, e.g. ['ERROR: connection refused', 'ERROR: timeout']",
+    "hint": "Use start_query to launch the query with startTime and endTime as Unix epoch integers. Then call get_query_results in a loop, checking the 'status' field. Status values are: 'Running', 'Scheduled', 'Complete', 'Failed', 'Cancelled', 'Timeout'.",
+    "solutionLanguage": "python",
+    "solution": "import boto3\nimport time\nfrom datetime import datetime, timezone, timedelta\n\ndef query_logs(\n    log_group: str,\n    query_string: str,\n    lookback_minutes: int = 5\n) -> list[str]:\n    client = boto3.client('logs')\n    end_time = datetime.now(timezone.utc)\n    start_time = end_time - timedelta(minutes=lookback_minutes)\n\n    start_response = client.start_query(\n        logGroupName=log_group,\n        startTime=int(start_time.timestamp()),\n        endTime=int(end_time.timestamp()),\n        queryString=query_string\n    )\n    query_id = start_response['queryId']\n\n    poll_deadline = time.time() + 60\n    while time.time() < poll_deadline:\n        result = client.get_query_results(queryId=query_id)\n        status = result['status']\n        if status == 'Complete':\n            messages = []\n            for row in result.get('results', []):\n                for field in row:\n                    if field['field'] == '@message':\n                        messages.append(field['value'])\n            return messages\n        if status in ('Failed', 'Cancelled', 'Timeout'):\n            raise RuntimeError(\n                f\"CloudWatch Logs Insights query '{query_id}' ended with status: {status}\"\n            )\n        time.sleep(2)\n\n    raise RuntimeError(\n        f\"Query '{query_id}' did not complete within 60 seconds\"\n    )",
+    "explanation": "start_query requires Unix epoch integers for startTime and endTime; passing datetime objects raises a TypeError. The polling loop checks for terminal states (Complete, Failed, Cancelled, Timeout) and sleeps 2 seconds between polls to avoid throttling the get_query_results API. Each row in the results list is itself a list of field dicts, so extracting '@message' requires iterating the inner list. The 60-second poll deadline prevents infinite loops when a query hangs.",
+    "commonMistakes": [
+      "Passing datetime objects instead of int epoch timestamps to start_query, causing a ParamValidationError",
+      "Not polling for completion and calling get_query_results immediately, receiving empty results because the query is still Running",
+      "Iterating results as if each row is a dict instead of a list of field dicts"
+    ],
+    "followUps": [
+      "How would you adapt this to search across multiple log groups simultaneously?"
+    ],
+    "tags": [
+      "aws",
+      "python",
+      "boto3",
+      "cloudwatch",
+      "logs-insights",
+      "testing"
+    ]
+  },
+  {
+    "id": "aws-046",
+    "topicId": "aws",
+    "topicTitle": "AWS",
+    "level": "mid",
+    "type": "coding",
+    "difficulty": "medium",
+    "title": "Check S3 Lifecycle Rule Exists",
+    "question": "Write a Python function that verifies an S3 bucket has at least one lifecycle rule with a transition to GLACIER storage class within a specified number of days.",
+    "problem": "Given a bucket name and a maximum number of days, the function should retrieve the bucket's lifecycle configuration and return True if any rule has a transition to 'GLACIER' with a Days value less than or equal to the maximum. Return False if no such rule exists, and return False (not raise) if the bucket has no lifecycle configuration at all.",
+    "inputExample": "has_glacier_transition('my-test-artifacts', max_days=90)",
+    "expectedOutput": "True if a GLACIER transition rule exists within max_days, False otherwise",
+    "hint": "Use the S3 client get_bucket_lifecycle_configuration. This raises a ClientError with code 'NoSuchLifecycleConfiguration' if no rules exist. Each rule in the 'Rules' list may have a 'Transitions' list, each with 'StorageClass' and 'Days'.",
+    "solutionLanguage": "python",
+    "solution": "import boto3\nfrom botocore.exceptions import ClientError\n\ndef has_glacier_transition(bucket_name: str, max_days: int) -> bool:\n    client = boto3.client('s3')\n    try:\n        response = client.get_bucket_lifecycle_configuration(Bucket=bucket_name)\n    except ClientError as e:\n        if e.response['Error']['Code'] == 'NoSuchLifecycleConfiguration':\n            return False\n        raise\n\n    for rule in response.get('Rules', []):\n        if rule.get('Status') != 'Enabled':\n            continue\n        for transition in rule.get('Transitions', []):\n            if (\n                transition.get('StorageClass') == 'GLACIER'\n                and transition.get('Days', float('inf')) <= max_days\n            ):\n                return True\n    return False",
+    "explanation": "get_bucket_lifecycle_configuration raises NoSuchLifecycleConfiguration rather than returning an empty response when no rules exist, so the exception must be caught explicitly. Checking rule Status == 'Enabled' avoids counting disabled rules as satisfying the policy. Using float('inf') as the default for missing Days ensures a rule without a Days value never falsely satisfies the condition.",
+    "commonMistakes": [
+      "Not catching NoSuchLifecycleConfiguration and letting the function raise instead of returning False",
+      "Counting disabled lifecycle rules as valid, causing a false positive assertion",
+      "Checking only the first rule or first transition instead of iterating all rules and all transitions"
+    ],
+    "followUps": [
+      "How would you write the complementary test that verifies an expiration rule also exists?"
+    ],
+    "tags": [
+      "aws",
+      "python",
+      "boto3",
+      "s3",
+      "lifecycle",
+      "compliance-testing"
+    ]
+  },
+  {
+    "id": "aws-047",
+    "topicId": "aws",
+    "topicTitle": "AWS",
+    "level": "senior",
+    "type": "coding",
+    "difficulty": "hard",
+    "title": "Validate IAM Role Has Required Policies",
+    "question": "Write a Python function that checks whether an IAM role has a specific managed policy attached by its ARN.",
+    "problem": "Given an IAM role name and a managed policy ARN, the function should return True if the policy is attached to the role and False otherwise. Handle pagination correctly because a role may have more than one page of attached policies.",
+    "inputExample": "role_has_policy('my-ecs-task-role', 'arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess')",
+    "expectedOutput": "True if the managed policy is attached, False otherwise",
+    "hint": "Use the IAM client list_attached_role_policies with the RoleName. The response includes 'AttachedPolicies' (a list of dicts with 'PolicyArn') and a 'Marker' for pagination. Use IsTruncated to check if more pages exist.",
+    "solutionLanguage": "python",
+    "solution": "import boto3\n\ndef role_has_policy(role_name: str, policy_arn: str) -> bool:\n    client = boto3.client('iam')\n    kwargs = {'RoleName': role_name}\n\n    while True:\n        response = client.list_attached_role_policies(**kwargs)\n        for policy in response.get('AttachedPolicies', []):\n            if policy['PolicyArn'] == policy_arn:\n                return True\n        if response.get('IsTruncated'):\n            kwargs['Marker'] = response['Marker']\n        else:\n            break\n\n    return False",
+    "explanation": "IAM list_attached_role_policies uses Marker-based pagination (not nextToken like most other AWS APIs). The loop checks IsTruncated to determine whether another page exists, then passes the Marker into the next call. Returning True as soon as the matching ARN is found short-circuits the pagination loop for efficiency. Returning False only after all pages are exhausted ensures no false negatives when the policy appears on a later page.",
+    "commonMistakes": [
+      "Using 'nextToken' instead of 'Marker' for IAM pagination, which causes the parameter to be ignored and only the first page to be checked",
+      "Checking policy name instead of policy ARN, which fails for identically named policies in different accounts",
+      "Forgetting to check IsTruncated and only evaluating the first page of results"
+    ],
+    "followUps": [
+      "How would you extend this to also check for inline policies on the role?"
+    ],
+    "tags": [
+      "aws",
+      "python",
+      "boto3",
+      "iam",
+      "permissions",
+      "validation"
+    ]
+  },
+  {
+    "id": "aws-048",
+    "topicId": "aws",
+    "topicTitle": "AWS",
+    "level": "senior",
+    "type": "coding",
+    "difficulty": "hard",
+    "title": "Publish SNS Message and Verify SQS Delivery",
+    "question": "Write a Python function that publishes a message to an SNS topic and then verifies the message is delivered to a subscribed SQS queue within a timeout.",
+    "problem": "Given an SNS topic ARN, an SQS queue URL, a message body string, and a timeout in seconds, the function should publish the message to SNS, then poll the SQS queue until a message containing the original body is found. Return the full SQS message body string on success, or raise a TimeoutError if the message does not arrive within the timeout. Delete the SQS message after consuming it.",
+    "inputExample": "publish_and_verify_delivery('arn:aws:sns:us-east-1:123:my-topic', 'https://sqs.us-east-1.amazonaws.com/123/my-queue', 'test-event-payload', timeout=30)",
+    "expectedOutput": "The SQS message body string (which SNS wraps in a JSON envelope), or raises TimeoutError",
+    "hint": "SNS wraps the original message in a JSON envelope when delivering to SQS. The SQS message Body is a JSON string with a 'Message' field containing the original SNS message. Parse the SQS body as JSON and check the 'Message' field for your original content.",
+    "solutionLanguage": "python",
+    "solution": "import boto3\nimport json\nimport time\n\ndef publish_and_verify_delivery(\n    topic_arn: str,\n    queue_url: str,\n    message_body: str,\n    timeout: int = 30\n) -> str:\n    sns_client = boto3.client('sns')\n    sqs_client = boto3.client('sqs')\n\n    sns_client.publish(\n        TopicArn=topic_arn,\n        Message=message_body\n    )\n\n    deadline = time.time() + timeout\n    while time.time() < deadline:\n        remaining = deadline - time.time()\n        wait_seconds = min(10, max(1, int(remaining)))\n        response = sqs_client.receive_message(\n            QueueUrl=queue_url,\n            MaxNumberOfMessages=10,\n            WaitTimeSeconds=wait_seconds\n        )\n        for msg in response.get('Messages', []):\n            try:\n                envelope = json.loads(msg['Body'])\n                inner_message = envelope.get('Message', '')\n            except (json.JSONDecodeError, KeyError):\n                inner_message = msg['Body']\n            if message_body in inner_message:\n                sqs_client.delete_message(\n                    QueueUrl=queue_url,\n                    ReceiptHandle=msg['ReceiptHandle']\n                )\n                return msg['Body']\n\n    raise TimeoutError(\n        f\"Message containing '{message_body}' not received on queue '{queue_url}' within {timeout}s\"\n    )",
+    "explanation": "When SNS delivers to SQS, the SQS message Body is a JSON string with fields like Type, MessageId, Message, and Timestamp. The original SNS message text appears in the 'Message' field. Parsing this envelope correctly is a common source of test bugs where testers search the outer Body string for their content and either match incorrectly or never match. The try-except on json.loads handles edge cases where the queue receives non-SNS messages during testing.",
+    "commonMistakes": [
+      "Searching the raw SQS Body string for the original message without unwrapping the SNS JSON envelope",
+      "Not deleting the SQS message after consumption, causing it to reappear after the visibility timeout",
+      "Publishing to SNS and immediately calling receive_message without allowing propagation time, then declaring the test failed"
+    ],
+    "followUps": [
+      "How would you test that a dead-letter queue receives messages when the subscriber Lambda fails?"
+    ],
+    "tags": [
+      "aws",
+      "python",
+      "boto3",
+      "sns",
+      "sqs",
+      "integration-testing",
+      "messaging"
+    ]
+  },
+  {
+    "id": "aws-049",
+    "topicId": "aws",
+    "topicTitle": "AWS",
+    "level": "mid",
+    "type": "interview",
+    "difficulty": "medium",
+    "question": "How would you use AWS Cost Explorer or billing tags to identify runaway costs caused by test environments?",
+    "shortAnswer": "Apply consistent resource tags (Environment, Team, Branch) to all test resources, enable cost allocation tags in billing, and set a billing alarm on monthly spend filtered by the test environment tag.",
+    "interviewAnswer": "The most common cause of runaway test environment costs is forgotten resources — EC2 instances, RDS snapshots, or ElastiCache clusters that were spun up for a test run and never deleted. The first step is consistent tagging: every resource created for testing should have tags like Environment=test, Team=qa, and Branch={branch-name}. These must be applied in the infrastructure-as-code templates, not manually. Once tagging is in place, Cost Explorer lets you group spend by tag to see which environments or branches are consuming the most. I also set a CloudWatch billing alarm on the total estimated charges and a separate alarm filtered to the test tag dimension so the team gets an alert before the monthly budget is exceeded. Beyond alerting, I recommend a nightly cleanup Lambda or a CloudFormation stack TTL policy that terminates stacks not updated within 24 hours, enforcing resource hygiene automatically.",
+    "realProjectExample": "We discovered a forgotten Elasticsearch domain from a test environment that had been running for three months unnoticed. After adding mandatory tagging via AWS Config rules and a daily spend report filtered to Environment=test, we reduced test environment costs by 35% in the first month.",
+    "followUps": [
+      "How do you enforce mandatory tagging for all resources created in an AWS account?",
+      "What is the difference between a billing alarm and a budget action?",
+      "How would you track test environment cost per feature branch?"
+    ],
+    "tags": [
+      "aws",
+      "cost-explorer",
+      "cost-optimization",
+      "tagging",
+      "test-environments"
+    ]
+  },
+  {
+    "id": "aws-050",
+    "topicId": "aws",
+    "topicTitle": "AWS",
+    "level": "senior",
+    "type": "interview",
+    "difficulty": "hard",
+    "question": "How do you test VPC networking configuration to confirm that a new service deployed to a private subnet can reach required dependencies but cannot reach the public internet directly?",
+    "shortAnswer": "Deploy a test task or Lambda in the subnet, attempt connections to allowed endpoints and assert success, then attempt connections to a public address and assert failure. Use VPC Flow Logs to confirm actual traffic patterns.",
+    "interviewAnswer": "VPC networking tests validate security posture as much as connectivity. My approach has two parts: positive assertions and negative assertions. For positive assertions, I deploy a test Lambda or ECS task in the target private subnet and attempt TCP connections to each required dependency — RDS on its private DNS name, ElastiCache on its private endpoint, and internal services by their service discovery names. I assert these connections succeed within a reasonable timeout. For negative assertions, I attempt a connection to a well-known public IP or DNS name and assert it fails or times out, confirming that egress to the internet is blocked. If a NAT Gateway is expected, I test through the NAT Gateway URL allowlist specifically. I also enable VPC Flow Logs on the subnets and query them after the test run to confirm the actual ACCEPT and REJECT records match the expected network policy. Flow Logs serve as a non-repudiable audit trail for security reviews and can catch traffic that test code missed.",
+    "realProjectExample": "A service in a private subnet needed to reach an external payments API through a NAT Gateway, but all other public egress was supposed to be blocked. Our connectivity test confirmed the payments API was reachable, then confirmed a connection to an arbitrary public IP was rejected. VPC Flow Logs later showed that an unexpected ALLOW record existed for a developer's personal IP — a forgotten security group inbound rule that the code path tests had not caught.",
+    "followUps": [
+      "How do you test VPC endpoint connectivity versus public endpoint connectivity for S3?",
+      "What is the difference between a security group and a network ACL, and how do you test each?",
+      "How would you automate VPC connectivity checks as part of a deployment pipeline?"
+    ],
+    "tags": [
+      "aws",
+      "vpc",
+      "networking",
+      "security",
+      "flow-logs",
+      "integration-testing"
+    ]
   }
 ]

@@ -686,5 +686,700 @@
       "ci",
       "typescript"
     ]
+  },
+  {
+    "id": "playwright-typescript-026",
+    "topicId": "playwright-typescript",
+    "topicTitle": "Playwright (TypeScript)",
+    "level": "mid",
+    "type": "quiz",
+    "difficulty": "easy",
+    "question": "What does `page.route()` allow you to do in a Playwright test?",
+    "choices": [
+      "Intercept and optionally modify or mock network requests",
+      "Navigate to a new route in a single-page application",
+      "Register a keyboard shortcut handler on the page",
+      "Create a new browser context with custom routes"
+    ],
+    "correctAnswer": "Intercept and optionally modify or mock network requests",
+    "explanation": "`page.route(pattern, handler)` registers a handler for all requests whose URL matches the pattern. Inside the handler you can call `route.fulfill()` to mock the response, `route.abort()` to simulate a network error, or `route.continue()` to let the real request proceed. This eliminates the need for a running backend when testing UI that depends on API data.",
+    "tags": [
+      "playwright",
+      "typescript",
+      "route",
+      "network",
+      "mocking"
+    ]
+  },
+  {
+    "id": "playwright-typescript-027",
+    "topicId": "playwright-typescript",
+    "topicTitle": "Playwright (TypeScript)",
+    "level": "mid",
+    "type": "quiz",
+    "difficulty": "easy",
+    "question": "Which Playwright method captures a screenshot and compares it to a stored baseline, failing if the visual diff exceeds a threshold?",
+    "choices": [
+      "expect(page).toMatchSnapshot()",
+      "page.screenshot({ path: 'baseline.png' })",
+      "expect(page).toHaveScreenshot()",
+      "page.evaluate(() => document.body.innerHTML)"
+    ],
+    "correctAnswer": "expect(page).toHaveScreenshot()",
+    "explanation": "`expect(page).toHaveScreenshot()` is Playwright's built-in visual regression assertion. On the first run it creates a baseline PNG. On subsequent runs it compares the current screenshot against the baseline pixel-by-pixel, applying a configurable `maxDiffPixels` or `threshold` tolerance. `toMatchSnapshot()` works similarly for arbitrary buffers or strings but `toHaveScreenshot()` is purpose-built for pages and locators.",
+    "tags": [
+      "playwright",
+      "typescript",
+      "visual-testing",
+      "screenshot",
+      "toHaveScreenshot"
+    ]
+  },
+  {
+    "id": "playwright-typescript-028",
+    "topicId": "playwright-typescript",
+    "topicTitle": "Playwright (TypeScript)",
+    "level": "mid",
+    "type": "quiz",
+    "difficulty": "medium",
+    "question": "What is the purpose of `test.step()` in a Playwright test?",
+    "choices": [
+      "Groups actions into a named step shown in the HTML report and Trace Viewer",
+      "Skips the remaining actions if the first assertion fails",
+      "Runs an action in a separate worker thread",
+      "Limits the step timeout independently of the test timeout"
+    ],
+    "correctAnswer": "Groups actions into a named step shown in the HTML report and Trace Viewer",
+    "explanation": "`await test.step('step name', async () => { ... })` wraps a block of actions into a labeled group. The label appears in the HTML report's step tree and in Trace Viewer's action panel, making it easier to navigate long tests. It does not change execution semantics — if an action inside the step throws, the entire test fails as normal.",
+    "tags": [
+      "playwright",
+      "typescript",
+      "test-step",
+      "reporting",
+      "trace"
+    ]
+  },
+  {
+    "id": "playwright-typescript-029",
+    "topicId": "playwright-typescript",
+    "topicTitle": "Playwright (TypeScript)",
+    "level": "senior",
+    "type": "quiz",
+    "difficulty": "medium",
+    "question": "How do soft assertions differ from regular assertions in Playwright?",
+    "choices": [
+      "Soft assertions record a failure but allow the test to continue executing; the test is marked failed at the end",
+      "Soft assertions retry indefinitely until the condition is met",
+      "Soft assertions only log a warning and never cause the test to fail",
+      "Soft assertions run in a separate browser context so they cannot affect the page state"
+    ],
+    "correctAnswer": "Soft assertions record a failure but allow the test to continue executing; the test is marked failed at the end",
+    "explanation": "`expect.soft(locator).toBeVisible()` records the failure without throwing, so subsequent assertions still run. After the test function returns, Playwright marks the test as failed if any soft assertion failed. This is useful for form-validation tests where you want to check all error messages in one run rather than stopping at the first failed field.",
+    "tags": [
+      "playwright",
+      "typescript",
+      "soft-assertions",
+      "expect"
+    ]
+  },
+  {
+    "id": "playwright-typescript-030",
+    "topicId": "playwright-typescript",
+    "topicTitle": "Playwright (TypeScript)",
+    "level": "senior",
+    "type": "quiz",
+    "difficulty": "medium",
+    "question": "Which `test.extend()` option scopes a fixture to the worker process instead of being recreated for every test?",
+    "choices": [
+      "scope: 'worker'",
+      "scope: 'parallel'",
+      "shared: true",
+      "singleton: true"
+    ],
+    "correctAnswer": "scope: 'worker'",
+    "explanation": "By default fixtures are test-scoped — they are set up before each test and torn down after. Setting `scope: 'worker'` inside the fixture definition creates the fixture once per worker process and reuses it across all tests that run in that worker. This is the correct scope for expensive shared resources like a database connection or a browser context with saved auth state.",
+    "tags": [
+      "playwright",
+      "typescript",
+      "fixtures",
+      "test-extend",
+      "worker-scope"
+    ]
+  },
+  {
+    "id": "playwright-typescript-031",
+    "topicId": "playwright-typescript",
+    "topicTitle": "Playwright (TypeScript)",
+    "level": "senior",
+    "type": "quiz",
+    "difficulty": "hard",
+    "question": "What does `expect.poll()` do and when should you use it instead of a web-first assertion?",
+    "choices": [
+      "Repeatedly evaluates a callback function until it matches the expected value — useful for non-Playwright-managed async state",
+      "Retries a Locator assertion with a custom polling interval",
+      "Polls the network for a specific request and asserts its response",
+      "Runs the assertion in a polling loop indefinitely until the test timeout"
+    ],
+    "correctAnswer": "Repeatedly evaluates a callback function until it matches the expected value — useful for non-Playwright-managed async state",
+    "explanation": "`expect.poll(() => someAsyncFn(), { timeout: 5000 }).toBe(expected)` keeps calling the callback on an interval until the return value satisfies the matcher or the timeout passes. It is the right tool when the state you need to assert is outside Playwright's DOM model — for example checking a database record, a file on disk, or a third-party API response that changes asynchronously.",
+    "tags": [
+      "playwright",
+      "typescript",
+      "expect-poll",
+      "assertions",
+      "async"
+    ]
+  },
+  {
+    "id": "playwright-typescript-032",
+    "topicId": "playwright-typescript",
+    "topicTitle": "Playwright (TypeScript)",
+    "level": "mid",
+    "type": "quiz",
+    "difficulty": "medium",
+    "question": "In Playwright, what is the correct way to open a new browser tab and assert its URL within the same test?",
+    "choices": [
+      "Use context.waitForEvent('page') to capture the new Page object that opens when a link is clicked",
+      "Call browser.newPage() and navigate to the URL manually with page.goto()",
+      "Use page.newTab() which returns a promise resolving to the new tab's Page",
+      "Listen for the 'popup' event on the page object using page.on('popup', handler)"
+    ],
+    "correctAnswer": "Use context.waitForEvent('page') to capture the new Page object that opens when a link is clicked",
+    "explanation": "When a user action (such as clicking a target='_blank' link) triggers a new tab, Playwright emits a 'page' event on the BrowserContext. The idiomatic pattern is `const [newPage] = await Promise.all([context.waitForEvent('page'), page.click('a[target=_blank]')])`. The Promise.all ensures the event listener is registered before the click fires. `page.on('popup')` works for windows opened by `window.open()`, while context-level 'page' handles all new tabs.",
+    "tags": [
+      "playwright",
+      "typescript",
+      "multi-tab",
+      "browser-context",
+      "tabs"
+    ]
+  },
+  {
+    "id": "playwright-typescript-033",
+    "topicId": "playwright-typescript",
+    "topicTitle": "Playwright (TypeScript)",
+    "level": "mid",
+    "type": "interview",
+    "difficulty": "easy",
+    "question": "What is browser context isolation in Playwright and why is it important for parallel testing?",
+    "shortAnswer": "Each BrowserContext is an independent incognito-like session with separate cookies, localStorage, and cache — tests in different contexts cannot interfere with each other.",
+    "interviewAnswer": "A BrowserContext is Playwright's equivalent of a fresh browser profile. It has its own cookie jar, localStorage, sessionStorage, IndexedDB, and HTTP cache. When tests run in parallel, each worker gets its own context (or you explicitly create one per test), so an authenticated session, a feature flag cookie, or localStorage data set in one test is completely invisible to another. This isolation is what makes Playwright tests reliable at high parallelism — unlike sharing a single browser instance where one test's state bleeds into the next.",
+    "realProjectExample": "On a multi-tenant SaaS app I created one BrowserContext per tenant in a fixtures file. Each context had its own storageState loaded from a different auth JSON. Running tests for tenant A and tenant B in parallel never produced cross-tenant data leakage.",
+    "followUps": [
+      "How do you share a BrowserContext across multiple tests deliberately?",
+      "What is the difference between BrowserContext and a browser tab?",
+      "When would you create a new BrowserContext inside a test rather than at the fixture level?"
+    ],
+    "tags": [
+      "playwright",
+      "typescript",
+      "browser-context",
+      "isolation",
+      "parallelism"
+    ]
+  },
+  {
+    "id": "playwright-typescript-034",
+    "topicId": "playwright-typescript",
+    "topicTitle": "Playwright (TypeScript)",
+    "level": "senior",
+    "type": "interview",
+    "difficulty": "medium",
+    "question": "How do you use `expect.toPass()` in Playwright and what problem does it solve?",
+    "shortAnswer": "`expect.toPass()` wraps an entire assertion block and retries it on an interval until all assertions inside pass or the timeout expires — useful when multiple conditions must become true together.",
+    "interviewAnswer": "`await expect(async () => { ... multiple assertions ... }).toPass({ timeout: 10_000 })` re-executes the entire callback until no assertion inside it throws. This is different from individual web-first assertions because it handles scenarios where you need a set of conditions to be simultaneously true — for example, an API-driven dashboard where both a chart and a table must update at the same time after a filter change. Without toPass you would need to coordinate multiple retrying assertions manually.",
+    "realProjectExample": "On a real-time analytics dashboard, after applying a date filter both a KPI card and a data table had to reflect the new range. Wrapping both `toHaveText` assertions inside `toPass` ensured we didn't catch a transient state where the card updated but the table had not yet.",
+    "followUps": [
+      "How does toPass differ from expect.poll()?",
+      "What is the default timeout for toPass and how do you override it?",
+      "Can you nest toPass inside test.step()?"
+    ],
+    "tags": [
+      "playwright",
+      "typescript",
+      "toPass",
+      "assertions",
+      "async"
+    ]
+  },
+  {
+    "id": "playwright-typescript-035",
+    "topicId": "playwright-typescript",
+    "topicTitle": "Playwright (TypeScript)",
+    "level": "senior",
+    "type": "interview",
+    "difficulty": "medium",
+    "question": "How do you write a custom Playwright reporter in TypeScript?",
+    "shortAnswer": "Implement the `Reporter` interface from `@playwright/test/reporter`, define lifecycle methods like `onTestEnd`, and register the class in playwright.config.ts `reporter` array.",
+    "interviewAnswer": "A custom reporter is a TypeScript class that implements the `Reporter` interface. Key lifecycle hooks are `onBegin(config, suite)`, `onTestEnd(test, result)`, `onEnd(result)`, and `onError(error)`. I implement the interface, add my logic (such as posting results to a test management tool like Xray or TestRail via their REST API), compile the file, and add its path to the `reporter` array in playwright.config.ts alongside built-in reporters. Using the built-in `dot` or `line` reporter in parallel ensures terminal output remains readable while the custom reporter does its work.",
+    "realProjectExample": "I built a reporter that, on every `onTestEnd` with a failed status, extracted the test's full title and associated Jira ticket ID from a tag (e.g., `@JIRA-123`) and called the Jira API to transition the linked issue to 'Failing in CI'. This gave the team real-time ticket updates without manual triage.",
+    "followUps": [
+      "How do you pass configuration options to a custom reporter?",
+      "How do you access test attachments (screenshots, traces) inside onTestEnd?",
+      "How do you run multiple reporters simultaneously, including the built-in HTML reporter?"
+    ],
+    "tags": [
+      "playwright",
+      "typescript",
+      "reporter",
+      "customization",
+      "ci"
+    ]
+  },
+  {
+    "id": "playwright-typescript-036",
+    "topicId": "playwright-typescript",
+    "topicTitle": "Playwright (TypeScript)",
+    "level": "mid",
+    "type": "interview",
+    "difficulty": "easy",
+    "question": "How do you run only the tests tagged with a specific label in Playwright, and how do you define tags in test files?",
+    "shortAnswer": "Add tags as strings in the test title (e.g., `@smoke`) or in `test.info().annotations`, then filter with `--grep @smoke` on the CLI.",
+    "interviewAnswer": "The simplest approach is embedding the tag in the test title string: `test('login @smoke', ...)`. Then `npx playwright test --grep @smoke` runs only tests whose title matches the regex `@smoke`. Playwright v1.42+ also supports a first-class `tag` option in `test()` options: `test('login', { tag: '@smoke' }, async ({ page }) => { ... })`. This appears in reports and allows filtering without modifying title strings. I use `@smoke` for the fast critical-path suite, `@regression` for the full suite, and `@flaky` to temporarily quarantine known unstable tests.",
+    "realProjectExample": "On a CI pipeline I ran `--grep @smoke` on every pull request for a 2-minute gate and `--grep @regression` nightly. The separation let developers get rapid feedback without waiting for the 15-minute full suite.",
+    "followUps": [
+      "How do you exclude tests with a specific tag using the CLI?",
+      "Can you combine multiple tag filters with AND logic?",
+      "How do tags interact with test.skip() and test.only()?"
+    ],
+    "tags": [
+      "playwright",
+      "typescript",
+      "tags",
+      "filtering",
+      "cli"
+    ]
+  },
+  {
+    "id": "playwright-typescript-037",
+    "topicId": "playwright-typescript",
+    "topicTitle": "Playwright (TypeScript)",
+    "level": "mid",
+    "type": "interview",
+    "difficulty": "easy",
+    "question": "How do you emulate a mobile device in Playwright TypeScript tests?",
+    "shortAnswer": "Use `devices` from `@playwright/test` in the project config or pass device descriptors to `browser.newContext()` to set viewport, user-agent, and touch support.",
+    "interviewAnswer": "Playwright ships a `devices` dictionary with descriptors for popular phones and tablets. In `playwright.config.ts` I add a project entry like `{ name: 'mobile-chrome', use: { ...devices['Pixel 5'] } }`. The descriptor sets the viewport size, user-agent string, deviceScaleFactor, isMobile flag, and hasTouch flag simultaneously. For ad-hoc emulation inside a test I can call `browser.newContext({ ...devices['iPhone 13'] })`. This lets me run the same test logic across desktop and mobile projects without duplicating any code.",
+    "realProjectExample": "On an e-commerce site the mobile navigation used a hamburger menu that required a tap interaction instead of a hover. By running tests in the 'Pixel 5' project I caught a bug where the dropdown menu didn't open on touch-only viewports before release.",
+    "followUps": [
+      "How do you emulate a specific geographic location alongside the device?",
+      "How do you test touch gestures like swipe in Playwright?",
+      "What is the difference between emulation and running on a real mobile device?"
+    ],
+    "tags": [
+      "playwright",
+      "typescript",
+      "mobile",
+      "device-emulation",
+      "config"
+    ]
+  },
+  {
+    "id": "playwright-typescript-038",
+    "topicId": "playwright-typescript",
+    "topicTitle": "Playwright (TypeScript)",
+    "level": "mid",
+    "type": "coding",
+    "difficulty": "medium",
+    "title": "Mock a REST API with route.fulfill()",
+    "question": "Write a Playwright test that intercepts a GET request to `/api/products` and returns a mocked JSON response, then asserts the UI renders the mocked data.",
+    "problem": "Using `page.route()`, intercept all GET requests to `**/api/products`. Return a fulfilled response with status 200, Content-Type `application/json`, and body `[{\"id\":1,\"name\":\"Mock Widget\",\"price\":4.99}]`. Then navigate to `/products` and assert a list item containing the text 'Mock Widget' is visible.",
+    "inputExample": "// No real server needed — the route handler provides the data\nawait page.goto('/products');",
+    "expectedOutput": "The page shows 'Mock Widget' sourced from the mocked response without hitting a real API.",
+    "hint": "Use `page.route('**/api/products', route => route.fulfill({ ... }))` before `page.goto()`.",
+    "solutionLanguage": "typescript",
+    "solution": "import { test, expect } from '@playwright/test';\n\ntest('products page renders mocked API data', async ({ page }) => {\n  const mockProducts = [{ id: 1, name: 'Mock Widget', price: 4.99 }];\n\n  await page.route('**/api/products', (route) =>\n    route.fulfill({\n      status: 200,\n      contentType: 'application/json',\n      body: JSON.stringify(mockProducts),\n    })\n  );\n\n  await page.goto('/products');\n\n  await expect(\n    page.getByRole('listitem').filter({ hasText: 'Mock Widget' })\n  ).toBeVisible();\n});",
+    "explanation": "`page.route()` registers the handler before navigation so the intercept is in place when the page makes its initial API call. `route.fulfill()` short-circuits the real network request and returns the provided response immediately. Setting `contentType` ensures the browser parses the body as JSON. The assertion uses a retrying web-first locator, which is important because the React/Vue component may render asynchronously after receiving the data.",
+    "commonMistakes": [
+      "Registering page.route() after page.goto() — the API call may already have been made",
+      "Forgetting contentType: 'application/json', causing the app to treat the body as text",
+      "Using page.unroute() too early and letting real requests through in subsequent navigations"
+    ],
+    "followUps": [
+      "How would you assert that the mocked route was actually called during the test?",
+      "How do you mock only the first request and let subsequent ones through?",
+      "How do you return different responses based on request query parameters?"
+    ],
+    "tags": [
+      "playwright",
+      "typescript",
+      "route",
+      "network-mocking",
+      "api"
+    ]
+  },
+  {
+    "id": "playwright-typescript-039",
+    "topicId": "playwright-typescript",
+    "topicTitle": "Playwright (TypeScript)",
+    "level": "senior",
+    "type": "coding",
+    "difficulty": "hard",
+    "title": "Custom fixture with TypeScript generics for worker-scoped database seed",
+    "question": "Create a worker-scoped Playwright fixture that seeds a database record once per worker and provides the record's ID to every test in that worker.",
+    "problem": "Using `test.extend()`, define a `seededItemId` fixture scoped to `'worker'`. The fixture should POST to `/api/items` with `{ name: 'Worker Item' }` using Playwright's `request` fixture, extract the `id` from the JSON response, yield it, then send a DELETE to `/api/items/:id` for teardown. Tests receive a `number` ID.",
+    "inputExample": "test('item detail page loads', async ({ page, seededItemId }) => {\n  await page.goto(`/items/${seededItemId}`);\n  await expect(page.getByRole('heading')).toContainText('Worker Item');\n});",
+    "expectedOutput": "The POST runs once per worker; teardown DELETE runs once after all tests in that worker finish.",
+    "hint": "Set `{ scope: 'worker' }` as the third argument to the fixture definition. Use the `playwright` object from `base.extend` to access `request` inside a worker-scoped fixture.",
+    "solutionLanguage": "typescript",
+    "solution": "import { test as base, request as baseRequest, expect } from '@playwright/test';\n\ntype WorkerFixtures = {\n  seededItemId: number;\n};\n\nexport const test = base.extend<{}, WorkerFixtures>({\n  seededItemId: [\n    async ({}, use) => {\n      // Worker-scoped fixtures cannot use page/context, but can use apiRequest\n      const context = await baseRequest.newContext({\n        baseURL: process.env.BASE_URL ?? 'http://localhost:3000',\n      });\n\n      const response = await context.post('/api/items', {\n        data: { name: 'Worker Item' },\n      });\n      expect(response.status()).toBe(201);\n\n      const body = await response.json() as { id: number };\n      const itemId = body.id;\n\n      await use(itemId);\n\n      // Teardown: delete the seeded record\n      await context.delete(`/api/items/${itemId}`);\n      await context.dispose();\n    },\n    { scope: 'worker' },\n  ],\n});\n\nexport { expect };",
+    "explanation": "Worker-scoped fixtures use the second positional argument tuple syntax `[async ({}, use) => { ... }, { scope: 'worker' }]`. Because worker-scoped fixtures outlive individual tests they cannot depend on test-scoped fixtures like `page`. A standalone `APIRequestContext` created via `baseRequest.newContext()` provides HTTP access. The teardown after `use()` runs once after the last test in the worker completes, not after every test, making this pattern efficient for expensive shared state.",
+    "commonMistakes": [
+      "Using `{ scope: 'worker' }` but depending on the test-scoped `request` or `page` fixture — this causes a scope mismatch error",
+      "Forgetting to call context.dispose() in teardown, leaking the API request context",
+      "Placing the fixture in the first generic type argument instead of the second — worker fixtures go in the second type parameter"
+    ],
+    "followUps": [
+      "How do you access test-scoped fixtures from inside a worker-scoped fixture?",
+      "What happens if the POST in setup fails — does the DELETE in teardown still run?",
+      "How would you parameterise this fixture to seed different item types?"
+    ],
+    "tags": [
+      "playwright",
+      "typescript",
+      "fixtures",
+      "worker-scope",
+      "test-extend",
+      "api"
+    ]
+  },
+  {
+    "id": "playwright-typescript-040",
+    "topicId": "playwright-typescript",
+    "topicTitle": "Playwright (TypeScript)",
+    "level": "senior",
+    "type": "coding",
+    "difficulty": "hard",
+    "title": "Multi-tab test: open popup and interact",
+    "question": "Write a Playwright test that clicks a link opening a new tab, switches to that tab, fills a form, and asserts the result back in the original tab.",
+    "problem": "Navigate to `/dashboard`. Click a button with text 'Open Settings' that opens a new tab (target='_blank'). In the new tab, find a text input labeled 'Display Name', fill it with 'Test User', and click the 'Save' button. After save, the new tab closes automatically. Back on the original dashboard page, assert that a `<span id='user-name'>` now contains 'Test User'.",
+    "inputExample": "// Dashboard at /dashboard has 'Open Settings' button\n// Settings tab has a form that posts back to the parent",
+    "expectedOutput": "The original dashboard page shows 'Test User' in span#user-name after the settings tab saves and closes.",
+    "hint": "Use `Promise.all([context.waitForEvent('page'), page.click(...)])` to capture the popup page. After save, use `newPage.waitForEvent('close')` before asserting on the original page.",
+    "solutionLanguage": "typescript",
+    "solution": "import { test, expect } from '@playwright/test';\n\ntest('update display name via settings popup', async ({ page, context }) => {\n  await page.goto('/dashboard');\n\n  // Open the settings tab and capture the new page\n  const [settingsPage] = await Promise.all([\n    context.waitForEvent('page'),\n    page.getByRole('button', { name: 'Open Settings' }).click(),\n  ]);\n\n  await settingsPage.waitForLoadState('domcontentloaded');\n\n  // Fill the form in the new tab\n  await settingsPage.getByLabel('Display Name').fill('Test User');\n  await settingsPage.getByRole('button', { name: 'Save' }).click();\n\n  // Wait for the settings tab to close\n  await settingsPage.waitForEvent('close');\n\n  // Assert the original dashboard reflects the update\n  await expect(page.locator('#user-name')).toHaveText('Test User');\n});",
+    "explanation": "Wrapping `context.waitForEvent('page')` and `click()` in `Promise.all` ensures the listener is registered before the click triggers the new tab, preventing a race condition. `waitForLoadState('domcontentloaded')` ensures the settings form is rendered before filling. After `Save` closes the tab we await the `close` event so the assertion on the original page runs after the server has processed the update.",
+    "commonMistakes": [
+      "Calling context.waitForEvent('page') after click() — the new tab event may already have fired",
+      "Not awaiting waitForEvent('close') before asserting on the original page, causing a race on the server update",
+      "Using page.on('popup') instead of context.waitForEvent('page') — 'popup' only fires for window.open, not target=_blank navigation in some browsers"
+    ],
+    "followUps": [
+      "How do you handle a new tab that requires its own authentication?",
+      "How do you assert that a tab has closed within a timeout?",
+      "How do you interact with multiple simultaneously open tabs?"
+    ],
+    "tags": [
+      "playwright",
+      "typescript",
+      "multi-tab",
+      "popup",
+      "browser-context"
+    ]
+  },
+  {
+    "id": "playwright-typescript-041",
+    "topicId": "playwright-typescript",
+    "topicTitle": "Playwright (TypeScript)",
+    "level": "mid",
+    "type": "coding",
+    "difficulty": "medium",
+    "title": "Simulate offline network conditions",
+    "question": "Write a Playwright test that simulates offline network conditions and asserts the app shows an offline error message.",
+    "problem": "Navigate to `/app`. Then set the browser context offline using `context.setOffline(true)`. Click a 'Refresh Data' button that triggers a fetch. Assert that a `[data-testid='offline-banner']` element with text 'You are offline' becomes visible. Finally, restore connectivity and assert the banner disappears.",
+    "inputExample": "// App at /app has a 'Refresh Data' button that makes a fetch request\n// When offline, it shows [data-testid='offline-banner']",
+    "expectedOutput": "Offline banner appears when context is offline; disappears after connectivity is restored.",
+    "hint": "Use `context.setOffline(true)` and `context.setOffline(false)`. Assert with `toBeVisible()` and `toBeHidden()`.",
+    "solutionLanguage": "typescript",
+    "solution": "import { test, expect } from '@playwright/test';\n\ntest('shows offline banner when network is unavailable', async ({ page, context }) => {\n  await page.goto('/app');\n\n  // Simulate network disconnection\n  await context.setOffline(true);\n\n  await page.getByRole('button', { name: 'Refresh Data' }).click();\n\n  const offlineBanner = page.getByTestId('offline-banner');\n  await expect(offlineBanner).toBeVisible();\n  await expect(offlineBanner).toHaveText('You are offline');\n\n  // Restore connectivity\n  await context.setOffline(false);\n\n  await expect(offlineBanner).toBeHidden();\n});",
+    "explanation": "`context.setOffline(true)` makes all subsequent network requests from that BrowserContext fail with a network error, simulating a disconnected device. The app's error-handling code should catch the failed fetch and render the offline banner. `context.setOffline(false)` restores normal network access. Using `getByTestId` keeps the locator independent of text that might change with i18n.",
+    "commonMistakes": [
+      "Calling page.setOffline() — the method lives on the BrowserContext, not the Page",
+      "Not clicking 'Refresh Data' before asserting — the app may already have data cached",
+      "Forgetting to restore offline state, causing subsequent tests in the same context to fail"
+    ],
+    "followUps": [
+      "How do you simulate slow network conditions (throttling) rather than full offline?",
+      "How do you assert that specific failed network requests triggered the error state?",
+      "How do you test service worker offline caching with Playwright?"
+    ],
+    "tags": [
+      "playwright",
+      "typescript",
+      "network",
+      "offline",
+      "context"
+    ]
+  },
+  {
+    "id": "playwright-typescript-042",
+    "topicId": "playwright-typescript",
+    "topicTitle": "Playwright (TypeScript)",
+    "level": "senior",
+    "type": "coding",
+    "difficulty": "hard",
+    "title": "TypeScript POM with interface contract",
+    "question": "Define a TypeScript interface for a page object, then implement it for a checkout page with typed methods.",
+    "problem": "Create an `ICheckoutPage` interface that declares: `goto(): Promise<void>`, `fillShipping(address: ShippingAddress): Promise<void>`, `placeOrder(): Promise<OrderConfirmation>`, and `totalPrice(): Locator`. Then implement it in `CheckoutPage`. Define `ShippingAddress` and `OrderConfirmation` as TypeScript types.",
+    "inputExample": "const checkout: ICheckoutPage = new CheckoutPage(page);\nawait checkout.goto();\nawait checkout.fillShipping({ street: '1 Main St', city: 'NY', zip: '10001' });\nconst confirmation = await checkout.placeOrder();\nexpect(confirmation.orderId).toBeTruthy();",
+    "expectedOutput": "TypeScript compiles without errors; interface enforces method signatures across POM implementations.",
+    "hint": "Use `implements` keyword on the class. `placeOrder()` should parse the confirmation page URL or element to extract orderId.",
+    "solutionLanguage": "typescript",
+    "solution": "import { Page, Locator } from '@playwright/test';\n\ntype ShippingAddress = {\n  street: string;\n  city: string;\n  zip: string;\n};\n\ntype OrderConfirmation = {\n  orderId: string;\n  totalAmount: string;\n};\n\ninterface ICheckoutPage {\n  goto(): Promise<void>;\n  fillShipping(address: ShippingAddress): Promise<void>;\n  placeOrder(): Promise<OrderConfirmation>;\n  totalPrice(): Locator;\n}\n\nexport class CheckoutPage implements ICheckoutPage {\n  constructor(private readonly page: Page) {}\n\n  async goto(): Promise<void> {\n    await this.page.goto('/checkout');\n  }\n\n  async fillShipping(address: ShippingAddress): Promise<void> {\n    await this.page.getByLabel('Street').fill(address.street);\n    await this.page.getByLabel('City').fill(address.city);\n    await this.page.getByLabel('ZIP').fill(address.zip);\n  }\n\n  async placeOrder(): Promise<OrderConfirmation> {\n    await this.page.getByRole('button', { name: 'Place Order' }).click();\n    await this.page.waitForURL(/\\/orders\\/[\\w-]+\\/confirmation/);\n\n    const orderId = this.page.url().split('/orders/')[1].split('/')[0];\n    const totalAmount = await this.totalPrice().innerText();\n\n    return { orderId, totalAmount };\n  }\n\n  totalPrice(): Locator {\n    return this.page.getByTestId('order-total');\n  }\n}",
+    "explanation": "Using an `interface` contract means TypeScript enforces the exact method signatures at compile time — if a new `CheckoutPage` implementation is created (e.g., for a redesigned UI), it must satisfy the interface. The `private readonly page` shorthand in the constructor reduces boilerplate. `placeOrder()` returns a typed value object rather than returning `void`, enabling callers to make further assertions without breaking the POM encapsulation boundary.",
+    "commonMistakes": [
+      "Returning a plain string orderId from placeOrder() instead of a typed object, losing extensibility",
+      "Making totalPrice() async — Locators are lazy and do not need to be awaited at creation time",
+      "Omitting the interface entirely and relying on duck typing, losing compile-time contract enforcement"
+    ],
+    "followUps": [
+      "How do you test a CheckoutPage implementation against the interface in isolation?",
+      "How would you extend ICheckoutPage for an express checkout variant?",
+      "How do you inject the interface type into a fixture so tests depend on the interface, not the implementation?"
+    ],
+    "tags": [
+      "playwright",
+      "typescript",
+      "page-object-model",
+      "interface",
+      "types"
+    ]
+  },
+  {
+    "id": "playwright-typescript-043",
+    "topicId": "playwright-typescript",
+    "topicTitle": "Playwright (TypeScript)",
+    "level": "mid",
+    "type": "coding",
+    "difficulty": "medium",
+    "title": "Visual regression with toHaveScreenshot",
+    "question": "Write a Playwright test that takes a component-level screenshot and compares it to a stored baseline, with a custom pixel tolerance.",
+    "problem": "Navigate to `/components/card`. Locate the element with `data-testid='product-card'`. Take a screenshot of that element and compare it to a baseline named `'product-card.png'` with a maximum pixel difference of 50 pixels. If the baseline does not exist yet, Playwright should create it on the first run.",
+    "inputExample": "// First run: creates tests/screenshots/product-card.png\n// Subsequent runs: compares and fails if diff > 50 pixels",
+    "expectedOutput": "Test passes when the card matches the baseline within 50 differing pixels.",
+    "hint": "Use `expect(locator).toHaveScreenshot('product-card.png', { maxDiffPixels: 50 })` where `locator` is the card element.",
+    "solutionLanguage": "typescript",
+    "solution": "import { test, expect } from '@playwright/test';\n\ntest('product card visual regression', async ({ page }) => {\n  await page.goto('/components/card');\n\n  const card = page.getByTestId('product-card');\n\n  // Ensure the card is fully visible before snapshotting\n  await expect(card).toBeVisible();\n\n  await expect(card).toHaveScreenshot('product-card.png', {\n    maxDiffPixels: 50,\n  });\n});",
+    "explanation": "`expect(locator).toHaveScreenshot()` captures only the bounding box of the matched element, not the whole page. On the first run with no baseline, Playwright writes the PNG and fails the test to draw attention — run with `--update-snapshots` to accept new baselines. `maxDiffPixels` is an absolute pixel count tolerance, suitable when the card has a known small animation or anti-aliasing variation. Alternatively use `maxDiffPixelRatio` for a relative tolerance.",
+    "commonMistakes": [
+      "Snapshotting before the component finishes loading, capturing a skeleton/loading state",
+      "Using page.screenshot() instead of expect(locator).toHaveScreenshot(), which skips the diffing logic",
+      "Setting maxDiffPixels too high and masking genuine visual regressions"
+    ],
+    "followUps": [
+      "How do you update all snapshots across the test suite at once?",
+      "How do you handle font-rendering differences between macOS and Linux CI?",
+      "How do you exclude a dynamic region (e.g., a timestamp) from the visual diff?"
+    ],
+    "tags": [
+      "playwright",
+      "typescript",
+      "visual-testing",
+      "toHaveScreenshot",
+      "screenshot"
+    ]
+  },
+  {
+    "id": "playwright-typescript-044",
+    "topicId": "playwright-typescript",
+    "topicTitle": "Playwright (TypeScript)",
+    "level": "senior",
+    "type": "coding",
+    "difficulty": "hard",
+    "title": "Global setup and teardown with TypeScript",
+    "question": "Write a `globalSetup.ts` and `globalTeardown.ts` that create and clean up a test database schema using a typed HTTP client.",
+    "problem": "In `globalSetup`, call `POST /api/test-db/seed` with an admin API key from env var `ADMIN_API_KEY`, expecting a 200 response and a JSON body `{ schemaId: string }`. Store the schemaId in `process.env.TEST_SCHEMA_ID`. In `globalTeardown`, call `DELETE /api/test-db/:schemaId` using the stored value. Use node's built-in `fetch` (Node 18+), not the Playwright request fixture.",
+    "inputExample": "// playwright.config.ts\n// globalSetup: './globalSetup.ts'\n// globalTeardown: './globalTeardown.ts'",
+    "expectedOutput": "Schema created before first test; deleted after last test; schemaId available to all tests via process.env.",
+    "hint": "Use native `fetch()` with the `Authorization` header. Store the ID in `process.env` so all worker processes inherit it.",
+    "solutionLanguage": "typescript",
+    "solution": "// globalSetup.ts\nimport { FullConfig } from '@playwright/test';\n\ntype SeedResponse = { schemaId: string };\n\nexport default async function globalSetup(_config: FullConfig): Promise<void> {\n  const adminKey = process.env.ADMIN_API_KEY ?? '';\n  const baseURL = process.env.BASE_URL ?? 'http://localhost:3000';\n\n  const response = await fetch(`${baseURL}/api/test-db/seed`, {\n    method: 'POST',\n    headers: {\n      Authorization: `Bearer ${adminKey}`,\n      'Content-Type': 'application/json',\n    },\n    body: JSON.stringify({ reset: true }),\n  });\n\n  if (!response.ok) {\n    throw new Error(`Seed failed: ${response.status} ${await response.text()}`);\n  }\n\n  const { schemaId } = (await response.json()) as SeedResponse;\n  process.env.TEST_SCHEMA_ID = schemaId;\n  console.log(`[globalSetup] seeded schema: ${schemaId}`);\n}\n\n// globalTeardown.ts\nexport default async function globalTeardown(): Promise<void> {\n  const schemaId = process.env.TEST_SCHEMA_ID;\n  const adminKey = process.env.ADMIN_API_KEY ?? '';\n  const baseURL = process.env.BASE_URL ?? 'http://localhost:3000';\n\n  if (!schemaId) return;\n\n  await fetch(`${baseURL}/api/test-db/${schemaId}`, {\n    method: 'DELETE',\n    headers: { Authorization: `Bearer ${adminKey}` },\n  });\n\n  console.log(`[globalTeardown] deleted schema: ${schemaId}`);\n}",
+    "explanation": "globalSetup and globalTeardown run in the main process (not in worker processes), so `process.env` mutations in globalSetup are inherited by all worker child processes. Throwing in globalSetup aborts the entire test run immediately, preventing tests from running against a broken environment. Native `fetch` (available since Node 18) avoids importing an HTTP library. Type-casting the response avoids `any` while keeping the code concise.",
+    "commonMistakes": [
+      "Storing the schemaId in a module-level variable instead of process.env — workers run in separate processes and cannot share module state",
+      "Not throwing on a non-ok seed response, allowing tests to run against an unprepared database",
+      "Forgetting to set globalTeardown in playwright.config.ts alongside globalSetup"
+    ],
+    "followUps": [
+      "How do you pass the schemaId to Playwright's test-level request fixture without using process.env?",
+      "How do you run multiple global setup steps in sequence?",
+      "What is the execution order of globalSetup, project setup, and beforeAll hooks?"
+    ],
+    "tags": [
+      "playwright",
+      "typescript",
+      "globalSetup",
+      "globalTeardown",
+      "test-data"
+    ]
+  },
+  {
+    "id": "playwright-typescript-045",
+    "topicId": "playwright-typescript",
+    "topicTitle": "Playwright (TypeScript)",
+    "level": "senior",
+    "type": "coding",
+    "difficulty": "medium",
+    "title": "Use expect.poll() for out-of-band state",
+    "question": "Write a Playwright test that uses `expect.poll()` to wait for a database record to appear via an API endpoint after a background job completes.",
+    "problem": "After clicking 'Trigger Export' on the UI, a background job runs on the server that eventually creates a record at `GET /api/exports/latest`. Write a test that polls this endpoint every 2 seconds for up to 30 seconds using `expect.poll()`, asserting the response body has `{ status: 'complete', url: /\\.csv$/ }`. Then assert the UI shows a download link.",
+    "inputExample": "// User clicks 'Trigger Export'\n// Server processes asynchronously...\n// GET /api/exports/latest returns { status: 'complete', url: '...' } eventually",
+    "expectedOutput": "Test waits up to 30 s for the job; passes when status=complete and url ends with .csv.",
+    "hint": "Use `expect.poll(async () => { const r = await request.get(...); return await r.json(); }, { intervals: [2000], timeout: 30000 }).toMatchObject(...)` ",
+    "solutionLanguage": "typescript",
+    "solution": "import { test, expect } from '@playwright/test';\n\ntest('export job completes and download link appears', async ({ page, request }) => {\n  await page.goto('/reports');\n\n  await page.getByRole('button', { name: 'Trigger Export' }).click();\n\n  // Poll the API until the export job is complete\n  await expect\n    .poll(\n      async () => {\n        const response = await request.get('/api/exports/latest');\n        if (!response.ok()) return null;\n        return response.json();\n      },\n      {\n        intervals: [2_000],\n        timeout: 30_000,\n        message: 'Export job did not complete within 30 seconds',\n      }\n    )\n    .toMatchObject({\n      status: 'complete',\n      url: expect.stringMatching(/\\.csv$/),\n    });\n\n  // Now assert the UI reflects the completed export\n  await expect(\n    page.getByRole('link', { name: /Download Export/ })\n  ).toBeVisible();\n});",
+    "explanation": "`expect.poll()` re-executes the async callback on the specified interval until the returned value satisfies the matcher or the timeout expires. Returning `null` when the response is not ok causes the `toMatchObject` to fail the current poll attempt, triggering a retry rather than throwing immediately. The `message` option provides a clear failure description. This pattern is ideal for background job polling where the state lives outside the DOM.",
+    "commonMistakes": [
+      "Using a manual while loop with page.waitForTimeout() instead of expect.poll — manual loops swallow errors and produce no useful failure message",
+      "Not providing intervals, causing the default rapid polling to hammer the API",
+      "Using toEqual instead of toMatchObject — toEqual requires an exact match and would fail if the response contains extra fields"
+    ],
+    "followUps": [
+      "How does expect.poll() differ from page.waitForResponse()?",
+      "What happens when the callback throws instead of returning null?",
+      "How would you cancel a background job in teardown if the test times out?"
+    ],
+    "tags": [
+      "playwright",
+      "typescript",
+      "expect-poll",
+      "async",
+      "api",
+      "polling"
+    ]
+  },
+  {
+    "id": "playwright-typescript-046",
+    "topicId": "playwright-typescript",
+    "topicTitle": "Playwright (TypeScript)",
+    "level": "senior",
+    "type": "scenario",
+    "difficulty": "hard",
+    "question": "You are testing a checkout flow where a third-party payment iframe loads from `payments.example.com`. Playwright cannot directly interact with cross-origin iframes. How do you test the full end-to-end checkout without bypassing iframe restrictions?",
+    "shortAnswer": "Use `page.frameLocator()` to scope locators inside the iframe, or mock the iframe entirely with `page.route()` if the iframe origin is third-party and cannot be modified.",
+    "interviewAnswer": "Playwright's `page.frameLocator('iframe[name=payment]')` returns a FrameLocator whose child locators scope automatically to the frame's DOM, even cross-origin. This works for read/write interactions. However, if the iframe source is a real third-party domain with SameSite cookies or CSP that reject test credentials, I mock the entire iframe response with `page.route('**/payments.example.com/embed**', route => route.fulfill({ body: mockIframeHTML }))`. The mock replaces the real iframe content with a controlled HTML form that accepts any card number and triggers the same postMessage events the parent page listens for. This lets me test the parent page's handling of payment success/failure without touching the real payment gateway.",
+    "realProjectExample": "On a SaaS subscription page, the Stripe payment iframe rejected test card numbers in the staging environment. I mocked the iframe URL to serve a local HTML file that posted `{ type: 'PAYMENT_SUCCESS', paymentIntentId: 'pi_mock' }` via `window.parent.postMessage`. The checkout tests covered all branch conditions (success, card decline, 3DS challenge) without a real Stripe integration.",
+    "followUps": [
+      "How do you assert on postMessage events sent from an iframe to the parent page?",
+      "What are the Playwright security limitations for cross-origin frames?",
+      "How do you handle an iframe that is injected dynamically after page load?"
+    ],
+    "tags": [
+      "playwright",
+      "typescript",
+      "iframe",
+      "cross-origin",
+      "route",
+      "mocking"
+    ]
+  },
+  {
+    "id": "playwright-typescript-047",
+    "topicId": "playwright-typescript",
+    "topicTitle": "Playwright (TypeScript)",
+    "level": "senior",
+    "type": "scenario",
+    "difficulty": "medium",
+    "question": "Your Playwright test suite runs in 20 minutes on a single CI machine. Product leadership wants it under 5 minutes. What is your strategy?",
+    "shortAnswer": "Shard the suite across multiple CI agents, maximize `fullyParallel`, move test-data setup to the API layer, and cache browser binaries.",
+    "interviewAnswer": "I profile the suite first: identify the slowest tests (usually those with long UI setup steps or sequential describe blocks) and the current worker count. Then I apply sharding — `--shard=1/4` through `4/4` across four parallel CI jobs, which theoretically gives a 4x speedup. I set `fullyParallel: true` in the config so tests within the same file run in parallel too. For data setup I audit any test that navigates a wizard to create data and replace it with an API call. I cache the `~/.cache/ms-playwright` directory keyed on the Playwright version so browser install time (60-90 s) is skipped on cache hit. For true isolation I move storage-state setup to a worker-scoped fixture so auth happens once per worker, not once per test. Together these typically cut a 20-minute suite to under 5 minutes.",
+    "realProjectExample": "On a 400-test React app, the suite ran in 22 minutes single-machine. After sharding to 4 agents, enabling fullyParallel, converting 30 UI-setup tests to API setup, and caching browsers, the wall-clock time dropped to 4 minutes 40 seconds on the CI budget.",
+    "followUps": [
+      "How do you merge HTML reports from 4 shards into a single report?",
+      "How do you prevent shard imbalance where one shard takes much longer than others?",
+      "What is the cost-benefit tradeoff of adding a fifth shard?"
+    ],
+    "tags": [
+      "playwright",
+      "typescript",
+      "ci",
+      "sharding",
+      "parallelism",
+      "performance"
+    ]
+  },
+  {
+    "id": "playwright-typescript-048",
+    "topicId": "playwright-typescript",
+    "topicTitle": "Playwright (TypeScript)",
+    "level": "mid",
+    "type": "scenario",
+    "difficulty": "medium",
+    "question": "A product manager asks you to add automated visual regression coverage for the company's new design system component library. The components are rendered in Storybook. How do you approach this with Playwright?",
+    "shortAnswer": "Use Playwright to navigate to each Storybook story URL and call `expect(locator).toHaveScreenshot()`, storing baselines per story in version control.",
+    "interviewAnswer": "I configure Playwright to point `baseURL` at the Storybook dev server (or the static build URL in CI). Each story has a deterministic URL like `/iframe.html?id=button--primary`. I write a parameterised test that loops over a list of story IDs, navigates to each one, waits for the component to settle, and calls `expect(page.locator('#storybook-root')).toHaveScreenshot(\\`${storyId}.png\\`)`. Baselines are committed to the repo alongside test files. On PRs, any pixel change causes a test failure and generates a diff image in the HTML report for visual review. I add `--update-snapshots` as a manual CI step that a designer can trigger to accept intentional design changes.",
+    "realProjectExample": "On a fintech design system with 80 components and 240 stories, I set up Playwright visual tests in a dedicated `visual` project in playwright.config.ts. On a redesign sprint the tests caught an unintentional 2px border-radius regression in the Card component that passed code review because the change was in a shared CSS variable.",
+    "followUps": [
+      "How do you handle story states that include animations or transitions?",
+      "How do you manage a growing number of baseline PNG files in the repository?",
+      "How do you integrate Playwright visual tests with Chromatic or Percy?"
+    ],
+    "tags": [
+      "playwright",
+      "typescript",
+      "visual-testing",
+      "storybook",
+      "screenshot",
+      "design-system"
+    ]
+  },
+  {
+    "id": "playwright-typescript-049",
+    "topicId": "playwright-typescript",
+    "topicTitle": "Playwright (TypeScript)",
+    "level": "senior",
+    "type": "scenario",
+    "difficulty": "hard",
+    "question": "You need to test a real-time collaborative document editor where two users must interact simultaneously. How do you structure a Playwright test for this?",
+    "shortAnswer": "Create two separate BrowserContexts (or two Pages in separate contexts) with different authenticated states, run their actions interleaved, and assert each sees the other's changes.",
+    "interviewAnswer": "I create two fixtures or inline contexts — `userAPage` and `userBPage` — each with a distinct `storageState` for different authenticated users. Within a single test I interleave their actions: User A types a character, then I assert User B's page shows it within a timeout using a retrying `toHaveText` assertion. The key is that both Pages run in the same test function, so I can coordinate them step by step without threads. I avoid `waitForTimeout` delays and instead use web-first assertions that poll until the real-time event propagates. For teardown, both contexts are closed by their fixtures automatically.",
+    "realProjectExample": "On a collaborative whiteboard app, I wrote tests where User A drew a shape and User B, 300ms later (simulated by the framework's async scheduling, not a sleep), asserted the shape appeared on their canvas. We caught a bug where shapes were broadcast to all sessions except the authoring session's own undo stack, causing divergent states after reconnects.",
+    "followUps": [
+      "How do you test conflict resolution when both users edit the same field simultaneously?",
+      "How do you simulate a network drop for one user mid-collaboration?",
+      "What is the maximum number of simultaneous Page objects Playwright can handle in one test?"
+    ],
+    "tags": [
+      "playwright",
+      "typescript",
+      "multi-user",
+      "browser-context",
+      "real-time",
+      "websocket"
+    ]
+  },
+  {
+    "id": "playwright-typescript-050",
+    "topicId": "playwright-typescript",
+    "topicTitle": "Playwright (TypeScript)",
+    "level": "senior",
+    "type": "coding",
+    "difficulty": "hard",
+    "title": "Soft assertions for full form validation",
+    "question": "Write a Playwright test that submits an empty form, then uses soft assertions to check all validation error messages without stopping at the first failure.",
+    "problem": "Navigate to `/signup`. Click 'Create Account' without filling any field. Use `expect.soft()` to assert that the following error locators are visible and have specific text: `[data-testid='error-name']` → 'Name is required', `[data-testid='error-email']` → 'Email is required', `[data-testid='error-password']` → 'Password must be at least 8 characters'. After all soft assertions, call `expect(page).toHaveURL('/signup')` as a hard assertion to confirm no navigation occurred.",
+    "inputExample": "// Signup form at /signup\n// Submitting empty form shows 3 inline validation errors",
+    "expectedOutput": "All three error messages are checked; if any fail, the test continues and collects all failures; the final hard assertion confirms no redirect happened.",
+    "hint": "Use `expect.soft(locator).toBeVisible()` and `expect.soft(locator).toHaveText(...)`. End with a regular `expect(page).toHaveURL()`.",
+    "solutionLanguage": "typescript",
+    "solution": "import { test, expect } from '@playwright/test';\n\ntest('signup form shows all validation errors on empty submit', async ({ page }) => {\n  await page.goto('/signup');\n\n  await page.getByRole('button', { name: 'Create Account' }).click();\n\n  // Soft assertions — all run even if one fails\n  const nameError = page.getByTestId('error-name');\n  const emailError = page.getByTestId('error-email');\n  const passwordError = page.getByTestId('error-password');\n\n  await expect.soft(nameError).toBeVisible();\n  await expect.soft(nameError).toHaveText('Name is required');\n\n  await expect.soft(emailError).toBeVisible();\n  await expect.soft(emailError).toHaveText('Email is required');\n\n  await expect.soft(passwordError).toBeVisible();\n  await expect.soft(passwordError).toHaveText('Password must be at least 8 characters');\n\n  // Hard assertion: confirm no navigation away from the signup page\n  await expect(page).toHaveURL('/signup');\n});",
+    "explanation": "Each `expect.soft()` call records a failure internally but does not throw, so all three error messages are checked regardless of individual outcomes. Playwright collects all soft assertion failures and reports them together at the end of the test, giving complete coverage in a single run. The final hard `expect(page).toHaveURL()` uses a regular assertion — if it fails, the test stops immediately since there is no point in collecting more information once we know the page navigated away.",
+    "commonMistakes": [
+      "Using regular expect() for error messages and missing multiple failures on the first broken assertion",
+      "Forgetting await before expect.soft() — the assertion is async and must be awaited to record the result",
+      "Using expect.soft() for the URL check — a navigation away is a critical failure that should stop the test immediately"
+    ],
+    "followUps": [
+      "How do soft assertion failures appear in the Playwright HTML report?",
+      "Can you mix soft and hard assertions in the same test? What is the recommended pattern?",
+      "How do you programmatically check whether any soft assertion failed before continuing to a destructive action?"
+    ],
+    "tags": [
+      "playwright",
+      "typescript",
+      "soft-assertions",
+      "form-validation",
+      "expect"
+    ]
   }
 ]

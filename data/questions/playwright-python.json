@@ -673,5 +673,729 @@
       "quality-gates",
       "performance"
     ]
+  },
+  {
+    "id": "playwright-python-026",
+    "topicId": "playwright-python",
+    "topicTitle": "Playwright (Python)",
+    "level": "mid",
+    "type": "interview",
+    "difficulty": "easy",
+    "question": "How does Playwright Python handle iframes, and what is the correct way to interact with elements inside one?",
+    "shortAnswer": "Use page.frame_locator() to get a scoped locator rooted inside the iframe, then chain further locators from it.",
+    "interviewAnswer": "iframes are essentially independent browsing contexts embedded inside the page. Playwright exposes them via page.frame_locator(selector), which returns a FrameLocator scoped to the iframe. From that frame locator you chain all the normal locator methods — get_by_role(), get_by_label(), locator() — exactly as you would on the page. Playwright's auto-waiting still applies inside the frame. For deeply nested iframes you chain multiple frame_locator() calls. I avoid using page.frames and manual indexing because it couples the test to iframe order, which changes with DOM updates.",
+    "realProjectExample": "We had a payment form embedded as a Stripe iframe inside our checkout page. Using page.frame_locator('iframe[name=\"stripe-card\"]').get_by_placeholder('Card number').fill('4242424242424242') worked reliably, while raw frame access by index broke whenever a third-party analytics script added its own iframe earlier in the DOM.",
+    "followUps": [
+      "How do you handle an iframe whose src is cross-origin?",
+      "What is the difference between frame_locator() and page.frame()?",
+      "How do you assert text inside a nested iframe?"
+    ],
+    "tags": [
+      "playwright",
+      "python",
+      "iframe",
+      "frame-locator"
+    ]
+  },
+  {
+    "id": "playwright-python-027",
+    "topicId": "playwright-python",
+    "topicTitle": "Playwright (Python)",
+    "level": "mid",
+    "type": "quiz",
+    "difficulty": "easy",
+    "question": "Which Playwright Python API do you use to simulate geolocation for a browser context?",
+    "choices": [
+      "page.set_geolocation({'latitude': 37.77, 'longitude': -122.41})",
+      "browser.new_context(geolocation={'latitude': 37.77, 'longitude': -122.41}, permissions=['geolocation'])",
+      "context.grant_permission('geolocation', {'latitude': 37.77, 'longitude': -122.41})",
+      "page.evaluate(\"navigator.geolocation.setPosition(37.77, -122.41)\")"
+    ],
+    "correctAnswer": "browser.new_context(geolocation={'latitude': 37.77, 'longitude': -122.41}, permissions=['geolocation'])",
+    "explanation": "Geolocation is set at the BrowserContext level, not the page level. You pass a geolocation dict with latitude, longitude, and optional accuracy to new_context(), and you must also include 'geolocation' in the permissions list so the browser grants permission automatically. Without the permissions entry the browser will prompt, which headless mode cannot handle.",
+    "tags": [
+      "playwright",
+      "python",
+      "geolocation",
+      "context"
+    ]
+  },
+  {
+    "id": "playwright-python-028",
+    "topicId": "playwright-python",
+    "topicTitle": "Playwright (Python)",
+    "level": "mid",
+    "type": "coding",
+    "difficulty": "medium",
+    "title": "Mock geolocation and verify location-aware UI",
+    "question": "Write a Playwright Python test that mocks the browser's geolocation to San Francisco and asserts that a location-aware page displays the correct city name.",
+    "problem": "Using Playwright for Python, create a browser context with a spoofed geolocation for San Francisco (lat 37.7749, lon -122.4194). Navigate to a page that reads navigator.geolocation and displays the city. Assert that 'San Francisco' appears on the page.",
+    "inputExample": "# The app at http://localhost:3000/location displays the nearest city based on GPS",
+    "expectedOutput": "The page text contains 'San Francisco' when geolocation is mocked to those coordinates.",
+    "hint": "Pass geolocation and permissions to browser.new_context(). You can also update geolocation mid-test with context.set_geolocation().",
+    "solutionLanguage": "python",
+    "solution": "from playwright.sync_api import Browser, expect\n\ndef test_location_page_shows_san_francisco(browser: Browser) -> None:\n    context = browser.new_context(\n        geolocation={\"latitude\": 37.7749, \"longitude\": -122.4194, \"accuracy\": 100},\n        permissions=[\"geolocation\"],\n    )\n    page = context.new_page()\n    page.goto(\"http://localhost:3000/location\")\n    expect(page.get_by_text(\"San Francisco\")).to_be_visible()\n    context.close()",
+    "explanation": "Geolocation must be configured on the context before the page navigates, because the browser grants the permission at context creation. The accuracy field is optional but some apps check it. context.set_geolocation() can update the position after navigation to simulate movement. Using expect() instead of a raw assertion ensures auto-retry while the page resolves the coordinates.",
+    "commonMistakes": [
+      "Forgetting to add 'geolocation' to permissions, causing the browser to silently deny the API",
+      "Setting geolocation on the page after goto(), which may miss the initial permission check",
+      "Using page.set_geolocation() which does not exist — it is a context-level method"
+    ],
+    "followUps": [
+      "How do you simulate the user moving to a new location mid-test?",
+      "How do you test the UI when the user denies geolocation permission?",
+      "How does accuracy affect geolocation-dependent features?"
+    ],
+    "tags": [
+      "playwright",
+      "python",
+      "geolocation",
+      "mocking",
+      "context"
+    ]
+  },
+  {
+    "id": "playwright-python-029",
+    "topicId": "playwright-python",
+    "topicTitle": "Playwright (Python)",
+    "level": "mid",
+    "type": "coding",
+    "difficulty": "medium",
+    "title": "Handle file download and verify filename",
+    "question": "Write a Playwright Python test that clicks a 'Download Report' button, waits for the file download to complete, and asserts the downloaded filename ends with '.csv'.",
+    "problem": "Using Playwright for Python, use page.expect_download() as a context manager to capture the download event triggered by clicking the download button. After the download completes, assert the filename ends with '.csv' and save the file to a temp path for further inspection.",
+    "inputExample": "# Page at http://localhost:3000/reports has a 'Download Report' button",
+    "expectedOutput": "The test captures the Download object, verifies the suggested filename ends with '.csv', and saves the file.",
+    "hint": "Use with page.expect_download() as download_info: before the click. Access download_info.value after exiting the block. Call download.save_as() to persist the file.",
+    "solutionLanguage": "python",
+    "solution": "import tempfile\nimport os\nfrom playwright.sync_api import Page\n\ndef test_report_download_is_csv(page: Page) -> None:\n    page.goto(\"http://localhost:3000/reports\")\n\n    with page.expect_download() as download_info:\n        page.get_by_role(\"button\", name=\"Download Report\").click()\n\n    download = download_info.value\n    assert download.suggested_filename.endswith(\".csv\"), (\n        f\"Expected .csv, got: {download.suggested_filename}\"\n    )\n\n    with tempfile.TemporaryDirectory() as tmp_dir:\n        save_path = os.path.join(tmp_dir, download.suggested_filename)\n        download.save_as(save_path)\n        assert os.path.getsize(save_path) > 0, \"Downloaded file is empty\"",
+    "explanation": "page.expect_download() is a context manager that starts listening for the download event before the action that triggers it. After exiting the block, download_info.value holds the Download object with suggested_filename and a save_as() method. The file is not automatically saved to disk — you must call save_as() or path() to access it. Using a temp directory keeps the filesystem clean after the test.",
+    "commonMistakes": [
+      "Clicking the download button before entering expect_download(), missing the event",
+      "Accessing download.path() before the download finishes, getting None",
+      "Not calling save_as() and trying to open the file from download.path() which may point to a temp path that is deleted after the test"
+    ],
+    "followUps": [
+      "How do you assert the content of the downloaded CSV file?",
+      "How do you handle a download triggered by a navigation (direct link) rather than a button?",
+      "How do you configure the default download directory for a browser context?"
+    ],
+    "tags": [
+      "playwright",
+      "python",
+      "download",
+      "file-handling"
+    ]
+  },
+  {
+    "id": "playwright-python-030",
+    "topicId": "playwright-python",
+    "topicTitle": "Playwright (Python)",
+    "level": "mid",
+    "type": "quiz",
+    "difficulty": "medium",
+    "question": "What is the correct way to handle a new browser tab opened by clicking a link in Playwright Python?",
+    "choices": [
+      "page.wait_for_new_tab() returns the new tab's Page object",
+      "Use context.expect_page() as a context manager before clicking; the new Page is available via the value attribute after exiting",
+      "Listen to the 'tab' event on the browser object with browser.on('tab', handler)",
+      "Call page.switch_to_tab(1) to switch to the newly opened tab"
+    ],
+    "correctAnswer": "Use context.expect_page() as a context manager before clicking; the new Page is available via the value attribute after exiting",
+    "explanation": "When an action opens a new tab, Playwright fires a 'page' event on the BrowserContext. context.expect_page() is a convenience context manager that subscribes to that event and captures the new Page. You must enter the context manager before the click that opens the tab so that the event is not missed. After exiting the block, page_info.value is the new Page object, fully loaded and ready for assertions.",
+    "tags": [
+      "playwright",
+      "python",
+      "tabs",
+      "windows",
+      "context"
+    ]
+  },
+  {
+    "id": "playwright-python-031",
+    "topicId": "playwright-python",
+    "topicTitle": "Playwright (Python)",
+    "level": "senior",
+    "type": "coding",
+    "difficulty": "hard",
+    "title": "Interact with a new tab opened by a link",
+    "question": "Write a Playwright Python test that clicks an 'Open Preview' link which opens a new tab, asserts the new tab's URL contains '/preview', and closes the tab before the original tab continues.",
+    "problem": "Using Playwright for Python, capture the new Page object opened by a link click using context.expect_page(). Assert the new page's URL and title. Then close the new page and verify the original page is still interactive.",
+    "inputExample": "# http://localhost:3000/dashboard has an 'Open Preview' link that opens a new tab",
+    "expectedOutput": "New tab URL contains '/preview'; original tab remains functional after new tab is closed.",
+    "hint": "Use with context.expect_page() as new_page_info: before the click. Access new_page_info.value to get the new Page. Call new_page.wait_for_load_state() to ensure it is fully loaded.",
+    "solutionLanguage": "python",
+    "solution": "from playwright.sync_api import Page, BrowserContext, expect\n\ndef test_preview_opens_in_new_tab(page: Page, context: BrowserContext) -> None:\n    page.goto(\"http://localhost:3000/dashboard\")\n\n    with context.expect_page() as new_page_info:\n        page.get_by_role(\"link\", name=\"Open Preview\").click()\n\n    new_page = new_page_info.value\n    new_page.wait_for_load_state()\n\n    expect(new_page).to_have_url(lambda url: \"/preview\" in url)\n    new_page.close()\n\n    # Original tab is still usable\n    expect(page.get_by_role(\"heading\", name=\"Dashboard\")).to_be_visible()",
+    "explanation": "context.expect_page() listens for the next page event on the context. The new page may not be fully loaded when the context manager exits, so wait_for_load_state() (defaulting to 'load') is required before assertions. Closing the new page does not affect the original page because each page is an independent tab within the same context. The original page fixture continues to work normally.",
+    "commonMistakes": [
+      "Not calling new_page.wait_for_load_state(), causing assertions to run before the page content is available",
+      "Using browser.expect_page() instead of context.expect_page() — the event fires on the context, not the browser",
+      "Forgetting to enter expect_page() before the click, missing the event entirely"
+    ],
+    "followUps": [
+      "How do you handle a popup window opened with window.open() versus a link with target='_blank'?",
+      "How do you run assertions on both the original and new tab in the same test?",
+      "How do you get a list of all currently open pages in a context?"
+    ],
+    "tags": [
+      "playwright",
+      "python",
+      "tabs",
+      "windows",
+      "context",
+      "multi-page"
+    ]
+  },
+  {
+    "id": "playwright-python-032",
+    "topicId": "playwright-python",
+    "topicTitle": "Playwright (Python)",
+    "level": "mid",
+    "type": "quiz",
+    "difficulty": "medium",
+    "question": "Which Playwright Python API allows you to simulate network conditions like slow 3G?",
+    "choices": [
+      "page.set_network_conditions(download=500, upload=500, latency=400)",
+      "context.set_offline(True) combined with page.route() handlers that add delays",
+      "browser.new_context(slow_mo=2000)",
+      "page.route('**/*', lambda route: route.fulfill(delay=400))"
+    ],
+    "correctAnswer": "context.set_offline(True) combined with page.route() handlers that add delays",
+    "explanation": "Playwright Python does not have a direct network throttling API equivalent to Chrome DevTools Protocol's setNetworkConditions. The closest approach is to use page.route() with a handler that delays fulfillment, simulating latency. context.set_offline(True) cuts connectivity entirely. For true bandwidth throttling you can use a CDP session: client = await page.context.new_cdp_session(page) and send the Network.emulateNetworkConditions command. slow_mo on the browser slows Playwright actions, not network traffic.",
+    "tags": [
+      "playwright",
+      "python",
+      "network",
+      "throttling",
+      "performance"
+    ]
+  },
+  {
+    "id": "playwright-python-033",
+    "topicId": "playwright-python",
+    "topicTitle": "Playwright (Python)",
+    "level": "senior",
+    "type": "coding",
+    "difficulty": "hard",
+    "title": "Simulate slow network with route delay",
+    "question": "Write a Playwright Python test that simulates a slow API by adding a 2-second delay to all /api/* responses via page.route(), then asserts a loading spinner is shown during the delay.",
+    "problem": "Using Playwright for Python, intercept all requests matching '**/api/**' and add a delay before fulfilling them by continuing the request with a wait. Assert that a loading spinner is visible during the delay period and disappears after the response arrives.",
+    "inputExample": "# App shows a .loading-spinner element while waiting for /api/data",
+    "expectedOutput": "The spinner is visible immediately after triggering the action and hidden after the (delayed) response arrives.",
+    "hint": "In the route handler, call route.continue_() after a time.sleep(). Use expect(spinner).to_be_visible() before the data loads and expect(spinner).to_be_hidden() after.",
+    "solutionLanguage": "python",
+    "solution": "import time\nfrom playwright.sync_api import Page, Route, expect\n\ndef test_loading_spinner_shown_during_slow_api(page: Page) -> None:\n    def slow_api(route: Route) -> None:\n        time.sleep(2)  # simulate 2-second network delay\n        route.continue_()\n\n    page.route(\"**/api/**\", slow_api)\n    page.goto(\"http://localhost:3000/dashboard\")\n\n    page.get_by_role(\"button\", name=\"Load Data\").click()\n\n    spinner = page.locator(\".loading-spinner\")\n    expect(spinner).to_be_visible()\n\n    # After the 2-second delay the spinner should disappear\n    expect(spinner).to_be_hidden(timeout=5000)",
+    "explanation": "The route handler runs synchronously in Playwright's sync API, so time.sleep() inside the handler blocks the response for that many seconds. route.continue_() forwards the request to the real server after the delay. This simulates high-latency network conditions without requiring OS-level traffic shaping. The test confirms both that the loading state appears and that it resolves correctly once the data arrives.",
+    "commonMistakes": [
+      "Using route.fulfill() with an empty body instead of route.continue_(), which returns an incorrect response to the app",
+      "Placing the spinner assertion after the data loads, missing the transient loading state",
+      "Not increasing the timeout on the hidden assertion, causing it to fail if the app takes longer than the default 5 s"
+    ],
+    "followUps": [
+      "How would you test the exact duration of the loading state?",
+      "How do you simulate intermittent network failures (abort some requests randomly)?",
+      "How would you use CDP to set actual bandwidth limits instead of adding artificial sleep?"
+    ],
+    "tags": [
+      "playwright",
+      "python",
+      "network",
+      "throttling",
+      "route",
+      "loading-state"
+    ]
+  },
+  {
+    "id": "playwright-python-034",
+    "topicId": "playwright-python",
+    "topicTitle": "Playwright (Python)",
+    "level": "mid",
+    "type": "interview",
+    "difficulty": "medium",
+    "question": "How do you perform accessibility testing in a Playwright Python test suite?",
+    "shortAnswer": "Inject the axe-core library via page.add_script_tag() or use the axe-playwright-python package, run the audit, and assert zero violations.",
+    "interviewAnswer": "I integrate axe-core for automated accessibility audits. The most convenient approach in Python is the axe-playwright-python package, which wraps axe-core and exposes an Axe(page).run() method. It returns a results dict with violations, incomplete, and passes arrays. In my tests I call axe.run() after the page is in the state I want to audit, then assert len(results['violations']) == 0. I also check specific impact levels — I treat 'critical' and 'serious' violations as hard failures and log 'moderate' ones as warnings. For large suites I run the accessibility check as a separate pytest mark so it can be included or excluded from CI runs independently. I complement automated checks with manual keyboard navigation and screen-reader testing because axe-core covers only about 30–40% of WCAG criteria.",
+    "realProjectExample": "On a government-facing portal we were required to meet WCAG 2.1 AA. I added an @pytest.mark.accessibility mark and a conftest fixture that called axe.run() on every page visited in that mark. The first run surfaced 47 violations — mostly missing alt text and insufficient colour contrast — which the dev team fixed in a single sprint. The suite then gated deploys on zero critical violations.",
+    "followUps": [
+      "What percentage of WCAG criteria can automated tools like axe-core detect?",
+      "How do you exclude known false positives from the axe violation count?",
+      "How do you test keyboard-only navigation with Playwright?"
+    ],
+    "tags": [
+      "playwright",
+      "python",
+      "accessibility",
+      "axe-core",
+      "wcag"
+    ]
+  },
+  {
+    "id": "playwright-python-035",
+    "topicId": "playwright-python",
+    "topicTitle": "Playwright (Python)",
+    "level": "senior",
+    "type": "coding",
+    "difficulty": "hard",
+    "title": "Accessibility audit with axe-core via evaluate",
+    "question": "Write a Playwright Python test that injects axe-core, runs an accessibility audit on the home page, and asserts there are no critical violations.",
+    "problem": "Using Playwright for Python, add the axe-core CDN script to the page with page.add_script_tag(), run the audit via page.evaluate(), parse the results, and fail the test with a descriptive message listing each critical violation.",
+    "inputExample": "# Home page at http://localhost:3000",
+    "expectedOutput": "Test fails with a list of critical violations if any are found, passes with no output otherwise.",
+    "hint": "Use page.add_script_tag(url='https://cdnjs.cloudflare.com/ajax/libs/axe-core/4.9.1/axe.min.js'). Call page.evaluate('() => axe.run()') which returns a dict. Filter violations by impact == 'critical'.",
+    "solutionLanguage": "python",
+    "solution": "from playwright.sync_api import Page\n\ndef test_home_page_has_no_critical_a11y_violations(page: Page) -> None:\n    page.goto(\"http://localhost:3000\")\n\n    page.add_script_tag(\n        url=\"https://cdnjs.cloudflare.com/ajax/libs/axe-core/4.9.1/axe.min.js\"\n    )\n\n    results = page.evaluate(\"() => axe.run()\")\n\n    critical_violations = [\n        v for v in results.get(\"violations\", [])\n        if v.get(\"impact\") == \"critical\"\n    ]\n\n    violation_summary = \"\\n\".join(\n        f\"  [{v['impact']}] {v['id']}: {v['description']} \"\n        f\"(affects {len(v['nodes'])} element(s))\"\n        for v in critical_violations\n    )\n\n    assert len(critical_violations) == 0, (\n        f\"Found {len(critical_violations)} critical accessibility violation(s):\\n\"\n        + violation_summary\n    )",
+    "explanation": "page.add_script_tag() injects the axe-core library into the page's JavaScript context. page.evaluate() executes axe.run() in that context and returns the serialized result as a Python dict. We filter for 'critical' impact violations only, allowing non-critical issues to be addressed separately. The assertion message includes violation IDs, descriptions, and node counts to make failures immediately actionable without opening a browser.",
+    "commonMistakes": [
+      "Running axe.run() before the page is fully rendered, getting incomplete results",
+      "Not adding the script tag before calling evaluate, causing axe is not defined errors",
+      "Asserting len(results['violations']) == 0 without filtering by impact, treating all severity levels as blocking"
+    ],
+    "followUps": [
+      "How do you scope the audit to a specific section of the page instead of the full document?",
+      "How do you suppress known acceptable violations using axe.run() options?",
+      "How would you integrate this with a pytest fixture to run on every page in the suite?"
+    ],
+    "tags": [
+      "playwright",
+      "python",
+      "accessibility",
+      "axe-core",
+      "evaluate"
+    ]
+  },
+  {
+    "id": "playwright-python-036",
+    "topicId": "playwright-python",
+    "topicTitle": "Playwright (Python)",
+    "level": "mid",
+    "type": "quiz",
+    "difficulty": "medium",
+    "question": "How do you save and restore browser authentication state (cookies and localStorage) in Playwright Python?",
+    "choices": [
+      "context.save_cookies('auth.json') and context.load_cookies('auth.json')",
+      "context.storage_state(path='auth.json') to save; browser.new_context(storage_state='auth.json') to restore",
+      "page.evaluate(\"localStorage.export()\") and page.evaluate(\"localStorage.import(data)\")",
+      "browser.save_session('auth.json') and browser.restore_session('auth.json')"
+    ],
+    "correctAnswer": "context.storage_state(path='auth.json') to save; browser.new_context(storage_state='auth.json') to restore",
+    "explanation": "context.storage_state(path='auth.json') serializes all cookies and localStorage for every origin in the context to a JSON file. To restore that state in a new context you pass storage_state='auth.json' to browser.new_context(). This is the canonical pattern for sharing authentication across tests without repeating the login flow. The storage_state parameter also accepts a dict if you want to build the state programmatically.",
+    "tags": [
+      "playwright",
+      "python",
+      "storage-state",
+      "authentication",
+      "cookies"
+    ]
+  },
+  {
+    "id": "playwright-python-037",
+    "topicId": "playwright-python",
+    "topicTitle": "Playwright (Python)",
+    "level": "senior",
+    "type": "coding",
+    "difficulty": "medium",
+    "title": "Generate and reuse storage state for authentication",
+    "question": "Write a pytest session-scoped fixture that logs in once, saves storage state to a file, and a function-scoped fixture that creates a pre-authenticated context using that state.",
+    "problem": "Using Playwright for Python, implement a session-scoped 'auth_state_file' fixture that performs the login flow and writes context.storage_state() to 'auth.json'. Implement a function-scoped 'authenticated_page' fixture that loads auth.json into a new context and yields a Page.",
+    "inputExample": "# Login endpoint at http://localhost:3000/login with email/password fields",
+    "expectedOutput": "Each test receives an already-authenticated page without performing a login flow.",
+    "hint": "Use scope='session' on the auth fixture. Pass storage_state='auth.json' to browser.new_context() in the page fixture.",
+    "solutionLanguage": "python",
+    "solution": "import pytest\nfrom pathlib import Path\nfrom playwright.sync_api import Browser, Page, sync_playwright\n\nAUTH_FILE = Path(\"auth.json\")\n\n@pytest.fixture(scope=\"session\")\ndef auth_state_file(browser: Browser) -> Path:\n    \"\"\"Log in once per session and persist storage state.\"\"\"\n    ctx = browser.new_context()\n    page = ctx.new_page()\n    page.goto(\"http://localhost:3000/login\")\n    page.get_by_label(\"Email\").fill(\"admin@example.com\")\n    page.get_by_label(\"Password\").fill(\"s3cret\")\n    page.get_by_role(\"button\", name=\"Log in\").click()\n    page.wait_for_url(\"**/dashboard\")\n    ctx.storage_state(path=str(AUTH_FILE))\n    ctx.close()\n    yield AUTH_FILE\n    AUTH_FILE.unlink(missing_ok=True)\n\n@pytest.fixture\ndef authenticated_page(browser: Browser, auth_state_file: Path) -> Page:\n    \"\"\"Create a new context pre-loaded with saved auth state.\"\"\"\n    ctx = browser.new_context(storage_state=str(auth_state_file))\n    page = ctx.new_page()\n    yield page\n    ctx.close()",
+    "explanation": "The session-scoped fixture runs once per test session. It performs the real login, waits for navigation to the dashboard as confirmation, and writes the state to disk. The function-scoped fixture consumes that file path and creates an isolated context for each test pre-loaded with the saved cookies and localStorage. Tests using authenticated_page skip the login entirely, which is much faster and avoids rate-limiting or CAPTCHA on the login endpoint.",
+    "commonMistakes": [
+      "Making the auth fixture function-scoped, repeating the login on every test",
+      "Not waiting for post-login navigation before calling storage_state(), saving an unauthenticated state",
+      "Hardcoding credentials in the fixture instead of reading from environment variables"
+    ],
+    "followUps": [
+      "How do you invalidate the auth.json file if the session token expires mid-run?",
+      "How do you support multiple user roles with separate state files?",
+      "Should auth.json be committed to version control?"
+    ],
+    "tags": [
+      "playwright",
+      "python",
+      "storage-state",
+      "authentication",
+      "fixtures",
+      "session-scope"
+    ]
+  },
+  {
+    "id": "playwright-python-038",
+    "topicId": "playwright-python",
+    "topicTitle": "Playwright (Python)",
+    "level": "mid",
+    "type": "quiz",
+    "difficulty": "easy",
+    "question": "What does the mobile emulation option in browser.new_context() change about the browser?",
+    "choices": [
+      "It installs a mobile browser binary instead of the desktop one",
+      "It sets the viewport size, device pixel ratio, user-agent string, and enables touch events to mimic a real mobile device",
+      "It only changes the viewport size; user-agent and touch must be configured separately",
+      "It routes all traffic through a mobile proxy server"
+    ],
+    "correctAnswer": "It sets the viewport size, device pixel ratio, user-agent string, and enables touch events to mimic a real mobile device",
+    "explanation": "Using playwright.devices['iPhone 14'] (or any device descriptor) and passing it to browser.new_context() applies a coordinated set of settings: viewport dimensions, device pixel ratio, user-agent string, and touch event support. This causes the server to return mobile-optimised HTML and ensures CSS media queries targeting mobile viewports are applied. You can also build a custom device dict and pass it directly.",
+    "tags": [
+      "playwright",
+      "python",
+      "mobile-emulation",
+      "viewport",
+      "devices"
+    ]
+  },
+  {
+    "id": "playwright-python-039",
+    "topicId": "playwright-python",
+    "topicTitle": "Playwright (Python)",
+    "level": "mid",
+    "type": "coding",
+    "difficulty": "medium",
+    "title": "Mobile emulation with Playwright device descriptors",
+    "question": "Write a Playwright Python test that emulates an iPhone 14 and asserts that the mobile navigation menu is visible while the desktop navigation is hidden.",
+    "problem": "Using Playwright for Python, create a browser context using the iPhone 14 device descriptor from playwright.devices. Navigate to the home page and assert that a hamburger menu button is visible and a horizontal desktop nav element is hidden.",
+    "inputExample": "# Desktop nav: role='navigation' with aria-label='Desktop nav'\n# Mobile nav button: role='button' with name='Menu'",
+    "expectedOutput": "Test passes: mobile menu button is visible, desktop nav is hidden on iPhone 14 viewport.",
+    "hint": "Access the device descriptor via playwright.devices['iPhone 14']. Spread it with **device into new_context().",
+    "solutionLanguage": "python",
+    "solution": "import pytest\nfrom playwright.sync_api import Playwright, expect\n\ndef test_mobile_navigation_layout(playwright: Playwright) -> None:\n    iphone = playwright.devices[\"iPhone 14\"]\n    browser = playwright.chromium.launch(headless=True)\n    context = browser.new_context(**iphone)\n    page = context.new_page()\n\n    page.goto(\"http://localhost:3000\")\n\n    mobile_menu_btn = page.get_by_role(\"button\", name=\"Menu\")\n    desktop_nav = page.get_by_role(\"navigation\", name=\"Desktop nav\")\n\n    expect(mobile_menu_btn).to_be_visible()\n    expect(desktop_nav).to_be_hidden()\n\n    context.close()\n    browser.close()",
+    "explanation": "playwright.devices is a dict of pre-configured device descriptors. Unpacking **iphone into new_context() applies all mobile settings at once. This is more reliable than manually setting viewport because it also configures the user-agent and touch support, which can affect how a responsive app serves and renders content. Testing on a device emulation catches layout regressions that would only appear on mobile browsers.",
+    "commonMistakes": [
+      "Passing iphone directly to new_context() without unpacking (**iphone), causing a TypeError",
+      "Only changing viewport size and missing user-agent, so the server still serves desktop HTML",
+      "Testing mobile layout in a desktop context by just resizing the window, which does not simulate touch events"
+    ],
+    "followUps": [
+      "How do you test a touch swipe gesture on a mobile-emulated page?",
+      "How do you add a custom device descriptor for a device not in playwright.devices?",
+      "How does mobile emulation differ from running tests on a real device farm?"
+    ],
+    "tags": [
+      "playwright",
+      "python",
+      "mobile-emulation",
+      "devices",
+      "responsive"
+    ]
+  },
+  {
+    "id": "playwright-python-040",
+    "topicId": "playwright-python",
+    "topicTitle": "Playwright (Python)",
+    "level": "senior",
+    "type": "interview",
+    "difficulty": "hard",
+    "question": "How do you configure and use Playwright Python for visual regression testing?",
+    "shortAnswer": "Use expect(page).to_have_screenshot() or expect(locator).to_have_screenshot() to compare against stored baseline images, with a pixel-difference threshold for tolerance.",
+    "interviewAnswer": "Playwright has built-in visual regression support via the to_have_screenshot() assertion, which is available on both Page and Locator through expect(). On first run it creates a baseline image in a __screenshots__ directory; on subsequent runs it compares pixel-by-pixel against the baseline and fails if the difference exceeds the configured threshold. I set a max_diff_pixels or pixel_ratio threshold to tolerate minor anti-aliasing differences. I also mask dynamic regions — date fields, user avatars, ads — with the mask parameter so unrelated content changes do not cause false failures. When a legitimate UI change is made, engineers run playwright update-snapshots (or the pytest-playwright equivalent) to refresh baselines, which are committed to version control. I run visual tests in a Docker container with a pinned OS and font stack to prevent rendering differences across developer machines and CI.",
+    "realProjectExample": "On a design-system team we had 80 component visual tests. Initially screenshots differed between macOS and Linux runners due to font rendering. Locking tests to a dedicated Linux Docker image reduced false failures from 12% to under 0.5%. We also masked a 'last updated' timestamp that changed every render and had been causing noisy failures.",
+    "followUps": [
+      "How do you update visual baselines for legitimate design changes in CI?",
+      "What threshold settings do you recommend for pixel-level comparison?",
+      "How do you handle visual testing for components with animations?"
+    ],
+    "tags": [
+      "playwright",
+      "python",
+      "visual-regression",
+      "screenshots",
+      "testing"
+    ]
+  },
+  {
+    "id": "playwright-python-041",
+    "topicId": "playwright-python",
+    "topicTitle": "Playwright (Python)",
+    "level": "senior",
+    "type": "coding",
+    "difficulty": "hard",
+    "title": "Visual regression snapshot with dynamic content masking",
+    "question": "Write a Playwright Python test that takes a visual snapshot of a product card component, masking a dynamic 'Last updated' timestamp to prevent false failures.",
+    "problem": "Using Playwright for Python, navigate to a product detail page, locate the product card element, and use expect(locator).to_have_screenshot() with a mask for the timestamp element. Configure a max_diff_pixels tolerance of 50.",
+    "inputExample": "# Product card at http://localhost:3000/products/1\n# Card selector: [data-testid='product-card']\n# Timestamp selector: [data-testid='last-updated']",
+    "expectedOutput": "The test passes when the product card matches the baseline screenshot, ignoring pixel differences in the masked timestamp area.",
+    "hint": "Pass mask=[page.locator('[data-testid=\\'last-updated\\']')] and max_diff_pixels=50 to to_have_screenshot().",
+    "solutionLanguage": "python",
+    "solution": "from playwright.sync_api import Page, expect\n\ndef test_product_card_visual(page: Page) -> None:\n    page.goto(\"http://localhost:3000/products/1\")\n\n    product_card = page.locator(\"[data-testid='product-card']\")\n    timestamp = page.locator(\"[data-testid='last-updated']\")\n\n    expect(product_card).to_have_screenshot(\n        name=\"product-card.png\",\n        mask=[timestamp],\n        max_diff_pixels=50,\n    )",
+    "explanation": "to_have_screenshot() compares the locator's bounding box screenshot against a baseline stored under the test file's directory. The mask parameter accepts a list of Locators; Playwright paints those regions with a solid colour before comparison, so dynamic text does not cause failures. max_diff_pixels allows a small absolute number of differing pixels to tolerate sub-pixel anti-aliasing. The name parameter gives the baseline file a stable name independent of the test's auto-generated name.",
+    "commonMistakes": [
+      "Not using mask, causing the test to fail every time the timestamp updates",
+      "Running snapshots on different OS or font configurations without a pinned environment, producing consistent rendering differences",
+      "Forgetting to commit the baseline PNG to version control, causing every CI run to regenerate it and never actually compare"
+    ],
+    "followUps": [
+      "How do you update the baseline after an intentional design change?",
+      "How do you run visual tests only on a specific branch to avoid baseline churn on feature branches?",
+      "What is the difference between max_diff_pixels and max_diff_ratio?"
+    ],
+    "tags": [
+      "playwright",
+      "python",
+      "visual-regression",
+      "screenshot",
+      "masking"
+    ]
+  },
+  {
+    "id": "playwright-python-042",
+    "topicId": "playwright-python",
+    "topicTitle": "Playwright (Python)",
+    "level": "mid",
+    "type": "quiz",
+    "difficulty": "medium",
+    "question": "Which Playwright Python method lets you interact with a Shadow DOM element inside a Web Component?",
+    "choices": [
+      "page.locator('>> shadow=open').locator('button')",
+      "page.locator('my-component').shadow_root().locator('button')",
+      "page.locator('my-component').locator('button') — Playwright pierces open Shadow DOM automatically",
+      "page.evaluate('document.querySelector(\"my-component\").shadowRoot.querySelector(\"button\")').click()"
+    ],
+    "correctAnswer": "page.locator('my-component').locator('button') — Playwright pierces open Shadow DOM automatically",
+    "explanation": "Playwright's CSS engine pierces open Shadow DOM boundaries automatically. You can chain locators as if the shadow root were not there: page.locator('my-component').locator('button') or the shorthand page.locator('my-component button') both work without any special syntax. This only applies to open Shadow DOM; closed Shadow DOM is intentionally inaccessible from JavaScript and Playwright cannot pierce it.",
+    "tags": [
+      "playwright",
+      "python",
+      "shadow-dom",
+      "web-components",
+      "locators"
+    ]
+  },
+  {
+    "id": "playwright-python-043",
+    "topicId": "playwright-python",
+    "topicTitle": "Playwright (Python)",
+    "level": "senior",
+    "type": "coding",
+    "difficulty": "medium",
+    "title": "Drag and drop between two elements",
+    "question": "Write a Playwright Python test that drags a 'Task' card from a 'To Do' column and drops it into a 'Done' column in a Kanban board, then asserts the card appears in the Done column.",
+    "problem": "Using Playwright for Python, locate a task card in the 'To Do' column and drag it to the 'Done' column using locator.drag_to(). After the drop, assert the card's text appears inside the Done column.",
+    "inputExample": "# Kanban board at http://localhost:3000/board\n# Columns: [data-column='todo'] and [data-column='done']\n# Card: element with text 'Fix bug #42'",
+    "expectedOutput": "The card 'Fix bug #42' is visible inside [data-column='done'] after the drag.",
+    "hint": "Use source_locator.drag_to(target_locator). You may need target_position or force=True for drop targets that require hover before accepting drops.",
+    "solutionLanguage": "python",
+    "solution": "from playwright.sync_api import Page, expect\n\ndef test_drag_task_to_done_column(page: Page) -> None:\n    page.goto(\"http://localhost:3000/board\")\n\n    task_card = page.locator(\"[data-column='todo']\").get_by_text(\"Fix bug #42\")\n    done_column = page.locator(\"[data-column='done']\")\n\n    task_card.drag_to(done_column)\n\n    expect(done_column.get_by_text(\"Fix bug #42\")).to_be_visible()",
+    "explanation": "locator.drag_to(target) dispatches a sequence of mousedown, mousemove, and mouseup events from the source element's center to the target's center, which is what most drag-and-drop libraries listen for. The assertion scopes get_by_text() inside the done column locator to confirm the card moved there and did not just disappear. For libraries that use pointer events instead of mouse events you may need to use locator.hover(), page.mouse.down(), page.mouse.move(), and page.mouse.up() manually.",
+    "commonMistakes": [
+      "Using page.drag_and_drop(source_selector, target_selector) which is a lower-level method and ignores intermediate hover events some DnD libraries require",
+      "Asserting the card is visible on the page instead of scoping the assertion to the Done column — the card was always on the page",
+      "Not waiting for the animation or state update after the drop before asserting"
+    ],
+    "followUps": [
+      "How do you handle drag-and-drop implemented with the HTML5 DataTransfer API?",
+      "How do you test drag-and-drop on a touch-enabled mobile emulation?",
+      "How do you verify the order of cards after dropping into a sorted list?"
+    ],
+    "tags": [
+      "playwright",
+      "python",
+      "drag-and-drop",
+      "mouse",
+      "interaction"
+    ]
+  },
+  {
+    "id": "playwright-python-044",
+    "topicId": "playwright-python",
+    "topicTitle": "Playwright (Python)",
+    "level": "mid",
+    "type": "quiz",
+    "difficulty": "easy",
+    "question": "What is the correct way to configure video recording for every test in Playwright Python?",
+    "choices": [
+      "Set record_video_dir and record_video_size in browser.new_context()",
+      "Call page.start_recording() before each test and page.stop_recording() after",
+      "Pass video=True to browser.launch()",
+      "Set PLAYWRIGHT_VIDEO=1 environment variable before running pytest"
+    ],
+    "correctAnswer": "Set record_video_dir and record_video_size in browser.new_context()",
+    "explanation": "Video recording is configured at the BrowserContext level. Passing record_video_dir='/path/to/videos' to browser.new_context() tells Playwright to record all pages in that context. The video is written to disk when the context is closed. record_video_size accepts a dict with width and height to set the video resolution. When using pytest-playwright you can also set video='on' or video='retain-on-failure' in pytest.ini to enable it globally.",
+    "tags": [
+      "playwright",
+      "python",
+      "video-recording",
+      "context",
+      "configuration"
+    ]
+  },
+  {
+    "id": "playwright-python-045",
+    "topicId": "playwright-python",
+    "topicTitle": "Playwright (Python)",
+    "level": "senior",
+    "type": "coding",
+    "difficulty": "hard",
+    "title": "Custom pytest fixture for parallel test configuration",
+    "question": "Write a conftest.py snippet that configures pytest-xdist for parallel execution of Playwright tests, ensuring each worker gets its own browser instance and tests are isolated.",
+    "problem": "Using Playwright for Python with pytest-xdist, implement a session-scoped browser fixture that is worker-aware (uses xdist worker id). Implement a function-scoped page fixture. Show the pytest.ini configuration for 4 parallel workers.",
+    "inputExample": "# pytest.ini or pyproject.toml configuration\n# conftest.py with worker-aware fixtures",
+    "expectedOutput": "Each xdist worker has its own browser process; tests within each worker share the browser but have isolated pages.",
+    "hint": "Access the worker id with request.config.workerinput.get('workerid', 'master'). Use scope='session' on the browser fixture to reuse per worker. Configure addopts = -n 4 in pytest.ini.",
+    "solutionLanguage": "python",
+    "solution": "# pytest.ini\n# [pytest]\n# addopts = -n 4 --dist=loadfile\n# timeout = 30\n\n# conftest.py\nimport pytest\nfrom playwright.sync_api import sync_playwright, Browser, Page\n\n@pytest.fixture(scope=\"session\")\ndef browser_type_launch_args():\n    return {\"headless\": True, \"args\": [\"--no-sandbox\", \"--disable-dev-shm-usage\"]}\n\n@pytest.fixture(scope=\"session\")\ndef browser(request, browser_type_launch_args) -> Browser:\n    worker_id = getattr(request.config, \"workerinput\", {}).get(\"workerid\", \"master\")\n    with sync_playwright() as p:\n        browser = p.chromium.launch(**browser_type_launch_args)\n        yield browser\n        browser.close()\n\n@pytest.fixture\ndef page(browser: Browser) -> Page:\n    context = browser.new_context()\n    page = context.new_page()\n    yield page\n    context.close()",
+    "explanation": "Each xdist worker process runs its own session, so a session-scoped browser fixture creates one browser per worker — exactly what we want. The --no-sandbox flag is required in Linux CI containers. --dist=loadfile groups tests from the same file onto the same worker, reducing context setup overhead. The function-scoped page fixture creates a fresh context for every test, providing full isolation. If you use pytest-playwright's built-in fixtures, xdist parallelism is handled automatically, but knowing how to do it manually is important for custom configurations.",
+    "commonMistakes": [
+      "Using a module-scoped browser fixture, which breaks when xdist distributes tests from the same module to different workers",
+      "Sharing a single browser instance across workers via a class variable or global, causing race conditions",
+      "Not closing the context in the page fixture teardown, accumulating open contexts within each worker's browser"
+    ],
+    "followUps": [
+      "How do you run different browser types (Chromium, Firefox, WebKit) in parallel?",
+      "How do you collect and merge HTML test reports from multiple xdist workers?",
+      "When would --dist=loadscope be preferable to --dist=loadfile?"
+    ],
+    "tags": [
+      "playwright",
+      "python",
+      "parallel",
+      "xdist",
+      "fixtures",
+      "ci"
+    ]
+  },
+  {
+    "id": "playwright-python-046",
+    "topicId": "playwright-python",
+    "topicTitle": "Playwright (Python)",
+    "level": "mid",
+    "type": "interview",
+    "difficulty": "medium",
+    "question": "How do you read and write clipboard content in a Playwright Python test?",
+    "shortAnswer": "Grant the clipboard-read/clipboard-write permissions on the context, then use page.evaluate() to call navigator.clipboard.readText() or writeText(), or use keyboard shortcuts Ctrl+C / Ctrl+V.",
+    "interviewAnswer": "Clipboard access in browsers is gated by permissions. First I grant 'clipboard-read' and 'clipboard-write' in the context permissions. Then I have two options. For writing I can call page.evaluate(\"navigator.clipboard.writeText('hello')\") — this sets the clipboard content programmatically. For reading I call page.evaluate(\"navigator.clipboard.readText()\") and compare the result to the expected value. Alternatively, if I want to test the actual copy flow from UI, I select text in an element and press Ctrl+C (or Cmd+C on macOS) using page.keyboard.press('Control+C'), then read back the clipboard. This tests the real user interaction rather than bypassing it. The key thing to remember is that clipboard APIs are async in JavaScript, so the evaluate call must use an async IIFE: page.evaluate('async () => await navigator.clipboard.readText()'). ",
+    "realProjectExample": "For a code editor product we had a 'Copy code snippet' button. The test verified that clicking it wrote the correct snippet to the clipboard. We granted clipboard-write permission, clicked the button, then called page.evaluate('async () => await navigator.clipboard.readText()') and asserted it equaled the displayed code. Without the permission grant the API threw a DOMException in headless mode.",
+    "followUps": [
+      "How do you test clipboard access on macOS versus Linux in headless mode?",
+      "What happens if you do not grant clipboard permissions before calling the API?",
+      "How do you test a paste operation where the user pastes content into a text field?"
+    ],
+    "tags": [
+      "playwright",
+      "python",
+      "clipboard",
+      "permissions",
+      "evaluate"
+    ]
+  },
+  {
+    "id": "playwright-python-047",
+    "topicId": "playwright-python",
+    "topicTitle": "Playwright (Python)",
+    "level": "senior",
+    "type": "coding",
+    "difficulty": "hard",
+    "title": "API testing with shared request context and response validation",
+    "question": "Write a pytest module with a session-scoped APIRequestContext fixture that shares a base URL and auth header, plus a helper function to assert common response structure, used by two separate API tests.",
+    "problem": "Using Playwright for Python, create a session-scoped api_client fixture using playwright.request.new_context(). Write a validate_response() helper that checks status code and required top-level JSON keys. Write tests for GET /api/users and GET /api/users/{id}.",
+    "inputExample": "# API base URL: http://localhost:8000\n# GET /api/users returns {\"data\": [...], \"total\": N}\n# GET /api/users/1 returns {\"id\": 1, \"name\": \"...\", \"email\": \"...\"}",
+    "expectedOutput": "Both tests share the same authenticated APIRequestContext and pass when the API returns the expected structure.",
+    "hint": "Use scope='session' and playwright fixture from pytest-playwright. Call validate_response() as a utility, not a fixture.",
+    "solutionLanguage": "python",
+    "solution": "import pytest\nfrom playwright.sync_api import Playwright, APIRequestContext, APIResponse\n\nBASE_URL = \"http://localhost:8000\"\n\n@pytest.fixture(scope=\"session\")\ndef api_client(playwright: Playwright) -> APIRequestContext:\n    client = playwright.request.new_context(\n        base_url=BASE_URL,\n        extra_http_headers={\n            \"Authorization\": \"Bearer test-token\",\n            \"Accept\": \"application/json\",\n        },\n    )\n    yield client\n    client.dispose()\n\ndef validate_response(\n    response: APIResponse,\n    expected_status: int,\n    required_keys: list[str],\n) -> dict:\n    assert response.status == expected_status, (\n        f\"Expected {expected_status}, got {response.status}: {response.text()}\"\n    )\n    body = response.json()\n    missing = [k for k in required_keys if k not in body]\n    assert not missing, f\"Response missing keys {missing}. Body: {body}\"\n    return body\n\ndef test_list_users_returns_paginated_data(api_client: APIRequestContext) -> None:\n    response = api_client.get(\"/api/users\")\n    body = validate_response(response, 200, [\"data\", \"total\"])\n    assert isinstance(body[\"data\"], list)\n\ndef test_get_single_user_returns_full_profile(api_client: APIRequestContext) -> None:\n    response = api_client.get(\"/api/users/1\")\n    body = validate_response(response, 200, [\"id\", \"name\", \"email\"])\n    assert body[\"id\"] == 1",
+    "explanation": "A session-scoped api_client shares the TCP connection pool and auth headers across all API tests in the session, reducing overhead compared to creating a new context per test. validate_response() is a plain helper function rather than a fixture because it operates on a response object passed to it — keeping fixtures for setup/teardown only is cleaner. Each test is self-contained and assertions are specific to that endpoint's contract.",
+    "commonMistakes": [
+      "Creating a new APIRequestContext in every test, which opens and closes a TCP connection pool each time",
+      "Not calling client.dispose() in teardown, leaving HTTP connections open after the session ends",
+      "Catching the raw requests library in the same test file, breaking the session-scoped context sharing"
+    ],
+    "followUps": [
+      "How do you record all API calls made during a test run to a HAR file for audit?",
+      "How would you extend validate_response() to support JSON schema validation?",
+      "When would you use a REST client library like httpx alongside APIRequestContext?"
+    ],
+    "tags": [
+      "playwright",
+      "python",
+      "api",
+      "APIRequestContext",
+      "session-scope",
+      "validation"
+    ]
+  },
+  {
+    "id": "playwright-python-048",
+    "topicId": "playwright-python",
+    "topicTitle": "Playwright (Python)",
+    "level": "mid",
+    "type": "quiz",
+    "difficulty": "hard",
+    "question": "You need to assert that a specific network request was NOT made during a test (e.g., no analytics call to /api/track). Which approach is correct in Playwright Python?",
+    "choices": [
+      "page.expect_request('**/api/track') will throw if the request is never made, confirming it was not sent",
+      "Collect all requests with page.on('request', handler), then assert the URL list does not contain '/api/track' after the test action",
+      "Use page.route('**/api/track', lambda r: r.abort()) and assert the test passes — the absence of an error confirms the request was not made",
+      "page.wait_for_request('**/api/track', timeout=0) returns None when no request is made"
+    ],
+    "correctAnswer": "Collect all requests with page.on('request', handler), then assert the URL list does not contain '/api/track' after the test action",
+    "explanation": "page.expect_request() raises a timeout error if the request is never received, which means it cannot be used to assert the absence of a request — it will always fail when the request does not happen. The correct approach is to register a listener with page.on('request', handler) before the action and accumulate matched URLs in a list. After the action completes (and any necessary wait), you assert the list is empty. Using route.abort() only stops the request; it does not confirm the request was not initiated. wait_for_request() also times out rather than returning None.",
+    "tags": [
+      "playwright",
+      "python",
+      "network",
+      "request",
+      "assertions",
+      "negative-testing"
+    ]
+  },
+  {
+    "id": "playwright-python-049",
+    "topicId": "playwright-python",
+    "topicTitle": "Playwright (Python)",
+    "level": "senior",
+    "type": "coding",
+    "difficulty": "hard",
+    "title": "Assert no unauthorized network requests are made",
+    "question": "Write a Playwright Python test that asserts no requests are made to a third-party analytics domain (analytics.example.com) during page load.",
+    "problem": "Using Playwright for Python, register a page.on('request') listener before navigation to collect all outbound request URLs. Navigate to the home page, wait for it to load, then assert that none of the collected URLs contain 'analytics.example.com'.",
+    "inputExample": "# Page at http://localhost:3000 should NOT call analytics.example.com in privacy mode",
+    "expectedOutput": "Test passes when no request URL matches the analytics domain; fails with a list of offending URLs otherwise.",
+    "hint": "Use page.on('request', lambda req: requests.append(req.url)) before page.goto(). After load, filter the list and assert it is empty.",
+    "solutionLanguage": "python",
+    "solution": "from playwright.sync_api import Page\n\ndef test_no_analytics_requests_on_load(page: Page) -> None:\n    captured_urls: list[str] = []\n\n    page.on(\"request\", lambda req: captured_urls.append(req.url))\n\n    page.goto(\"http://localhost:3000\")\n    page.wait_for_load_state(\"networkidle\")\n\n    analytics_requests = [\n        url for url in captured_urls\n        if \"analytics.example.com\" in url\n    ]\n\n    assert not analytics_requests, (\n        f\"Unexpected analytics requests were made:\\n\"\n        + \"\\n\".join(f\"  - {url}\" for url in analytics_requests)\n    )",
+    "explanation": "page.on('request', handler) registers a listener that fires synchronously for every outgoing request on the page. By appending URLs to a list we build a complete audit log. wait_for_load_state('networkidle') ensures we capture requests that fire after the initial HTML load, such as lazy-loaded scripts or deferred analytics calls. The assertion message lists every offending URL, making it easy to identify exactly which call violated the privacy requirement.",
+    "commonMistakes": [
+      "Registering the listener after page.goto(), missing requests that fired during navigation",
+      "Not waiting for networkidle, missing deferred analytics calls that load after DOMContentLoaded",
+      "Using a boolean flag instead of collecting URLs, losing the ability to report which specific URL violated the rule"
+    ],
+    "followUps": [
+      "How do you extend this to block and fail the test immediately when the first analytics call is detected?",
+      "How do you audit response headers (e.g., no Set-Cookie from third parties)?",
+      "How would you run this privacy check as a regression gate on every deploy?"
+    ],
+    "tags": [
+      "playwright",
+      "python",
+      "network",
+      "privacy",
+      "negative-testing",
+      "audit"
+    ]
+  },
+  {
+    "id": "playwright-python-050",
+    "topicId": "playwright-python",
+    "topicTitle": "Playwright (Python)",
+    "level": "senior",
+    "type": "interview",
+    "difficulty": "hard",
+    "question": "How do you use Playwright Python to generate a PDF from a web page, and what are the key configuration options?",
+    "shortAnswer": "Call page.pdf(path='output.pdf') on a Chromium page; configure paper size, margins, headers, footers, and print media type via the pdf() parameters.",
+    "interviewAnswer": "Playwright's page.pdf() method triggers Chromium's print-to-PDF engine and saves the output to disk. It only works with Chromium because PDF generation relies on Chrome's native print API. Key parameters include path for the output file, format ('A4', 'Letter', etc.), margin as a dict with top/right/bottom/left values, print_background to include CSS background colours and images, and header_template / footer_template for HTML-based headers and footers with class-based placeholders like .pageNumber and .totalPages. I also call page.emulate_media(media='print') before navigation or before calling pdf() so that print-specific CSS rules (like @media print) are applied, giving the PDF the correct layout rather than the screen layout. This is essential for apps that hide navigation bars and sidebars in print mode.",
+    "realProjectExample": "For a financial reporting tool we needed to generate quarterly reports as PDFs from our Next.js app. I used page.emulate_media(media='print') to activate the print stylesheet that hid the sidebar and applied page-break CSS. Then page.pdf(format='A4', print_background=True, margin={'top': '20mm', 'bottom': '20mm', 'left': '15mm', 'right': '15mm'}) produced clean multi-page PDFs. The test asserted the file size was above a minimum threshold (indicating content was rendered) and that the file was valid PDF by checking the first bytes for the %PDF- header.",
+    "followUps": [
+      "How do you test the content of a generated PDF programmatically?",
+      "Why does page.pdf() only work with Chromium and not Firefox or WebKit?",
+      "How do you handle multi-page PDFs where content must not be cut across page breaks?"
+    ],
+    "tags": [
+      "playwright",
+      "python",
+      "pdf",
+      "chromium",
+      "print-media"
+    ]
   }
 ]

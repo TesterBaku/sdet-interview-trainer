@@ -10,8 +10,16 @@
     "shortAnswer": "Validate response body, schema, headers when relevant, business rules, and side effects.",
     "interviewAnswer": "A status code is only the first signal. I also validate required fields, data types, important headers, error messages, persistence side effects, and contract expectations. I keep assertions tied to business risk rather than checking every unstable implementation detail.",
     "realProjectExample": "For a create-user endpoint, I checked 201, response ID, default role, database persistence, and duplicate-email behavior.",
-    "followUps": ["How do you test negative cases?", "When do you validate headers?", "How do you test idempotency?"],
-    "tags": ["api", "rest", "assertions"]
+    "followUps": [
+      "How do you test negative cases?",
+      "When do you validate headers?",
+      "How do you test idempotency?"
+    ],
+    "tags": [
+      "api",
+      "rest",
+      "assertions"
+    ]
   },
   {
     "id": "api-testing-002",
@@ -21,10 +29,18 @@
     "type": "quiz",
     "difficulty": "easy",
     "question": "Which status code usually means a resource was created successfully?",
-    "choices": ["200", "201", "204", "409"],
+    "choices": [
+      "200",
+      "201",
+      "204",
+      "409"
+    ],
     "correctAnswer": "201",
     "explanation": "201 Created indicates the request succeeded and a new resource was created.",
-    "tags": ["api", "status codes"]
+    "tags": [
+      "api",
+      "status codes"
+    ]
   },
   {
     "id": "api-testing-003",
@@ -37,8 +53,16 @@
     "shortAnswer": "Make test data unique, isolate cleanup, and verify whether retries are hiding a real idempotency issue.",
     "interviewAnswer": "I would first confirm the conflict source. If multiple test runs share static emails, I would generate unique data and clean it safely. If the endpoint should be idempotent, I would clarify expected behavior and add targeted coverage for duplicate creation.",
     "realProjectExample": "We changed static qa@example.com users to unique emails using run IDs and added cleanup by test tag, which removed CI collisions.",
-    "followUps": ["How do you manage test data in parallel CI?", "When should cleanup be avoided?", "How do you test duplicate requests?"],
-    "tags": ["api", "test data", "ci"]
+    "followUps": [
+      "How do you manage test data in parallel CI?",
+      "When should cleanup be avoided?",
+      "How do you test duplicate requests?"
+    ],
+    "tags": [
+      "api",
+      "test data",
+      "ci"
+    ]
   },
   {
     "id": "api-testing-004",
@@ -61,8 +85,16 @@
       "Not including the field name in the error message, making failures hard to debug",
       "Checking the wrong layer — e.g. checking the requests.Response object instead of response.json()"
     ],
-    "followUps": ["How would you also validate the type of each field?", "How would you handle nested required fields?"],
-    "tags": ["api", "assertions", "json", "python"]
+    "followUps": [
+      "How would you also validate the type of each field?",
+      "How would you handle nested required fields?"
+    ],
+    "tags": [
+      "api",
+      "assertions",
+      "json",
+      "python"
+    ]
   },
   {
     "id": "api-testing-005",
@@ -85,8 +117,16 @@
       "Hardcoding the URL inside the function instead of accepting it as a parameter",
       "Not returning the response, forcing the caller to make a duplicate request"
     ],
-    "followUps": ["How would you add a timeout parameter?", "How would you handle network errors gracefully in a test?"],
-    "tags": ["api", "requests", "status codes", "python"]
+    "followUps": [
+      "How would you add a timeout parameter?",
+      "How would you handle network errors gracefully in a test?"
+    ],
+    "tags": [
+      "api",
+      "requests",
+      "status codes",
+      "python"
+    ]
   },
   {
     "id": "api-testing-006",
@@ -109,8 +149,17 @@
       "Skipping the presence check, which causes a KeyError instead of an AssertionError",
       "Not collecting all failures — stopping at the first error makes debugging slower"
     ],
-    "followUps": ["When would you use the jsonschema library instead?", "How would you handle nullable fields?", "How do you test optional fields?"],
-    "tags": ["api", "json schema", "assertions", "python"]
+    "followUps": [
+      "When would you use the jsonschema library instead?",
+      "How would you handle nullable fields?",
+      "How do you test optional fields?"
+    ],
+    "tags": [
+      "api",
+      "json schema",
+      "assertions",
+      "python"
+    ]
   },
   {
     "id": "api-testing-007",
@@ -133,8 +182,17 @@
       "Using requests.post() instead of requests.put(), which tests the wrong method",
       "Not asserting the first call succeeded before making the second call"
     ],
-    "followUps": ["Which HTTP methods must be idempotent by spec?", "How would you test DELETE idempotency?", "What if timestamps in the response change on each call?"],
-    "tags": ["api", "idempotency", "put", "python"]
+    "followUps": [
+      "Which HTTP methods must be idempotent by spec?",
+      "How would you test DELETE idempotency?",
+      "What if timestamps in the response change on each call?"
+    ],
+    "tags": [
+      "api",
+      "idempotency",
+      "put",
+      "python"
+    ]
   },
   {
     "id": "api-testing-008",
@@ -157,8 +215,17 @@
       "Using 403 when 401 is the correct code for missing credentials — 403 means authenticated but forbidden",
       "Passing the token value without the 'Bearer ' prefix"
     ],
-    "followUps": ["What is the difference between 401 and 403?", "How would you test an expired token?", "How would you test API key authentication vs Bearer tokens?"],
-    "tags": ["api", "authentication", "authorization", "python"]
+    "followUps": [
+      "What is the difference between 401 and 403?",
+      "How would you test an expired token?",
+      "How would you test API key authentication vs Bearer tokens?"
+    ],
+    "tags": [
+      "api",
+      "authentication",
+      "authorization",
+      "python"
+    ]
   },
   {
     "id": "api-testing-009",
@@ -181,8 +248,17 @@
       "Using a fixed sleep instead of exponential delay, which hammers the server",
       "Swallowing the last error and returning None, which hides failures silently"
     ],
-    "followUps": ["How would you add jitter to the backoff?", "When should you NOT retry a request?", "How would you make this work with POST requests safely?"],
-    "tags": ["api", "retries", "backoff", "python"]
+    "followUps": [
+      "How would you add jitter to the backoff?",
+      "When should you NOT retry a request?",
+      "How would you make this work with POST requests safely?"
+    ],
+    "tags": [
+      "api",
+      "retries",
+      "backoff",
+      "python"
+    ]
   },
   {
     "id": "api-testing-010",
@@ -205,8 +281,18 @@
       "Not asserting the 201 in setup, allowing a broken fixture to silently pass",
       "Sharing a single fixture instance across tests when tests mutate the user"
     ],
-    "followUps": ["How would you make the fixture create unique emails per run?", "When would you use scope='module' instead of the default scope?", "How would you handle teardown failures?"],
-    "tags": ["api", "test data", "pytest", "fixtures", "python"]
+    "followUps": [
+      "How would you make the fixture create unique emails per run?",
+      "When would you use scope='module' instead of the default scope?",
+      "How would you handle teardown failures?"
+    ],
+    "tags": [
+      "api",
+      "test data",
+      "pytest",
+      "fixtures",
+      "python"
+    ]
   },
   {
     "id": "api-testing-011",
@@ -224,7 +310,10 @@
     ],
     "correctAnswer": "The request was successful but there is no content to return",
     "explanation": "204 No Content means the server successfully processed the request but is not returning any content. It is common for DELETE and some PUT operations.",
-    "tags": ["api", "status codes"]
+    "tags": [
+      "api",
+      "status codes"
+    ]
   },
   {
     "id": "api-testing-012",
@@ -234,10 +323,19 @@
     "type": "quiz",
     "difficulty": "easy",
     "question": "Which HTTP method is considered idempotent by the HTTP specification?",
-    "choices": ["POST", "PATCH", "PUT", "None of the above"],
+    "choices": [
+      "POST",
+      "PATCH",
+      "PUT",
+      "None of the above"
+    ],
     "correctAnswer": "PUT",
     "explanation": "PUT is idempotent: calling it multiple times with the same payload produces the same result. POST is not idempotent because repeated calls typically create duplicate resources. PATCH may or may not be idempotent depending on implementation.",
-    "tags": ["api", "idempotency", "http methods"]
+    "tags": [
+      "api",
+      "idempotency",
+      "http methods"
+    ]
   },
   {
     "id": "api-testing-013",
@@ -255,7 +353,11 @@
     ],
     "correctAnswer": "application/json",
     "explanation": "application/json tells the server the request body is JSON-encoded. application/x-www-form-urlencoded is for HTML form submissions, and multipart/form-data is for file uploads.",
-    "tags": ["api", "headers", "rest"]
+    "tags": [
+      "api",
+      "headers",
+      "rest"
+    ]
   },
   {
     "id": "api-testing-014",
@@ -265,10 +367,19 @@
     "type": "quiz",
     "difficulty": "medium",
     "question": "Which status code should a REST API return when a client sends a request body that fails validation (e.g., a missing required field)?",
-    "choices": ["400", "401", "404", "500"],
+    "choices": [
+      "400",
+      "401",
+      "404",
+      "500"
+    ],
     "correctAnswer": "400",
     "explanation": "400 Bad Request indicates the server cannot process the request because of a client error such as malformed syntax or invalid parameters. 401 is for authentication issues, 404 for not found, and 500 for server-side errors.",
-    "tags": ["api", "status codes", "negative testing"]
+    "tags": [
+      "api",
+      "status codes",
+      "negative testing"
+    ]
   },
   {
     "id": "api-testing-015",
@@ -286,7 +397,11 @@
     ],
     "correctAnswer": "Verifying that the consumer and provider agree on the API's request/response structure",
     "explanation": "Contract testing (e.g., with Pact) ensures the consumer's expectations about the API's shape match what the provider actually delivers. It catches breaking changes before they reach production, unlike end-to-end tests which test behavior through a running system.",
-    "tags": ["api", "contract testing", "pact"]
+    "tags": [
+      "api",
+      "contract testing",
+      "pact"
+    ]
   },
   {
     "id": "api-testing-016",
@@ -304,7 +419,12 @@
     ],
     "correctAnswer": "Consumers expect 200 and will not handle 404 for an empty collection, causing client errors",
     "explanation": "A collection endpoint returning 200 with [] is the REST convention for 'the collection exists but has no items.' Returning 404 conflates 'resource not found' with 'empty result set' and breaks consumers who only handle 200. This is a contract violation.",
-    "tags": ["api", "contract testing", "rest", "breaking changes"]
+    "tags": [
+      "api",
+      "contract testing",
+      "rest",
+      "breaking changes"
+    ]
   },
   {
     "id": "api-testing-017",
@@ -322,7 +442,11 @@
     ],
     "correctAnswer": "Authorization",
     "explanation": "The Authorization header is the standard header for credentials. For JWT and OAuth2 tokens it takes the form 'Authorization: Bearer <token>'. X-API-Key is a common custom header but is not standardized.",
-    "tags": ["api", "authentication", "headers"]
+    "tags": [
+      "api",
+      "authentication",
+      "headers"
+    ]
   },
   {
     "id": "api-testing-018",
@@ -340,7 +464,12 @@
     ],
     "correctAnswer": "Yes, because idempotency means the server state is the same, but the response code may differ",
     "explanation": "Idempotency guarantees that repeated identical requests leave the server in the same state, not that they return identical status codes. After the first DELETE the resource is gone. The second DELETE finds nothing to delete — returning 404 is acceptable. The server state (resource absent) is identical after both calls.",
-    "tags": ["api", "idempotency", "delete", "rest semantics"]
+    "tags": [
+      "api",
+      "idempotency",
+      "delete",
+      "rest semantics"
+    ]
   },
   {
     "id": "api-testing-019",
@@ -353,8 +482,17 @@
     "shortAnswer": "Test invalid inputs, missing required fields, unauthorized access, boundary values, and unexpected content types.",
     "interviewAnswer": "Negative testing confirms the API fails safely. I cover missing required fields expecting 400, invalid data types, values outside allowed ranges, requests without or with expired tokens, wrong HTTP methods on endpoints, and payloads with extra or malformed fields. I also test that error responses include a meaningful message, not just the status code. I prioritize the cases most likely to reach production due to client bugs.",
     "realProjectExample": "On a payment API I tested amounts as negative numbers, zero, strings, and above account balance. Each boundary had a distinct error code and message, and I verified none of them triggered a 500.",
-    "followUps": ["How do you decide which negative cases are worth automating?", "What do you check in an error response body?", "How do you test SQL injection or path traversal through the API?"],
-    "tags": ["api", "negative testing", "validation", "rest"]
+    "followUps": [
+      "How do you decide which negative cases are worth automating?",
+      "What do you check in an error response body?",
+      "How do you test SQL injection or path traversal through the API?"
+    ],
+    "tags": [
+      "api",
+      "negative testing",
+      "validation",
+      "rest"
+    ]
   },
   {
     "id": "api-testing-020",
@@ -367,8 +505,17 @@
     "shortAnswer": "Obtain a token in a fixture or setup step using client credentials, cache it for the session, and refresh it if it expires.",
     "interviewAnswer": "I treat token acquisition as infrastructure, not as a test step. I create a session-scoped fixture that calls the token endpoint with client credentials or a test service account, caches the token, and injects it into request headers. For short-lived tokens I add a refresh check before each test request. In CI I store client secrets as environment variables, never in the test code. I also have dedicated tests for the auth boundary: expired tokens, revoked tokens, and tokens with insufficient scope.",
     "realProjectExample": "We had a pytest fixture that called the /oauth/token endpoint once per test session using a dedicated QA service account. Tests received the token through dependency injection. When the token TTL was cut from 1 hour to 5 minutes, the fixture broke immediately and we added auto-refresh before it hit CI.",
-    "followUps": ["How do you handle token refresh in long-running test runs?", "How do you test token expiry behavior?", "Where do you store OAuth2 client secrets safely in CI?"],
-    "tags": ["api", "authentication", "oauth2", "fixtures"]
+    "followUps": [
+      "How do you handle token refresh in long-running test runs?",
+      "How do you test token expiry behavior?",
+      "Where do you store OAuth2 client secrets safely in CI?"
+    ],
+    "tags": [
+      "api",
+      "authentication",
+      "oauth2",
+      "fixtures"
+    ]
   },
   {
     "id": "api-testing-021",
@@ -381,8 +528,17 @@
     "shortAnswer": "Use consumer-driven contract testing with a tool like Pact so each service verifies its contract independently without needing all services running.",
     "interviewAnswer": "In a microservices system, end-to-end tests are slow and brittle because any service can break them. Consumer-driven contract testing with Pact solves this by letting each consumer define its expectations as a contract, which the provider verifies in isolation. I set up contract tests to run in CI on every PR for both consumer and provider sides. This catches breaking changes — like a provider removing a field a consumer depends on — before deployment. Contracts live in a shared broker so both teams can see the current state. I still keep a small set of end-to-end tests for critical flows, but contract tests cover the integration surface at much lower cost.",
     "realProjectExample": "When a user service team refactored their /users/{id} response to rename 'username' to 'login', our consumer contract test caught the change in the provider's PR. Without it, three downstream services would have broken in the staging environment.",
-    "followUps": ["What is the difference between consumer-driven and provider-driven contracts?", "How do you handle versioning in a contract?", "When would you NOT use contract testing?"],
-    "tags": ["api", "contract testing", "pact", "microservices"]
+    "followUps": [
+      "What is the difference between consumer-driven and provider-driven contracts?",
+      "How do you handle versioning in a contract?",
+      "When would you NOT use contract testing?"
+    ],
+    "tags": [
+      "api",
+      "contract testing",
+      "pact",
+      "microservices"
+    ]
   },
   {
     "id": "api-testing-022",
@@ -395,8 +551,17 @@
     "shortAnswer": "Content-Type, Cache-Control, and security headers like Strict-Transport-Security and X-Content-Type-Options when relevant.",
     "interviewAnswer": "I always validate Content-Type to ensure the response is actually JSON when I'm about to parse it — this prevents silent failures when a server returns an HTML error page with 200. For security-sensitive APIs I check Strict-Transport-Security, X-Content-Type-Options, and X-Frame-Options. For cached resources I verify Cache-Control and Expires match the expected caching policy. I avoid over-specifying headers that don't affect test outcomes, like server-generated tracing IDs, because they make tests brittle.",
     "realProjectExample": "An endpoint returned Content-Type: text/html during a deployment rollback, which caused our JSON parser to throw an exception rather than a meaningful assertion failure. Adding a Content-Type assertion gave us a clear failure message that pointed to the server problem.",
-    "followUps": ["When would you validate ETag headers?", "How do you test CORS headers?", "Why is validating Content-Type important before calling response.json()?"],
-    "tags": ["api", "headers", "rest", "security"]
+    "followUps": [
+      "When would you validate ETag headers?",
+      "How do you test CORS headers?",
+      "Why is validating Content-Type important before calling response.json()?"
+    ],
+    "tags": [
+      "api",
+      "headers",
+      "rest",
+      "security"
+    ]
   },
   {
     "id": "api-testing-023",
@@ -409,8 +574,17 @@
     "shortAnswer": "Start with static analysis of the contract, write tests against a mock server, and use feature flags or environment parity checks once staging is available.",
     "interviewAnswer": "I would not wait for environment stability to start. First I would review the Swagger spec and write test cases as plain scenarios: happy path, validation errors, auth failures, edge cases. Then I would spin up a mock server using the spec (e.g., with WireMock or responses library in Python) so I can write and run automated tests immediately against the expected contract. When staging stabilizes I would flip the base URL to the real server and run the same tests. I would also flag any ambiguities in the spec — undocumented fields, unclear error codes — and resolve them with the developer before they become post-release surprises.",
     "realProjectExample": "On a logistics project the staging API was unstable for two weeks. I used the OpenAPI spec with the responses mock library to build the entire test suite. When staging stabilized we had 100% coverage running in under 30 seconds with zero test rewrites needed.",
-    "followUps": ["How do you keep mock behavior in sync with real API changes?", "When is mocking appropriate versus integration testing?", "How would you test against staging without polluting real data?"],
-    "tags": ["api", "test strategy", "mocking", "contract testing"]
+    "followUps": [
+      "How do you keep mock behavior in sync with real API changes?",
+      "When is mocking appropriate versus integration testing?",
+      "How would you test against staging without polluting real data?"
+    ],
+    "tags": [
+      "api",
+      "test strategy",
+      "mocking",
+      "contract testing"
+    ]
   },
   {
     "id": "api-testing-024",
@@ -423,8 +597,18 @@
     "shortAnswer": "Parallelize test execution, eliminate redundant setup, use shared auth tokens, and separate the suite into fast smoke and full regression runs.",
     "interviewAnswer": "I would start by profiling which tests take the most time. Common culprits are sequential execution, expensive test data setup that repeats per test, and waiting for slow external dependencies. My approach: first, run tests in parallel using pytest-xdist — this alone often cuts time by 60-70%. Second, move auth token acquisition to session scope so it runs once, not per test. Third, replace slow database-backed test data setup with pre-seeded data or API-level fixtures that reuse existing records when the test doesn't mutate them. Fourth, add a fast smoke layer that runs in under 2 minutes for PR gates and run the full suite only on main branch merges. If the slowdown is from real network calls to staging, I would also evaluate whether some tests can run against a mock server in CI.",
     "realProjectExample": "On a 78-minute suite I used pytest-xdist with 4 workers, moved token calls to session scope, and replaced per-test database seeds with a shared read-only dataset. Run time dropped to 9 minutes without removing a single test.",
-    "followUps": ["How do you handle test ordering when using parallel execution?", "What risks does parallelization introduce for API tests?", "How do you decide what belongs in the smoke layer vs full regression?"],
-    "tags": ["api", "test strategy", "performance", "ci", "parallelization"]
+    "followUps": [
+      "How do you handle test ordering when using parallel execution?",
+      "What risks does parallelization introduce for API tests?",
+      "How do you decide what belongs in the smoke layer vs full regression?"
+    ],
+    "tags": [
+      "api",
+      "test strategy",
+      "performance",
+      "ci",
+      "parallelization"
+    ]
   },
   {
     "id": "api-testing-025",
@@ -437,7 +621,692 @@
     "shortAnswer": "Immediately assess blast radius, update tests and adapters for the new schema, then add contract monitoring and schema drift alerts to prevent recurrence.",
     "interviewAnswer": "Immediately I triage: is this a failure in a test monitor or does it affect live production traffic? If live traffic is impacted, I escalate to the on-call engineer and may roll back or feature-flag the integration. In parallel I compare the old and new schema to understand the exact diff. Once stable, I update the integration code and tests to match the new schema, verify all affected consumers, and deploy. Going forward I would add three safeguards: schema snapshot tests that fail fast when the provider response changes, automated API monitoring that runs the core contract tests every 15 minutes in production, and a provider change notification process — even informal, like subscribing to their changelog or changelog webhook. I would also document the incident so the team learns the integration point is high-risk.",
     "realProjectExample": "A shipping carrier renamed 'tracking_number' to 'trackingCode' in a silent release. Our production monitor caught it within 10 minutes. The fix was a one-line adapter change, but the root cause was no schema monitoring. I added a daily snapshot test that diffed the live response against our stored schema, which caught two more silent changes in the following quarter.",
-    "followUps": ["How do you monitor third-party API contracts you don't control?", "What is the difference between a test environment failure and a production schema change?", "How do you communicate a provider schema change to downstream teams quickly?"],
-    "tags": ["api", "contract testing", "monitoring", "incident response", "third-party apis"]
+    "followUps": [
+      "How do you monitor third-party API contracts you don't control?",
+      "What is the difference between a test environment failure and a production schema change?",
+      "How do you communicate a provider schema change to downstream teams quickly?"
+    ],
+    "tags": [
+      "api",
+      "contract testing",
+      "monitoring",
+      "incident response",
+      "third-party apis"
+    ]
+  },
+  {
+    "id": "api-testing-026",
+    "topicId": "api-testing",
+    "topicTitle": "API Testing",
+    "level": "mid",
+    "type": "interview",
+    "difficulty": "easy",
+    "question": "How do you test a paginated REST API endpoint?",
+    "shortAnswer": "Test the first page, boundary pages, last page, and edge cases like empty results and out-of-range page numbers.",
+    "interviewAnswer": "Paginated endpoints have several failure modes that single-resource tests miss. I test the first page to verify the correct default page size and that the response includes pagination metadata (total_count, next, prev links). I test an explicit page and size combination to verify the slice is correct. I test the last page to confirm the count is right and the 'next' link is absent. I test an out-of-range page number to confirm the API returns 400 or an empty array rather than crashing. I also test sorting and filtering combined with pagination to ensure filters apply before slicing, not after. If the API uses cursor-based pagination I test that the cursor from page N correctly fetches page N+1.",
+    "realProjectExample": "A search endpoint had a bug where the 'total_count' reflected the unfiltered collection size even when query filters were applied. We caught this with a test that applied a filter that should return 3 results and verified total_count was 3, not the full 500.",
+    "followUps": [
+      "How do you test cursor-based pagination vs offset-based?",
+      "How do you verify there are no duplicates or gaps between pages?",
+      "What pagination metadata fields do you always assert on?"
+    ],
+    "tags": [
+      "api",
+      "pagination",
+      "rest"
+    ]
+  },
+  {
+    "id": "api-testing-027",
+    "topicId": "api-testing",
+    "topicTitle": "API Testing",
+    "level": "mid",
+    "type": "quiz",
+    "difficulty": "easy",
+    "question": "Which Content-Type header value should you use when uploading a file along with form fields in a single HTTP request?",
+    "choices": [
+      "application/json",
+      "application/x-www-form-urlencoded",
+      "multipart/form-data",
+      "text/plain"
+    ],
+    "correctAnswer": "multipart/form-data",
+    "explanation": "multipart/form-data allows a single request to carry both file binary data and text form fields as separate parts. application/json cannot contain raw binary efficiently, and application/x-www-form-urlencoded encodes only key-value strings without binary support.",
+    "tags": [
+      "api",
+      "file upload",
+      "content-type",
+      "multipart"
+    ]
+  },
+  {
+    "id": "api-testing-028",
+    "topicId": "api-testing",
+    "topicTitle": "API Testing",
+    "level": "mid",
+    "type": "coding",
+    "difficulty": "medium",
+    "title": "Upload a File via Multipart Form POST",
+    "question": "Write a Python function using the requests library that uploads a file and a metadata field to an API endpoint using multipart/form-data encoding.",
+    "problem": "Implement upload_file(url, file_path, token) that opens the file at file_path, sends it as a multipart POST request to url with an Authorization header, and asserts the response status code is 201.",
+    "inputExample": "upload_file(\n    url=\"https://api.example.com/uploads\",\n    file_path=\"/tmp/report.pdf\",\n    token=\"Bearer abc123\"\n)",
+    "expectedOutput": "Returns the response JSON containing the uploaded file metadata (e.g., file_id, url) on 201 success.",
+    "hint": "Use the files parameter in requests.post() for multipart upload. Open the file in binary mode ('rb').",
+    "solutionLanguage": "python",
+    "solution": "import requests\n\ndef upload_file(url: str, file_path: str, token: str) -> dict:\n    headers = {\"Authorization\": token}\n    with open(file_path, \"rb\") as f:\n        files = {\"file\": (file_path.split(\"/\")[-1], f, \"application/octet-stream\")}\n        data = {\"description\": \"automated upload\"}\n        response = requests.post(\n            url,\n            headers=headers,\n            files=files,\n            data=data\n        )\n    assert response.status_code == 201, (\n        f\"Upload failed: {response.status_code} {response.text}\"\n    )\n    return response.json()\n\n# Example usage\n# result = upload_file(\n#     url=\"https://api.example.com/uploads\",\n#     file_path=\"/tmp/report.pdf\",\n#     token=\"Bearer abc123\"\n# )\n# print(result[\"file_id\"])",
+    "explanation": "Passing a tuple (filename, file_object, content_type) to the files dict gives the server the correct filename and MIME type. The data parameter carries additional form fields alongside the file. Do not set the Content-Type header manually — requests sets it automatically with the correct boundary when files is provided.",
+    "commonMistakes": [
+      "Setting Content-Type: application/json manually, which overrides the multipart boundary and breaks the upload",
+      "Opening the file outside the with block, risking sending a closed file handle",
+      "Passing the file content as a string instead of opening in 'rb' (binary) mode"
+    ],
+    "followUps": [
+      "How do you test that the server rejects files above a size limit?",
+      "How do you test invalid MIME type rejection?",
+      "How would you upload multiple files in one request?"
+    ],
+    "tags": [
+      "api",
+      "file upload",
+      "multipart",
+      "requests",
+      "python"
+    ]
+  },
+  {
+    "id": "api-testing-029",
+    "topicId": "api-testing",
+    "topicTitle": "API Testing",
+    "level": "mid",
+    "type": "quiz",
+    "difficulty": "medium",
+    "question": "What does the HTTP 429 status code mean and what header does a well-behaved API include in the response?",
+    "choices": [
+      "429 means the request payload is too large; the API includes a Content-Length header",
+      "429 means the client has sent too many requests; a well-behaved API includes Retry-After",
+      "429 means the API key is invalid; the API includes WWW-Authenticate",
+      "429 means the service is unavailable; the API includes X-Rate-Limit-Reset"
+    ],
+    "correctAnswer": "429 means the client has sent too many requests; a well-behaved API includes Retry-After",
+    "explanation": "429 Too Many Requests is the standard rate-limiting status code. The Retry-After header tells clients how many seconds to wait before retrying. X-RateLimit-Limit and X-RateLimit-Remaining are common informational headers but Retry-After is the actionable one specified in RFC 6585.",
+    "tags": [
+      "api",
+      "rate limiting",
+      "status codes",
+      "headers"
+    ]
+  },
+  {
+    "id": "api-testing-030",
+    "topicId": "api-testing",
+    "topicTitle": "API Testing",
+    "level": "mid",
+    "type": "coding",
+    "difficulty": "medium",
+    "title": "Assert Response Time Under a Threshold",
+    "question": "Write a Python function that sends a GET request and asserts the response time is below a given threshold in milliseconds.",
+    "problem": "Implement assert_response_time(url, threshold_ms, headers) that measures the elapsed time of the request and raises an AssertionError if it exceeds threshold_ms.",
+    "inputExample": "assert_response_time(\n    url=\"https://api.example.com/health\",\n    threshold_ms=500,\n    headers={\"Authorization\": \"Bearer token\"}\n)",
+    "expectedOutput": "Returns the response if under threshold. Raises AssertionError with elapsed time if over.",
+    "hint": "Use response.elapsed.total_seconds() from the requests library to get accurate server-side timing, then multiply by 1000 for milliseconds.",
+    "solutionLanguage": "python",
+    "solution": "import requests\n\ndef assert_response_time(\n    url: str,\n    threshold_ms: float,\n    headers: dict = None\n) -> requests.Response:\n    response = requests.get(url, headers=headers or {})\n    elapsed_ms = response.elapsed.total_seconds() * 1000\n    assert elapsed_ms < threshold_ms, (\n        f\"Response time {elapsed_ms:.1f}ms exceeded threshold {threshold_ms}ms \"\n        f\"for {url}\"\n    )\n    return response\n\n# Example usage\n# resp = assert_response_time(\n#     url=\"https://jsonplaceholder.typicode.com/posts/1\",\n#     threshold_ms=2000\n# )\n# print(f\"Response time OK: {resp.elapsed.total_seconds() * 1000:.1f}ms\")",
+    "explanation": "response.elapsed is a timedelta that captures the round-trip time from request sent to response headers received, excluding connection setup overhead already absorbed in the session. Multiplying by 1000 converts seconds to milliseconds. This gives a stable measurement without manual time.time() calls around the request.",
+    "commonMistakes": [
+      "Using time.time() before and after the call, which includes Python overhead not related to the network round-trip",
+      "Comparing elapsed_ms <= threshold_ms instead of < threshold_ms when the spec says strictly under",
+      "Not including the URL in the assertion message, making it hard to identify which endpoint is slow in a suite"
+    ],
+    "followUps": [
+      "How would you assert a P95 response time across multiple requests?",
+      "What is the difference between response.elapsed and manually timing the call?",
+      "How do you set a connect timeout separately from a read timeout?"
+    ],
+    "tags": [
+      "api",
+      "performance",
+      "response time",
+      "python"
+    ]
+  },
+  {
+    "id": "api-testing-031",
+    "topicId": "api-testing",
+    "topicTitle": "API Testing",
+    "level": "mid",
+    "type": "quiz",
+    "difficulty": "medium",
+    "question": "What is the primary purpose of an OpenAPI (Swagger) specification in API testing?",
+    "choices": [
+      "To generate load test scripts for performance testing",
+      "To serve as a machine-readable contract that tools can use to validate requests and responses automatically",
+      "To replace unit tests for the API business logic",
+      "To document which authentication method the API supports"
+    ],
+    "correctAnswer": "To serve as a machine-readable contract that tools can use to validate requests and responses automatically",
+    "explanation": "An OpenAPI spec defines endpoints, request parameters, request bodies, and response schemas in a structured format (JSON or YAML). Testing tools like schemathesis or openapi-core can use the spec to automatically validate that real API responses conform to the documented contract, catching undocumented fields, wrong types, and missing required properties.",
+    "tags": [
+      "api",
+      "openapi",
+      "swagger",
+      "contract testing"
+    ]
+  },
+  {
+    "id": "api-testing-032",
+    "topicId": "api-testing",
+    "topicTitle": "API Testing",
+    "level": "senior",
+    "type": "interview",
+    "difficulty": "medium",
+    "question": "How do you test API versioning to ensure older versions remain backward compatible?",
+    "shortAnswer": "Run the same contract test suite against all supported API versions and fail the build if any version breaks a consumer contract.",
+    "interviewAnswer": "API versioning testing has two goals: confirm the new version works as designed, and confirm all older supported versions still work for existing consumers. My strategy is to maintain a version matrix in CI. For each supported version (v1, v2, etc.) I run the same core contract tests using the appropriate base URL or Accept header. I use parameterized fixtures so the same test logic runs against all versions. I also add explicit backward-compatibility tests: take a payload valid in v1 and verify it still works in v2 if the API claims to be backward compatible. When a field is deprecated I add a test that sends the old field and verifies the API either accepts it silently or returns a clear deprecation message — not a 500. I tie this to the API changelog so when a version is retired, the corresponding tests are removed intentionally.",
+    "realProjectExample": "A v1 endpoint accepted 'username' while v2 renamed it to 'email'. My backward-compat test sent a v1-style payload to the v2 endpoint and expected a 400 with a clear message, not a 500 or silent failure. The developer had forgotten to add the validation error path.",
+    "followUps": [
+      "How do you handle testing when versioning is done via URL path vs Accept header?",
+      "How do you sunset a deprecated API version in your test suite?",
+      "What is the difference between backward compatible and non-breaking changes?"
+    ],
+    "tags": [
+      "api",
+      "versioning",
+      "backward compatibility",
+      "contract testing"
+    ]
+  },
+  {
+    "id": "api-testing-033",
+    "topicId": "api-testing",
+    "topicTitle": "API Testing",
+    "level": "mid",
+    "type": "coding",
+    "difficulty": "medium",
+    "title": "Parameterized Query Parameter Validation",
+    "question": "Write a pytest parameterized test that sends GET requests with different query parameter combinations to a search endpoint and asserts the expected status code and result count for each case.",
+    "problem": "Use pytest.mark.parametrize to test a /products endpoint with query params (q, min_price, max_price). Each test case provides the params dict, expected status code, and expected number of results in the response 'items' list.",
+    "inputExample": "# Test cases:\n# ({\"q\": \"laptop\"}, 200, 5)\n# ({\"min_price\": -1}, 400, 0)\n# ({}, 200, 10)  # no filters, returns all",
+    "expectedOutput": "Each parameterized case asserts status code and len(response['items']) matches expected count.",
+    "hint": "Use @pytest.mark.parametrize with three arguments: params dict, expected_status, expected_count. Call requests.get with params=params.",
+    "solutionLanguage": "python",
+    "solution": "import pytest\nimport requests\n\nBASE_URL = \"https://api.example.com\"\n\n@pytest.mark.parametrize(\"params,expected_status,expected_count\", [\n    ({\"q\": \"laptop\"}, 200, 5),\n    ({\"min_price\": \"-1\"}, 400, 0),\n    ({}, 200, 10),\n    ({\"q\": \"nonexistent_xyz_product_99999\"}, 200, 0),\n    ({\"min_price\": \"10\", \"max_price\": \"50\"}, 200, 3),\n])\ndef test_product_search(params, expected_status, expected_count):\n    response = requests.get(f\"{BASE_URL}/products\", params=params)\n    assert response.status_code == expected_status, (\n        f\"Expected {expected_status}, got {response.status_code}. \"\n        f\"Params: {params}. Body: {response.text[:200]}\"\n    )\n    if expected_status == 200:\n        body = response.json()\n        assert len(body[\"items\"]) == expected_count, (\n            f\"Expected {expected_count} items, got {len(body['items'])}. \"\n            f\"Params: {params}\"\n        )\n\n# Run with: pytest test_search.py -v",
+    "explanation": "pytest.mark.parametrize generates one test per data row with a descriptive ID, making failures easy to identify. Passing params as a dict to requests.get automatically URL-encodes them correctly. Guarding the body assertion behind a status check avoids a KeyError on 400 responses that return a different body shape.",
+    "commonMistakes": [
+      "Manually building the query string instead of using the params argument, risking encoding errors",
+      "Asserting the body structure on error responses that have a different schema than success responses",
+      "Using a single test with conditionals instead of parametrize, which hides which case failed"
+    ],
+    "followUps": [
+      "How would you also assert specific field values in the returned items?",
+      "How do you test that query parameters are case-insensitive?",
+      "How would you test for SQL injection via query parameters?"
+    ],
+    "tags": [
+      "api",
+      "query parameters",
+      "pytest",
+      "parametrize",
+      "python"
+    ]
+  },
+  {
+    "id": "api-testing-034",
+    "topicId": "api-testing",
+    "topicTitle": "API Testing",
+    "level": "senior",
+    "type": "scenario",
+    "difficulty": "medium",
+    "question": "You need to test a WebSocket API that emits real-time order status updates. The REST API creates orders, and the WebSocket pushes status changes. How would you structure automated tests for this?",
+    "shortAnswer": "Use websocket-client or websockets library to connect and listen before triggering the REST action, then assert the expected message arrives within a timeout.",
+    "interviewAnswer": "WebSocket tests require careful sequencing: connect and subscribe before triggering the action, not after. My approach is to open the WebSocket connection first, send any subscription message, then use the REST API to trigger the state change, and finally assert the expected event arrives within a reasonable timeout. I use Python's websockets or websocket-client library with an async listener that appends messages to a queue. After the REST trigger, I poll the queue until the expected message type appears or a timeout fires. I keep these tests in a separate suite because they are inherently async and slower than pure REST tests. I also test error paths: connect with an invalid token and expect a connection rejection, and test that a disconnect-and-reconnect sequence receives missed events if the API supports it.",
+    "realProjectExample": "For an order tracking system I wrote an async pytest test that connected via websockets, subscribed to order events, then called POST /orders via requests, and asserted the 'order.created' event arrived within 5 seconds. The test caught a bug where the WebSocket event was emitted before the database write committed, causing consumers to fetch stale data.",
+    "followUps": [
+      "How do you handle WebSocket reconnection logic in tests?",
+      "How do you test that a WebSocket connection is rejected when the token is invalid?",
+      "What is the difference between testing a WebSocket and testing SSE (Server-Sent Events)?"
+    ],
+    "tags": [
+      "api",
+      "websocket",
+      "real-time",
+      "async testing"
+    ]
+  },
+  {
+    "id": "api-testing-035",
+    "topicId": "api-testing",
+    "topicTitle": "API Testing",
+    "level": "mid",
+    "type": "quiz",
+    "difficulty": "easy",
+    "question": "What does the 'Accept' header in an HTTP request tell the server?",
+    "choices": [
+      "The format of the request body being sent",
+      "The format the client wants to receive in the response",
+      "The authentication scheme the client supports",
+      "The API version the client is targeting"
+    ],
+    "correctAnswer": "The format the client wants to receive in the response",
+    "explanation": "The Accept header is content negotiation from the client side. For example, 'Accept: application/json' tells the server the client wants JSON. This is the pair to Content-Type, which describes the format of the request body being sent. Some APIs use the Accept header for versioning (e.g., 'Accept: application/vnd.api.v2+json').",
+    "tags": [
+      "api",
+      "headers",
+      "content negotiation",
+      "rest"
+    ]
+  },
+  {
+    "id": "api-testing-036",
+    "topicId": "api-testing",
+    "topicTitle": "API Testing",
+    "level": "senior",
+    "type": "coding",
+    "difficulty": "hard",
+    "title": "Mock an External API Dependency with responses",
+    "question": "Write a Python test using the responses library to mock an external payment gateway API call and verify that the application code handles both a successful charge and a payment failure correctly.",
+    "problem": "Given a function charge_customer(amount, card_token) that calls POST https://payments.example.com/charge, write two tests: one where the mock returns 200 with {\"status\": \"success\"} and one where it returns 402 with {\"error\": \"card_declined\"}. Assert the function returns True on success and raises PaymentError on failure.",
+    "inputExample": "# Function signature being tested:\n# charge_customer(amount: float, card_token: str) -> bool\n# Raises PaymentError on non-200 response",
+    "expectedOutput": "Test 1: charge_customer returns True when mock returns 200. Test 2: charge_customer raises PaymentError when mock returns 402.",
+    "hint": "Use @responses.activate as a decorator and responses.add() to register mock responses before calling the function under test.",
+    "solutionLanguage": "python",
+    "solution": "import responses\nimport pytest\nimport requests\n\nPAYMENT_URL = \"https://payments.example.com/charge\"\n\nclass PaymentError(Exception):\n    pass\n\ndef charge_customer(amount: float, card_token: str) -> bool:\n    \"\"\"Application code that calls the external payment API.\"\"\"\n    resp = requests.post(\n        PAYMENT_URL,\n        json={\"amount\": amount, \"token\": card_token}\n    )\n    if resp.status_code != 200:\n        raise PaymentError(f\"Payment failed: {resp.json().get('error')}\")\n    return resp.json()[\"status\"] == \"success\"\n\n\n@responses.activate\ndef test_charge_success():\n    responses.add(\n        responses.POST,\n        PAYMENT_URL,\n        json={\"status\": \"success\"},\n        status=200\n    )\n    result = charge_customer(99.99, \"tok_visa_test\")\n    assert result is True\n    assert len(responses.calls) == 1\n\n\n@responses.activate\ndef test_charge_declined():\n    responses.add(\n        responses.POST,\n        PAYMENT_URL,\n        json={\"error\": \"card_declined\"},\n        status=402\n    )\n    with pytest.raises(PaymentError, match=\"card_declined\"):\n        charge_customer(99.99, \"tok_declined_test\")\n    assert len(responses.calls) == 1\n\n\n# Run with: pytest test_payment.py -v",
+    "explanation": "The responses library intercepts outbound HTTP calls made by the requests library and returns the configured mock response without any network access. This keeps tests fast, deterministic, and isolated from external services. Asserting len(responses.calls) == 1 verifies the function made exactly the expected number of HTTP calls — catching bugs where retries happen unexpectedly.",
+    "commonMistakes": [
+      "Forgetting @responses.activate, which lets the real HTTP request go through and makes tests flaky",
+      "Not asserting responses.calls to verify the mock was actually called",
+      "Using responses.add() for a GET URL when the application code uses POST, causing the mock to not match"
+    ],
+    "followUps": [
+      "How would you mock a sequence of responses for retry testing?",
+      "When would you use responses vs unittest.mock.patch?",
+      "How do you test timeout behavior when the mock never responds?"
+    ],
+    "tags": [
+      "api",
+      "mocking",
+      "responses",
+      "python",
+      "external dependencies"
+    ]
+  },
+  {
+    "id": "api-testing-037",
+    "topicId": "api-testing",
+    "topicTitle": "API Testing",
+    "level": "senior",
+    "type": "interview",
+    "difficulty": "hard",
+    "question": "What is GraphQL and how does API testing for it differ from REST API testing?",
+    "shortAnswer": "GraphQL uses a single endpoint with flexible queries; testing must cover query shape validation, field selection, mutations, and error responses in the data field rather than HTTP status codes.",
+    "interviewAnswer": "GraphQL replaces many REST endpoints with a single /graphql endpoint that accepts POST requests with a JSON body containing a 'query' string and optional 'variables'. Unlike REST, most GraphQL responses return 200 OK even for errors — the error details appear in an 'errors' key in the response body, not in the HTTP status code. This changes how I write assertions: I always check for the absence of an 'errors' key before checking the 'data' field. I also test field selection — requesting only the fields I need and verifying extra fields are not returned. For mutations I test the happy path, invalid input (which returns a structured errors array), and permission errors. I use tools like gql in Python or dedicated GraphQL test clients. Schema validation with introspection lets me compare the live schema against a snapshot to catch breaking changes early.",
+    "realProjectExample": "On a GraphQL API for a product catalog I wrote tests using the gql library. When the team renamed a field from 'productName' to 'name' in the schema, our introspection snapshot test caught the breaking change in the provider's PR before any consumer was affected.",
+    "followUps": [
+      "How do you test a GraphQL subscription (real-time updates)?",
+      "How do you validate the GraphQL schema against a stored snapshot?",
+      "What is the N+1 problem in GraphQL and how would you detect it in testing?"
+    ],
+    "tags": [
+      "api",
+      "graphql",
+      "queries",
+      "mutations",
+      "testing strategy"
+    ]
+  },
+  {
+    "id": "api-testing-038",
+    "topicId": "api-testing",
+    "topicTitle": "API Testing",
+    "level": "senior",
+    "type": "coding",
+    "difficulty": "hard",
+    "title": "Send a GraphQL Query and Validate the Response",
+    "question": "Write a Python function that sends a GraphQL query to an endpoint and validates that the response has no errors and contains the expected top-level data keys.",
+    "problem": "Implement graphql_query(url, query, variables, token) that POSTs the query to the GraphQL endpoint, asserts no 'errors' key is present, and returns the 'data' field. Raise AssertionError with the error details if 'errors' is present.",
+    "inputExample": "query = \"\"\"\n  query GetUser($id: ID!) {\n    user(id: $id) {\n      id\n      email\n      role\n    }\n  }\n\"\"\"\ndata = graphql_query(\n    url=\"https://api.example.com/graphql\",\n    query=query,\n    variables={\"id\": \"123\"},\n    token=\"Bearer abc\"\n)",
+    "expectedOutput": "Returns {'user': {'id': '123', 'email': 'alice@example.com', 'role': 'admin'}} on success. Raises AssertionError with error messages on GraphQL errors.",
+    "hint": "GraphQL always returns 200 OK. Check the response body for an 'errors' key before accessing 'data'.",
+    "solutionLanguage": "python",
+    "solution": "import requests\n\ndef graphql_query(\n    url: str,\n    query: str,\n    variables: dict = None,\n    token: str = None\n) -> dict:\n    headers = {\"Content-Type\": \"application/json\"}\n    if token:\n        headers[\"Authorization\"] = token\n\n    payload = {\"query\": query}\n    if variables:\n        payload[\"variables\"] = variables\n\n    response = requests.post(url, json=payload, headers=headers)\n    assert response.status_code == 200, (\n        f\"Unexpected HTTP status: {response.status_code}. Body: {response.text[:300]}\"\n    )\n\n    body = response.json()\n    if \"errors\" in body:\n        error_messages = [e.get(\"message\", str(e)) for e in body[\"errors\"]]\n        raise AssertionError(\n            f\"GraphQL errors returned: {'; '.join(error_messages)}\"\n        )\n\n    assert \"data\" in body, f\"Response missing 'data' field: {body}\"\n    return body[\"data\"]\n\n\n# Example usage\nGET_USER = \"\"\"\n  query GetUser($id: ID!) {\n    user(id: $id) { id email role }\n  }\n\"\"\"\n# data = graphql_query(\n#     url=\"https://api.example.com/graphql\",\n#     query=GET_USER,\n#     variables={\"id\": \"123\"},\n#     token=\"Bearer mytoken\"\n# )\n# assert data[\"user\"][\"email\"] == \"alice@example.com\"",
+    "explanation": "GraphQL always returns 200 even for errors, so checking HTTP status alone is insufficient. The 'errors' key must be explicitly checked in the response body. Extracting error messages from the errors array and joining them gives a readable failure message. Returning only the 'data' field keeps callers clean and avoids them needing to know the outer response envelope structure.",
+    "commonMistakes": [
+      "Only checking HTTP status code 200 and assuming success, missing GraphQL-level errors in the body",
+      "Sending the query as plain text instead of inside a JSON object with a 'query' key",
+      "Not passing variables and instead string-interpolating values into the query, risking injection"
+    ],
+    "followUps": [
+      "How do you test a GraphQL mutation that creates a resource?",
+      "How do you assert the exact shape of nested GraphQL response fields?",
+      "How do you test that a query returns only the requested fields and not extra ones?"
+    ],
+    "tags": [
+      "api",
+      "graphql",
+      "python",
+      "requests"
+    ]
+  },
+  {
+    "id": "api-testing-039",
+    "topicId": "api-testing",
+    "topicTitle": "API Testing",
+    "level": "mid",
+    "type": "scenario",
+    "difficulty": "medium",
+    "question": "You are testing a rate-limited endpoint that allows 10 requests per minute per API key. How would you write automated tests for the rate limiting behavior without triggering a production rate limit in CI?",
+    "shortAnswer": "Use a dedicated test API key with a lower limit, or mock the rate limit response and test the client's retry-after handling separately.",
+    "interviewAnswer": "I split rate limit testing into two concerns: the server behavior and the client behavior. For server behavior I use a dedicated test API key configured with a lower limit (e.g., 3 requests per minute) in a test environment so I can trigger the 429 without hammering a production key. I send N+1 requests in a loop and assert the Nth+1 returns 429 with a Retry-After header. I verify the rate limit resets correctly after the window expires. For client-side behavior — how our code handles a 429 — I mock the 429 response using the responses library so I don't need to burn real requests. I test that the client reads Retry-After, waits the indicated time, and retries. In CI I always use the mock approach for client tests to keep them fast and quota-safe. The real rate limit test runs only in a scheduled integration suite, not on every PR.",
+    "realProjectExample": "We had a data ingestion service that needed to call a partner API that allowed 60 requests per minute. I created a test-environment API key with a 5 req/min limit, wrote a parameterized test to fire 6 requests, asserted the 6th returned 429 with Retry-After, then verified the backoff logic waited the correct time using a mocked responses.add() sequence.",
+    "followUps": [
+      "How do you test that the Retry-After header value is correct?",
+      "How would you test concurrent requests hitting the rate limit simultaneously?",
+      "How do you test rate limits that are per user vs per IP?"
+    ],
+    "tags": [
+      "api",
+      "rate limiting",
+      "mocking",
+      "negative testing"
+    ]
+  },
+  {
+    "id": "api-testing-040",
+    "topicId": "api-testing",
+    "topicTitle": "API Testing",
+    "level": "mid",
+    "type": "coding",
+    "difficulty": "easy",
+    "title": "CRUD End-to-End Flow Test",
+    "question": "Write a Python test function that performs a complete CRUD sequence (Create, Read, Update, Delete) against a REST resource endpoint and asserts correct behavior at each step.",
+    "problem": "Implement test_user_crud(base_url, token) that creates a user with POST, reads it back with GET, updates the name with PUT, and deletes it with DELETE. Assert the correct status codes and that the updated name is reflected in a GET after the PUT.",
+    "inputExample": "test_user_crud(\n    base_url=\"https://api.example.com\",\n    token=\"Bearer testtoken\"\n)",
+    "expectedOutput": "POST returns 201 with id. GET returns 200 with correct data. PUT returns 200 with updated name. Second GET shows new name. DELETE returns 204. Final GET returns 404.",
+    "hint": "Carry the resource ID from the POST response through each subsequent request. Chain the assertions step by step.",
+    "solutionLanguage": "python",
+    "solution": "import requests\n\ndef test_user_crud(base_url: str, token: str) -> None:\n    headers = {\"Authorization\": token, \"Content-Type\": \"application/json\"}\n    users_url = f\"{base_url}/users\"\n\n    # CREATE\n    payload = {\"name\": \"Alice Test\", \"email\": \"alice_crud@example.com\"}\n    create_resp = requests.post(users_url, json=payload, headers=headers)\n    assert create_resp.status_code == 201, (\n        f\"CREATE failed: {create_resp.status_code} {create_resp.text}\"\n    )\n    user_id = create_resp.json()[\"id\"]\n    user_url = f\"{users_url}/{user_id}\"\n\n    # READ\n    read_resp = requests.get(user_url, headers=headers)\n    assert read_resp.status_code == 200\n    assert read_resp.json()[\"name\"] == \"Alice Test\"\n\n    # UPDATE\n    update_resp = requests.put(\n        user_url,\n        json={\"name\": \"Alice Updated\", \"email\": \"alice_crud@example.com\"},\n        headers=headers\n    )\n    assert update_resp.status_code == 200\n\n    # VERIFY UPDATE\n    verify_resp = requests.get(user_url, headers=headers)\n    assert verify_resp.json()[\"name\"] == \"Alice Updated\", (\n        f\"Update not persisted: {verify_resp.json()['name']}\"\n    )\n\n    # DELETE\n    delete_resp = requests.delete(user_url, headers=headers)\n    assert delete_resp.status_code == 204\n\n    # VERIFY DELETION\n    gone_resp = requests.get(user_url, headers=headers)\n    assert gone_resp.status_code == 404, (\n        f\"Resource still accessible after DELETE: {gone_resp.status_code}\"\n    )\n\n\n# Example usage\n# test_user_crud(\"https://api.example.com\", \"Bearer mytoken\")",
+    "explanation": "CRUD flow tests verify the full resource lifecycle and catch bugs that unit-level tests miss — like a PUT that succeeds in the response but does not persist to the database. The GET after PUT is the most important assertion because it verifies persistence, not just the response from the write operation. The final GET after DELETE confirms the resource is truly gone.",
+    "commonMistakes": [
+      "Not capturing the resource ID from the POST response and hardcoding it instead",
+      "Skipping the GET-after-PUT verification, which misses write-through caching bugs",
+      "Not checking that the final GET returns 404 after DELETE, allowing ghost resources to go undetected"
+    ],
+    "followUps": [
+      "How would you clean up if the test fails midway through?",
+      "How do you make the email unique so this test can run in parallel?",
+      "What assertions would you add to verify side effects like audit logs?"
+    ],
+    "tags": [
+      "api",
+      "crud",
+      "end-to-end",
+      "python",
+      "integration testing"
+    ]
+  },
+  {
+    "id": "api-testing-041",
+    "topicId": "api-testing",
+    "topicTitle": "API Testing",
+    "level": "senior",
+    "type": "quiz",
+    "difficulty": "hard",
+    "question": "In Pact consumer-driven contract testing, who is responsible for publishing the pact file and who is responsible for verifying it?",
+    "choices": [
+      "The provider publishes the pact file and the consumer verifies it",
+      "The consumer generates and publishes the pact file; the provider downloads and verifies it",
+      "Both consumer and provider independently publish their own pact files to a central broker",
+      "The QA team manually writes the pact file and both sides verify against it"
+    ],
+    "correctAnswer": "The consumer generates and publishes the pact file; the provider downloads and verifies it",
+    "explanation": "In consumer-driven contract testing with Pact, the consumer side writes interaction tests that generate a pact file describing its expectations. This file is published to a Pact Broker. The provider then pulls the pact file and runs its own verification test to confirm it satisfies every consumer expectation. This decouples the two teams while ensuring integration compatibility.",
+    "tags": [
+      "api",
+      "pact",
+      "contract testing",
+      "consumer-driven"
+    ]
+  },
+  {
+    "id": "api-testing-042",
+    "topicId": "api-testing",
+    "topicTitle": "API Testing",
+    "level": "mid",
+    "type": "coding",
+    "difficulty": "medium",
+    "title": "Validate a Paginated Response Structure",
+    "question": "Write a Python function that calls a paginated API endpoint page by page, collects all items across all pages, and asserts the total count matches the reported total from the first response.",
+    "problem": "Implement fetch_all_pages(url, headers) that repeatedly calls GET with a 'page' query parameter, collecting items until no 'next' URL is present, then asserts len(all_items) == first_response['total'].",
+    "inputExample": "items = fetch_all_pages(\n    url=\"https://api.example.com/products\",\n    headers={\"Authorization\": \"Bearer token\"}\n)",
+    "expectedOutput": "Returns a flat list of all items across all pages. Raises AssertionError if total count does not match.",
+    "hint": "Check for a 'next' key in the response to decide whether to continue. Use the 'next' URL directly instead of incrementing a page counter manually.",
+    "solutionLanguage": "python",
+    "solution": "import requests\n\ndef fetch_all_pages(url: str, headers: dict = None) -> list:\n    all_items = []\n    total_expected = None\n    next_url = url\n\n    while next_url:\n        response = requests.get(next_url, headers=headers or {})\n        assert response.status_code == 200, (\n            f\"Pagination request failed: {response.status_code} at {next_url}\"\n        )\n        body = response.json()\n\n        if total_expected is None:\n            total_expected = body.get(\"total\")\n\n        items = body.get(\"items\", [])\n        all_items.extend(items)\n\n        next_url = body.get(\"next\")\n\n    if total_expected is not None:\n        assert len(all_items) == total_expected, (\n            f\"Collected {len(all_items)} items but API reported total={total_expected}\"\n        )\n\n    return all_items\n\n# Example usage\n# all_products = fetch_all_pages(\n#     url=\"https://api.example.com/products\",\n#     headers={\"Authorization\": \"Bearer mytoken\"}\n# )\n# print(f\"Fetched {len(all_products)} products\")",
+    "explanation": "Using the 'next' URL from the response rather than incrementing a page counter handles APIs that use cursor-based pagination or non-sequential page numbers. Capturing total from the first response and asserting at the end catches off-by-one errors, gaps between pages, and duplicate items. Asserting status 200 per page fails fast if the API breaks mid-pagination.",
+    "commonMistakes": [
+      "Incrementing a manual page counter instead of following the 'next' link, breaking on non-sequential pages",
+      "Not asserting the final count against 'total', missing gaps or duplicates between pages",
+      "Using an infinite loop without a max_pages guard, risking an infinite loop if 'next' never goes null"
+    ],
+    "followUps": [
+      "How would you add a max_pages safety limit to prevent infinite loops?",
+      "How do you handle cursor-based pagination where there is no 'total' field?",
+      "How would you parallelize fetching multiple pages?"
+    ],
+    "tags": [
+      "api",
+      "pagination",
+      "python",
+      "integration testing"
+    ]
+  },
+  {
+    "id": "api-testing-043",
+    "topicId": "api-testing",
+    "topicTitle": "API Testing",
+    "level": "mid",
+    "type": "quiz",
+    "difficulty": "medium",
+    "question": "When testing an API that uses query parameters for filtering, which of the following is MOST important to validate?",
+    "choices": [
+      "That the URL is correctly percent-encoded by the client library",
+      "That filtering is applied server-side before pagination, so the 'total' count reflects only filtered results",
+      "That the query parameters are listed in alphabetical order in the URL",
+      "That the response time is under 100ms when filters are applied"
+    ],
+    "correctAnswer": "That filtering is applied server-side before pagination, so the 'total' count reflects only filtered results",
+    "explanation": "A common bug is when pagination occurs before filtering, causing the API to return the correct page slice but report the unfiltered total count. Consumers then try to paginate through non-existent pages. Always validate that total_count in a filtered response reflects only the filtered results, not the full dataset.",
+    "tags": [
+      "api",
+      "query parameters",
+      "filtering",
+      "pagination"
+    ]
+  },
+  {
+    "id": "api-testing-044",
+    "topicId": "api-testing",
+    "topicTitle": "API Testing",
+    "level": "senior",
+    "type": "interview",
+    "difficulty": "medium",
+    "question": "How do you validate an API response against its OpenAPI specification programmatically in a test suite?",
+    "shortAnswer": "Use openapi-core or schemathesis to load the spec and validate each real response body and status code against the documented schema.",
+    "interviewAnswer": "I use one of two approaches depending on the project. If I want validation integrated into existing pytest tests, I use openapi-core: load the spec once in a session fixture, then after each request call spec.validate_response() which checks the status code, response headers, and body structure against the documented schema. If I want property-based fuzzing of the entire spec, I use schemathesis — it reads the spec and automatically generates test cases for every endpoint, testing boundary values, missing fields, and malformed inputs without me writing each case manually. Both approaches catch a class of bugs that hand-written tests miss: fields present in the implementation but missing from the spec (or vice versa), wrong types for optional fields, and undocumented error response bodies. I run spec validation on every integration test to create a live contract check.",
+    "realProjectExample": "After integrating openapi-core validation, we discovered that three endpoints returned a 'meta' field in their responses that was not in the spec. The developers had added it without updating the spec. The validation failure became a process checkpoint: spec must be updated alongside code changes.",
+    "followUps": [
+      "What is the difference between schemathesis and openapi-core?",
+      "How do you handle OpenAPI specs that are incomplete or have errors themselves?",
+      "How do you use the OpenAPI spec to auto-generate test data?"
+    ],
+    "tags": [
+      "api",
+      "openapi",
+      "swagger",
+      "schema validation",
+      "schemathesis"
+    ]
+  },
+  {
+    "id": "api-testing-045",
+    "topicId": "api-testing",
+    "topicTitle": "API Testing",
+    "level": "mid",
+    "type": "quiz",
+    "difficulty": "hard",
+    "question": "Your API test sends a POST request and gets back a 200 OK with {'status': 'processing'}. Later the actual result is delivered via a webhook to your server. What is the correct test strategy for this asynchronous pattern?",
+    "choices": [
+      "Poll the GET endpoint every second until the result appears, with a maximum timeout",
+      "Trust the 200 OK response and assert the webhook payload in a separate long-running test",
+      "Start a local webhook listener before calling the POST, then assert the received payload within a timeout",
+      "Ignore webhook testing because it cannot be reliably automated"
+    ],
+    "correctAnswer": "Start a local webhook listener before calling the POST, then assert the received payload within a timeout",
+    "explanation": "For async APIs that deliver results via webhook, the test must be set up to receive the callback before triggering the action. Starting a local HTTP listener (e.g., using Flask or http.server in a background thread), registering its URL with the API, then triggering the action and blocking until the webhook payload arrives (or a timeout fires) is the correct approach. Polling is a fallback when webhooks are not available. Trusting just the 200 does not test the async completion path at all.",
+    "tags": [
+      "api",
+      "webhooks",
+      "async testing",
+      "test strategy"
+    ]
+  },
+  {
+    "id": "api-testing-046",
+    "topicId": "api-testing",
+    "topicTitle": "API Testing",
+    "level": "senior",
+    "type": "coding",
+    "difficulty": "hard",
+    "title": "Validate Rate Limit Headers on Every Response",
+    "question": "Write a Python pytest fixture that wraps every API request made with a requests.Session and asserts that rate limit headers (X-RateLimit-Limit, X-RateLimit-Remaining) are present and sensible on every response.",
+    "problem": "Create a session fixture that mounts a custom HTTPAdapter using an event hook on 'response'. The hook should assert X-RateLimit-Limit is present, X-RateLimit-Remaining is >= 0, and X-RateLimit-Remaining <= X-RateLimit-Limit on every response with status 200-299.",
+    "inputExample": "# Used in a test like:\n# def test_list_users(rate_limit_session):\n#     resp = rate_limit_session.get(\"https://api.example.com/users\")\n#     assert resp.status_code == 200",
+    "expectedOutput": "Fixture provides a session that auto-validates rate limit headers on every successful response.",
+    "hint": "Use session.hooks['response'].append(callback) to register a response hook. The hook receives the response object.",
+    "solutionLanguage": "python",
+    "solution": "import pytest\nimport requests\n\nRATE_LIMIT_HEADERS = {\n    \"X-RateLimit-Limit\",\n    \"X-RateLimit-Remaining\"\n}\n\ndef assert_rate_limit_headers(response, *args, **kwargs):\n    \"\"\"Response hook that validates rate limit headers on 2xx responses.\"\"\"\n    if 200 <= response.status_code < 300:\n        for header in RATE_LIMIT_HEADERS:\n            assert header in response.headers, (\n                f\"Missing rate limit header '{header}' on \"\n                f\"{response.request.method} {response.url}\"\n            )\n        limit = int(response.headers[\"X-RateLimit-Limit\"])\n        remaining = int(response.headers[\"X-RateLimit-Remaining\"])\n        assert remaining >= 0, (\n            f\"X-RateLimit-Remaining is negative: {remaining}\"\n        )\n        assert remaining <= limit, (\n            f\"X-RateLimit-Remaining ({remaining}) > X-RateLimit-Limit ({limit})\"\n        )\n\n\n@pytest.fixture\ndef rate_limit_session():\n    session = requests.Session()\n    session.hooks[\"response\"].append(assert_rate_limit_headers)\n    yield session\n    session.close()\n\n\n# Example test\ndef test_list_users(rate_limit_session):\n    resp = rate_limit_session.get(\"https://jsonplaceholder.typicode.com/users\")\n    assert resp.status_code == 200\n    # Rate limit headers are automatically validated by the fixture hook",
+    "explanation": "requests.Session hooks are called for every response, making them ideal for cross-cutting assertions like rate limit header validation. Attaching the check to the session means every test that uses the fixture gets the validation for free without duplicating code. Limiting the check to 2xx responses avoids false positives on error responses that may not include rate limit headers.",
+    "commonMistakes": [
+      "Checking headers in each individual test instead of a shared hook, causing duplication and missed coverage",
+      "Not casting header values to int before comparison, causing string comparison bugs (e.g., '9' > '10' is True in string comparison)",
+      "Validating on all status codes instead of 2xx only, causing false failures on 401/403 responses that omit rate limit headers"
+    ],
+    "followUps": [
+      "How would you assert that X-RateLimit-Remaining decreases with each request?",
+      "How would you test the behavior when remaining hits zero?",
+      "How would you extend the hook to also log rate limit usage for observability?"
+    ],
+    "tags": [
+      "api",
+      "rate limiting",
+      "pytest",
+      "fixtures",
+      "python",
+      "session"
+    ]
+  },
+  {
+    "id": "api-testing-047",
+    "topicId": "api-testing",
+    "topicTitle": "API Testing",
+    "level": "mid",
+    "type": "interview",
+    "difficulty": "easy",
+    "question": "What is API mocking and when would you use it instead of testing against a real API?",
+    "shortAnswer": "API mocking replaces real HTTP calls with pre-configured fake responses for speed, isolation, and testing scenarios that are hard to reproduce with a real server.",
+    "interviewAnswer": "API mocking intercepts outbound HTTP calls and returns configured fake responses without any network traffic. I use it in three situations. First, when the external service is unreliable or not available — mocking lets me write and run tests before the API exists or while the environment is unstable. Second, when I need to test error scenarios that are difficult to reproduce — like a 503 from a payment gateway or a specific rate limit sequence — which I can set up deterministically in a mock. Third, when tests need to be fast and isolated — mocking eliminates network latency, auth setup, and side effects like billing charges. The tradeoff is that mocks can diverge from the real API over time. I mitigate this by also running a smaller integration test suite against the real API in a staging environment and using contract tests to verify the mock's behavior matches the actual provider.",
+    "realProjectExample": "During development of a shipping integration, the carrier's sandbox API was offline 30% of the time. I mocked the shipping API using the responses library so the team could develop and test locally without depending on the carrier's availability. We ran contract tests against the real sandbox weekly to detect drift.",
+    "followUps": [
+      "What tools do you use for API mocking in Python?",
+      "How do you keep mocks synchronized with the real API?",
+      "What is the difference between a mock and a stub?"
+    ],
+    "tags": [
+      "api",
+      "mocking",
+      "test strategy",
+      "isolation"
+    ]
+  },
+  {
+    "id": "api-testing-048",
+    "topicId": "api-testing",
+    "topicTitle": "API Testing",
+    "level": "mid",
+    "type": "quiz",
+    "difficulty": "easy",
+    "question": "Which of the following is a valid reason to use a requests.Session object instead of calling requests.get() directly in API tests?",
+    "choices": [
+      "Sessions allow you to send GraphQL queries instead of REST requests",
+      "Sessions automatically persist cookies, headers, and connection pooling across multiple requests",
+      "Sessions require no authentication headers since they manage tokens internally",
+      "Sessions increase the timeout for each request automatically"
+    ],
+    "correctAnswer": "Sessions automatically persist cookies, headers, and connection pooling across multiple requests",
+    "explanation": "A requests.Session object persists settings like headers, cookies, and auth across all requests made through it. This means you can set the Authorization header once on the session instead of on every call. Sessions also reuse TCP connections (connection pooling), which speeds up test suites that make many requests to the same host.",
+    "tags": [
+      "api",
+      "requests",
+      "session",
+      "python"
+    ]
+  },
+  {
+    "id": "api-testing-049",
+    "topicId": "api-testing",
+    "topicTitle": "API Testing",
+    "level": "senior",
+    "type": "scenario",
+    "difficulty": "hard",
+    "question": "A backend team is about to release a new version of a high-traffic /orders endpoint that changes the response schema. Three frontend teams depend on this endpoint. How do you ensure none of them break without requiring all teams to test against a live environment simultaneously?",
+    "shortAnswer": "Implement consumer-driven contract testing with Pact so each consumer defines its expectations and the provider verifies all contracts before release, independently of the consumers being available.",
+    "interviewAnswer": "This is exactly the problem Pact solves. I would coordinate the following: each of the three frontend teams writes consumer Pact tests that describe what fields they read from the /orders response. These tests generate pact files that are published to a shared Pact Broker. The backend team then adds a provider verification step to their CI pipeline: before any PR to the orders service is merged, the pipeline downloads all three consumer pacts from the broker and runs provider verification against them. If the backend's schema change breaks even one consumer's contract, the PR fails immediately — no shared environment needed. I would also add a 'can-i-deploy' check from the Pact Broker in the deployment pipeline to prevent deployment until all consumer contracts are verified. This gives each team autonomy to work independently while the contract broker acts as the integration check.",
+    "realProjectExample": "We had four services consuming a payments API. The payments team wanted to remove a 'legacy_id' field. Running the provider verification step showed two of the four consumers still used that field. The change was blocked until those consumers migrated, preventing a production outage.",
+    "followUps": [
+      "What happens if a consumer's pact test is wrong — does that block the provider?",
+      "How do you handle a consumer that cannot update its pact tests quickly?",
+      "What is the 'pending pacts' feature in Pact Broker and when would you use it?"
+    ],
+    "tags": [
+      "api",
+      "pact",
+      "contract testing",
+      "consumer-driven",
+      "microservices"
+    ]
+  },
+  {
+    "id": "api-testing-050",
+    "topicId": "api-testing",
+    "topicTitle": "API Testing",
+    "level": "senior",
+    "type": "coding",
+    "difficulty": "hard",
+    "title": "Validate OpenAPI Response Schema with openapi-core",
+    "question": "Write a Python pytest helper that loads an OpenAPI spec from a YAML file and validates a real API response against it using openapi-core, raising a clear assertion error on schema violations.",
+    "problem": "Implement validate_openapi_response(spec_path, method, path, response) that loads the spec, constructs an openapi-core UnmarshalledRequest/Response, and calls spec.validate_response(). If validation fails, raise an AssertionError listing each violation.",
+    "inputExample": "import requests\nresponse = requests.get(\"https://api.example.com/users/1\")\nvalidate_openapi_response(\n    spec_path=\"openapi.yaml\",\n    method=\"GET\",\n    path=\"/users/{id}\",\n    response=response\n)",
+    "expectedOutput": "Raises AssertionError listing schema violations if response does not match the spec. Passes silently if compliant.",
+    "hint": "Use openapi_core.OpenAPI.from_file_path() to load the spec. Wrap the requests.Response in openapi_core.contrib.requests.RequestsOpenAPIResponse for validation.",
+    "solutionLanguage": "python",
+    "solution": "import pytest\nimport requests\nfrom openapi_core import OpenAPI\nfrom openapi_core.contrib.requests import (\n    RequestsOpenAPIRequest,\n    RequestsOpenAPIResponse\n)\nfrom openapi_core.validation.response.exceptions import ResponseValidationError\n\n\ndef validate_openapi_response(\n    spec_path: str,\n    response: requests.Response\n) -> None:\n    \"\"\"\n    Validate a requests.Response against an OpenAPI spec file.\n    Raises AssertionError with violation details on schema mismatch.\n    \"\"\"\n    spec = OpenAPI.from_file_path(spec_path)\n    openapi_request = RequestsOpenAPIRequest(response.request)\n    openapi_response = RequestsOpenAPIResponse(response)\n\n    try:\n        spec.validate_response(openapi_request, openapi_response)\n    except ResponseValidationError as exc:\n        violations = \"\\n\".join(str(e) for e in exc.schema_errors)\n        raise AssertionError(\n            f\"OpenAPI response validation failed for \"\n            f\"{response.request.method} {response.request.url}:\\n{violations}\"\n        ) from exc\n\n\n# Example pytest usage\n@pytest.fixture(scope=\"session\")\ndef spec_path(tmp_path_factory):\n    # In a real project, return the path to your openapi.yaml\n    return \"openapi.yaml\"\n\n\ndef test_get_user_matches_spec(spec_path):\n    response = requests.get(\"https://api.example.com/users/1\")\n    assert response.status_code == 200\n    validate_openapi_response(spec_path, response)\n    # If we reach here, the response conforms to the spec\n    assert response.json()[\"id\"] == 1",
+    "explanation": "openapi-core bridges the OpenAPI spec and real responses. RequestsOpenAPIRequest wraps the PreparedRequest (available as response.request) so the validator knows the method and path. ResponseValidationError carries schema_errors which are specific jsonschema violations. Re-raising as AssertionError with the violations joined into a readable string integrates cleanly with pytest output without requiring a custom plugin.",
+    "commonMistakes": [
+      "Loading the spec inside every test instead of in a session-scoped fixture, causing significant slowdown",
+      "Catching Exception instead of ResponseValidationError, which masks real Python errors as spec failures",
+      "Not passing response.request to the RequestsOpenAPIRequest, causing the validator to be unable to resolve the path template"
+    ],
+    "followUps": [
+      "How would you run openapi-core validation on every test automatically without adding it to each test manually?",
+      "How do you handle OpenAPI specs that use $ref to external files?",
+      "What is the difference between request validation and response validation in openapi-core?"
+    ],
+    "tags": [
+      "api",
+      "openapi",
+      "swagger",
+      "schema validation",
+      "python",
+      "openapi-core"
+    ]
   }
 ]

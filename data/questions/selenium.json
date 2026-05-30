@@ -659,5 +659,695 @@
       "webdriver",
       "best practices"
     ]
+  },
+  {
+    "id": "selenium-026",
+    "topicId": "selenium",
+    "topicTitle": "Selenium",
+    "level": "mid",
+    "type": "quiz",
+    "difficulty": "easy",
+    "question": "Which Selenium 4 feature allows you to locate an element relative to another element on the page?",
+    "choices": [
+      "RelativeLocator using withTagName() and near()/above()/below()/toLeftOf()/toRightOf()",
+      "ChainedLocator combining two By strategies with a pipe operator",
+      "NestedLocator using driver.findElement() inside another findElement()",
+      "ProximityBy using distance in pixels as the primary selector"
+    ],
+    "correctAnswer": "RelativeLocator using withTagName() and near()/above()/below()/toLeftOf()/toRightOf()",
+    "explanation": "Selenium 4 introduced RelativeLocators (formerly 'Friendly Locators'). You call RelativeLocator.with(By.tagName('input')).above(someElement) or .near(otherElement) to find an element based on its visual position relative to a known anchor element. The 'near' method uses a default proximity of 50px.",
+    "tags": [
+      "selenium",
+      "selenium4",
+      "relative locators"
+    ]
+  },
+  {
+    "id": "selenium-027",
+    "topicId": "selenium",
+    "topicTitle": "Selenium",
+    "level": "senior",
+    "type": "quiz",
+    "difficulty": "medium",
+    "question": "What is the Chrome DevTools Protocol (CDP) used for in Selenium 4?",
+    "choices": [
+      "Configuring ChromeOptions before browser launch only",
+      "Accessing low-level browser APIs such as network interception, console logs, and geolocation emulation at runtime",
+      "Replacing WebDriver protocol for all browser interactions",
+      "Enabling cross-browser testing without browser-specific drivers"
+    ],
+    "correctAnswer": "Accessing low-level browser APIs such as network interception, console logs, and geolocation emulation at runtime",
+    "explanation": "Selenium 4 exposes CDP through the HasDevTools interface and the DevTools class. It allows direct access to Chrome's internal protocol, enabling capabilities like intercepting network requests, emulating geolocation, mocking authentication, capturing performance metrics, and reading console logs — none of which were natively possible through WebDriver alone in Selenium 3.",
+    "tags": [
+      "selenium",
+      "selenium4",
+      "cdp",
+      "chrome devtools protocol"
+    ]
+  },
+  {
+    "id": "selenium-028",
+    "topicId": "selenium",
+    "topicTitle": "Selenium",
+    "level": "senior",
+    "type": "quiz",
+    "difficulty": "hard",
+    "question": "In Selenium 4, what is the BiDi (WebDriver BiDi) protocol and how does it differ from CDP?",
+    "choices": [
+      "BiDi is a Chrome-only protocol identical to CDP but with a JSON-RPC transport",
+      "BiDi is a W3C-standardized bidirectional protocol that works across all browsers, unlike CDP which is Chrome-specific",
+      "BiDi replaces WebDriver entirely and requires no browser driver",
+      "BiDi is a Selenium Grid feature for bidirectional node communication"
+    ],
+    "correctAnswer": "BiDi is a W3C-standardized bidirectional protocol that works across all browsers, unlike CDP which is Chrome-specific",
+    "explanation": "WebDriver BiDi is a W3C specification for a bidirectional communication channel between the WebDriver client and browser. Unlike CDP (which is Chrome/Edge-specific), BiDi aims to provide the same low-level capabilities — event subscriptions, network interception, console log access — across all browsers including Firefox and Safari. Selenium 4 is progressively implementing BiDi support.",
+    "tags": [
+      "selenium",
+      "selenium4",
+      "bidi",
+      "webdriver",
+      "cross-browser"
+    ]
+  },
+  {
+    "id": "selenium-029",
+    "topicId": "selenium",
+    "topicTitle": "Selenium",
+    "level": "senior",
+    "type": "quiz",
+    "difficulty": "medium",
+    "question": "Which class should you use to interact with a native HTML <select> dropdown in Selenium?",
+    "choices": [
+      "DropdownHandler",
+      "Select",
+      "Options",
+      "WebElementSelect"
+    ],
+    "correctAnswer": "Select",
+    "explanation": "The org.openqa.selenium.support.ui.Select class wraps a WebElement pointing to a <select> tag and provides selectByVisibleText(), selectByValue(), selectByIndex(), deselectAll(), getOptions(), and getAllSelectedOptions(). It throws UnexpectedTagNameException if the wrapped element is not a <select>.",
+    "tags": [
+      "selenium",
+      "select",
+      "dropdowns",
+      "webdriver"
+    ]
+  },
+  {
+    "id": "selenium-030",
+    "topicId": "selenium",
+    "topicTitle": "Selenium",
+    "level": "mid",
+    "type": "quiz",
+    "difficulty": "easy",
+    "question": "What is the correct way to configure headless Chrome in Selenium 4 Java?",
+    "choices": [
+      "ChromeOptions options = new ChromeOptions(); options.setHeadless(true);",
+      "ChromeOptions options = new ChromeOptions(); options.addArguments(\"--headless=new\");",
+      "ChromeDriver driver = new ChromeDriver(); driver.setHeadless(true);",
+      "System.setProperty(\"chrome.headless\", \"true\");"
+    ],
+    "correctAnswer": "ChromeOptions options = new ChromeOptions(); options.addArguments(\"--headless=new\");",
+    "explanation": "In Selenium 4 with Chrome 112+, the recommended approach is options.addArguments('--headless=new') which uses Chrome's new headless implementation that is closer to the full browser. The older options.setHeadless(true) is deprecated in Selenium 4.10+ and used the legacy '--headless' flag. Always pair with '--disable-gpu' and '--window-size' for stable rendering in CI.",
+    "tags": [
+      "selenium",
+      "headless",
+      "chrome",
+      "chromeoptions"
+    ]
+  },
+  {
+    "id": "selenium-031",
+    "topicId": "selenium",
+    "topicTitle": "Selenium",
+    "level": "mid",
+    "type": "quiz",
+    "difficulty": "medium",
+    "question": "What does WebDriverManager do and why is it preferred over manual driver management?",
+    "choices": [
+      "It is a Selenium Grid component that manages remote driver nodes",
+      "It automatically downloads, sets up, and configures the correct browser driver binary, eliminating manual version matching",
+      "It is a TestNG listener that restarts the WebDriver on test failure",
+      "It replaces ChromeDriver with a managed cloud browser session"
+    ],
+    "correctAnswer": "It automatically downloads, sets up, and configures the correct browser driver binary, eliminating manual version matching",
+    "explanation": "WebDriverManager (by Bonigarcia) detects the installed browser version, downloads the matching driver binary (chromedriver, geckodriver, etc.) from the official repository, caches it, and sets the system property automatically. This eliminates the fragile manual step of downloading the right driver version and adding it to PATH, which is a common source of CI failures after browser auto-updates.",
+    "tags": [
+      "selenium",
+      "webdrivermanager",
+      "driver management",
+      "ci"
+    ]
+  },
+  {
+    "id": "selenium-032",
+    "topicId": "selenium",
+    "topicTitle": "Selenium",
+    "level": "senior",
+    "type": "quiz",
+    "difficulty": "hard",
+    "question": "In a TestNG parallel test suite, where should you initialize and quit the WebDriver to avoid thread-safety issues?",
+    "choices": [
+      "@BeforeClass and @AfterClass with a static WebDriver field",
+      "@BeforeSuite and @AfterSuite with a single shared WebDriver instance",
+      "@BeforeMethod and @AfterMethod with a ThreadLocal<WebDriver> field",
+      "@BeforeTest and @AfterTest with synchronized blocks around driver access"
+    ],
+    "correctAnswer": "@BeforeMethod and @AfterMethod with a ThreadLocal<WebDriver> field",
+    "explanation": "WebDriver is not thread-safe. With parallel='methods' or parallel='classes' in TestNG, each test method runs on its own thread. A ThreadLocal<WebDriver> ensures each thread has an independent driver instance initialized in @BeforeMethod and cleaned up in @AfterMethod. @AfterMethod must call driver.quit() and then remove() on the ThreadLocal to prevent memory leaks between test runs.",
+    "tags": [
+      "selenium",
+      "testng",
+      "parallel execution",
+      "thread safety",
+      "threadlocal"
+    ]
+  },
+  {
+    "id": "selenium-033",
+    "topicId": "selenium",
+    "topicTitle": "Selenium",
+    "level": "mid",
+    "type": "interview",
+    "difficulty": "easy",
+    "question": "How does the Actions class work in Selenium and when would you use it?",
+    "shortAnswer": "Actions builds a chain of low-level user input events (mouse moves, hovers, drags, keyboard combos) executed as a single synthetic gesture.",
+    "interviewAnswer": "The Actions class uses the W3C Actions API to compose complex user gestures that cannot be expressed as simple element.click() or sendKeys() calls. I use it for hover menus that only appear on mouseover, for drag-and-drop interactions, for right-click context menus via contextClick(), for keyboard shortcuts like Ctrl+A, and for clicking at an offset within a canvas element. The key is to always end the chain with .perform() and to ensure the target element is in the viewport first — Actions calls that target off-screen elements fail silently or raise MoveTargetOutOfBoundsException.",
+    "realProjectExample": "A tooltip was triggered by hovering a chart data point. I used new Actions(driver).moveToElement(dataPoint).pause(Duration.ofMillis(500)).perform() to trigger the hover state and then asserted the tooltip text.",
+    "followUps": [
+      "How do you perform a drag-and-drop between two elements?",
+      "What is the difference between Actions.click() and WebElement.click()?",
+      "How do you handle a right-click context menu?"
+    ],
+    "tags": [
+      "selenium",
+      "actions",
+      "mouse events",
+      "keyboard",
+      "webdriver"
+    ]
+  },
+  {
+    "id": "selenium-034",
+    "topicId": "selenium",
+    "topicTitle": "Selenium",
+    "level": "senior",
+    "type": "interview",
+    "difficulty": "medium",
+    "question": "How do you interact with elements inside a Shadow DOM in Selenium?",
+    "shortAnswer": "Expand the shadow root via getShadowRoot() (Selenium 4) or JavascriptExecutor, then use regular findElement calls within that root.",
+    "interviewAnswer": "Shadow DOM encapsulates component internals, and standard CSS selectors and XPath cannot pierce the shadow boundary. In Selenium 4, WebElement exposes getShadowRoot() which returns a SearchContext representing the shadow root. I call shadowRoot.findElement(By.cssSelector(...)) to locate elements inside. Only CSS selectors work within a shadow root — XPath does not cross the shadow boundary. For nested shadow DOMs I call getShadowRoot() repeatedly through each host element. In Selenium 3 I fell back to JavascriptExecutor with querySelector inside the shadow root.",
+    "realProjectExample": "A web component checkout form hid its input fields inside a shadow DOM. I chained three getShadowRoot() calls through three nested custom elements and then interacted with the inner form fields using CSS selectors.",
+    "followUps": [
+      "Does XPath work inside a Shadow DOM?",
+      "How do you locate a shadow host when the host itself has no stable ID?",
+      "What are the limitations of the getShadowRoot() approach?"
+    ],
+    "tags": [
+      "selenium",
+      "shadow dom",
+      "web components",
+      "selenium4",
+      "javascript executor"
+    ]
+  },
+  {
+    "id": "selenium-035",
+    "topicId": "selenium",
+    "topicTitle": "Selenium",
+    "level": "senior",
+    "type": "interview",
+    "difficulty": "medium",
+    "question": "How do you configure and use Selenium Grid 4 for distributed test execution?",
+    "shortAnswer": "Grid 4 uses a hub-node topology or a fully distributed mode. Nodes register with the hub; tests send capabilities to the hub URL via RemoteWebDriver.",
+    "interviewAnswer": "Selenium Grid 4 introduces three deployment modes: Standalone (single process), Hub-Node (classic), and Fully Distributed with separate Router, Distributor, Session Map, and Node components. For most teams I use Hub-Node: start the hub with 'java -jar selenium-server.jar hub', start nodes with 'java -jar selenium-server.jar node --hub http://hub:4444'. The hub URL becomes the RemoteWebDriver endpoint. I set capabilities via ChromeOptions or FirefoxOptions passed to RemoteWebDriver's constructor. Grid 4 also adds a live UI at /ui and structured event logging. For Kubernetes deployments I use the official Helm chart which handles node autoscaling and session queue management.",
+    "realProjectExample": "We ran a 200-test suite across four Grid nodes (each with 4 Chrome and 4 Firefox slots) in our CI cluster. Total execution dropped from 35 minutes to under 6 minutes, and the Grid UI let us inspect live sessions when debugging failures.",
+    "followUps": [
+      "How does Grid 4 differ from Grid 3 architecturally?",
+      "How do you pass browser capabilities to a Remote session?",
+      "What happens to a test if the Grid node crashes mid-session?"
+    ],
+    "tags": [
+      "selenium",
+      "selenium grid",
+      "grid4",
+      "remote webdriver",
+      "distributed testing"
+    ]
+  },
+  {
+    "id": "selenium-036",
+    "topicId": "selenium",
+    "topicTitle": "Selenium",
+    "level": "senior",
+    "type": "interview",
+    "difficulty": "hard",
+    "question": "How do you implement a screenshot-on-failure mechanism in a Selenium + TestNG framework?",
+    "shortAnswer": "Implement ITestListener or use a @AfterMethod with ITestResult to detect failure, then call TakesScreenshot to capture and save the image.",
+    "interviewAnswer": "I implement ITestListener and override onTestFailure(). Inside, I cast the WebDriver to TakesScreenshot, call getScreenshotAs(OutputType.FILE), copy the file to a build/screenshots directory with a name derived from the test method and timestamp, and attach the path to the Allure or Extent report via annotation. I retrieve the driver from a ThreadLocal in the base class to stay thread-safe in parallel runs. Alternatively, for simpler setups I put a try-finally in @AfterMethod and check ITestResult.getStatus() == ITestResult.FAILURE. I also capture page source alongside the screenshot for DOM-level debugging.",
+    "realProjectExample": "After integrating the listener, our CI pipeline attached screenshots directly to the failed test entries in Allure. Investigation time per failure dropped from 20 minutes (reproducing locally) to under 3 minutes (reading the artifact).",
+    "followUps": [
+      "How do you attach a screenshot to an Allure report?",
+      "How do you capture video of a failing test run?",
+      "What do you do when TakesScreenshot returns a blank image?"
+    ],
+    "tags": [
+      "selenium",
+      "screenshot",
+      "testng",
+      "reporting",
+      "allure",
+      "itestlistener"
+    ]
+  },
+  {
+    "id": "selenium-037",
+    "topicId": "selenium",
+    "topicTitle": "Selenium",
+    "level": "senior",
+    "type": "interview",
+    "difficulty": "hard",
+    "question": "How do you implement a RetryAnalyzer in TestNG for Selenium tests, and what are the risks?",
+    "shortAnswer": "Implement IRetryAnalyzer, override retry() to count attempts and return true up to a max, then assign it via @Test(retryAnalyzer = ...) or a listener.",
+    "interviewAnswer": "IRetryAnalyzer.retry() receives the ITestResult and returns true to rerun the test. I keep an AtomicInteger per instance to count retries and return false once the max (typically 1 retry) is reached. I apply it globally via a custom IAnnotationTransformer listener rather than annotating each test, which keeps tests clean. The critical caveat: retrying hides real failures. I only apply the analyzer to tests tagged @Flaky and track the retry rate in CI. A test that passes on retry is still a flaky test and should be investigated — retrying is a short-term safety net, not a fix. I also ensure the driver is re-initialized before each retry attempt to avoid contaminated state from the failed run.",
+    "realProjectExample": "We applied a single-retry analyzer to 15 known-flaky network-dependent tests during a migration period. The retry rate was logged to a dashboard; when retries exceeded 50% over a week, the test was escalated to a bug ticket.",
+    "followUps": [
+      "How do you prevent retries from masking real product bugs?",
+      "What is the difference between IRetryAnalyzer and TestNG's rerunFailingTestsCount attribute?",
+      "How do you ensure the retry runs with a fresh browser state?"
+    ],
+    "tags": [
+      "selenium",
+      "testng",
+      "retry analyzer",
+      "flaky tests",
+      "iretryanalyzer"
+    ]
+  },
+  {
+    "id": "selenium-038",
+    "topicId": "selenium",
+    "topicTitle": "Selenium",
+    "level": "mid",
+    "type": "coding",
+    "difficulty": "medium",
+    "title": "Select Dropdown Option by Visible Text",
+    "question": "Write a Java method that selects an option from a native HTML <select> dropdown by visible text, verifies the selection, and returns the selected option's value attribute.",
+    "problem": "Implement `selectDropdownOption(WebDriver driver, By dropdownLocator, String visibleText)`. Wait up to 5 seconds for the dropdown to be clickable, wrap it in a Select object, select by visible text, then return getFirstSelectedOption().getAttribute('value').",
+    "inputExample": "String val = selectDropdownOption(driver, By.id(\"country\"), \"United States\");",
+    "expectedOutput": "Returns the value attribute of the selected option, e.g. \"US\"",
+    "hint": "Wrap the located WebElement in new Select(element). Use selectByVisibleText(). Then call getFirstSelectedOption().getAttribute(\"value\").",
+    "solutionLanguage": "java",
+    "solution": "import org.openqa.selenium.By;\nimport org.openqa.selenium.WebDriver;\nimport org.openqa.selenium.WebElement;\nimport org.openqa.selenium.support.ui.ExpectedConditions;\nimport org.openqa.selenium.support.ui.Select;\nimport org.openqa.selenium.support.ui.WebDriverWait;\nimport java.time.Duration;\n\npublic class DropdownUtils {\n\n    public static String selectDropdownOption(WebDriver driver, By dropdownLocator, String visibleText) {\n        WebElement dropdownElement = new WebDriverWait(driver, Duration.ofSeconds(5))\n                .until(ExpectedConditions.elementToBeClickable(dropdownLocator));\n\n        Select select = new Select(dropdownElement);\n        select.selectByVisibleText(visibleText);\n\n        return select.getFirstSelectedOption().getAttribute(\"value\");\n    }\n}",
+    "explanation": "The Select class encapsulates all dropdown operations for native <select> elements. Waiting for elementToBeClickable ensures the dropdown is rendered and not disabled before interaction. selectByVisibleText trims whitespace and does a contains match, which is more robust than selectByIndex when options may be reordered. Returning the value attribute (not the text) is useful for downstream assertions against API response values.",
+    "commonMistakes": [
+      "Using Select on a custom div-based dropdown, which throws UnexpectedTagNameException",
+      "Calling selectByIndex with hardcoded indices that break when the option list changes",
+      "Not waiting for the dropdown to be present before wrapping it in Select, causing StaleElementReferenceException"
+    ],
+    "followUps": [
+      "How do you select multiple options in a multi-select dropdown?",
+      "How do you get all available options from a dropdown?",
+      "What exception is thrown when selectByVisibleText cannot find a matching option?"
+    ],
+    "tags": [
+      "selenium",
+      "select",
+      "dropdowns",
+      "webdriver",
+      "forms"
+    ]
+  },
+  {
+    "id": "selenium-039",
+    "topicId": "selenium",
+    "topicTitle": "Selenium",
+    "level": "mid",
+    "type": "coding",
+    "difficulty": "medium",
+    "title": "Hover to Reveal and Click a Submenu Item",
+    "question": "Write a Java method that hovers over a top-level navigation menu item to reveal a submenu, waits for the submenu to appear, and clicks the specified submenu link.",
+    "problem": "Implement `hoverAndClickSubmenu(WebDriver driver, By menuItemLocator, By submenuItemLocator)`. Use Actions to move to the menu item. Wait up to 5 seconds for the submenu item to be visible. Click the submenu item.",
+    "inputExample": "hoverAndClickSubmenu(driver, By.id(\"products-menu\"), By.linkText(\"Laptops\"));",
+    "expectedOutput": "The submenu item is clicked and the browser navigates to the submenu target page",
+    "hint": "Use new Actions(driver).moveToElement(menuItem).perform() then WebDriverWait for the submenu item visibility before clicking.",
+    "solutionLanguage": "java",
+    "solution": "import org.openqa.selenium.By;\nimport org.openqa.selenium.WebDriver;\nimport org.openqa.selenium.WebElement;\nimport org.openqa.selenium.interactions.Actions;\nimport org.openqa.selenium.support.ui.ExpectedConditions;\nimport org.openqa.selenium.support.ui.WebDriverWait;\nimport java.time.Duration;\n\npublic class MenuUtils {\n\n    public static void hoverAndClickSubmenu(WebDriver driver, By menuItemLocator, By submenuItemLocator) {\n        WebElement menuItem = new WebDriverWait(driver, Duration.ofSeconds(5))\n                .until(ExpectedConditions.visibilityOfElementLocated(menuItemLocator));\n\n        new Actions(driver)\n                .moveToElement(menuItem)\n                .perform();\n\n        WebElement submenuItem = new WebDriverWait(driver, Duration.ofSeconds(5))\n                .until(ExpectedConditions.visibilityOfElementLocated(submenuItemLocator));\n\n        submenuItem.click();\n    }\n}",
+    "explanation": "moveToElement triggers the CSS :hover pseudo-class that reveals the submenu. Performing the hover as a separate action before waiting for the submenu item ensures the element is visible before Selenium tries to click it. A second explicit wait is required because the submenu appears asynchronously after the hover. Clicking submenuItem directly (rather than via Actions.click) is acceptable once the element is confirmed visible and clickable.",
+    "commonMistakes": [
+      "Clicking the menu item instead of just moving to it, which may navigate away before the submenu appears",
+      "Not waiting for the submenu item to be visible after hovering, causing NoSuchElementException",
+      "Using Actions.click(submenuItem) in the same chain as the hover without waiting — the submenu may not be rendered yet"
+    ],
+    "followUps": [
+      "How do you handle submenus that require a delay before they become clickable?",
+      "What happens when moveToElement targets an element outside the current viewport?",
+      "How do you test that a submenu disappears after moving the mouse away?"
+    ],
+    "tags": [
+      "selenium",
+      "actions",
+      "hover",
+      "submenu",
+      "mouse events"
+    ]
+  },
+  {
+    "id": "selenium-040",
+    "topicId": "selenium",
+    "topicTitle": "Selenium",
+    "level": "mid",
+    "type": "coding",
+    "difficulty": "medium",
+    "title": "File Upload Using sendKeys",
+    "question": "Write a Java method that uploads a file by sending the absolute file path to a file input element and verifies the file name appears in the UI.",
+    "problem": "Implement `uploadFile(WebDriver driver, By fileInputLocator, String absoluteFilePath, By fileNameDisplayLocator)`. Do not click a dialog — use sendKeys on the input element directly. After uploading, wait up to 5 seconds for the file name display element to contain the base file name. Return true if visible, false otherwise.",
+    "inputExample": "boolean ok = uploadFile(driver, By.id(\"file-input\"), \"/tmp/report.pdf\", By.id(\"file-name-label\"));",
+    "expectedOutput": "Returns true when the file name label shows 'report.pdf' within 5 seconds",
+    "hint": "Use driver.findElement(fileInputLocator).sendKeys(absoluteFilePath). The input does not need to be visible. Use ExpectedConditions.textToBePresentInElementLocated to verify the name appears.",
+    "solutionLanguage": "java",
+    "solution": "import org.openqa.selenium.By;\nimport org.openqa.selenium.WebDriver;\nimport org.openqa.selenium.support.ui.ExpectedConditions;\nimport org.openqa.selenium.support.ui.WebDriverWait;\nimport java.io.File;\nimport java.time.Duration;\n\npublic class FileUploadUtils {\n\n    public static boolean uploadFile(WebDriver driver,\n                                     By fileInputLocator,\n                                     String absoluteFilePath,\n                                     By fileNameDisplayLocator) {\n        String fileName = new File(absoluteFilePath).getName();\n\n        driver.findElement(fileInputLocator).sendKeys(absoluteFilePath);\n\n        try {\n            new WebDriverWait(driver, Duration.ofSeconds(5))\n                    .until(ExpectedConditions.textToBePresentInElementLocated(\n                            fileNameDisplayLocator, fileName));\n            return true;\n        } catch (org.openqa.selenium.TimeoutException e) {\n            return false;\n        }\n    }\n}",
+    "explanation": "Sending the absolute file path via sendKeys to a file input (<input type='file'>) bypasses the OS file chooser dialog entirely — Selenium cannot interact with native OS dialogs. The file input does not need to be visible or even interactable in the conventional sense; sendKeys works regardless of display:none. Extracting the base filename from the path with File.getName() makes the verification independent of OS path separators.",
+    "commonMistakes": [
+      "Trying to click the file input and then interact with the OS file picker dialog, which Selenium cannot control",
+      "Using a relative path instead of an absolute path, which fails in CI where the working directory differs",
+      "Making the file input visible via JavascriptExecutor before sendKeys — unnecessary for file inputs"
+    ],
+    "followUps": [
+      "How do you upload a file to a drag-and-drop upload area that has no file input?",
+      "How do you verify the file was uploaded successfully beyond the UI label?",
+      "How do you handle file uploads when running on a remote Selenium Grid node?"
+    ],
+    "tags": [
+      "selenium",
+      "file upload",
+      "sendkeys",
+      "webdriver",
+      "forms"
+    ]
+  },
+  {
+    "id": "selenium-041",
+    "topicId": "selenium",
+    "topicTitle": "Selenium",
+    "level": "mid",
+    "type": "coding",
+    "difficulty": "medium",
+    "title": "Cookie Management — Set, Read, and Delete",
+    "question": "Write a Java utility class with three methods: one to add an authentication cookie, one to read a cookie value by name, and one to delete all cookies.",
+    "problem": "Implement CookieUtils with: (1) addAuthCookie(WebDriver driver, String name, String value, String domain) that creates and adds a Cookie; (2) getCookieValue(WebDriver driver, String name) that returns the cookie value or null if absent; (3) clearAllCookies(WebDriver driver) that deletes all cookies and refreshes the page.",
+    "inputExample": "CookieUtils.addAuthCookie(driver, \"auth_token\", \"abc123\", \".example.com\");\nString token = CookieUtils.getCookieValue(driver, \"auth_token\");\nCookieUtils.clearAllCookies(driver);",
+    "expectedOutput": "addAuthCookie sets the cookie; getCookieValue returns 'abc123'; clearAllCookies deletes all cookies and refreshes",
+    "hint": "Use driver.manage().addCookie(new Cookie.Builder(name, value).domain(domain).build()). Use driver.manage().getCookieNamed(name) which returns null if absent.",
+    "solutionLanguage": "java",
+    "solution": "import org.openqa.selenium.Cookie;\nimport org.openqa.selenium.WebDriver;\n\npublic class CookieUtils {\n\n    public static void addAuthCookie(WebDriver driver, String name, String value, String domain) {\n        Cookie authCookie = new Cookie.Builder(name, value)\n                .domain(domain)\n                .path(\"/\")\n                .isSecure(true)\n                .build();\n        driver.manage().addCookie(authCookie);\n    }\n\n    public static String getCookieValue(WebDriver driver, String name) {\n        Cookie cookie = driver.manage().getCookieNamed(name);\n        return cookie != null ? cookie.getValue() : null;\n    }\n\n    public static void clearAllCookies(WebDriver driver) {\n        driver.manage().deleteAllCookies();\n        driver.navigate().refresh();\n    }\n}",
+    "explanation": "Cookie management via driver.manage() is essential for test setup shortcuts: injecting an auth cookie avoids the login UI flow, dramatically speeding up tests that require an authenticated session. Cookie.Builder ensures the domain, path, and security flags are set correctly — an auth cookie set without the correct domain will not be sent with requests. Refreshing after deleteAllCookies forces the browser to re-evaluate its session state.",
+    "commonMistakes": [
+      "Adding a cookie before navigating to the domain — the browser rejects cookies for domains not matching the current page",
+      "Not setting the domain attribute, causing the cookie to apply only to the exact current URL",
+      "Calling getCookieNamed without null checking and getting a NullPointerException when the cookie does not exist"
+    ],
+    "followUps": [
+      "How do you use cookie injection to skip the login flow in a test suite?",
+      "How do you copy cookies from one browser session to another?",
+      "What is the security risk of hardcoding auth tokens in test code?"
+    ],
+    "tags": [
+      "selenium",
+      "cookies",
+      "authentication",
+      "webdriver",
+      "session management"
+    ]
+  },
+  {
+    "id": "selenium-042",
+    "topicId": "selenium",
+    "topicTitle": "Selenium",
+    "level": "senior",
+    "type": "coding",
+    "difficulty": "hard",
+    "title": "Network Interception with Chrome DevTools Protocol",
+    "question": "Write a Java method using Selenium 4 CDP to intercept a specific network request and verify its presence during a page action.",
+    "problem": "Implement `captureApiRequests(ChromeDriver driver, String urlPattern, Runnable triggerAction)` that: (1) enables network events via CDP; (2) collects request URLs matching the pattern into a list; (3) executes the triggerAction; (4) waits up to 5 seconds for at least one matching request; (5) returns the list of matched URLs.",
+    "inputExample": "List<String> urls = captureApiRequests(driver, \"/api/products\", () -> driver.findElement(By.id(\"load-btn\")).click());",
+    "expectedOutput": "List containing matched request URLs like ['https://example.com/api/products?page=1']",
+    "hint": "Use driver.getDevTools(), devTools.createSession(), devTools.send(Network.enable(...)), and devTools.addListener(Network.requestWillBeSent(), ...) to capture requests.",
+    "solutionLanguage": "java",
+    "solution": "import org.openqa.selenium.By;\nimport org.openqa.selenium.chrome.ChromeDriver;\nimport org.openqa.selenium.devtools.DevTools;\nimport org.openqa.selenium.devtools.v129.network.Network;\nimport java.util.ArrayList;\nimport java.util.List;\nimport java.util.Optional;\nimport java.util.concurrent.CopyOnWriteArrayList;\nimport java.util.concurrent.TimeUnit;\n\npublic class CdpNetworkUtils {\n\n    public static List<String> captureApiRequests(\n            ChromeDriver driver,\n            String urlPattern,\n            Runnable triggerAction) throws InterruptedException {\n\n        DevTools devTools = driver.getDevTools();\n        devTools.createSession();\n        devTools.send(Network.enable(\n                Optional.empty(), Optional.empty(), Optional.empty()));\n\n        List<String> matchedUrls = new CopyOnWriteArrayList<>();\n\n        devTools.addListener(Network.requestWillBeSent(), request -> {\n            String url = request.getRequest().getUrl();\n            if (url.contains(urlPattern)) {\n                matchedUrls.add(url);\n            }\n        });\n\n        triggerAction.run();\n\n        long deadline = System.currentTimeMillis() + 5000;\n        while (matchedUrls.isEmpty() && System.currentTimeMillis() < deadline) {\n            TimeUnit.MILLISECONDS.sleep(200);\n        }\n\n        devTools.send(Network.disable());\n        return matchedUrls;\n    }\n}",
+    "explanation": "Selenium 4's DevTools API wraps CDP. Network.enable() subscribes the session to network events. The requestWillBeSent listener fires before each request is sent, giving access to the URL, method, and headers. CopyOnWriteArrayList is used because the listener callback runs on a separate CDP event thread. Disabling Network after capture avoids performance overhead for subsequent page actions in the same test.",
+    "commonMistakes": [
+      "Using ChromeDriver cast as WebDriver — CDP requires ChromeDriver specifically via HasDevTools interface",
+      "Not creating the DevTools session before sending CDP commands, causing NullPointerException",
+      "Forgetting that CDP version classes (v129) must match the installed Chrome version or using a version-agnostic approach"
+    ],
+    "followUps": [
+      "How do you mock a network response using CDP to return a custom JSON payload?",
+      "How do you capture response bodies, not just request URLs?",
+      "How does BiDi network interception differ from CDP network interception?"
+    ],
+    "tags": [
+      "selenium",
+      "cdp",
+      "chrome devtools protocol",
+      "network interception",
+      "selenium4"
+    ]
+  },
+  {
+    "id": "selenium-043",
+    "topicId": "selenium",
+    "topicTitle": "Selenium",
+    "level": "senior",
+    "type": "coding",
+    "difficulty": "hard",
+    "title": "Custom ExpectedCondition — Wait for Element Attribute Value",
+    "question": "Write a Java method that creates and uses a custom ExpectedCondition that waits until a specific element's attribute contains an expected value.",
+    "problem": "Implement `waitForAttributeContains(WebDriver driver, By locator, String attribute, String expectedValue, int timeoutSeconds)`. Create an anonymous ExpectedCondition<Boolean> that checks whether element.getAttribute(attribute) is non-null and contains expectedValue. Use WebDriverWait with the custom condition.",
+    "inputExample": "waitForAttributeContains(driver, By.id(\"status-badge\"), \"class\", \"active\", 10);",
+    "expectedOutput": "Method returns when the element's class attribute contains 'active', or throws TimeoutException",
+    "hint": "Create new ExpectedCondition<Boolean>() { public Boolean apply(WebDriver d) { ... } } or use a lambda. Check for null before calling contains().",
+    "solutionLanguage": "java",
+    "solution": "import org.openqa.selenium.By;\nimport org.openqa.selenium.WebDriver;\nimport org.openqa.selenium.WebElement;\nimport org.openqa.selenium.support.ui.ExpectedCondition;\nimport org.openqa.selenium.support.ui.WebDriverWait;\nimport java.time.Duration;\n\npublic class CustomWaitUtils {\n\n    public static void waitForAttributeContains(\n            WebDriver driver,\n            By locator,\n            String attribute,\n            String expectedValue,\n            int timeoutSeconds) {\n\n        ExpectedCondition<Boolean> attributeContains = d -> {\n            try {\n                WebElement element = d.findElement(locator);\n                String attrValue = element.getAttribute(attribute);\n                return attrValue != null && attrValue.contains(expectedValue);\n            } catch (org.openqa.selenium.NoSuchElementException e) {\n                return false;\n            }\n        };\n\n        new WebDriverWait(driver, Duration.ofSeconds(timeoutSeconds))\n                .until(attributeContains);\n    }\n}",
+    "explanation": "ExpectedCondition<T> is a functional interface, so a lambda expression satisfies it cleanly. The lambda must return null or Boolean.FALSE (not throw) when the condition is not yet met — catching NoSuchElementException inside the lambda prevents the wait from failing prematurely when the element is transiently absent. This pattern is especially useful for state-driven UI where classes like 'loading', 'error', or 'active' signal component state changes.",
+    "commonMistakes": [
+      "Throwing an exception inside the lambda instead of returning false, which causes WebDriverWait to propagate the exception immediately",
+      "Not null-checking getAttribute() return value — it returns null when the attribute does not exist",
+      "Using driver.findElement() outside the lambda, which captures a potentially stale reference"
+    ],
+    "followUps": [
+      "How do you add a custom failure message to a custom ExpectedCondition?",
+      "How would you generalize this into a reusable method accepting a Predicate<WebElement>?",
+      "What is the difference between ExpectedCondition<Boolean> and ExpectedCondition<WebElement>?"
+    ],
+    "tags": [
+      "selenium",
+      "custom wait",
+      "expected condition",
+      "webdriverwait",
+      "webdriver"
+    ]
+  },
+  {
+    "id": "selenium-044",
+    "topicId": "selenium",
+    "topicTitle": "Selenium",
+    "level": "senior",
+    "type": "coding",
+    "difficulty": "hard",
+    "title": "Configure RemoteWebDriver for Selenium Grid",
+    "question": "Write a Java factory method that creates a RemoteWebDriver instance targeting a Selenium Grid hub with Chrome capabilities.",
+    "problem": "Implement `createRemoteDriver(String gridUrl, boolean headless)`. Use ChromeOptions to configure the browser. Add '--headless=new', '--no-sandbox', '--disable-dev-shm-usage' when headless is true. Construct and return a RemoteWebDriver pointed at the provided Grid URL. Set an implicit wait of 0 seconds (do not mix waits).",
+    "inputExample": "WebDriver driver = createRemoteDriver(\"http://grid-hub:4444/wd/hub\", true);",
+    "expectedOutput": "A RemoteWebDriver connected to the Grid hub running headless Chrome",
+    "hint": "Use new RemoteWebDriver(new URL(gridUrl), options). ChromeOptions extends AbstractDriverOptions and acts as the capabilities object.",
+    "solutionLanguage": "java",
+    "solution": "import org.openqa.selenium.WebDriver;\nimport org.openqa.selenium.chrome.ChromeOptions;\nimport org.openqa.selenium.remote.RemoteWebDriver;\nimport java.net.MalformedURLException;\nimport java.net.URL;\nimport java.time.Duration;\n\npublic class DriverFactory {\n\n    public static WebDriver createRemoteDriver(String gridUrl, boolean headless)\n            throws MalformedURLException {\n\n        ChromeOptions options = new ChromeOptions();\n        options.addArguments(\"--no-sandbox\");\n        options.addArguments(\"--disable-dev-shm-usage\");\n        options.addArguments(\"--window-size=1920,1080\");\n\n        if (headless) {\n            options.addArguments(\"--headless=new\");\n        }\n\n        WebDriver driver = new RemoteWebDriver(new URL(gridUrl), options);\n        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(0));\n\n        return driver;\n    }\n}",
+    "explanation": "RemoteWebDriver accepts a URL (the Grid hub endpoint) and a Capabilities object (here ChromeOptions). In Selenium 4, ChromeOptions also serves as the capabilities, replacing the old DesiredCapabilities class. '--no-sandbox' and '--disable-dev-shm-usage' are required for stable Chrome operation in Linux containers. Setting implicit wait to 0 explicitly reinforces that explicit waits are the project standard and prevents confusion when the framework is extended.",
+    "commonMistakes": [
+      "Using DesiredCapabilities.chrome() which is deprecated in Selenium 4 — use ChromeOptions instead",
+      "Forgetting '--no-sandbox' in containerized Linux environments, causing Chrome to crash on launch",
+      "Passing the hub URL without '/wd/hub' path for Grid 3 compatibility, while Grid 4 accepts both forms"
+    ],
+    "followUps": [
+      "How do you run tests on BrowserStack or Sauce Labs instead of a local Grid?",
+      "How do you set browser version or platform constraints on the RemoteWebDriver?",
+      "How do you handle a Grid node that becomes unavailable during a test session?"
+    ],
+    "tags": [
+      "selenium",
+      "remote webdriver",
+      "selenium grid",
+      "chromeoptions",
+      "ci",
+      "docker"
+    ]
+  },
+  {
+    "id": "selenium-045",
+    "topicId": "selenium",
+    "topicTitle": "Selenium",
+    "level": "senior",
+    "type": "coding",
+    "difficulty": "hard",
+    "title": "Traverse Shadow DOM to Interact with a Form Field",
+    "question": "Write a Java method that traverses a shadow DOM hierarchy to find and fill a text input inside a nested web component.",
+    "problem": "Implement `fillShadowInput(WebDriver driver, By shadowHostLocator, String cssInsideShadow, String value)`. Locate the shadow host element. Call getShadowRoot() on it to get the shadow root SearchContext. Use it to find the input via CSS selector and send the value. Return the input's current value after typing for verification.",
+    "inputExample": "String result = fillShadowInput(driver, By.tagName(\"my-form\"), \"input[name='email']\", \"user@example.com\");",
+    "expectedOutput": "Returns 'user@example.com' — the value typed into the shadow DOM input",
+    "hint": "WebElement shadowHost = driver.findElement(hostLocator); SearchContext shadowRoot = shadowHost.getShadowRoot(); Then shadowRoot.findElement(By.cssSelector(cssInsideShadow)).sendKeys(value).",
+    "solutionLanguage": "java",
+    "solution": "import org.openqa.selenium.By;\nimport org.openqa.selenium.SearchContext;\nimport org.openqa.selenium.WebDriver;\nimport org.openqa.selenium.WebElement;\n\npublic class ShadowDomUtils {\n\n    public static String fillShadowInput(\n            WebDriver driver,\n            By shadowHostLocator,\n            String cssInsideShadow,\n            String value) {\n\n        WebElement shadowHost = driver.findElement(shadowHostLocator);\n        SearchContext shadowRoot = shadowHost.getShadowRoot();\n\n        WebElement input = shadowRoot.findElement(By.cssSelector(cssInsideShadow));\n        input.clear();\n        input.sendKeys(value);\n\n        return input.getAttribute(\"value\");\n    }\n}",
+    "explanation": "getShadowRoot() is a Selenium 4 API that returns a SearchContext scoped to the shadow root, allowing standard findElement calls within the encapsulated DOM. Only CSS selectors work inside a shadow root — XPath cannot cross the shadow boundary. Calling clear() before sendKeys prevents appending to pre-filled values. getAttribute('value') reads the live DOM property, which reflects what the user has typed.",
+    "commonMistakes": [
+      "Using XPath to locate elements inside the shadow root — XPath does not pierce shadow boundaries",
+      "Calling driver.findElement() with the inner CSS selector directly — it cannot cross shadow boundaries without getShadowRoot()",
+      "Forgetting that getShadowRoot() requires Selenium 4 — in Selenium 3 you must use JavascriptExecutor with querySelector"
+    ],
+    "followUps": [
+      "How do you traverse two levels of nested shadow DOM?",
+      "How do you wait for an element inside a shadow DOM to become visible?",
+      "What is the Selenium 3 JavascriptExecutor equivalent of getShadowRoot()?"
+    ],
+    "tags": [
+      "selenium",
+      "shadow dom",
+      "web components",
+      "selenium4",
+      "css selector"
+    ]
+  },
+  {
+    "id": "selenium-046",
+    "topicId": "selenium",
+    "topicTitle": "Selenium",
+    "level": "mid",
+    "type": "coding",
+    "difficulty": "medium",
+    "title": "TestNG DataProvider with Selenium Login Test",
+    "question": "Write a TestNG test class that uses @DataProvider to run a login test with multiple credential sets and captures a screenshot on each failure.",
+    "problem": "Implement a TestNG test class `LoginParameterizedTest` with: (1) a @DataProvider named 'credentials' providing at least 3 rows of {username, password, expectedTitle}; (2) a @Test method that uses the DataProvider, navigates to a login page, performs login, and asserts the page title; (3) an @AfterMethod that takes a screenshot if the test failed using ITestResult.",
+    "inputExample": "TestNG runner invokes the test 3 times with different credential rows automatically",
+    "expectedOutput": "3 test instances run: passing rows show expected title assertion success; failing rows generate a screenshot artifact",
+    "hint": "Annotate the data method with @DataProvider(name='credentials'). Use Object[][] return type. In @AfterMethod accept ITestResult as parameter. Cast driver to TakesScreenshot when result.getStatus() == ITestResult.FAILURE.",
+    "solutionLanguage": "java",
+    "solution": "import io.github.bonigarcia.wdm.WebDriverManager;\nimport org.openqa.selenium.OutputType;\nimport org.openqa.selenium.TakesScreenshot;\nimport org.openqa.selenium.WebDriver;\nimport org.openqa.selenium.chrome.ChromeDriver;\nimport org.openqa.selenium.chrome.ChromeOptions;\nimport org.testng.ITestResult;\nimport org.testng.annotations.*;\n\nimport java.io.File;\nimport java.io.IOException;\nimport java.nio.file.Files;\nimport java.nio.file.Path;\nimport java.nio.file.Paths;\n\nimport static org.testng.Assert.assertEquals;\n\npublic class LoginParameterizedTest {\n\n    private WebDriver driver;\n\n    @BeforeMethod\n    public void setUp() {\n        WebDriverManager.chromedriver().setup();\n        ChromeOptions options = new ChromeOptions();\n        options.addArguments(\"--headless=new\", \"--no-sandbox\", \"--disable-dev-shm-usage\");\n        driver = new ChromeDriver(options);\n    }\n\n    @DataProvider(name = \"credentials\")\n    public Object[][] credentials() {\n        return new Object[][] {\n            { \"admin\",   \"correct_password\", \"Dashboard\" },\n            { \"editor\",  \"editor_pass\",      \"Editor Home\" },\n            { \"hacker\",  \"wrong_pass\",       \"Login Error\" }\n        };\n    }\n\n    @Test(dataProvider = \"credentials\")\n    public void loginTest(String username, String password, String expectedTitle) {\n        driver.get(\"https://example-app.com/login\");\n        // Assume LoginPage POM is available\n        // new LoginPage(driver).login(username, password);\n        // assertEquals(driver.getTitle(), expectedTitle);\n    }\n\n    @AfterMethod\n    public void tearDown(ITestResult result) throws IOException {\n        if (result.getStatus() == ITestResult.FAILURE) {\n            File src = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);\n            Path dest = Paths.get(\"build/screenshots\",\n                    result.getName() + \"_\" + System.currentTimeMillis() + \".png\");\n            Files.createDirectories(dest.getParent());\n            Files.copy(src.toPath(), dest);\n        }\n        if (driver != null) {\n            driver.quit();\n        }\n    }\n}",
+    "explanation": "DataProvider returns Object[][] where each inner array maps to test method parameters positionally. TestNG automatically names each invocation with the parameter values, making reports readable. ITestResult injected into @AfterMethod gives access to the test outcome without a shared flag variable — this is the idiomatic TestNG pattern. Quitting the driver in a finally-equivalent structure (always in @AfterMethod after screenshot) prevents browser leaks even on assertion failure.",
+    "commonMistakes": [
+      "Returning a List instead of Object[][] from @DataProvider — TestNG requires the array form",
+      "Not matching the @DataProvider name attribute exactly to the dataProvider attribute in @Test",
+      "Calling driver.quit() before taking the screenshot, so getScreenshotAs fails with a session-not-found error"
+    ],
+    "followUps": [
+      "How do you load DataProvider values from a CSV or JSON file?",
+      "How do you run only specific DataProvider rows during debugging?",
+      "How does DataProvider interact with TestNG parallel='methods' configuration?"
+    ],
+    "tags": [
+      "selenium",
+      "testng",
+      "dataprovider",
+      "parameterized testing",
+      "screenshot",
+      "webdrivermanager"
+    ]
+  },
+  {
+    "id": "selenium-047",
+    "topicId": "selenium",
+    "topicTitle": "Selenium",
+    "level": "senior",
+    "type": "scenario",
+    "difficulty": "medium",
+    "question": "A test that uploads a file to a drag-and-drop zone fails on the CI server because there is no real file on the remote node. How do you fix this?",
+    "shortAnswer": "Bundle the test file as a classpath resource and write it to a temporary path at runtime, or use RemoteWebDriver file detector to transfer the file to the remote node.",
+    "interviewAnswer": "There are two root causes to address: the file must exist on the machine where the browser runs, and the path must be absolute and valid on that machine. For a local driver this is trivial, but for RemoteWebDriver the browser runs on the Grid node, not on the test machine. The solution is to enable the LocalFileDetector on the RemoteWebDriver instance — driver.setFileDetector(new LocalFileDetector()) — before calling sendKeys. This instructs RemoteWebDriver to upload the local file to the remote node transparently before sending the path. I also store test fixtures inside src/test/resources, load them via getClass().getClassLoader().getResourceAsStream(), and write to Files.createTempFile() so the path is always valid regardless of the working directory.",
+    "realProjectExample": "Our CI pipeline ran on a Selenium Grid where test VMs had no access to the build machine filesystem. Adding LocalFileDetector and loading fixtures from classpath resources eliminated all file-not-found failures on Grid nodes.",
+    "followUps": [
+      "How do you verify a file was actually uploaded to the server, not just accepted by the UI?",
+      "What is the maximum file size that LocalFileDetector can reliably transfer?",
+      "How do you handle drag-and-drop upload areas that have no underlying file input element?"
+    ],
+    "tags": [
+      "selenium",
+      "file upload",
+      "remote webdriver",
+      "selenium grid",
+      "localfiledetector"
+    ]
+  },
+  {
+    "id": "selenium-048",
+    "topicId": "selenium",
+    "topicTitle": "Selenium",
+    "level": "senior",
+    "type": "scenario",
+    "difficulty": "hard",
+    "question": "A multi-step checkout flow takes 40 seconds per test because every test starts from the homepage and logs in. How do you reduce this to under 10 seconds without sacrificing test isolation?",
+    "shortAnswer": "Bypass the UI login by injecting session cookies or calling the authentication API, navigate directly to the checkout page, and reset state via API between tests.",
+    "interviewAnswer": "UI login is the most common performance bottleneck because it involves multiple network round-trips, DOM interactions, and often a redirect sequence. My approach: (1) call the authentication REST API in a @BeforeMethod using a plain HTTP client (RestAssured or OkHttp) to obtain a session token or cookie; (2) navigate to the app's base URL to establish the browser domain context; (3) inject the auth cookie via driver.manage().addCookie(); (4) navigate directly to the starting URL for the test using driver.get(). This reduces login from 8–12 seconds to under 500ms. For test isolation I use the API to set up and tear down test-specific data rather than relying on UI flows. If cookies are not sufficient (e.g., the app uses HttpOnly tokens with additional CSRF validation), I pre-create the full session via API and replay the resulting cookie jar.",
+    "realProjectExample": "A checkout regression suite of 80 tests ran in 54 minutes. After switching to API-based login and direct navigation, it completed in under 11 minutes with identical coverage and no test isolation regressions.",
+    "followUps": [
+      "How do you handle CSRF tokens when injecting an API session into a browser?",
+      "What do you do when the API does not provide a public authentication endpoint?",
+      "How do you verify that the cookie injection worked before proceeding with the test?"
+    ],
+    "tags": [
+      "selenium",
+      "performance",
+      "authentication",
+      "cookies",
+      "api testing",
+      "test optimization"
+    ]
+  },
+  {
+    "id": "selenium-049",
+    "topicId": "selenium",
+    "topicTitle": "Selenium",
+    "level": "senior",
+    "type": "scenario",
+    "difficulty": "hard",
+    "question": "You need to write an end-to-end test for a real-time dashboard that updates via WebSocket every 2 seconds. The test must assert that a metric value changes after a server event. How do you approach this?",
+    "shortAnswer": "Capture the initial value, trigger or simulate the server event, then use a custom ExpectedCondition that polls until the displayed value changes.",
+    "interviewAnswer": "WebSocket-driven UI updates are inherently asynchronous, so fixed sleeps are unreliable. My approach: (1) capture the initial metric value from the DOM as a baseline; (2) trigger the event — either through the UI (e.g., clicking 'Start Process'), through a direct API call, or by using CDP network events to verify the WebSocket frame was sent; (3) use a custom WebDriverWait condition that polls the element text and returns true only when it differs from the baseline value; (4) assert that the new value matches the expected state. I set the wait timeout to at least 3x the update interval as a safety margin (e.g., 10 seconds for a 2-second update cycle). If the test is fragile due to update order, I assert a range or state ('greater than baseline') rather than an exact value.",
+    "realProjectExample": "A monitoring dashboard displayed an active user count that updated every 3 seconds via WebSocket. We triggered a mock login event via the admin API and waited for the count to increment using a custom ExpectedCondition comparing Integer.parseInt of the element text against the baseline. The test was stable across 200 CI runs.",
+    "followUps": [
+      "How do you intercept and assert WebSocket message content directly in Selenium 4?",
+      "How do you test that the UI recovers correctly when a WebSocket connection drops?",
+      "What is the risk of asserting exact values on a live dashboard versus asserting state changes?"
+    ],
+    "tags": [
+      "selenium",
+      "websocket",
+      "real-time",
+      "custom wait",
+      "async ui",
+      "cdp"
+    ]
+  },
+  {
+    "id": "selenium-050",
+    "topicId": "selenium",
+    "topicTitle": "Selenium",
+    "level": "senior",
+    "type": "scenario",
+    "difficulty": "medium",
+    "question": "A Page Factory-based page object works in isolation but throws StaleElementReferenceException when tests run in a specific order as part of a suite. What is the root cause and how do you fix it?",
+    "shortAnswer": "PageFactory proxy elements are re-located on each access, but if the driver navigates away and back, the proxy may hold state from the previous page's DOM. Fix by ensuring page objects are instantiated after navigation, not reused across navigations.",
+    "interviewAnswer": "PageFactory.initElements creates lazy proxy objects that call findElement on every access. The stale reference is not from caching — the proxy always re-locates. The real issue is usually one of three patterns: (1) the test reuses a page object instance after navigating away from and back to the page, and between navigations the @FindBy locator matched a different element; (2) an AJAX update replaces the matched element between the proxy resolution and the actual method call; (3) the tests run in a different order in suite mode and a previous test left the browser on a different page, so the locator matches an unintended element. The fix: instantiate a new page object every time you navigate to the page rather than holding a page object reference across navigation events. I enforce this by having each POM navigation method return a new typed page object, making it structurally impossible to reuse a stale page object reference.",
+    "realProjectExample": "A checkout test failed with StaleElementReferenceException only when preceded by a payment test that also opened the checkout page. The shared page object instance from a test base class was the culprit. Moving instantiation into each test method resolved it completely.",
+    "followUps": [
+      "Does PageFactory's lazy proxy prevent StaleElementReferenceException entirely?",
+      "How do you handle page objects for pages that partially reload (e.g., SPA route changes)?",
+      "What is the LoadableComponent pattern and when is it preferable to PageFactory?"
+    ],
+    "tags": [
+      "selenium",
+      "page factory",
+      "pagefactory",
+      "stale element",
+      "pom",
+      "page object model"
+    ]
   }
 ]

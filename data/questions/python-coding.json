@@ -15,9 +15,22 @@
     "solutionLanguage": "python",
     "solution": "def find_duplicates(items):\n    seen = set()\n    duplicates = []\n    duplicate_set = set()\n\n    for item in items:\n        if item in seen and item not in duplicate_set:\n            duplicates.append(item)\n            duplicate_set.add(item)\n        seen.add(item)\n\n    return duplicates",
     "explanation": "The function uses one set for values already seen and another to prevent returning the same duplicate twice.",
-    "commonMistakes": ["Returning duplicates multiple times", "Using nested loops unnecessarily", "Not preserving order"],
-    "followUps": ["What is the time complexity?", "How would you handle unhashable values?", "How would you write a pytest for this?"],
-    "tags": ["python", "list", "set", "duplicates"]
+    "commonMistakes": [
+      "Returning duplicates multiple times",
+      "Using nested loops unnecessarily",
+      "Not preserving order"
+    ],
+    "followUps": [
+      "What is the time complexity?",
+      "How would you handle unhashable values?",
+      "How would you write a pytest for this?"
+    ],
+    "tags": [
+      "python",
+      "list",
+      "set",
+      "duplicates"
+    ]
   },
   {
     "id": "python-coding-002",
@@ -27,10 +40,19 @@
     "type": "quiz",
     "difficulty": "easy",
     "question": "Which Python data structure is best for checking if an item has already been seen?",
-    "choices": ["list", "set", "tuple", "string"],
+    "choices": [
+      "list",
+      "set",
+      "tuple",
+      "string"
+    ],
     "correctAnswer": "set",
     "explanation": "A set provides average O(1) membership checks, which is ideal for duplicate detection and validation helpers.",
-    "tags": ["python", "set", "complexity"]
+    "tags": [
+      "python",
+      "set",
+      "complexity"
+    ]
   },
   {
     "id": "python-coding-003",
@@ -43,8 +65,16 @@
     "shortAnswer": "Validate required structure and business-critical fields, then avoid asserting unstable fields like timestamps unless needed.",
     "interviewAnswer": "I separate schema-level checks from business assertions. I validate required keys, data types, status-related fields, and known invariants, while allowing dynamic fields such as IDs or timestamps to vary. For larger APIs I use helper functions or JSON schema so tests stay readable and consistent.",
     "realProjectExample": "For an order API, I would assert the order status, item count, and customer ID, but only validate that createdAt is a valid timestamp rather than matching an exact value.",
-    "followUps": ["When would you use JSON schema?", "How do you test optional fields?", "How do you handle backward-compatible API changes?"],
-    "tags": ["python", "api", "validation"]
+    "followUps": [
+      "When would you use JSON schema?",
+      "How do you test optional fields?",
+      "How do you handle backward-compatible API changes?"
+    ],
+    "tags": [
+      "python",
+      "api",
+      "validation"
+    ]
   },
   {
     "id": "python-coding-004",
@@ -62,9 +92,22 @@
     "solutionLanguage": "python",
     "solution": "def compare_strings(a, b):\n    return a.strip().lower() == b.strip().lower()",
     "explanation": "strip() removes leading/trailing whitespace and lower() normalizes case. Chaining them before comparison avoids false negatives caused by cosmetic differences in UI text.",
-    "commonMistakes": ["Forgetting to strip before lowercasing", "Using == directly on raw input", "Not handling None values"],
-    "followUps": ["How would you extend this to ignore internal extra spaces?", "How would you write a pytest parametrize for multiple cases?", "What if the strings are None?"],
-    "tags": ["python", "strings", "normalization", "comparison"]
+    "commonMistakes": [
+      "Forgetting to strip before lowercasing",
+      "Using == directly on raw input",
+      "Not handling None values"
+    ],
+    "followUps": [
+      "How would you extend this to ignore internal extra spaces?",
+      "How would you write a pytest parametrize for multiple cases?",
+      "What if the strings are None?"
+    ],
+    "tags": [
+      "python",
+      "strings",
+      "normalization",
+      "comparison"
+    ]
   },
   {
     "id": "python-coding-005",
@@ -82,9 +125,22 @@
     "solutionLanguage": "python",
     "solution": "def extract_field(items, field):\n    return [item[field] for item in items if field in item]",
     "explanation": "The list comprehension iterates over every dict and includes only those where the key exists, returning the associated value. This is a common QA utility for pulling IDs, statuses, or names out of paginated API responses.",
-    "commonMistakes": ["Using item[field] without guarding against KeyError", "Returning None values instead of skipping missing keys", "Using a for loop with append when a list comprehension is cleaner"],
-    "followUps": ["How would you handle nested fields like 'address.city'?", "How would you make this work for a dot-notation path string?", "How would you assert all returned values are unique?"],
-    "tags": ["python", "lists", "dictionaries", "data-extraction"]
+    "commonMistakes": [
+      "Using item[field] without guarding against KeyError",
+      "Returning None values instead of skipping missing keys",
+      "Using a for loop with append when a list comprehension is cleaner"
+    ],
+    "followUps": [
+      "How would you handle nested fields like 'address.city'?",
+      "How would you make this work for a dot-notation path string?",
+      "How would you assert all returned values are unique?"
+    ],
+    "tags": [
+      "python",
+      "lists",
+      "dictionaries",
+      "data-extraction"
+    ]
   },
   {
     "id": "python-coding-006",
@@ -102,9 +158,22 @@
     "solutionLanguage": "python",
     "solution": "import json\n\ndef validate_json(json_string, required_keys):\n    try:\n        data = json.loads(json_string)\n    except (json.JSONDecodeError, TypeError):\n        return (None, ['INVALID_JSON'])\n\n    missing = [key for key in required_keys if key not in data]\n    return (data, missing)",
     "explanation": "json.loads parses the string into a Python dict. A try/except catches malformed input gracefully. The missing keys list is built with a list comprehension comparing required_keys against the parsed dict.",
-    "commonMistakes": ["Letting JSONDecodeError propagate instead of catching it", "Checking keys on the raw string instead of the parsed dict", "Returning a mutable default like [] as a fallback"],
-    "followUps": ["How would you validate nested keys?", "When would you use jsonschema instead of manual key checks?", "How would you log which endpoint returned missing keys?"],
-    "tags": ["python", "json", "validation", "error-handling"]
+    "commonMistakes": [
+      "Letting JSONDecodeError propagate instead of catching it",
+      "Checking keys on the raw string instead of the parsed dict",
+      "Returning a mutable default like [] as a fallback"
+    ],
+    "followUps": [
+      "How would you validate nested keys?",
+      "When would you use jsonschema instead of manual key checks?",
+      "How would you log which endpoint returned missing keys?"
+    ],
+    "tags": [
+      "python",
+      "json",
+      "validation",
+      "error-handling"
+    ]
   },
   {
     "id": "python-coding-007",
@@ -122,9 +191,22 @@
     "solutionLanguage": "python",
     "solution": "import csv\n\ndef load_csv(file_path):\n    rows = []\n    with open(file_path, newline='', encoding='utf-8') as f:\n        reader = csv.DictReader(f)\n        for row in reader:\n            rows.append(dict(row))\n    return rows",
     "explanation": "csv.DictReader uses the first row as field names and maps each subsequent row into an OrderedDict (Python 3.7+ preserves insertion order). Wrapping in dict() converts OrderedDict to a plain dict. The with block ensures the file is closed after reading.",
-    "commonMistakes": ["Forgetting newline='' which causes extra blank rows on Windows", "Using csv.reader instead of DictReader and manually indexing columns", "Not specifying encoding and getting UnicodeDecodeError on non-ASCII data"],
-    "followUps": ["How would you skip comment rows starting with '#'?", "How would you use this data with pytest.mark.parametrize?", "How would you handle a file that doesn't exist?"],
-    "tags": ["python", "file-reading", "csv", "data-driven-testing"]
+    "commonMistakes": [
+      "Forgetting newline='' which causes extra blank rows on Windows",
+      "Using csv.reader instead of DictReader and manually indexing columns",
+      "Not specifying encoding and getting UnicodeDecodeError on non-ASCII data"
+    ],
+    "followUps": [
+      "How would you skip comment rows starting with '#'?",
+      "How would you use this data with pytest.mark.parametrize?",
+      "How would you handle a file that doesn't exist?"
+    ],
+    "tags": [
+      "python",
+      "file-reading",
+      "csv",
+      "data-driven-testing"
+    ]
   },
   {
     "id": "python-coding-008",
@@ -142,9 +224,23 @@
     "solutionLanguage": "python",
     "solution": "def diff_dicts(expected, actual, path=''):\n    differences = []\n\n    all_keys = set(expected.keys()) | set(actual.keys())\n\n    for key in sorted(all_keys):\n        full_path = f'{path}.{key}' if path else key\n\n        if key not in expected:\n            differences.append(f'{full_path}: key missing in expected')\n        elif key not in actual:\n            differences.append(f'{full_path}: key missing in actual')\n        elif isinstance(expected[key], dict) and isinstance(actual[key], dict):\n            differences.extend(diff_dicts(expected[key], actual[key], full_path))\n        elif expected[key] != actual[key]:\n            differences.append(f'{full_path}: expected {expected[key]!r}, got {actual[key]!r}')\n\n    return differences",
     "explanation": "The function builds the union of all keys, then for each key either recurses (if both values are dicts) or records a mismatch. The dotted path prefix makes it easy to pinpoint the location of each difference in deeply nested payloads.",
-    "commonMistakes": ["Not handling keys present in only one dict", "Comparing dicts with == at the top level instead of recursing", "Not sorting keys, leading to non-deterministic output order"],
-    "followUps": ["How would you extend this to handle lists?", "How would you make certain fields optional or ignored?", "How would you plug this into a custom pytest assertion message?"],
-    "tags": ["python", "data-comparison", "dictionaries", "recursion", "json"]
+    "commonMistakes": [
+      "Not handling keys present in only one dict",
+      "Comparing dicts with == at the top level instead of recursing",
+      "Not sorting keys, leading to non-deterministic output order"
+    ],
+    "followUps": [
+      "How would you extend this to handle lists?",
+      "How would you make certain fields optional or ignored?",
+      "How would you plug this into a custom pytest assertion message?"
+    ],
+    "tags": [
+      "python",
+      "data-comparison",
+      "dictionaries",
+      "recursion",
+      "json"
+    ]
   },
   {
     "id": "python-coding-009",
@@ -162,9 +258,23 @@
     "solutionLanguage": "python",
     "solution": "from collections import defaultdict\n\ndef group_by(items, key):\n    groups = defaultdict(list)\n    for item in items:\n        groups[item[key]].append(item)\n    return dict(groups)",
     "explanation": "defaultdict(list) automatically initializes an empty list for new keys, so no explicit key-existence check is needed. Converting back to a plain dict at the end avoids surprises for callers who don't expect a defaultdict.",
-    "commonMistakes": ["Using a regular dict and checking 'if key in groups' manually", "Modifying items while grouping", "Forgetting to convert defaultdict to dict before returning"],
-    "followUps": ["How would you count items in each group instead of listing them?", "How would you sort each group by a secondary field?", "How is this related to itertools.groupby?"],
-    "tags": ["python", "lists", "dictionaries", "grouping", "collections"]
+    "commonMistakes": [
+      "Using a regular dict and checking 'if key in groups' manually",
+      "Modifying items while grouping",
+      "Forgetting to convert defaultdict to dict before returning"
+    ],
+    "followUps": [
+      "How would you count items in each group instead of listing them?",
+      "How would you sort each group by a secondary field?",
+      "How is this related to itertools.groupby?"
+    ],
+    "tags": [
+      "python",
+      "lists",
+      "dictionaries",
+      "grouping",
+      "collections"
+    ]
   },
   {
     "id": "python-coding-010",
@@ -182,9 +292,22 @@
     "solutionLanguage": "python",
     "solution": "def flatten(nested):\n    result = []\n    for item in nested:\n        if isinstance(item, list):\n            result.extend(item)\n        else:\n            result.append(item)\n    return result",
     "explanation": "extend() adds all elements of a sub-list in place, while append() handles scalar values. This avoids the common mistake of appending the inner list as a single element.",
-    "commonMistakes": ["Using append for sub-lists, which nests them further", "Using sum(nested, []) which is Pythonic but has O(n^2) performance", "Not handling mixed lists with both scalars and sub-lists"],
-    "followUps": ["How would you flatten arbitrarily deeply nested lists?", "What is the performance of sum(nested, [])?", "How would you write this as a list comprehension?"],
-    "tags": ["python", "lists", "flattening", "loops"]
+    "commonMistakes": [
+      "Using append for sub-lists, which nests them further",
+      "Using sum(nested, []) which is Pythonic but has O(n^2) performance",
+      "Not handling mixed lists with both scalars and sub-lists"
+    ],
+    "followUps": [
+      "How would you flatten arbitrarily deeply nested lists?",
+      "What is the performance of sum(nested, [])?",
+      "How would you write this as a list comprehension?"
+    ],
+    "tags": [
+      "python",
+      "lists",
+      "flattening",
+      "loops"
+    ]
   },
   {
     "id": "python-coding-011",
@@ -202,9 +325,23 @@
     "solutionLanguage": "python",
     "solution": "import functools\n\ndef retry(max_attempts=3, exceptions=(Exception,)):\n    def decorator(func):\n        @functools.wraps(func)\n        def wrapper(*args, **kwargs):\n            last_exception = None\n            for attempt in range(1, max_attempts + 1):\n                try:\n                    return func(*args, **kwargs)\n                except exceptions as e:\n                    last_exception = e\n            raise last_exception\n        return wrapper\n    return decorator",
     "explanation": "The outer retry() function returns a decorator that wraps the target function. functools.wraps copies __name__ and __doc__ so the wrapper looks like the original. The loop retries up to max_attempts times, catching only the specified exception types and storing the last one for re-raising.",
-    "commonMistakes": ["Forgetting functools.wraps, which breaks introspection", "Catching all exceptions when only specific ones should be retried", "Raising a new exception instead of re-raising the original with full traceback"],
-    "followUps": ["How would you add a configurable sleep between retries?", "How would you log each failed attempt?", "How would you test this decorator itself with pytest?"],
-    "tags": ["python", "functions", "decorators", "retry", "test-utilities"]
+    "commonMistakes": [
+      "Forgetting functools.wraps, which breaks introspection",
+      "Catching all exceptions when only specific ones should be retried",
+      "Raising a new exception instead of re-raising the original with full traceback"
+    ],
+    "followUps": [
+      "How would you add a configurable sleep between retries?",
+      "How would you log each failed attempt?",
+      "How would you test this decorator itself with pytest?"
+    ],
+    "tags": [
+      "python",
+      "functions",
+      "decorators",
+      "retry",
+      "test-utilities"
+    ]
   },
   {
     "id": "python-coding-012",
@@ -222,9 +359,23 @@
     "solutionLanguage": "python",
     "solution": "import pytest\n\n@pytest.fixture\ndef test_users():\n    return [\n        {'username': 'alice', 'password': 'pass1', 'role': 'admin'},\n        {'username': 'bob',   'password': 'pass2', 'role': 'viewer'},\n        {'username': 'carol', 'password': 'pass3', 'role': 'editor'},\n    ]\n\ndef test_all_users_have_username(test_users):\n    for user in test_users:\n        assert user['username'], f\"Empty username found: {user}\"",
     "explanation": "The fixture function is called by pytest before each test that declares test_users as a parameter. The test iterates over all users and asserts the username field is truthy (non-empty string). The f-string in the assert provides a clear failure message.",
-    "commonMistakes": ["Calling the fixture function directly instead of declaring it as a parameter", "Using setup_method instead of fixtures for data setup", "Not including a meaningful failure message in the assert"],
-    "followUps": ["How would you make this fixture session-scoped?", "How would you load the data from a JSON file instead?", "How would you parametrize this test to run once per user?"],
-    "tags": ["python", "pytest", "fixtures", "test-utilities", "data-driven-testing"]
+    "commonMistakes": [
+      "Calling the fixture function directly instead of declaring it as a parameter",
+      "Using setup_method instead of fixtures for data setup",
+      "Not including a meaningful failure message in the assert"
+    ],
+    "followUps": [
+      "How would you make this fixture session-scoped?",
+      "How would you load the data from a JSON file instead?",
+      "How would you parametrize this test to run once per user?"
+    ],
+    "tags": [
+      "python",
+      "pytest",
+      "fixtures",
+      "test-utilities",
+      "data-driven-testing"
+    ]
   },
   {
     "id": "python-coding-013",
@@ -242,7 +393,12 @@
     ],
     "correctAnswer": "A Python dict with the value True (bool)",
     "explanation": "json.loads() converts JSON types to Python equivalents: JSON true becomes Python True (bool), JSON null becomes None, JSON numbers become int or float. The string 'true' is not a valid Python literal, so it would not appear as a string.",
-    "tags": ["python", "json", "types", "parsing"]
+    "tags": [
+      "python",
+      "json",
+      "types",
+      "parsing"
+    ]
   },
   {
     "id": "python-coding-014",
@@ -260,7 +416,12 @@
     ],
     "correctAnswer": "with open('file.txt', 'r') as f:",
     "explanation": "The with statement is the recommended pattern because it ensures the file is closed automatically when the block exits, even if an exception occurs. The bare open() call without with risks leaving file handles open.",
-    "tags": ["python", "file-reading", "context-manager", "best-practices"]
+    "tags": [
+      "python",
+      "file-reading",
+      "context-manager",
+      "best-practices"
+    ]
   },
   {
     "id": "python-coding-015",
@@ -278,7 +439,13 @@
     ],
     "correctAnswer": "The list is shared across all calls that use the default, accumulating values between tests",
     "explanation": "Mutable default arguments in Python are evaluated once when the function is defined, not on each call. This means every test that calls append_result() without passing results will write into the same list object, causing cross-test pollution. The fix is to use results=None and assign results = [] inside the function body.",
-    "tags": ["python", "functions", "mutable-defaults", "bugs", "test-utilities"]
+    "tags": [
+      "python",
+      "functions",
+      "mutable-defaults",
+      "bugs",
+      "test-utilities"
+    ]
   },
   {
     "id": "python-coding-016",
@@ -296,7 +463,12 @@
     ],
     "correctAnswer": "{'b': 2}",
     "explanation": "Iterating over list(data.keys()) creates a snapshot of the keys as a list, so modifying the dict during the loop is safe. If the code iterated over data.keys() directly, Python 3 would raise RuntimeError. The key 'a' with value 1 is deleted, leaving {'b': 2}.",
-    "tags": ["python", "dictionaries", "loops", "iteration-safety"]
+    "tags": [
+      "python",
+      "dictionaries",
+      "loops",
+      "iteration-safety"
+    ]
   },
   {
     "id": "python-coding-017",
@@ -314,7 +486,13 @@
     ],
     "correctAnswer": "session scope runs the fixture once for the entire test run; function scope runs it before every test function",
     "explanation": "Scope controls fixture lifetime. function (default) creates and tears down for each test. module shares across one file. class shares within a class. session shares across the entire pytest session. For expensive setup like browser launch or DB connection, session or module scope avoids repetition.",
-    "tags": ["python", "pytest", "fixtures", "scope", "test-utilities"]
+    "tags": [
+      "python",
+      "pytest",
+      "fixtures",
+      "scope",
+      "test-utilities"
+    ]
   },
   {
     "id": "python-coding-018",
@@ -332,7 +510,12 @@
     ],
     "correctAnswer": "@pytest.mark.parametrize('input,expected', [('hello', 'HELLO'), ('world', 'WORLD')])",
     "explanation": "pytest.mark.parametrize takes a comma-separated string of argument names and a list of tuples providing the values. Each tuple becomes one test case. The other options use invalid syntax that pytest does not accept.",
-    "tags": ["python", "pytest", "parametrize", "test-utilities"]
+    "tags": [
+      "python",
+      "pytest",
+      "parametrize",
+      "test-utilities"
+    ]
   },
   {
     "id": "python-coding-019",
@@ -345,8 +528,18 @@
     "shortAnswer": "Extract common assertions and helpers into a shared module with clear contracts, keep them pure where possible, and version-control them alongside tests.",
     "interviewAnswer": "I organize utilities into focused modules — for example, api_helpers.py for response assertion helpers, data_helpers.py for diff and extraction utilities, and fixtures.py for shared pytest fixtures in conftest.py. Each function does one thing and has a clear return contract. I avoid side effects in helpers: they should not call external services or write to disk. I document the expected input shape with type hints or a docstring so the next engineer knows what to pass. When a helper grows complicated, I write unit tests for it. I also use consistent naming conventions — assert_ prefix for assertion helpers and get_ prefix for data extraction — so test authors can find what they need quickly.",
     "realProjectExample": "In a previous project, I extracted an assert_pagination_response(response, expected_count, page_size) helper that validated status code, total count, page metadata, and item count in one call. Centralizing it meant that when the API changed its pagination envelope, I fixed one function and all 40+ tests that used it immediately passed again.",
-    "followUps": ["How do you prevent utility functions from becoming a dumping ground?", "How do you document that a helper is deprecated?", "How do you share utilities across multiple test repositories?"],
-    "tags": ["python", "test-utilities", "functions", "maintainability", "pytest"]
+    "followUps": [
+      "How do you prevent utility functions from becoming a dumping ground?",
+      "How do you document that a helper is deprecated?",
+      "How do you share utilities across multiple test repositories?"
+    ],
+    "tags": [
+      "python",
+      "test-utilities",
+      "functions",
+      "maintainability",
+      "pytest"
+    ]
   },
   {
     "id": "python-coding-020",
@@ -359,8 +552,18 @@
     "shortAnswer": "Use fixtures for setup and teardown, keep test data close to tests, and avoid sharing mutable state between test cases.",
     "interviewAnswer": "Test data isolation is one of the biggest maintenance challenges in large suites. I use pytest fixtures with appropriate scope to create and tear down data: function-scoped fixtures for data that must be clean per test, and session-scoped for read-only reference data. For integration tests that hit a real database I create data in a setup step and delete it in teardown using yield fixtures. I store static test data as JSON or CSV files in a test_data/ directory alongside the tests, rather than hardcoding values inline. For data-driven tests I use pytest.mark.parametrize with the file contents loaded by a helper. I also avoid global variables in test modules — any shared state should flow through fixtures explicitly.",
     "realProjectExample": "For an e-commerce project, I had a create_order fixture that called the API to create an order and yielded the order ID to the test. The fixture's teardown called a cleanup endpoint to cancel the order. This meant every test started with a fresh order regardless of test execution order or parallelism.",
-    "followUps": ["How do you handle test data in a CI environment where you can't call a real API?", "How do you create test data for tests that run in parallel?", "When would you use factory functions instead of fixtures?"],
-    "tags": ["python", "test-data", "fixtures", "pytest", "isolation"]
+    "followUps": [
+      "How do you handle test data in a CI environment where you can't call a real API?",
+      "How do you create test data for tests that run in parallel?",
+      "When would you use factory functions instead of fixtures?"
+    ],
+    "tags": [
+      "python",
+      "test-data",
+      "fixtures",
+      "pytest",
+      "isolation"
+    ]
   },
   {
     "id": "python-coding-021",
@@ -373,8 +576,18 @@
     "shortAnswer": "Sort both lists by a stable key before comparing, or convert each dict to a frozenset of items and compare the resulting sets.",
     "interviewAnswer": "When comparing API responses that return a list of objects, the order is often not guaranteed or not part of the contract. A naive assertEqual on two lists fails if the order differs. My approach depends on the data: if each dict has a unique identifier like 'id', I sort both lists by that key before comparing with a deep-equal check. If there is no natural sort key, I convert each dict to a tuple of sorted items — tuple(sorted(d.items())) — and compare the resulting sets. For nested dicts I serialize to JSON with sorted keys using json.dumps(d, sort_keys=True) and compare those strings. I expose this as an assert_unordered_equal(expected, actual, key) helper so test code is readable.",
     "realProjectExample": "A search endpoint returned product tags as a list and the order changed between environments. I replaced a direct list comparison with a set-of-frozenset comparison in a helper, which made the test stable across environments without weakening the assertion.",
-    "followUps": ["How would you handle lists with duplicate items?", "When is order actually part of the contract and should be tested?", "How does this relate to JSON schema validation?"],
-    "tags": ["python", "data-comparison", "lists", "dictionaries", "test-utilities"]
+    "followUps": [
+      "How would you handle lists with duplicate items?",
+      "When is order actually part of the contract and should be tested?",
+      "How does this relate to JSON schema validation?"
+    ],
+    "tags": [
+      "python",
+      "data-comparison",
+      "lists",
+      "dictionaries",
+      "test-utilities"
+    ]
   },
   {
     "id": "python-coding-022",
@@ -387,8 +600,18 @@
     "shortAnswer": "Convert both collections to sets and use set operations: difference for missing or extra items, intersection for common items, and symmetric difference for all discrepancies at once.",
     "interviewAnswer": "Sets are the right tool when I need to answer questions like: which expected test IDs are missing from the actual results? Which actual items were not expected? Are there any unexpected extras? Set operations make this concise and O(n) on average. expected_set - actual_set gives missing items. actual_set - expected_set gives extras. expected_set ^ actual_set gives all discrepancies in one expression. I use this pattern in CI result validators that compare a required test list against the test run report to flag if any required tests were skipped. The key constraint is that items must be hashable, so for dicts I use a frozenset of items() or a JSON-serialized key.",
     "realProjectExample": "After migrating a test suite to a new runner, I wrote a validator that loaded the canonical list of required test IDs from a text file into a set, loaded the JUnit XML report results into another set, and used set difference to immediately surface any tests that were dropped during the migration — without any loops.",
-    "followUps": ["When would you use a Counter instead of a set?", "How would you handle case-insensitive comparison with sets?", "How would you extend this to track which tests are new versus which are removed?"],
-    "tags": ["python", "sets", "data-comparison", "test-utilities", "ci-validation"]
+    "followUps": [
+      "When would you use a Counter instead of a set?",
+      "How would you handle case-insensitive comparison with sets?",
+      "How would you extend this to track which tests are new versus which are removed?"
+    ],
+    "tags": [
+      "python",
+      "sets",
+      "data-comparison",
+      "test-utilities",
+      "ci-validation"
+    ]
   },
   {
     "id": "python-coding-023",
@@ -406,9 +629,23 @@
     "solutionLanguage": "python",
     "solution": "def assert_subset(subset, full):\n    mismatches = []\n    for key, expected_value in subset.items():\n        if key not in full:\n            mismatches.append(f\"Key {key!r}: missing from actual response\")\n        elif full[key] != expected_value:\n            mismatches.append(f\"Key {key!r}: expected {expected_value!r}, got {full[key]!r}\")\n    if mismatches:\n        raise AssertionError('\\n'.join(mismatches))",
     "explanation": "The helper collects all mismatches before raising, so one AssertionError reports every problem rather than stopping at the first. Collecting all failures first is more useful than failing fast in assertion helpers.",
-    "commonMistakes": ["Raising immediately on the first mismatch so other differences are hidden", "Using == on the whole dict which fails if full has extra keys", "Not including the key name in the error message"],
-    "followUps": ["How would you make this work with nested dicts?", "How would you ignore certain keys like 'timestamp'?", "How is this similar to Python's unittest assertDictContainsSubset (deprecated)?"],
-    "tags": ["python", "dictionaries", "pytest-style", "assertions", "test-utilities"]
+    "commonMistakes": [
+      "Raising immediately on the first mismatch so other differences are hidden",
+      "Using == on the whole dict which fails if full has extra keys",
+      "Not including the key name in the error message"
+    ],
+    "followUps": [
+      "How would you make this work with nested dicts?",
+      "How would you ignore certain keys like 'timestamp'?",
+      "How is this similar to Python's unittest assertDictContainsSubset (deprecated)?"
+    ],
+    "tags": [
+      "python",
+      "dictionaries",
+      "pytest-style",
+      "assertions",
+      "test-utilities"
+    ]
   },
   {
     "id": "python-coding-024",
@@ -426,9 +663,23 @@
     "solutionLanguage": "python",
     "solution": "import string\n\ndef word_frequency(text):\n    counts = {}\n    for word in text.split():\n        cleaned = word.strip(string.punctuation).lower()\n        if cleaned:\n            counts[cleaned] = counts.get(cleaned, 0) + 1\n    return counts",
     "explanation": "text.split() splits on any whitespace. strip(string.punctuation) removes leading and trailing punctuation characters. lower() normalizes case. counts.get(word, 0) + 1 increments the count or starts at 1 without needing a key-existence check.",
-    "commonMistakes": ["Forgetting to strip punctuation, counting 'error' and 'error.' as different words", "Using a case-sensitive comparison for words", "Not skipping empty strings that result from stripping all characters"],
-    "followUps": ["How would you use collections.Counter to simplify this?", "How would you find words that appear more than N times?", "How would you apply this to scan a log file line by line?"],
-    "tags": ["python", "strings", "dictionaries", "loops", "text-processing"]
+    "commonMistakes": [
+      "Forgetting to strip punctuation, counting 'error' and 'error.' as different words",
+      "Using a case-sensitive comparison for words",
+      "Not skipping empty strings that result from stripping all characters"
+    ],
+    "followUps": [
+      "How would you use collections.Counter to simplify this?",
+      "How would you find words that appear more than N times?",
+      "How would you apply this to scan a log file line by line?"
+    ],
+    "tags": [
+      "python",
+      "strings",
+      "dictionaries",
+      "loops",
+      "text-processing"
+    ]
   },
   {
     "id": "python-coding-025",
@@ -446,8 +697,787 @@
     "solutionLanguage": "python",
     "solution": "def validate_response_list(items, schema):\n    errors = []\n    for idx, item in enumerate(items):\n        for field, expected_type in schema.items():\n            if field not in item:\n                errors.append(f\"Item {idx}: field {field!r} is missing\")\n            elif not isinstance(item[field], expected_type):\n                actual_type = type(item[field]).__name__\n                errors.append(\n                    f\"Item {idx}: field {field!r} expected {expected_type.__name__}, got {actual_type}\"\n                )\n    return errors",
     "explanation": "enumerate provides a zero-based index for clear error messages. For each field in the schema the function first checks presence, then type. isinstance handles subclass relationships correctly (e.g., bool is a subclass of int, so schema={'flag': bool} would accept True). Collecting all errors before returning gives a complete picture of schema violations across the full list.",
-    "commonMistakes": ["Using type(x) == expected_type instead of isinstance, which misses subclasses", "Stopping at the first error per item instead of collecting all violations", "Not including the item index in the error message, making it hard to locate the bad record"],
-    "followUps": ["How would you extend this to support optional fields?", "When would you use jsonschema library instead of this approach?", "How would you make the type schema support Union types like int or str?"],
-    "tags": ["python", "api-validation", "dictionaries", "functions", "type-checking", "test-utilities"]
+    "commonMistakes": [
+      "Using type(x) == expected_type instead of isinstance, which misses subclasses",
+      "Stopping at the first error per item instead of collecting all violations",
+      "Not including the item index in the error message, making it hard to locate the bad record"
+    ],
+    "followUps": [
+      "How would you extend this to support optional fields?",
+      "When would you use jsonschema library instead of this approach?",
+      "How would you make the type schema support Union types like int or str?"
+    ],
+    "tags": [
+      "python",
+      "api-validation",
+      "dictionaries",
+      "functions",
+      "type-checking",
+      "test-utilities"
+    ]
+  },
+  {
+    "id": "python-coding-026",
+    "topicId": "python-coding",
+    "topicTitle": "Python Coding",
+    "level": "mid",
+    "type": "coding",
+    "difficulty": "medium",
+    "title": "Context manager for temporary test directory",
+    "question": "Write a context manager that creates a temporary directory for a test and deletes it on exit.",
+    "problem": "Implement a context manager class TempTestDir whose __enter__ method creates a uniquely-named temporary directory under the system temp folder and returns its path as a pathlib.Path. The __exit__ method must delete the directory and all its contents, even if the test raises an exception.",
+    "inputExample": "with TempTestDir() as tmp:\n    (tmp / 'report.txt').write_text('ok')\n    print(tmp.exists())  # True\nprint(tmp.exists())  # False",
+    "expectedOutput": "True\nFalse",
+    "hint": "Use tempfile.mkdtemp() in __enter__ and shutil.rmtree() in __exit__. Return False from __exit__ so exceptions propagate.",
+    "solutionLanguage": "python",
+    "solution": "import tempfile\nimport shutil\nfrom pathlib import Path\n\nclass TempTestDir:\n    def __enter__(self):\n        self._path = Path(tempfile.mkdtemp())\n        return self._path\n\n    def __exit__(self, exc_type, exc_val, exc_tb):\n        shutil.rmtree(self._path, ignore_errors=True)\n        return False  # do not suppress exceptions\n\n# Example usage\nwith TempTestDir() as tmp:\n    (tmp / 'report.txt').write_text('ok')\n    print(tmp.exists())   # True\nprint(tmp.exists())       # False",
+    "explanation": "__enter__ is called when the with block starts; it creates the directory and returns the path. __exit__ is called when the block exits for any reason (normal or exception). shutil.rmtree deletes the tree recursively. Returning False allows any exception from the test body to propagate normally.",
+    "commonMistakes": [
+      "Returning True from __exit__, which silently swallows test exceptions",
+      "Using os.rmdir which fails if the directory is not empty",
+      "Storing the path as a string instead of a Path object, breaking / operator for path joining"
+    ],
+    "followUps": [
+      "How would you convert this to a @contextmanager generator function?",
+      "How would you use pytest's tmp_path fixture instead?",
+      "How would you keep the directory on failure for debugging?"
+    ],
+    "tags": [
+      "python",
+      "context-manager",
+      "pathlib",
+      "tempfile",
+      "test-utilities"
+    ]
+  },
+  {
+    "id": "python-coding-027",
+    "topicId": "python-coding",
+    "topicTitle": "Python Coding",
+    "level": "mid",
+    "type": "coding",
+    "difficulty": "medium",
+    "title": "Generator for paginated test data",
+    "question": "Write a generator function that yields records from a paginated data source one page at a time.",
+    "problem": "Implement paginated_records(fetch_page, page_size) where fetch_page(page_num, size) is a callable that returns a list of records (simulating an API call). The generator should yield individual records starting from page 1, fetching the next page only when the current page is exhausted. Stop when a page returns fewer records than page_size (indicating the last page).",
+    "inputExample": "# Simulated API\nall_data = list(range(7))\ndef fetch(page, size):\n    start = (page - 1) * size\n    return all_data[start:start + size]\n\nprint(list(paginated_records(fetch, 3)))",
+    "expectedOutput": "[0, 1, 2, 3, 4, 5, 6]",
+    "hint": "Use a while True loop; break when the page length is less than page_size. Use yield inside a for loop over each page's records.",
+    "solutionLanguage": "python",
+    "solution": "def paginated_records(fetch_page, page_size):\n    page_num = 1\n    while True:\n        records = fetch_page(page_num, page_size)\n        for record in records:\n            yield record\n        if len(records) < page_size:\n            break\n        page_num += 1\n\n# Example\nall_data = list(range(7))\ndef fetch(page, size):\n    start = (page - 1) * size\n    return all_data[start:start + size]\n\nprint(list(paginated_records(fetch, 3)))  # [0, 1, 2, 3, 4, 5, 6]",
+    "explanation": "The generator yields each record lazily, so the caller controls how many are consumed — useful when scanning for a matching record without loading all pages. The termination condition (shorter page than requested) is the standard API pagination sentinel. Breaking after yielding the short page ensures the last partial page is always included.",
+    "commonMistakes": [
+      "Breaking before yielding the last partial page, dropping the final records",
+      "Fetching all pages eagerly into a list, defeating the generator's lazy purpose",
+      "Using page_num starting at 0 when the API is 1-indexed"
+    ],
+    "followUps": [
+      "How would you add a max_pages safety limit?",
+      "How would you use this generator in a pytest parametrize?",
+      "How would you handle an API that returns a next_cursor token instead of page numbers?"
+    ],
+    "tags": [
+      "python",
+      "generators",
+      "pagination",
+      "api",
+      "test-data"
+    ]
+  },
+  {
+    "id": "python-coding-028",
+    "topicId": "python-coding",
+    "topicTitle": "Python Coding",
+    "level": "mid",
+    "type": "coding",
+    "difficulty": "medium",
+    "title": "Parse log lines with regular expressions",
+    "question": "Write a function that extracts structured data from log lines using a regular expression.",
+    "problem": "Given a list of log line strings in the format '[LEVEL] YYYY-MM-DD HH:MM:SS - message', implement parse_log_lines(lines) that returns a list of dicts with keys 'level', 'timestamp', and 'message'. Skip lines that do not match the format.",
+    "inputExample": "lines = [\n    '[ERROR] 2024-03-15 10:22:01 - Connection refused',\n    '[INFO] 2024-03-15 10:22:05 - Test started',\n    'INVALID LINE'\n]\nparse_log_lines(lines)",
+    "expectedOutput": "[{'level': 'ERROR', 'timestamp': '2024-03-15 10:22:01', 'message': 'Connection refused'}, {'level': 'INFO', 'timestamp': '2024-03-15 10:22:05', 'message': 'Test started'}]",
+    "hint": "Use re.match() with named groups (?P<name>...) and compile the pattern outside the loop for efficiency.",
+    "solutionLanguage": "python",
+    "solution": "import re\n\nLOG_PATTERN = re.compile(\n    r'\\[(?P<level>[A-Z]+)\\] (?P<timestamp>\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}) - (?P<message>.+)'\n)\n\ndef parse_log_lines(lines):\n    results = []\n    for line in lines:\n        match = LOG_PATTERN.match(line)\n        if match:\n            results.append(match.groupdict())\n    return results\n\n# Example\nlines = [\n    '[ERROR] 2024-03-15 10:22:01 - Connection refused',\n    '[INFO] 2024-03-15 10:22:05 - Test started',\n    'INVALID LINE'\n]\nprint(parse_log_lines(lines))",
+    "explanation": "re.compile() outside the loop avoids recompiling the pattern on every iteration. Named groups (?P<name>...) allow match.groupdict() to return a ready-made dict with descriptive keys. re.match() anchors to the start of the line, which is appropriate for fixed-format log lines.",
+    "commonMistakes": [
+      "Compiling the pattern inside the loop, adding unnecessary overhead",
+      "Using re.search() instead of re.match() which can match mid-line substrings",
+      "Forgetting to escape the brackets \\[ \\] in the pattern"
+    ],
+    "followUps": [
+      "How would you filter only ERROR lines after parsing?",
+      "How would you convert the timestamp string to a datetime object?",
+      "How would you handle multi-line log entries?"
+    ],
+    "tags": [
+      "python",
+      "regex",
+      "log-parsing",
+      "test-utilities",
+      "strings"
+    ]
+  },
+  {
+    "id": "python-coding-029",
+    "topicId": "python-coding",
+    "topicTitle": "Python Coding",
+    "level": "mid",
+    "type": "coding",
+    "difficulty": "medium",
+    "title": "Dataclass for API test response model",
+    "question": "Write a dataclass that models an API response and includes a helper method to check success.",
+    "problem": "Define a dataclass ApiResponse with fields: status_code (int), body (dict), headers (dict, default empty dict). Add a method is_success() that returns True when status_code is in the 200-299 range. Add a classmethod from_requests_response(resp) that constructs an ApiResponse from a requests.Response-like object (has .status_code, .json(), and .headers attributes).",
+    "inputExample": "r = ApiResponse(status_code=200, body={'id': 1}, headers={'Content-Type': 'application/json'})\nprint(r.is_success())  # True\nr2 = ApiResponse(status_code=404, body={})\nprint(r2.is_success())  # False",
+    "expectedOutput": "True\nFalse",
+    "hint": "Use @dataclass with field(default_factory=dict) for the mutable default. Use @classmethod for the constructor.",
+    "solutionLanguage": "python",
+    "solution": "from dataclasses import dataclass, field\n\n@dataclass\nclass ApiResponse:\n    status_code: int\n    body: dict\n    headers: dict = field(default_factory=dict)\n\n    def is_success(self) -> bool:\n        return 200 <= self.status_code <= 299\n\n    @classmethod\n    def from_requests_response(cls, resp) -> 'ApiResponse':\n        return cls(\n            status_code=resp.status_code,\n            body=resp.json(),\n            headers=dict(resp.headers)\n        )\n\n# Example\nr = ApiResponse(status_code=200, body={'id': 1}, headers={'Content-Type': 'application/json'})\nprint(r.is_success())   # True\nr2 = ApiResponse(status_code=404, body={})\nprint(r2.is_success())  # False",
+    "explanation": "Dataclasses auto-generate __init__, __repr__, and __eq__, removing boilerplate. field(default_factory=dict) avoids the mutable default argument bug. The classmethod factory makes test code readable: ApiResponse.from_requests_response(resp) is self-documenting. is_success() encapsulates the business rule so tests don't scatter 200 <= code <= 299 checks everywhere.",
+    "commonMistakes": [
+      "Using headers: dict = {} which causes the mutable default bug",
+      "Forgetting to decorate with @dataclass so none of the auto-methods are generated",
+      "Not converting resp.headers to a plain dict, leaving a case-insensitive mapping object"
+    ],
+    "followUps": [
+      "How would you add __post_init__ to validate status_code is a positive integer?",
+      "How would you make ApiResponse frozen (immutable)?",
+      "How would you serialize this back to a dict for logging?"
+    ],
+    "tags": [
+      "python",
+      "dataclasses",
+      "api",
+      "test-models",
+      "type-hints"
+    ]
+  },
+  {
+    "id": "python-coding-030",
+    "topicId": "python-coding",
+    "topicTitle": "Python Coding",
+    "level": "mid",
+    "type": "coding",
+    "difficulty": "medium",
+    "title": "Generate test case combinations with itertools",
+    "question": "Write a function that generates all pairwise combinations of parameter values for combinatorial testing.",
+    "problem": "Implement generate_test_pairs(param_dict) where param_dict maps parameter names to lists of possible values (e.g., {'browser': ['chrome', 'firefox'], 'env': ['staging', 'prod']}). Return a list of dicts, one per combination, where each dict maps every parameter name to one value. Use itertools to avoid nested for loops.",
+    "inputExample": "generate_test_pairs({'browser': ['chrome', 'firefox'], 'env': ['staging', 'prod']})",
+    "expectedOutput": "[{'browser': 'chrome', 'env': 'staging'}, {'browser': 'chrome', 'env': 'prod'}, {'browser': 'firefox', 'env': 'staging'}, {'browser': 'firefox', 'env': 'prod'}]",
+    "hint": "Use itertools.product(*param_dict.values()) and zip with param_dict.keys() to build each combination dict.",
+    "solutionLanguage": "python",
+    "solution": "import itertools\n\ndef generate_test_pairs(param_dict):\n    keys = list(param_dict.keys())\n    value_lists = [param_dict[k] for k in keys]\n    combinations = []\n    for combo in itertools.product(*value_lists):\n        combinations.append(dict(zip(keys, combo)))\n    return combinations\n\n# Example\nresult = generate_test_pairs({'browser': ['chrome', 'firefox'], 'env': ['staging', 'prod']})\nfor r in result:\n    print(r)",
+    "explanation": "itertools.product computes the Cartesian product of all value lists, equivalent to nested for loops but without the nesting. zip(keys, combo) pairs each key with its value for that combination. This is useful for generating a parametrize argument list covering all combinations of browser, environment, locale, or other test dimensions.",
+    "commonMistakes": [
+      "Using itertools.combinations instead of itertools.product — combinations picks subsets from one iterable, not the Cartesian product across multiple",
+      "Losing the key names by only returning tuples of values",
+      "Not converting the generator from itertools.product to a list when the caller iterates multiple times"
+    ],
+    "followUps": [
+      "How would you filter out certain combinations (e.g., IE + prod)?",
+      "How would you pass this output directly to pytest.mark.parametrize?",
+      "When would pairwise (2-way) coverage be preferable to full Cartesian product?"
+    ],
+    "tags": [
+      "python",
+      "itertools",
+      "combinatorics",
+      "test-data",
+      "parametrize"
+    ]
+  },
+  {
+    "id": "python-coding-031",
+    "topicId": "python-coding",
+    "topicTitle": "Python Coding",
+    "level": "senior",
+    "type": "coding",
+    "difficulty": "hard",
+    "title": "Mock patch.object to stub a method on a class instance",
+    "question": "Write a test that uses unittest.mock.patch.object to replace a method on an existing object instance.",
+    "problem": "Given a class DatabaseClient with a method fetch_user(user_id) that hits a real database, write a pytest test test_get_username that patches fetch_user on a DatabaseClient instance to return a fake user dict without touching the database. Assert that the function under test, get_username(client, user_id), returns the expected name string.",
+    "inputExample": "# Code under test:\nclass DatabaseClient:\n    def fetch_user(self, user_id):\n        # real DB call\n        ...\n\ndef get_username(client, user_id):\n    user = client.fetch_user(user_id)\n    return user['name']",
+    "expectedOutput": "# Test passes; fetch_user never called the real database",
+    "hint": "Use patch.object(instance, 'method_name', return_value=...) as a context manager inside the test.",
+    "solutionLanguage": "python",
+    "solution": "from unittest.mock import patch\nimport pytest\n\nclass DatabaseClient:\n    def fetch_user(self, user_id):\n        raise RuntimeError('Real DB should not be called in tests')\n\ndef get_username(client, user_id):\n    user = client.fetch_user(user_id)\n    return user['name']\n\ndef test_get_username():\n    client = DatabaseClient()\n    fake_user = {'id': 42, 'name': 'Alice'}\n\n    with patch.object(client, 'fetch_user', return_value=fake_user) as mock_fetch:\n        result = get_username(client, 42)\n\n    assert result == 'Alice'\n    mock_fetch.assert_called_once_with(42)",
+    "explanation": "patch.object targets a specific instance, so other DatabaseClient instances remain unaffected. return_value sets what the mock returns when called. Storing the context manager result (mock_fetch) gives access to call assertions. assert_called_once_with verifies the correct user_id was passed, catching bugs where the wrapper passes the wrong argument.",
+    "commonMistakes": [
+      "Using patch('module.DatabaseClient.fetch_user') which patches the class and affects all instances",
+      "Forgetting to pass the user_id in assert_called_once_with",
+      "Not storing the mock reference and being unable to assert call arguments"
+    ],
+    "followUps": [
+      "How would you use patch.object as a decorator instead of a context manager?",
+      "How would you make fetch_user raise an exception to test error handling?",
+      "When would you use MagicMock vs Mock?"
+    ],
+    "tags": [
+      "python",
+      "unittest-mock",
+      "patch-object",
+      "mocking",
+      "pytest"
+    ]
+  },
+  {
+    "id": "python-coding-032",
+    "topicId": "python-coding",
+    "topicTitle": "Python Coding",
+    "level": "senior",
+    "type": "coding",
+    "difficulty": "hard",
+    "title": "Mock side_effect to raise exceptions conditionally",
+    "question": "Write a test that uses side_effect to make a mock raise an exception on the first call and return a value on the second call.",
+    "problem": "You are testing a retry_fetch(client, url) function that calls client.get(url) and retries once on ConnectionError. Write a pytest test where the mock raises ConnectionError on the first call and returns a fake response on the second call. Assert the function returns the fake response.",
+    "inputExample": "def retry_fetch(client, url):\n    try:\n        return client.get(url)\n    except ConnectionError:\n        return client.get(url)  # one retry",
+    "expectedOutput": "# Test passes; mock called twice; result is the fake response",
+    "hint": "Assign a list to mock.side_effect — each element is used in order; an exception class or instance causes the mock to raise it.",
+    "solutionLanguage": "python",
+    "solution": "from unittest.mock import MagicMock\nimport pytest\n\ndef retry_fetch(client, url):\n    try:\n        return client.get(url)\n    except ConnectionError:\n        return client.get(url)\n\ndef test_retry_fetch_recovers_after_connection_error():\n    fake_response = MagicMock(status_code=200)\n    mock_client = MagicMock()\n    mock_client.get.side_effect = [ConnectionError('timeout'), fake_response]\n\n    result = retry_fetch(mock_client, 'https://api.example.com/data')\n\n    assert result.status_code == 200\n    assert mock_client.get.call_count == 2",
+    "explanation": "When side_effect is a list, each call pops the next element. If an element is an exception instance (or class), the mock raises it; otherwise it returns the element. This lets a single mock simulate intermittent failures followed by success, which is exactly what retry logic tests need.",
+    "commonMistakes": [
+      "Setting side_effect to the exception class without instantiating it — both work, but an instance gives a clearer message",
+      "Forgetting that side_effect takes priority over return_value",
+      "Using return_value for the list instead of side_effect, which makes the mock return the list object rather than iterating it"
+    ],
+    "followUps": [
+      "How would you test that the function raises the exception when both retries fail?",
+      "How would you use a callable as side_effect for more complex logic?",
+      "How would you assert the exact URL passed in each call?"
+    ],
+    "tags": [
+      "python",
+      "unittest-mock",
+      "side-effect",
+      "mocking",
+      "retry",
+      "pytest"
+    ]
+  },
+  {
+    "id": "python-coding-033",
+    "topicId": "python-coding",
+    "topicTitle": "Python Coding",
+    "level": "senior",
+    "type": "coding",
+    "difficulty": "hard",
+    "title": "Read environment variables with fallback defaults",
+    "question": "Write a configuration helper that reads test settings from environment variables with typed defaults.",
+    "problem": "Implement load_test_config() that reads the following env vars and returns a typed dict: BASE_URL (str, default 'http://localhost:8080'), TIMEOUT (int, default 30), VERIFY_SSL (bool, default True). VERIFY_SSL is 'true' or 'false' (case-insensitive string in the environment). Raise ValueError if TIMEOUT is not a valid integer.",
+    "inputExample": "import os\nos.environ['BASE_URL'] = 'https://staging.example.com'\nos.environ['TIMEOUT'] = '60'\nos.environ['VERIFY_SSL'] = 'false'\nprint(load_test_config())",
+    "expectedOutput": "{'base_url': 'https://staging.example.com', 'timeout': 60, 'verify_ssl': False}",
+    "hint": "Use os.environ.get(key, default) and convert types explicitly. For bool, compare the lowercased string to 'true'.",
+    "solutionLanguage": "python",
+    "solution": "import os\n\ndef load_test_config() -> dict:\n    raw_timeout = os.environ.get('TIMEOUT', '30')\n    try:\n        timeout = int(raw_timeout)\n    except ValueError:\n        raise ValueError(f\"TIMEOUT must be an integer, got: {raw_timeout!r}\")\n\n    verify_ssl_raw = os.environ.get('VERIFY_SSL', 'true').lower()\n    verify_ssl = verify_ssl_raw == 'true'\n\n    return {\n        'base_url': os.environ.get('BASE_URL', 'http://localhost:8080'),\n        'timeout': timeout,\n        'verify_ssl': verify_ssl,\n    }\n\n# Example\nimport os\nos.environ['BASE_URL'] = 'https://staging.example.com'\nos.environ['TIMEOUT'] = '60'\nos.environ['VERIFY_SSL'] = 'false'\nprint(load_test_config())",
+    "explanation": "os.environ.get never raises KeyError; it returns the default when the variable is absent. Explicit int() conversion with a clear ValueError message is better than letting a cryptic exception propagate. Bool from string: comparing lowercased value to 'true' handles 'True', 'TRUE', 'true' equally, while anything else (including 'false', '', '0') maps to False.",
+    "commonMistakes": [
+      "Using bool(os.environ.get('VERIFY_SSL', 'true')) which returns True for any non-empty string including 'false'",
+      "Not handling ValueError for int conversion, letting it surface with an unhelpful message",
+      "Using os.getenv without a default and then calling int() on None"
+    ],
+    "followUps": [
+      "How would you use pytest monkeypatch to set env vars in tests for this function?",
+      "How would you use python-dotenv to load a .env file before calling this?",
+      "When would you use pydantic BaseSettings instead of manual parsing?"
+    ],
+    "tags": [
+      "python",
+      "environment-variables",
+      "configuration",
+      "test-utilities",
+      "type-conversion"
+    ]
+  },
+  {
+    "id": "python-coding-034",
+    "topicId": "python-coding",
+    "topicTitle": "Python Coding",
+    "level": "mid",
+    "type": "coding",
+    "difficulty": "medium",
+    "title": "Walk a directory tree with pathlib",
+    "question": "Write a function that recursively collects all files matching a given extension under a directory.",
+    "problem": "Implement find_files(root_dir, extension) using pathlib.Path. root_dir is a string or Path. extension is a file extension including the dot (e.g., '.json'). Return a sorted list of absolute Path objects for every matching file found at any depth under root_dir.",
+    "inputExample": "# Assuming directory structure:\n# reports/\n#   run1/result.json\n#   run2/result.json\n#   run2/summary.txt\nfind_files('reports', '.json')",
+    "expectedOutput": "[PosixPath('reports/run1/result.json'), PosixPath('reports/run2/result.json')]",
+    "hint": "Use Path(root_dir).rglob('*' + extension) which recursively matches all files with the given extension.",
+    "solutionLanguage": "python",
+    "solution": "from pathlib import Path\n\ndef find_files(root_dir, extension: str) -> list:\n    root = Path(root_dir)\n    return sorted(root.rglob('*' + extension))\n\n# Example\n# find_files('reports', '.json')\n# Returns sorted list of Path objects for every .json file under reports/",
+    "explanation": "Path.rglob('*.json') is equivalent to glob('**/*.json') and recursively searches all subdirectories. Sorting the results makes the output deterministic across operating systems, which matters when the list is used in assertions. Returning Path objects rather than strings lets callers use / for further path operations without manual string concatenation.",
+    "commonMistakes": [
+      "Using os.walk with manual string joining instead of pathlib",
+      "Returning strings instead of Path objects, forcing callers to reconstruct paths",
+      "Not sorting, leading to platform-dependent ordering that breaks snapshot assertions"
+    ],
+    "followUps": [
+      "How would you filter to only files modified in the last N hours?",
+      "How would you find the most recently modified .json file?",
+      "How would you use this in a conftest to auto-load all fixture files?"
+    ],
+    "tags": [
+      "python",
+      "pathlib",
+      "file-system",
+      "test-utilities",
+      "glob"
+    ]
+  },
+  {
+    "id": "python-coding-035",
+    "topicId": "python-coding",
+    "topicTitle": "Python Coding",
+    "level": "senior",
+    "type": "coding",
+    "difficulty": "hard",
+    "title": "Run a CLI command and capture output with subprocess",
+    "question": "Write a helper function that runs a shell command and returns its exit code, stdout, and stderr.",
+    "problem": "Implement run_command(cmd) where cmd is a list of strings (e.g., ['python', '--version']). Return a named tuple or dataclass with fields: exit_code (int), stdout (str), stderr (str). The function must not raise an exception if the command fails — capture the failure in exit_code instead. Strip trailing whitespace from stdout and stderr.",
+    "inputExample": "result = run_command(['echo', 'hello world'])\nprint(result.exit_code)   # 0\nprint(result.stdout)      # 'hello world'\nprint(result.stderr)      # ''",
+    "expectedOutput": "0\nhello world\n",
+    "hint": "Use subprocess.run with capture_output=True, text=True, and check=False. Access returncode, stdout, stderr on the result.",
+    "solutionLanguage": "python",
+    "solution": "import subprocess\nfrom dataclasses import dataclass\n\n@dataclass\nclass CommandResult:\n    exit_code: int\n    stdout: str\n    stderr: str\n\ndef run_command(cmd: list) -> CommandResult:\n    proc = subprocess.run(\n        cmd,\n        capture_output=True,\n        text=True,\n        check=False\n    )\n    return CommandResult(\n        exit_code=proc.returncode,\n        stdout=proc.stdout.strip(),\n        stderr=proc.stderr.strip()\n    )\n\n# Example\nresult = run_command(['echo', 'hello world'])\nprint(result.exit_code)  # 0\nprint(result.stdout)     # hello world",
+    "explanation": "capture_output=True is shorthand for stdout=PIPE, stderr=PIPE. text=True decodes bytes to str using the default encoding. check=False prevents subprocess from raising CalledProcessError on non-zero exit, leaving error handling to the caller. Returning a dataclass gives named attribute access and a readable repr for test failure messages.",
+    "commonMistakes": [
+      "Using check=True which raises an exception on any non-zero exit, breaking tests that intentionally test failure scenarios",
+      "Passing a plain string instead of a list for cmd, which requires shell=True and introduces injection risk",
+      "Not stripping whitespace, causing assertion failures due to trailing newlines"
+    ],
+    "followUps": [
+      "How would you add a timeout parameter to kill the command if it hangs?",
+      "How would you use this to test a CLI tool's --help output?",
+      "When would you use shell=True and what are the risks?"
+    ],
+    "tags": [
+      "python",
+      "subprocess",
+      "cli-testing",
+      "test-utilities",
+      "dataclasses"
+    ]
+  },
+  {
+    "id": "python-coding-036",
+    "topicId": "python-coding",
+    "topicTitle": "Python Coding",
+    "level": "senior",
+    "type": "coding",
+    "difficulty": "hard",
+    "title": "Parametrize with indirect fixture for typed test data",
+    "question": "Write a conftest.py fixture that accepts parameters indirectly and uses them to build typed test input.",
+    "problem": "Create a pytest fixture user_payload that receives a string role via indirect parametrize and returns the appropriate user dict for that role ('admin' or 'viewer'). Write a test test_role_permissions parametrized with indirect to run once per role and assert the dict has a non-empty 'permissions' list.",
+    "inputExample": "# Running: pytest -v\n# test_role_permissions[admin]\n# test_role_permissions[viewer]",
+    "expectedOutput": "# Both parametrize cases pass",
+    "hint": "Access the parameter inside the fixture via request.param. Use @pytest.fixture and pass indirect=['user_payload'] to pytest.mark.parametrize.",
+    "solutionLanguage": "python",
+    "solution": "import pytest\n\nUSER_DATA = {\n    'admin':  {'role': 'admin',  'permissions': ['read', 'write', 'delete']},\n    'viewer': {'role': 'viewer', 'permissions': ['read']},\n}\n\n@pytest.fixture\ndef user_payload(request):\n    role = request.param\n    return USER_DATA[role]\n\n@pytest.mark.parametrize('user_payload', ['admin', 'viewer'], indirect=True)\ndef test_role_permissions(user_payload):\n    assert isinstance(user_payload['permissions'], list)\n    assert len(user_payload['permissions']) > 0, f\"No permissions for role: {user_payload['role']}\"",
+    "explanation": "indirect=True tells pytest to pass the parametrize value to the fixture as request.param instead of injecting it directly into the test function. This lets the fixture do heavy lifting (DB lookup, object construction) while keeping test parametrize values simple strings. Each string produces one test case with the fixture called fresh per case.",
+    "commonMistakes": [
+      "Forgetting indirect=True, which passes the string directly to the test instead of through the fixture",
+      "Using request.param without marking the fixture to accept it — the fixture must declare request as an argument",
+      "Hardcoding role data inside the test rather than in the fixture, making it hard to reuse across multiple tests"
+    ],
+    "followUps": [
+      "How would you combine indirect and direct parameters in one parametrize call?",
+      "How would you share this fixture across multiple test files via conftest.py?",
+      "How would you mark certain parameter combinations as expected failures with pytest.mark.xfail?"
+    ],
+    "tags": [
+      "python",
+      "pytest",
+      "parametrize",
+      "indirect-fixtures",
+      "conftest"
+    ]
+  },
+  {
+    "id": "python-coding-037",
+    "topicId": "python-coding",
+    "topicTitle": "Python Coding",
+    "level": "mid",
+    "type": "coding",
+    "difficulty": "medium",
+    "title": "Configure logging for a test session",
+    "question": "Write a helper that configures Python logging to write DEBUG and above to a file and WARNING and above to the console.",
+    "problem": "Implement setup_test_logging(log_file) that configures the root logger with two handlers: a FileHandler writing to log_file at DEBUG level, and a StreamHandler (console) at WARNING level. Both should use the format '%(asctime)s [%(levelname)s] %(name)s: %(message)s'. Return the configured root logger.",
+    "inputExample": "logger = setup_test_logging('test_run.log')\nlogger.debug('Setup complete')    # only in file\nlogger.warning('Slow response')   # in file AND console",
+    "expectedOutput": "# File contains both messages; console shows only the WARNING",
+    "hint": "Create handlers, set their level and formatter individually, then add them to the root logger with logging.getLogger().",
+    "solutionLanguage": "python",
+    "solution": "import logging\n\ndef setup_test_logging(log_file: str) -> logging.Logger:\n    fmt = logging.Formatter('%(asctime)s [%(levelname)s] %(name)s: %(message)s')\n\n    file_handler = logging.FileHandler(log_file, mode='w', encoding='utf-8')\n    file_handler.setLevel(logging.DEBUG)\n    file_handler.setFormatter(fmt)\n\n    console_handler = logging.StreamHandler()\n    console_handler.setLevel(logging.WARNING)\n    console_handler.setFormatter(fmt)\n\n    root_logger = logging.getLogger()\n    root_logger.setLevel(logging.DEBUG)  # must be <= lowest handler level\n    root_logger.handlers.clear()         # avoid duplicates on repeated calls\n    root_logger.addHandler(file_handler)\n    root_logger.addHandler(console_handler)\n\n    return root_logger",
+    "explanation": "The root logger's own level acts as a gate: if it is higher than a handler's level, messages are filtered before reaching the handler. Setting it to DEBUG lets both handlers apply their own filtering. Clearing handlers before adding prevents duplicated log entries when the function is called more than once in a session.",
+    "commonMistakes": [
+      "Not setting the root logger level to DEBUG, causing DEBUG messages to be filtered before reaching the file handler",
+      "Adding handlers without clearing existing ones, causing duplicated log lines",
+      "Using mode='a' when you want a fresh log file per run — mode='w' overwrites"
+    ],
+    "followUps": [
+      "How would you integrate this with pytest's --log-file option instead?",
+      "How would you capture log output in a test assertion using caplog fixture?",
+      "How would you rotate the log file when it exceeds a size limit?"
+    ],
+    "tags": [
+      "python",
+      "logging",
+      "test-utilities",
+      "configuration",
+      "debugging"
+    ]
+  },
+  {
+    "id": "python-coding-038",
+    "topicId": "python-coding",
+    "topicTitle": "Python Coding",
+    "level": "mid",
+    "type": "coding",
+    "difficulty": "medium",
+    "title": "Use Counter to analyze test result frequencies",
+    "question": "Write a function that uses collections.Counter to summarize a list of test result statuses.",
+    "problem": "Implement summarize_results(results) where results is a list of status strings (e.g., ['passed', 'failed', 'passed', 'skipped', 'failed', 'failed']). Return a dict with keys 'passed', 'failed', 'skipped', 'error' (always present, defaulting to 0 if not in the input) and an additional key 'total' with the total count.",
+    "inputExample": "summarize_results(['passed', 'failed', 'passed', 'skipped', 'failed', 'failed'])",
+    "expectedOutput": "{'passed': 2, 'failed': 3, 'skipped': 1, 'error': 0, 'total': 6}",
+    "hint": "Create a Counter from the list, then build the output dict using counter.get(key, 0) for each expected status.",
+    "solutionLanguage": "python",
+    "solution": "from collections import Counter\n\ndef summarize_results(results: list) -> dict:\n    counts = Counter(results)\n    statuses = ['passed', 'failed', 'skipped', 'error']\n    summary = {status: counts.get(status, 0) for status in statuses}\n    summary['total'] = len(results)\n    return summary\n\n# Example\nprint(summarize_results(['passed', 'failed', 'passed', 'skipped', 'failed', 'failed']))\n# {'passed': 2, 'failed': 3, 'skipped': 1, 'error': 0, 'total': 6}",
+    "explanation": "Counter counts hashable items in a single pass. Using counter.get(status, 0) guarantees that every expected status key appears in the output even when absent from the input. This makes the summary safe to use in downstream assertions or reporting without key-existence checks.",
+    "commonMistakes": [
+      "Accessing counter[key] directly which raises KeyError for absent statuses (Counter subclasses dict but returns 0 for missing keys — however making this explicit with get is clearer)",
+      "Forgetting 'total' so callers compute len separately and risk inconsistency",
+      "Returning only statuses actually present, causing KeyError in downstream code that expects all four keys"
+    ],
+    "followUps": [
+      "How would you use Counter.most_common() to find the most frequent failure type?",
+      "How would you use this summary to set a CI exit code (non-zero if failed > 0)?",
+      "How would you aggregate summaries from multiple parallel test runs?"
+    ],
+    "tags": [
+      "python",
+      "collections",
+      "counter",
+      "test-analysis",
+      "reporting"
+    ]
+  },
+  {
+    "id": "python-coding-039",
+    "topicId": "python-coding",
+    "topicTitle": "Python Coding",
+    "level": "mid",
+    "type": "quiz",
+    "difficulty": "medium",
+    "question": "What is the output of the following code?\n\nfrom functools import partial\n\ndef assert_status(response, expected_code):\n    assert response['status'] == expected_code, f\"Got {response['status']}\"\n\nassert_200 = partial(assert_status, expected_code=200)\nassert_200({'status': 200})",
+    "choices": [
+      "AssertionError: Got 200",
+      "No output — the assertion passes silently",
+      "TypeError: assert_status() got multiple values for argument 'expected_code'",
+      "NameError: name 'partial' is not defined"
+    ],
+    "correctAnswer": "No output — the assertion passes silently",
+    "explanation": "functools.partial creates a new callable with expected_code pre-filled as 200. Calling assert_200({'status': 200}) is equivalent to assert_status({'status': 200}, expected_code=200). The assertion 200 == 200 passes, so nothing is raised and nothing is printed. partial is useful for creating specialized assertion helpers from general ones without subclassing.",
+    "tags": [
+      "python",
+      "functools",
+      "partial",
+      "assertions",
+      "test-utilities"
+    ]
+  },
+  {
+    "id": "python-coding-040",
+    "topicId": "python-coding",
+    "topicTitle": "Python Coding",
+    "level": "mid",
+    "type": "quiz",
+    "difficulty": "easy",
+    "question": "Which statement about Python's @contextmanager decorator from contextlib is correct?",
+    "choices": [
+      "It can only be used with class-based context managers that define __enter__ and __exit__",
+      "It turns a generator function with a single yield into a context manager; code before yield is setup and code after yield is teardown",
+      "The yield value cannot be passed to the with...as variable",
+      "It requires the generator to use yield from instead of yield"
+    ],
+    "correctAnswer": "It turns a generator function with a single yield into a context manager; code before yield is setup and code after yield is teardown",
+    "explanation": "@contextmanager wraps a generator function so that everything before the yield runs on __enter__ and everything after the yield runs on __exit__. The yielded value is bound to the 'as' variable in the with statement. This lets you write resource management logic as a simple function instead of a class with __enter__ and __exit__ methods.",
+    "tags": [
+      "python",
+      "contextlib",
+      "context-manager",
+      "generators",
+      "test-utilities"
+    ]
+  },
+  {
+    "id": "python-coding-041",
+    "topicId": "python-coding",
+    "topicTitle": "Python Coding",
+    "level": "mid",
+    "type": "quiz",
+    "difficulty": "medium",
+    "question": "In Python's unittest.mock, what happens when you use @patch('mymodule.requests.get') as a decorator on a test method?",
+    "choices": [
+      "requests.get is patched globally in all modules for the duration of the test session",
+      "requests.get in mymodule is replaced with a MagicMock for the duration of the decorated test, then restored automatically",
+      "The decorator injects a real requests.get wrapped in a spy that records calls",
+      "The patch applies only if mymodule is imported inside the test function"
+    ],
+    "correctAnswer": "requests.get in mymodule is replaced with a MagicMock for the duration of the decorated test, then restored automatically",
+    "explanation": "The patch target must be the name as used in the module under test, not where it is defined. Patching 'mymodule.requests.get' replaces the attribute requests.get as seen from mymodule's namespace. The original is restored after the test regardless of pass or fail. The MagicMock is injected as an extra argument to the test method.",
+    "tags": [
+      "python",
+      "unittest-mock",
+      "patch",
+      "mocking",
+      "pytest"
+    ]
+  },
+  {
+    "id": "python-coding-042",
+    "topicId": "python-coding",
+    "topicTitle": "Python Coding",
+    "level": "senior",
+    "type": "quiz",
+    "difficulty": "hard",
+    "question": "Which of the following correctly uses type hints in a Python test helper function signature?",
+    "choices": [
+      "def assert_items_equal(expected: List[Dict[str, Any]], actual: List[Dict[str, Any]], key: str) -> None:",
+      "def assert_items_equal(expected: list[dict[str, any]], actual: list[dict[str, any]], key: str) -> none:",
+      "def assert_items_equal(expected: List, actual: List, key: String) -> Void:",
+      "def assert_items_equal(expected: array, actual: array, key: str) -> null:"
+    ],
+    "correctAnswer": "def assert_items_equal(expected: List[Dict[str, Any]], actual: List[Dict[str, Any]], key: str) -> None:",
+    "explanation": "In Python 3.8 and earlier, generic aliases from the typing module (List, Dict, Any) are required for parameterized type hints. None (not none or Void or null) is the correct return type annotation for functions that return nothing. Python 3.9+ allows lowercase list[dict[str, any]], but 'any' lowercase is not valid — Any must be imported from typing.",
+    "tags": [
+      "python",
+      "type-hints",
+      "typing",
+      "test-utilities",
+      "best-practices"
+    ]
+  },
+  {
+    "id": "python-coding-043",
+    "topicId": "python-coding",
+    "topicTitle": "Python Coding",
+    "level": "mid",
+    "type": "interview",
+    "difficulty": "medium",
+    "question": "How do you use a conftest.py file to share fixtures and configuration across multiple test files in a pytest project?",
+    "shortAnswer": "Place a conftest.py at the appropriate directory level; pytest auto-discovers it and makes its fixtures available to all tests in that directory and below without explicit imports.",
+    "interviewAnswer": "conftest.py is pytest's mechanism for sharing fixtures, hooks, and plugins without any import statements in test files. pytest automatically discovers all conftest.py files from the rootdir downward. Fixtures defined in a conftest.py at the project root are available to every test in the project. Fixtures in a subdirectory conftest.py are available only to tests in that subtree, which lets you scope fixtures to a feature area. I use conftest.py for: shared test data fixtures (database connections, API clients), custom markers registration, pytest hooks like pytest_runtest_logreport for CI result publishing, and autouse fixtures like setting environment variables before any test runs. I avoid putting too much logic directly in conftest.py — I import from utility modules to keep the file readable.",
+    "realProjectExample": "In a multi-service test repo, I had a root conftest.py that provided an authenticated_client fixture used by all API tests, a ui/ conftest.py that provided a browser fixture for Selenium tests, and an api/ conftest.py that provided mock_server for contract tests. This layering meant UI tests never paid the cost of the mock server setup.",
+    "followUps": [
+      "How do you register custom marks in conftest.py to avoid PytestUnknownMarkWarning?",
+      "Can a conftest.py fixture override one defined in a parent conftest.py?",
+      "How would you share a conftest.py across multiple repositories?"
+    ],
+    "tags": [
+      "python",
+      "pytest",
+      "conftest",
+      "fixtures",
+      "test-architecture"
+    ]
+  },
+  {
+    "id": "python-coding-044",
+    "topicId": "python-coding",
+    "topicTitle": "Python Coding",
+    "level": "senior",
+    "type": "interview",
+    "difficulty": "hard",
+    "question": "What is property-based testing and how would you apply it in a Python test suite using Hypothesis?",
+    "shortAnswer": "Property-based testing generates many random inputs automatically and checks that a specified property (invariant) holds for all of them, surfacing edge cases you would not think to write manually.",
+    "interviewAnswer": "In traditional example-based testing, I specify exact inputs and expected outputs. Property-based testing shifts the focus: instead of 'for input X I expect Y', I describe an invariant — a property that must hold for any valid input. Hypothesis generates hundreds of random inputs, shrinks failing cases to the minimal reproducer, and persists the example in its database to replay it in future runs. A property for a sort function might be: the output is always the same length as the input and every adjacent pair satisfies output[i] <= output[i+1]. Hypothesis would then try empty lists, lists with duplicates, very large lists, and lists with negative numbers automatically. For SDETs, useful properties include: encode then decode returns the original, serializing and deserializing a record produces an equal record, and adding an item to a collection always increases its length by exactly one.",
+    "realProjectExample": "I applied Hypothesis to a custom date-range parser used in test report filtering. I defined the property: any string produced by the range formatter should be parseable back to the same date pair. Hypothesis found a bug with year boundaries (December 31 → January 1) in the first run — a case I had not written as an example test.",
+    "followUps": [
+      "How do you define a custom Hypothesis strategy for a domain object?",
+      "How do you reproduce a Hypothesis failure deterministically in CI?",
+      "When is property-based testing not worth the investment?"
+    ],
+    "tags": [
+      "python",
+      "property-based-testing",
+      "hypothesis",
+      "test-strategy",
+      "edge-cases"
+    ]
+  },
+  {
+    "id": "python-coding-045",
+    "topicId": "python-coding",
+    "topicTitle": "Python Coding",
+    "level": "senior",
+    "type": "interview",
+    "difficulty": "hard",
+    "question": "How do you handle datetime-related assertions in tests when timestamps are generated at runtime?",
+    "shortAnswer": "Freeze or mock time during the test, or assert the timestamp is within an acceptable tolerance window rather than matching an exact value.",
+    "interviewAnswer": "Hardcoding an expected timestamp in an assertion makes the test time-dependent and will always fail on replay. I use three strategies. First, mock the clock: use unittest.mock.patch to replace datetime.datetime.now or use the freezegun library to freeze time at a fixed instant, then assert the exact value. Second, tolerance-based comparison: assert abs((actual_dt - expected_dt).total_seconds()) < threshold, typically a few seconds. Third, structural assertion: instead of comparing the value, assert that the field is a valid ISO-8601 datetime string using a regex or datetime.fromisoformat(), and that it is within a reasonable range (e.g., not in the future, not older than one hour). I prefer freezegun for unit tests of business logic and tolerance-based comparison for integration tests that call real APIs.",
+    "realProjectExample": "An order creation API test was asserting response['created_at'] == '2024-01-15T10:00:00Z' and failing in CI because the clock advanced between the test writing and the assertion. I replaced it with assert datetime.fromisoformat(response['created_at'].replace('Z', '+00:00')) > datetime.now(UTC) - timedelta(seconds=5), which validated recency without brittle exact-match.",
+    "followUps": [
+      "How do you test logic that depends on time zones?",
+      "What is the difference between datetime.utcnow() and datetime.now(timezone.utc)?",
+      "How do you use freezegun with pytest fixtures?"
+    ],
+    "tags": [
+      "python",
+      "datetime",
+      "mocking",
+      "test-utilities",
+      "assertions"
+    ]
+  },
+  {
+    "id": "python-coding-046",
+    "topicId": "python-coding",
+    "topicTitle": "Python Coding",
+    "level": "mid",
+    "type": "interview",
+    "difficulty": "medium",
+    "question": "How do you use Python's argparse module to build a CLI tool that runs a specific subset of tests based on command-line flags?",
+    "shortAnswer": "Define an ArgumentParser with flags for environment, tags, and output format, parse args in the entry point, then build and execute the corresponding pytest command or use pytest's Python API.",
+    "interviewAnswer": "I create a small CLI wrapper using argparse when the team needs to run tests without memorizing long pytest command lines. The parser defines: --env (choices=['staging', 'prod'], default='staging'), --tags (nargs='+' to accept multiple), --output (choices=['terminal', 'junit', 'html']). In the main function I parse args and construct the pytest command as a list, then invoke subprocess.run or the pytest Python API (pytest.main). This centralizes environment-specific config (base URLs, credentials) so testers type python run_tests.py --env staging --tags smoke rather than managing pytest.ini markers and env var exports manually.",
+    "realProjectExample": "I built a run_tests.py CLI for a regression suite that accepted --env, --module, and --parallel flags. The CI pipeline called it with different flag combinations for different stages, and testers could run the same command locally with --env staging to reproduce CI runs exactly.",
+    "followUps": [
+      "How would you add a --dry-run flag that prints the pytest command without executing it?",
+      "How would you validate that --tags only accepts known marker names?",
+      "When would you use click or typer instead of argparse?"
+    ],
+    "tags": [
+      "python",
+      "argparse",
+      "cli",
+      "test-tooling",
+      "subprocess"
+    ]
+  },
+  {
+    "id": "python-coding-047",
+    "topicId": "python-coding",
+    "topicTitle": "Python Coding",
+    "level": "mid",
+    "type": "coding",
+    "difficulty": "easy",
+    "title": "Format a test failure report string",
+    "question": "Write a function that formats a test result into a human-readable report line.",
+    "problem": "Implement format_result(test_name, status, duration_ms, error_msg=None) that returns a formatted string. The format should be: '[PASSED] test_login (123ms)' for passing tests and '[FAILED] test_checkout (456ms): AssertionError: expected 200 got 500' for failures. status is always uppercase.",
+    "inputExample": "print(format_result('test_login', 'passed', 123))\nprint(format_result('test_checkout', 'failed', 456, 'AssertionError: expected 200 got 500'))",
+    "expectedOutput": "[PASSED] test_login (123ms)\n[FAILED] test_checkout (456ms): AssertionError: expected 200 got 500",
+    "hint": "Use an f-string with status.upper(). Append the error_msg conditionally only when it is not None.",
+    "solutionLanguage": "python",
+    "solution": "def format_result(test_name: str, status: str, duration_ms: int, error_msg: str = None) -> str:\n    base = f'[{status.upper()}] {test_name} ({duration_ms}ms)'\n    if error_msg:\n        return f'{base}: {error_msg}'\n    return base\n\n# Example\nprint(format_result('test_login', 'passed', 123))\nprint(format_result('test_checkout', 'failed', 456, 'AssertionError: expected 200 got 500'))",
+    "explanation": "f-strings are the clearest way to compose strings with embedded expressions. status.upper() normalizes the status regardless of how it was stored. The conditional tail avoids printing a trailing colon or 'None' for passing tests. Separating the base string from the optional suffix keeps the logic readable.",
+    "commonMistakes": [
+      "Using string concatenation with + which raises TypeError if duration_ms is not yet converted to str",
+      "Checking 'if error_msg is not None' versus 'if error_msg' — the latter correctly treats an empty string as no message",
+      "Forgetting to uppercase the status, causing inconsistent output like '[passed]'"
+    ],
+    "followUps": [
+      "How would you pad the test name to a fixed width for aligned columns?",
+      "How would you write these lines to a file using pathlib?",
+      "How would you color-code the output based on status using ANSI escape codes?"
+    ],
+    "tags": [
+      "python",
+      "strings",
+      "formatting",
+      "reporting",
+      "test-utilities"
+    ]
+  },
+  {
+    "id": "python-coding-048",
+    "topicId": "python-coding",
+    "topicTitle": "Python Coding",
+    "level": "mid",
+    "type": "coding",
+    "difficulty": "medium",
+    "title": "Extract test artifacts from a zip archive",
+    "question": "Write a function that extracts specific files from a zip archive to a target directory.",
+    "problem": "Implement extract_artifacts(zip_path, target_dir, extensions) where zip_path is the path to a .zip file, target_dir is where to extract, and extensions is a list of file extensions to extract (e.g., ['.json', '.xml']). Extract only matching files, preserving their names but not subdirectory structure (write all to the flat target_dir). Return the list of extracted file paths as strings.",
+    "inputExample": "# archive contains: results/report.json, results/log.txt, results/junit.xml\nextract_artifacts('build.zip', '/tmp/artifacts', ['.json', '.xml'])",
+    "expectedOutput": "['/tmp/artifacts/report.json', '/tmp/artifacts/junit.xml']",
+    "hint": "Use zipfile.ZipFile in a with block. Iterate namelist(), filter by extension using pathlib.Path(name).suffix, then use zf.read() and write bytes to target_dir.",
+    "solutionLanguage": "python",
+    "solution": "import zipfile\nfrom pathlib import Path\n\ndef extract_artifacts(zip_path: str, target_dir: str, extensions: list) -> list:\n    target = Path(target_dir)\n    target.mkdir(parents=True, exist_ok=True)\n    extracted = []\n\n    with zipfile.ZipFile(zip_path, 'r') as zf:\n        for name in zf.namelist():\n            p = Path(name)\n            if p.suffix in extensions:\n                dest = target / p.name  # flatten: ignore subdirectories\n                dest.write_bytes(zf.read(name))\n                extracted.append(str(dest))\n\n    return extracted\n\n# Example\n# extract_artifacts('build.zip', '/tmp/artifacts', ['.json', '.xml'])",
+    "explanation": "zipfile.ZipFile is the standard library module for reading zip archives. namelist() returns all member paths as strings. Path(name).suffix gives the file extension including the dot. Using p.name strips the directory component, flattening the structure. write_bytes with zf.read() extracts without needing extractall, giving precise control over which files are written and where.",
+    "commonMistakes": [
+      "Using extractall() which extracts everything and recreates the archive's directory structure",
+      "Forgetting to create target_dir before writing, causing FileNotFoundError",
+      "Checking if name.endswith('.json') without the dot, which would match 'config.notjson'"
+    ],
+    "followUps": [
+      "How would you preserve the original subdirectory structure instead of flattening?",
+      "How would you handle a password-protected zip?",
+      "How would you verify the extracted files with a checksum?"
+    ],
+    "tags": [
+      "python",
+      "zipfile",
+      "file-handling",
+      "test-utilities",
+      "artifacts"
+    ]
+  },
+  {
+    "id": "python-coding-049",
+    "topicId": "python-coding",
+    "topicTitle": "Python Coding",
+    "level": "senior",
+    "type": "coding",
+    "difficulty": "hard",
+    "title": "LRU-cached test data loader",
+    "question": "Write a function that loads test fixture data from a JSON file and caches the result so the file is read only once per session.",
+    "problem": "Implement load_fixture(file_name) using functools.lru_cache. The function should resolve file_name relative to a fixtures/ directory next to the calling module, read the JSON file, and return the parsed Python object. Because lru_cache requires hashable arguments, file_name must be a string. Demonstrate that calling the function twice with the same argument reads the file only once.",
+    "inputExample": "# fixtures/users.json contains: [{\"id\": 1, \"name\": \"Alice\"}]\ndata1 = load_fixture('users.json')\ndata2 = load_fixture('users.json')  # served from cache\nprint(data1 is data2)  # True — same object",
+    "expectedOutput": "True",
+    "hint": "Decorate with @functools.lru_cache(maxsize=None). Inside, use Path(__file__).parent / 'fixtures' / file_name to build the path. Return a tuple or frozenset if you need a hashable result, or return the list/dict directly (the cache stores the reference).",
+    "solutionLanguage": "python",
+    "solution": "import json\nimport functools\nfrom pathlib import Path\n\nFIXTURES_DIR = Path(__file__).parent / 'fixtures'\n\n@functools.lru_cache(maxsize=None)\ndef load_fixture(file_name: str):\n    fixture_path = FIXTURES_DIR / file_name\n    with open(fixture_path, encoding='utf-8') as f:\n        return json.load(f)\n\n# The cache ensures the file is read only once:\n# data1 = load_fixture('users.json')\n# data2 = load_fixture('users.json')\n# assert data1 is data2  # True",
+    "explanation": "lru_cache(maxsize=None) caches all calls indefinitely (equivalent to functools.cache in Python 3.9+). Because file_name is a string it is hashable, satisfying lru_cache's requirement. The returned list or dict is stored in the cache and the same object reference is returned on subsequent calls, which is why 'is' returns True. This pattern avoids redundant I/O during a test session while keeping the call site simple.",
+    "commonMistakes": [
+      "Applying lru_cache to a function that takes a dict or list argument, which raises TypeError because they are not hashable",
+      "Mutating the returned cached object in a test, which corrupts the cache for subsequent tests — callers should copy if they need to modify",
+      "Using @lru_cache without parentheses in older Python (3.7) requires the parentheses form"
+    ],
+    "followUps": [
+      "How would you clear the cache between test sessions?",
+      "How would you make the cache thread-safe for parallel test execution?",
+      "When would functools.cache be preferred over lru_cache?"
+    ],
+    "tags": [
+      "python",
+      "functools",
+      "lru-cache",
+      "fixtures",
+      "performance",
+      "test-utilities"
+    ]
+  },
+  {
+    "id": "python-coding-050",
+    "topicId": "python-coding",
+    "topicTitle": "Python Coding",
+    "level": "senior",
+    "type": "scenario",
+    "difficulty": "hard",
+    "question": "Your CI pipeline runs 500 API tests overnight. In the morning you see that 47 tests failed. The failures are spread across multiple endpoints with different error messages. How do you use Python to triage the failures systematically before reading individual test logs?",
+    "shortAnswer": "Parse the JUnit XML report into a structured summary, group failures by endpoint or error pattern, and surface the most common failure signatures first.",
+    "interviewAnswer": "My first step is to avoid reading 47 individual logs by extracting signal from the structured test report. pytest writes a JUnit XML report (--junitxml=report.xml) that I parse with Python's xml.etree.ElementTree. I extract all <failure> and <error> elements, pull their classname (endpoint module) and message attributes, then use collections.Counter on the error messages and collections.defaultdict to group by classname. This immediately shows me: are the 47 failures spread evenly (suggesting a systemic outage) or concentrated in 2-3 endpoints (suggesting a targeted regression)? I then look at the top-3 error message patterns. If 35 out of 47 say 'ConnectionRefused: port 5432', the problem is the test database, not the application code. If they say '401 Unauthorized', a credential rotation broke the test environment. I script this triage so it runs automatically and posts a summary comment on the PR or Slack channel before anyone opens a browser.",
+    "realProjectExample": "After a large refactor, CI showed 80 failures. My triage script parsed the XML in 30 seconds and revealed that 75 failures had the identical message 'KeyError: user_id' — the refactor had renamed a field in the shared user fixture. Fixing one line in conftest.py resolved 75 tests at once. Without the grouping step I would have spent hours reading individual test logs.",
+    "followUps": [
+      "How would you automate this triage script to run after every failed CI build?",
+      "How would you distinguish infrastructure failures from application regressions in the grouping?",
+      "How would you track failure trends across multiple nightly runs using a SQLite database?"
+    ],
+    "tags": [
+      "python",
+      "test-triage",
+      "xml-parsing",
+      "counter",
+      "defaultdict",
+      "ci",
+      "reporting"
+    ]
   }
 ]

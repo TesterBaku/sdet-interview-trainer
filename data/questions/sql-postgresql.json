@@ -15,9 +15,21 @@
     "solutionLanguage": "sql",
     "solution": "SELECT email\nFROM customers\nWHERE email IS NOT NULL\nGROUP BY email\nHAVING COUNT(*) > 1;",
     "explanation": "GROUP BY creates one group per email, and HAVING filters groups after aggregation.",
-    "commonMistakes": ["Using WHERE COUNT(*) > 1", "Forgetting NULL behavior", "Selecting non-grouped columns"],
-    "followUps": ["How would you include duplicate counts?", "How would you delete duplicates safely?", "How would you handle case-insensitive email matching?"],
-    "tags": ["sql", "group by", "having"]
+    "commonMistakes": [
+      "Using WHERE COUNT(*) > 1",
+      "Forgetting NULL behavior",
+      "Selecting non-grouped columns"
+    ],
+    "followUps": [
+      "How would you include duplicate counts?",
+      "How would you delete duplicates safely?",
+      "How would you handle case-insensitive email matching?"
+    ],
+    "tags": [
+      "sql",
+      "group by",
+      "having"
+    ]
   },
   {
     "id": "sql-postgresql-002",
@@ -27,10 +39,18 @@
     "type": "quiz",
     "difficulty": "easy",
     "question": "Which clause filters aggregated groups?",
-    "choices": ["WHERE", "HAVING", "ORDER BY", "LIMIT"],
+    "choices": [
+      "WHERE",
+      "HAVING",
+      "ORDER BY",
+      "LIMIT"
+    ],
     "correctAnswer": "HAVING",
     "explanation": "WHERE filters rows before aggregation; HAVING filters groups after GROUP BY.",
-    "tags": ["sql", "aggregation"]
+    "tags": [
+      "sql",
+      "aggregation"
+    ]
   },
   {
     "id": "sql-postgresql-003",
@@ -43,8 +63,16 @@
     "shortAnswer": "Check ordering logic, timestamps, joins, environment data, and whether the UI reads from a different source or cache.",
     "interviewAnswer": "I would verify the expected business rule first: latest by created_at, updated_at, sequence, or event version. Then I would query all status records for the order, inspect joins, and compare the API/UI source. If the UI uses cached or denormalized data, I would validate that pipeline too.",
     "realProjectExample": "For an order history bug, the test used MAX(id) but the app used updated_at, so backfilled records broke the assertion. We changed the validation query to match the product rule.",
-    "followUps": ["How do you avoid flaky database assertions?", "When should tests avoid direct DB checks?", "How do transactions affect test reads?"],
-    "tags": ["sql", "debugging", "data validation"]
+    "followUps": [
+      "How do you avoid flaky database assertions?",
+      "When should tests avoid direct DB checks?",
+      "How do transactions affect test reads?"
+    ],
+    "tags": [
+      "sql",
+      "debugging",
+      "data validation"
+    ]
   },
   {
     "id": "sql-postgresql-004",
@@ -62,9 +90,22 @@
     "solutionLanguage": "sql",
     "solution": "SELECT customer_id, order_id, created_at\nFROM (\n  SELECT\n    customer_id,\n    order_id,\n    created_at,\n    ROW_NUMBER() OVER (PARTITION BY customer_id ORDER BY created_at DESC) AS rn\n  FROM orders\n) ranked\nWHERE rn = 1;",
     "explanation": "ROW_NUMBER() assigns a sequential rank within each customer partition ordered newest-first. Filtering to rn = 1 keeps only the latest row per customer. This is more reliable than a self-join or subquery with MAX() when you also need non-aggregated columns from the same row.",
-    "commonMistakes": ["Using MAX(created_at) in a subquery but joining back incorrectly when two orders share the same timestamp", "Using RANK() instead of ROW_NUMBER() which can produce ties", "Forgetting to partition — windowing the entire table without PARTITION BY"],
-    "followUps": ["How would you handle ties where two orders have identical created_at timestamps?", "What is the difference between ROW_NUMBER, RANK, and DENSE_RANK?", "How would you validate this query result against the application's displayed 'last order' in a test?"],
-    "tags": ["sql", "window functions", "row_number", "latest record per group"]
+    "commonMistakes": [
+      "Using MAX(created_at) in a subquery but joining back incorrectly when two orders share the same timestamp",
+      "Using RANK() instead of ROW_NUMBER() which can produce ties",
+      "Forgetting to partition — windowing the entire table without PARTITION BY"
+    ],
+    "followUps": [
+      "How would you handle ties where two orders have identical created_at timestamps?",
+      "What is the difference between ROW_NUMBER, RANK, and DENSE_RANK?",
+      "How would you validate this query result against the application's displayed 'last order' in a test?"
+    ],
+    "tags": [
+      "sql",
+      "window functions",
+      "row_number",
+      "latest record per group"
+    ]
   },
   {
     "id": "sql-postgresql-005",
@@ -82,9 +123,22 @@
     "solutionLanguage": "sql",
     "solution": "SELECT order_id, customer_id\nFROM orders\nWHERE shipping_address IS NULL;",
     "explanation": "NULL is not a value; it is the absence of a value. Comparing with = NULL always returns NULL (falsy), so IS NULL is the correct operator. In test data validation, NULL checks help identify seeding gaps or missing required fields before running downstream test scenarios.",
-    "commonMistakes": ["Writing WHERE shipping_address = NULL instead of IS NULL", "Assuming COALESCE is needed in a filter — COALESCE is for output, not predicate logic", "Not checking for empty strings separately when the application treats '' as missing"],
-    "followUps": ["How would you find orders where shipping_address is either NULL or an empty string?", "How does NULL behave in COUNT() and SUM()?", "How would you assert in a test that no new orders have NULL shipping addresses after a registration flow?"],
-    "tags": ["sql", "null handling", "where", "data validation"]
+    "commonMistakes": [
+      "Writing WHERE shipping_address = NULL instead of IS NULL",
+      "Assuming COALESCE is needed in a filter — COALESCE is for output, not predicate logic",
+      "Not checking for empty strings separately when the application treats '' as missing"
+    ],
+    "followUps": [
+      "How would you find orders where shipping_address is either NULL or an empty string?",
+      "How does NULL behave in COUNT() and SUM()?",
+      "How would you assert in a test that no new orders have NULL shipping addresses after a registration flow?"
+    ],
+    "tags": [
+      "sql",
+      "null handling",
+      "where",
+      "data validation"
+    ]
   },
   {
     "id": "sql-postgresql-006",
@@ -102,9 +156,23 @@
     "solutionLanguage": "sql",
     "solution": "SELECT\n  status,\n  COUNT(*) AS order_count\nFROM orders\nGROUP BY status\nORDER BY order_count DESC;",
     "explanation": "GROUP BY status collapses all rows with the same status into one group. COUNT(*) counts every row in each group including NULLs in other columns. ORDER BY on the alias works in PostgreSQL. This query is useful as a pre-test assertion to confirm that your test environment is seeded with the right distribution of data.",
-    "commonMistakes": ["Using COUNT(status) instead of COUNT(*) — COUNT(column) excludes NULLs in that column", "Not aliasing the count column, making downstream assertion code brittle", "Forgetting ORDER BY and getting non-deterministic result ordering in tests"],
-    "followUps": ["How would you assert that at least one order in each of the four expected statuses exists?", "What is the difference between COUNT(*) and COUNT(column_name)?", "How would you add a HAVING clause to surface only statuses with fewer than 5 orders?"],
-    "tags": ["sql", "group by", "aggregation", "count", "data validation"]
+    "commonMistakes": [
+      "Using COUNT(status) instead of COUNT(*) — COUNT(column) excludes NULLs in that column",
+      "Not aliasing the count column, making downstream assertion code brittle",
+      "Forgetting ORDER BY and getting non-deterministic result ordering in tests"
+    ],
+    "followUps": [
+      "How would you assert that at least one order in each of the four expected statuses exists?",
+      "What is the difference between COUNT(*) and COUNT(column_name)?",
+      "How would you add a HAVING clause to surface only statuses with fewer than 5 orders?"
+    ],
+    "tags": [
+      "sql",
+      "group by",
+      "aggregation",
+      "count",
+      "data validation"
+    ]
   },
   {
     "id": "sql-postgresql-007",
@@ -122,9 +190,23 @@
     "solutionLanguage": "sql",
     "solution": "SELECT\n  c.first_name || ' ' || c.last_name AS full_name,\n  COUNT(o.order_id) AS order_count\nFROM customers c\nINNER JOIN orders o ON c.customer_id = o.customer_id\nGROUP BY c.customer_id, c.first_name, c.last_name\nORDER BY order_count DESC;",
     "explanation": "INNER JOIN filters out customers with no matching orders (Carol is excluded). Grouping by customer_id guarantees uniqueness even if two customers share a name. COUNT(o.order_id) counts non-NULL order IDs per group, which is equivalent to counting matched order rows.",
-    "commonMistakes": ["Using COUNT(*) after a LEFT JOIN — this counts the NULL placeholder row and inflates the count for customers with no orders", "Grouping only by full_name — two customers with the same name collapse into one group", "Forgetting that INNER JOIN excludes unmatched rows, which may be the desired or undesired behavior"],
-    "followUps": ["How would you change this to also include customers with zero orders?", "What is the difference between INNER JOIN and LEFT JOIN in this context?", "How would you use this query to assert referential integrity in a test?"],
-    "tags": ["sql", "join", "inner join", "aggregation", "group by"]
+    "commonMistakes": [
+      "Using COUNT(*) after a LEFT JOIN — this counts the NULL placeholder row and inflates the count for customers with no orders",
+      "Grouping only by full_name — two customers with the same name collapse into one group",
+      "Forgetting that INNER JOIN excludes unmatched rows, which may be the desired or undesired behavior"
+    ],
+    "followUps": [
+      "How would you change this to also include customers with zero orders?",
+      "What is the difference between INNER JOIN and LEFT JOIN in this context?",
+      "How would you use this query to assert referential integrity in a test?"
+    ],
+    "tags": [
+      "sql",
+      "join",
+      "inner join",
+      "aggregation",
+      "group by"
+    ]
   },
   {
     "id": "sql-postgresql-008",
@@ -142,9 +224,23 @@
     "solutionLanguage": "sql",
     "solution": "SELECT c.customer_id, c.email\nFROM customers c\nLEFT JOIN orders o ON c.customer_id = o.customer_id\nWHERE o.order_id IS NULL;",
     "explanation": "LEFT JOIN returns all rows from the left table (customers) and matching rows from the right table (orders). When no match exists, right-side columns are NULL. Filtering WHERE o.order_id IS NULL isolates customers with no orders. This pattern is also called an anti-join and is more readable than NOT IN or NOT EXISTS for simple cases.",
-    "commonMistakes": ["Using INNER JOIN instead of LEFT JOIN — this eliminates non-matching rows before the WHERE filter", "Filtering on a nullable column that could legitimately be NULL rather than the primary key", "Using NOT IN with a subquery that could return NULL — NOT IN with any NULL in the list returns zero rows"],
-    "followUps": ["How would you rewrite this using NOT EXISTS?", "Why is NOT IN dangerous when the subquery can return NULLs?", "How does this kind of query help validate test environment seeding?"],
-    "tags": ["sql", "left join", "null handling", "anti-join", "data validation"]
+    "commonMistakes": [
+      "Using INNER JOIN instead of LEFT JOIN — this eliminates non-matching rows before the WHERE filter",
+      "Filtering on a nullable column that could legitimately be NULL rather than the primary key",
+      "Using NOT IN with a subquery that could return NULL — NOT IN with any NULL in the list returns zero rows"
+    ],
+    "followUps": [
+      "How would you rewrite this using NOT EXISTS?",
+      "Why is NOT IN dangerous when the subquery can return NULLs?",
+      "How does this kind of query help validate test environment seeding?"
+    ],
+    "tags": [
+      "sql",
+      "left join",
+      "null handling",
+      "anti-join",
+      "data validation"
+    ]
   },
   {
     "id": "sql-postgresql-009",
@@ -162,9 +258,24 @@
     "solutionLanguage": "sql",
     "solution": "SELECT\n  pm.category,\n  COUNT(p.product_id) AS actual_count,\n  pm.min_count AS required_min\nFROM product_minimums pm\nLEFT JOIN products p\n  ON pm.category = p.category\n  AND p.is_active = TRUE\nGROUP BY pm.category, pm.min_count\nHAVING COUNT(p.product_id) < pm.min_count\nORDER BY pm.category;",
     "explanation": "The LEFT JOIN from product_minimums ensures categories with zero active products still appear. The is_active filter is placed in the JOIN condition rather than the WHERE clause so that categories with no active products are not excluded entirely (a WHERE filter after LEFT JOIN would eliminate NULL rows). HAVING compares the aggregated count against the per-category minimum.",
-    "commonMistakes": ["Putting is_active = TRUE in the WHERE clause, which converts the LEFT JOIN into an INNER JOIN and drops categories with zero active products", "Using COUNT(*) instead of COUNT(p.product_id) — COUNT(*) counts the NULL placeholder row and returns 1 instead of 0 for empty categories", "Joining in the wrong direction (products LEFT JOIN product_minimums) which loses minimum definitions for categories with no products at all"],
-    "followUps": ["How would you assert this check automatically in a pytest fixture before the test suite runs?", "How would you handle a case where a category in product_minimums does not exist at all in the products table?", "How does moving a filter from WHERE to the JOIN ON clause change the query semantics?"],
-    "tags": ["sql", "left join", "having", "aggregation", "data validation", "test data"]
+    "commonMistakes": [
+      "Putting is_active = TRUE in the WHERE clause, which converts the LEFT JOIN into an INNER JOIN and drops categories with zero active products",
+      "Using COUNT(*) instead of COUNT(p.product_id) — COUNT(*) counts the NULL placeholder row and returns 1 instead of 0 for empty categories",
+      "Joining in the wrong direction (products LEFT JOIN product_minimums) which loses minimum definitions for categories with no products at all"
+    ],
+    "followUps": [
+      "How would you assert this check automatically in a pytest fixture before the test suite runs?",
+      "How would you handle a case where a category in product_minimums does not exist at all in the products table?",
+      "How does moving a filter from WHERE to the JOIN ON clause change the query semantics?"
+    ],
+    "tags": [
+      "sql",
+      "left join",
+      "having",
+      "aggregation",
+      "data validation",
+      "test data"
+    ]
   },
   {
     "id": "sql-postgresql-010",
@@ -182,9 +293,23 @@
     "solutionLanguage": "sql",
     "solution": "SELECT\n  oi.item_id,\n  oi.order_id\nFROM order_items oi\nLEFT JOIN orders o ON oi.order_id = o.order_id\nWHERE o.order_id IS NULL;",
     "explanation": "A LEFT JOIN from order_items to orders returns all items; when no matching order exists, order columns are NULL. Filtering WHERE o.order_id IS NULL isolates the orphaned items. In test environments where FK constraints are disabled or the schema uses soft deletes, this query catches data integrity problems that would cause test flakiness.",
-    "commonMistakes": ["Using NOT IN with a subquery — safe only if orders.order_id is guaranteed non-NULL", "Using INNER JOIN which silently drops the orphaned rows you are trying to find", "Not considering that the test DB may have FK constraints disabled, so the app may have inserted bad data without an error"],
-    "followUps": ["How would you turn this into a pytest assertion that fails the test if any orphaned items exist?", "What are the risks of disabling FK constraints in a test database?", "How would you clean up orphaned records safely before a test run?"],
-    "tags": ["sql", "left join", "referential integrity", "null handling", "data validation"]
+    "commonMistakes": [
+      "Using NOT IN with a subquery — safe only if orders.order_id is guaranteed non-NULL",
+      "Using INNER JOIN which silently drops the orphaned rows you are trying to find",
+      "Not considering that the test DB may have FK constraints disabled, so the app may have inserted bad data without an error"
+    ],
+    "followUps": [
+      "How would you turn this into a pytest assertion that fails the test if any orphaned items exist?",
+      "What are the risks of disabling FK constraints in a test database?",
+      "How would you clean up orphaned records safely before a test run?"
+    ],
+    "tags": [
+      "sql",
+      "left join",
+      "referential integrity",
+      "null handling",
+      "data validation"
+    ]
   },
   {
     "id": "sql-postgresql-011",
@@ -202,9 +327,25 @@
     "solutionLanguage": "sql",
     "solution": "SELECT\n  c.tier,\n  ROUND(AVG(o.total_amount), 2) AS avg_total,\n  MIN(o.total_amount) AS min_total,\n  MAX(o.total_amount) AS max_total,\n  COUNT(o.order_id) AS order_count\nFROM customers c\nINNER JOIN orders o ON c.customer_id = o.customer_id\nGROUP BY c.tier\nHAVING COUNT(o.order_id) > 2\nORDER BY avg_total DESC;",
     "explanation": "INNER JOIN limits results to customers who have at least one order. GROUP BY tier aggregates across all customers in that tier. AVG, MIN, MAX, and COUNT are standard aggregate functions. HAVING filters after aggregation to keep only tiers with more than 2 orders. ROUND(AVG(...), 2) prevents floating-point precision noise in assertion comparisons.",
-    "commonMistakes": ["Rounding in the application layer rather than SQL, causing comparison mismatches", "Using WHERE to filter order count instead of HAVING", "Not specifying which column to COUNT — COUNT(c.customer_id) would count distinct customers, not orders"],
-    "followUps": ["How would you use this query to assert that the gold tier always has the highest average order value?", "What does ROUND do to exactly 0.005 in PostgreSQL — round half up or banker's rounding?", "How would you pivot this result to compare tiers side-by-side in a test report?"],
-    "tags": ["sql", "aggregation", "avg", "min", "max", "having", "join"]
+    "commonMistakes": [
+      "Rounding in the application layer rather than SQL, causing comparison mismatches",
+      "Using WHERE to filter order count instead of HAVING",
+      "Not specifying which column to COUNT — COUNT(c.customer_id) would count distinct customers, not orders"
+    ],
+    "followUps": [
+      "How would you use this query to assert that the gold tier always has the highest average order value?",
+      "What does ROUND do to exactly 0.005 in PostgreSQL — round half up or banker's rounding?",
+      "How would you pivot this result to compare tiers side-by-side in a test report?"
+    ],
+    "tags": [
+      "sql",
+      "aggregation",
+      "avg",
+      "min",
+      "max",
+      "having",
+      "join"
+    ]
   },
   {
     "id": "sql-postgresql-012",
@@ -214,10 +355,19 @@
     "type": "quiz",
     "difficulty": "easy",
     "question": "What is the result of comparing any value to NULL using the = operator in PostgreSQL?",
-    "choices": ["TRUE", "FALSE", "NULL", "An error is raised"],
+    "choices": [
+      "TRUE",
+      "FALSE",
+      "NULL",
+      "An error is raised"
+    ],
     "correctAnswer": "NULL",
     "explanation": "In SQL, NULL represents an unknown value. Any comparison with NULL using =, <>, >, or < evaluates to NULL (unknown), not TRUE or FALSE. This is why WHERE column = NULL never matches any rows — you must use IS NULL or IS NOT NULL instead.",
-    "tags": ["sql", "null handling", "comparison"]
+    "tags": [
+      "sql",
+      "null handling",
+      "comparison"
+    ]
   },
   {
     "id": "sql-postgresql-013",
@@ -227,10 +377,19 @@
     "type": "quiz",
     "difficulty": "easy",
     "question": "Which JOIN type returns ALL rows from the left table and matching rows from the right table, filling with NULLs when there is no match?",
-    "choices": ["INNER JOIN", "RIGHT JOIN", "LEFT JOIN", "FULL OUTER JOIN"],
+    "choices": [
+      "INNER JOIN",
+      "RIGHT JOIN",
+      "LEFT JOIN",
+      "FULL OUTER JOIN"
+    ],
     "correctAnswer": "LEFT JOIN",
     "explanation": "LEFT JOIN (also called LEFT OUTER JOIN) returns every row from the left table. For rows with no match in the right table, all right-side columns are set to NULL. This is the standard join used for anti-join patterns (finding unmatched rows) and for including entities with zero related records.",
-    "tags": ["sql", "join", "left join"]
+    "tags": [
+      "sql",
+      "join",
+      "left join"
+    ]
   },
   {
     "id": "sql-postgresql-014",
@@ -248,7 +407,12 @@
     ],
     "correctAnswer": "The number of rows in the group, regardless of NULL values",
     "explanation": "COUNT(*) counts all rows in a group, including rows where every column is NULL. It never returns NULL — it returns 0 for an empty group. COUNT(column_name), by contrast, counts only non-NULL values in that column. This distinction matters when validating test data: COUNT(*) from a LEFT JOIN can return 1 even for unmatched rows because it counts the NULL placeholder row.",
-    "tags": ["sql", "aggregation", "count", "null handling"]
+    "tags": [
+      "sql",
+      "aggregation",
+      "count",
+      "null handling"
+    ]
   },
   {
     "id": "sql-postgresql-015",
@@ -266,7 +430,12 @@
     ],
     "correctAnswer": "The subquery returns at least one NULL value",
     "explanation": "NOT IN with a subquery that returns any NULL value causes the entire NOT IN condition to evaluate to NULL (unknown) for every row, matching nothing. This is because 'x NOT IN (1, NULL)' expands to 'x <> 1 AND x <> NULL', and 'x <> NULL' is always NULL. The safe alternatives are NOT EXISTS or a LEFT JOIN anti-join pattern, both of which handle NULL correctly.",
-    "tags": ["sql", "null handling", "not in", "subquery"]
+    "tags": [
+      "sql",
+      "null handling",
+      "not in",
+      "subquery"
+    ]
   },
   {
     "id": "sql-postgresql-016",
@@ -284,7 +453,12 @@
     ],
     "correctAnswer": "SUM(total_amount) OVER (PARTITION BY customer_id ORDER BY created_at)",
     "explanation": "Window functions use the OVER clause. PARTITION BY customer_id resets the running total for each customer. ORDER BY created_at defines the frame ordering so the sum accumulates chronologically. Without PARTITION BY, the running total would span all customers. The RUNNING SUM syntax does not exist in standard SQL or PostgreSQL.",
-    "tags": ["sql", "window functions", "aggregation", "partition by"]
+    "tags": [
+      "sql",
+      "window functions",
+      "aggregation",
+      "partition by"
+    ]
   },
   {
     "id": "sql-postgresql-017",
@@ -302,7 +476,13 @@
     ],
     "correctAnswer": "SELECT total_amount * 0.9 AS discounted FROM orders WHERE total_amount * 0.9 < 50",
     "explanation": "In standard SQL and PostgreSQL, SELECT list aliases are not available in the WHERE clause because WHERE is evaluated before SELECT in the logical query order. You must repeat the expression in the WHERE clause, or use a subquery or CTE to reference the alias. Only ORDER BY and HAVING (in some DBs) can reference SELECT aliases.",
-    "tags": ["sql", "select", "where", "alias", "query execution order"]
+    "tags": [
+      "sql",
+      "select",
+      "where",
+      "alias",
+      "query execution order"
+    ]
   },
   {
     "id": "sql-postgresql-018",
@@ -315,8 +495,18 @@
     "shortAnswer": "Run precondition queries as pytest fixtures or setup steps to assert that required data exists, has the correct shape, and meets minimum counts before any test executes.",
     "interviewAnswer": "Before running a test suite that depends on database state, I write SQL precondition checks and run them in a setup fixture. These checks verify: required records exist (e.g., at least one active product per category), no orphaned foreign keys, no NULLs in required fields, and minimum row counts match expectations. If any check fails, I fail fast with a clear error like 'Staging DB is missing gold-tier customers — cannot run loyalty tests.' This prevents the test suite from producing misleading failures caused by bad test data rather than application bugs. I encapsulate these checks in a db_preconditions fixture that runs at session scope so it only queries once. For long-running suites, I also log the data state to the test report so failures are reproducible.",
     "realProjectExample": "On a payments project, our checkout tests were failing intermittently because staging had no active payment methods for certain regions. I added a session-scoped fixture that queried SELECT COUNT(*) FROM payment_methods WHERE region = %s AND is_active = TRUE and raised a pytest.skip with a clear message if the count was zero. This cut false-failure noise by 40% and made root-cause analysis faster.",
-    "followUps": ["How do you handle test data cleanup after a test that inserts rows?", "Should tests ever modify production data directly via SQL?", "How do you make SQL-based precondition checks part of a CI pipeline?"],
-    "tags": ["sql", "data validation", "test data", "pytest", "preconditions"]
+    "followUps": [
+      "How do you handle test data cleanup after a test that inserts rows?",
+      "Should tests ever modify production data directly via SQL?",
+      "How do you make SQL-based precondition checks part of a CI pipeline?"
+    ],
+    "tags": [
+      "sql",
+      "data validation",
+      "test data",
+      "pytest",
+      "preconditions"
+    ]
   },
   {
     "id": "sql-postgresql-019",
@@ -329,8 +519,18 @@
     "shortAnswer": "WHERE filters individual rows before grouping; HAVING filters groups after aggregation. Use WHERE to limit which rows enter the aggregation and HAVING to filter the aggregated result.",
     "interviewAnswer": "WHERE is evaluated before GROUP BY, so it filters raw rows — it cannot reference aggregate functions. HAVING is evaluated after GROUP BY, so it can reference aggregates like COUNT(*) > 5 or SUM(amount) > 1000. In test data validation, I use WHERE to narrow down the dataset (e.g., WHERE status = 'active' AND created_at > '2024-01-01') and HAVING to assert properties of groups (e.g., HAVING COUNT(*) < 3 to find under-seeded categories). A common mistake is putting a row-level filter in HAVING and an aggregate filter in WHERE — the latter causes a syntax error. Combining both correctly keeps queries fast because WHERE reduces the rows before the expensive GROUP BY operation.",
     "realProjectExample": "I was debugging a flaky test that validated order counts per region. The original query had WHERE COUNT(*) > 0 which caused a PostgreSQL error. The fix was to move it to HAVING COUNT(*) > 0. After that fix, the query also ran faster because we added a WHERE created_at > NOW() - INTERVAL '30 days' to limit the scan to recent orders.",
-    "followUps": ["Can HAVING be used without GROUP BY in PostgreSQL?", "What happens if you reference a SELECT alias in HAVING?", "How would you explain this distinction to a junior QA engineer who writes SQL for the first time?"],
-    "tags": ["sql", "where", "having", "group by", "aggregation"]
+    "followUps": [
+      "Can HAVING be used without GROUP BY in PostgreSQL?",
+      "What happens if you reference a SELECT alias in HAVING?",
+      "How would you explain this distinction to a junior QA engineer who writes SQL for the first time?"
+    ],
+    "tags": [
+      "sql",
+      "where",
+      "having",
+      "group by",
+      "aggregation"
+    ]
   },
   {
     "id": "sql-postgresql-020",
@@ -343,8 +543,18 @@
     "shortAnswer": "Use IS NULL / IS NOT NULL for filtering, COALESCE or NULLIF for output substitution, and be careful with NOT IN subqueries that may return NULLs.",
     "interviewAnswer": "NULL handling is one of the top sources of subtle SQL bugs in test code. I follow four rules. First, never use = NULL in a WHERE clause — use IS NULL or IS NOT NULL. Second, when a NULL in a column should be treated as a default value in output, use COALESCE(column, default). Third, never use NOT IN with a subquery unless I am certain the subquery cannot return NULL, because a single NULL in the list makes NOT IN return zero rows silently. Instead I prefer NOT EXISTS or a LEFT JOIN anti-join. Fourth, be aware that aggregate functions like SUM, AVG, and COUNT(column) ignore NULLs — if every value is NULL, SUM returns NULL, not zero, which can break numeric comparisons in tests. I wrap those with COALESCE(SUM(column), 0) when asserting numeric totals.",
     "realProjectExample": "We had a test asserting that no customer IDs from a cancellation batch were still present in the active_subscriptions table. The query used NOT IN against a cancellation subquery. Unknown to us, some rows in that subquery had NULL customer_id from a data import bug. The NOT IN returned zero rows, the assertion passed, and a real defect went undetected for a sprint. Rewriting with NOT EXISTS caught the real problem immediately.",
-    "followUps": ["What does NULLIF do and when would you use it in a test query?", "How does PostgreSQL handle NULLs in ORDER BY?", "How would you detect which columns in a table have unexpected NULL values automatically?"],
-    "tags": ["sql", "null handling", "not in", "coalesce", "data validation"]
+    "followUps": [
+      "What does NULLIF do and when would you use it in a test query?",
+      "How does PostgreSQL handle NULLs in ORDER BY?",
+      "How would you detect which columns in a table have unexpected NULL values automatically?"
+    ],
+    "tags": [
+      "sql",
+      "null handling",
+      "not in",
+      "coalesce",
+      "data validation"
+    ]
   },
   {
     "id": "sql-postgresql-021",
@@ -357,8 +567,18 @@
     "shortAnswer": "Use SQL for deep data integrity checks that the API does not expose, and for fast pre/post-condition validation. Avoid SQL assertions for business logic already covered by the API contract.",
     "interviewAnswer": "I use SQL assertions strategically, not as a replacement for API-level validation. The cases where SQL is the right tool: verifying side effects that the API does not expose (e.g., an event was logged, a foreign key was created, a soft-delete set deleted_at rather than removing the row); asserting data integrity constraints that span multiple tables; and seeding or validating test environment state. The cases where SQL is wrong: asserting business logic that the API owns — if the API changes its data model, SQL tests break even though behavior is correct. Also, direct SQL reads bypass application caching and read replicas, so a green SQL check does not prove the user sees correct data. My rule is: API for behavior, SQL for state. I also avoid writing SQL that encodes business rules the app owns — that creates parallel logic that diverges and causes ghost failures.",
     "realProjectExample": "On a user registration feature, I used SQL to verify that the users table row was created with the correct role and that the audit_log table had the creation event — things the POST /users response did not include. But I used the API to validate the password hash was not returned in the response. Mixing the two appropriately kept tests both thorough and resilient.",
-    "followUps": ["How do you handle database schema changes that break existing SQL assertions?", "What is the risk of testing against a read replica in PostgreSQL?", "How would you design a test helper library that wraps common SQL validation queries?"],
-    "tags": ["sql", "testing strategy", "data validation", "api testing", "sdet"]
+    "followUps": [
+      "How do you handle database schema changes that break existing SQL assertions?",
+      "What is the risk of testing against a read replica in PostgreSQL?",
+      "How would you design a test helper library that wraps common SQL validation queries?"
+    ],
+    "tags": [
+      "sql",
+      "testing strategy",
+      "data validation",
+      "api testing",
+      "sdet"
+    ]
   },
   {
     "id": "sql-postgresql-022",
@@ -371,8 +591,18 @@
     "shortAnswer": "Compare row counts between source and destination, check for records that failed transformation, and validate key field values on a sample using SQL queries in your test teardown or monitoring step.",
     "interviewAnswer": "For batch job validation I use a three-step SQL strategy. First, count check: SELECT COUNT(*) from the source and destination tables for the batch window and assert they are equal. Second, anomaly check: JOIN source to destination on a business key and look for records that are missing, duplicated, or have unexpected field values. Third, spot-check: SELECT specific transformed fields for a known input and assert the output matches the expected transformation rule. I wrap these in a post-run fixture that runs after the batch job completes. If any check fails, the test fails with a clear message showing which record IDs are affected. I also query for NULL values in fields that the pipeline should have populated, because NULLs are a common symptom of a transformation silently failing on an unexpected input format.",
     "realProjectExample": "On a nightly ETL job that synced orders from a legacy system to a data warehouse, I built SQL assertions that ran after each sync: count of source rows matched count of destination rows, zero rows with NULL transformed_order_id, and spot-checks on orders with edge-case statuses like 'partially_refunded'. These caught a bug where orders with unicode characters in the address field were silently dropped.",
-    "followUps": ["How do you handle idempotency validation for a pipeline that may run multiple times?", "How would you validate data quality for very large tables where a full scan is too slow?", "What SQL patterns help you detect off-by-one errors in date range processing?"],
-    "tags": ["sql", "data pipeline", "etl", "batch validation", "data validation"]
+    "followUps": [
+      "How do you handle idempotency validation for a pipeline that may run multiple times?",
+      "How would you validate data quality for very large tables where a full scan is too slow?",
+      "What SQL patterns help you detect off-by-one errors in date range processing?"
+    ],
+    "tags": [
+      "sql",
+      "data pipeline",
+      "etl",
+      "batch validation",
+      "data validation"
+    ]
   },
   {
     "id": "sql-postgresql-023",
@@ -390,9 +620,23 @@
     "solutionLanguage": "sql",
     "solution": "SELECT\n  product_id,\n  CONCAT_WS(', ',\n    CASE WHEN name IS NULL THEN 'name' END,\n    CASE WHEN price IS NULL THEN 'price' END,\n    CASE WHEN category IS NULL THEN 'category' END\n  ) AS null_fields\nFROM products\nWHERE name IS NULL\n   OR price IS NULL\n   OR category IS NULL;",
     "explanation": "CASE WHEN name IS NULL THEN 'name' END returns the string 'name' when name is NULL and NULL otherwise. CONCAT_WS(', ', ...) concatenates non-NULL arguments with the separator, automatically skipping NULLs — this is why it cleanly builds 'price, category' without extra commas. The WHERE clause filters to only rows with at least one NULL required field, keeping the result set small and actionable.",
-    "commonMistakes": ["Using CONCAT instead of CONCAT_WS — CONCAT returns NULL if any argument is NULL in some SQL dialects", "Forgetting to filter with WHERE, returning all rows with an empty null_fields column for valid records", "Using COALESCE to substitute 'NULL' as a string rather than detecting actual NULL values"],
-    "followUps": ["How would you extend this to check all columns in a table dynamically using PostgreSQL's information_schema?", "How would you turn this into a pytest assertion that prints the offending product IDs?", "How does CONCAT_WS behave differently from CONCAT when arguments are NULL?"],
-    "tags": ["sql", "null handling", "case", "concat_ws", "data validation"]
+    "commonMistakes": [
+      "Using CONCAT instead of CONCAT_WS — CONCAT returns NULL if any argument is NULL in some SQL dialects",
+      "Forgetting to filter with WHERE, returning all rows with an empty null_fields column for valid records",
+      "Using COALESCE to substitute 'NULL' as a string rather than detecting actual NULL values"
+    ],
+    "followUps": [
+      "How would you extend this to check all columns in a table dynamically using PostgreSQL's information_schema?",
+      "How would you turn this into a pytest assertion that prints the offending product IDs?",
+      "How does CONCAT_WS behave differently from CONCAT when arguments are NULL?"
+    ],
+    "tags": [
+      "sql",
+      "null handling",
+      "case",
+      "concat_ws",
+      "data validation"
+    ]
   },
   {
     "id": "sql-postgresql-024",
@@ -410,9 +654,24 @@
     "solutionLanguage": "sql",
     "solution": "SELECT\n  test_run_id,\n  test_case_id,\n  COUNT(*) AS occurrence_count\nFROM test_results\nGROUP BY test_run_id, test_case_id\nHAVING COUNT(*) > 1\nORDER BY test_run_id, test_case_id;",
     "explanation": "Grouping by the composite key (test_run_id, test_case_id) creates one group per unique pair. HAVING COUNT(*) > 1 keeps only pairs that appear more than once. This is a direct data integrity assertion — if this query returns any rows, the pipeline is writing duplicate results, which means the test runner is being triggered multiple times for the same test case or the results writer lacks idempotency.",
-    "commonMistakes": ["Grouping by only one column and missing composite duplicates", "Using WHERE COUNT(*) > 1 which is a syntax error", "Returning only result_id of one duplicate without showing the count — makes it harder to triage"],
-    "followUps": ["How would you use this query inside a pytest conftest.py to fail the entire suite if duplicates exist?", "How would you identify which duplicate result to keep if you needed to deduplicate the table?", "How would you add a unique constraint on (test_run_id, test_case_id) in PostgreSQL to prevent duplicates at the DB level?"],
-    "tags": ["sql", "duplicates", "group by", "having", "data validation", "test infrastructure"]
+    "commonMistakes": [
+      "Grouping by only one column and missing composite duplicates",
+      "Using WHERE COUNT(*) > 1 which is a syntax error",
+      "Returning only result_id of one duplicate without showing the count — makes it harder to triage"
+    ],
+    "followUps": [
+      "How would you use this query inside a pytest conftest.py to fail the entire suite if duplicates exist?",
+      "How would you identify which duplicate result to keep if you needed to deduplicate the table?",
+      "How would you add a unique constraint on (test_run_id, test_case_id) in PostgreSQL to prevent duplicates at the DB level?"
+    ],
+    "tags": [
+      "sql",
+      "duplicates",
+      "group by",
+      "having",
+      "data validation",
+      "test infrastructure"
+    ]
   },
   {
     "id": "sql-postgresql-025",
@@ -430,8 +689,740 @@
     "solutionLanguage": "sql",
     "solution": "SELECT\n  user_id,\n  email,\n  registered_at\nFROM users\nWHERE is_active = TRUE\n  AND registered_at >= NOW() - INTERVAL '30 days'\nORDER BY registered_at DESC;",
     "explanation": "The WHERE clause combines two predicates with AND: is_active = TRUE filters inactive users, and registered_at >= NOW() - INTERVAL '30 days' uses a dynamic date threshold. Using >= on a TIMESTAMP column correctly includes the boundary moment. INTERVAL '30 days' is idiomatic PostgreSQL syntax. Sorting DESC puts the most recently registered users at the top, which matches how a test would typically want to inspect new registrations.",
-    "commonMistakes": ["Using DATEADD instead of INTERVAL — DATEADD is SQL Server syntax, not PostgreSQL", "Using > instead of >= and accidentally excluding users registered exactly 30 days ago", "Hardcoding a date string instead of NOW() - INTERVAL, making the query brittle as time passes"],
-    "followUps": ["How would you modify this query to count new active users per day over the last 30 days?", "What is the difference between NOW() and CURRENT_TIMESTAMP in PostgreSQL?", "How would you parameterize the 30-day window in a Python test helper so different tests can use different windows?"],
-    "tags": ["sql", "where", "select", "interval", "date filtering", "data validation"]
+    "commonMistakes": [
+      "Using DATEADD instead of INTERVAL — DATEADD is SQL Server syntax, not PostgreSQL",
+      "Using > instead of >= and accidentally excluding users registered exactly 30 days ago",
+      "Hardcoding a date string instead of NOW() - INTERVAL, making the query brittle as time passes"
+    ],
+    "followUps": [
+      "How would you modify this query to count new active users per day over the last 30 days?",
+      "What is the difference between NOW() and CURRENT_TIMESTAMP in PostgreSQL?",
+      "How would you parameterize the 30-day window in a Python test helper so different tests can use different windows?"
+    ],
+    "tags": [
+      "sql",
+      "where",
+      "select",
+      "interval",
+      "date filtering",
+      "data validation"
+    ]
+  },
+  {
+    "id": "sql-postgresql-026",
+    "topicId": "sql-postgresql",
+    "topicTitle": "SQL & PostgreSQL",
+    "level": "mid",
+    "type": "coding",
+    "difficulty": "medium",
+    "title": "Running total with LEAD and LAG",
+    "question": "Write a SQL query that returns each order along with the previous and next order amounts for the same customer, ordered by created_at.",
+    "problem": "Given an orders table, return order_id, customer_id, total_amount, the amount of the prior order for that customer (prev_amount), and the amount of the next order (next_amount). Use NULL when no prior or next order exists. Order results by customer_id and created_at.",
+    "inputExample": "orders(order_id INT, customer_id INT, total_amount NUMERIC, created_at TIMESTAMP)\n\nSample rows:\n(1, 10, 100.00, '2024-01-01')\n(2, 10, 150.00, '2024-01-05')\n(3, 10, 200.00, '2024-01-10')\n(4, 11, 50.00,  '2024-01-03')",
+    "expectedOutput": "order_id | customer_id | total_amount | prev_amount | next_amount\n1        | 10          | 100.00       | NULL        | 150.00\n2        | 10          | 150.00       | 100.00      | 200.00\n3        | 10          | 200.00       | 150.00      | NULL\n4        | 11          | 50.00        | NULL        | NULL",
+    "hint": "Use LAG(total_amount) OVER (PARTITION BY customer_id ORDER BY created_at) for previous and LEAD for next.",
+    "solutionLanguage": "sql",
+    "solution": "SELECT\n  order_id,\n  customer_id,\n  total_amount,\n  LAG(total_amount)  OVER (PARTITION BY customer_id ORDER BY created_at) AS prev_amount,\n  LEAD(total_amount) OVER (PARTITION BY customer_id ORDER BY created_at) AS next_amount\nFROM orders\nORDER BY customer_id, created_at;",
+    "explanation": "LAG accesses the value from the previous row in the window frame; LEAD accesses the next row. Both are partitioned by customer_id so they only look within each customer's own orders. When no prior or next row exists the function returns NULL by default. These functions are essential for detecting trend changes, computing deltas between consecutive events, or validating sequence logic in test data.",
+    "commonMistakes": [
+      "Forgetting PARTITION BY and getting cross-customer prev/next values",
+      "Using ORDER BY in the outer query but not in the OVER clause — window order and result order must be specified independently",
+      "Confusing LAG and LEAD — LAG goes backward (previous row), LEAD goes forward (next row)"
+    ],
+    "followUps": [
+      "How would you use LAG to compute the amount difference between consecutive orders?",
+      "What does the second argument to LAG(col, 2) do?",
+      "How would you use FIRST_VALUE and LAST_VALUE to get each customer's first and last order amounts in the same query?"
+    ],
+    "tags": [
+      "sql",
+      "postgresql",
+      "window functions",
+      "lag",
+      "lead"
+    ]
+  },
+  {
+    "id": "sql-postgresql-027",
+    "topicId": "sql-postgresql",
+    "topicTitle": "SQL & PostgreSQL",
+    "level": "mid",
+    "type": "quiz",
+    "difficulty": "easy",
+    "question": "What is the difference between RANK() and DENSE_RANK() when there are ties?",
+    "choices": [
+      "RANK skips numbers after a tie; DENSE_RANK does not skip numbers",
+      "DENSE_RANK skips numbers after a tie; RANK does not skip numbers",
+      "Both RANK and DENSE_RANK skip numbers after a tie",
+      "RANK and DENSE_RANK produce identical results in all cases"
+    ],
+    "correctAnswer": "RANK skips numbers after a tie; DENSE_RANK does not skip numbers",
+    "explanation": "If three rows are tied for rank 2, RANK assigns them all rank 2 and then jumps to rank 5 (skipping 3 and 4). DENSE_RANK also assigns them all rank 2 but continues with rank 3 for the next distinct value — no gaps. ROW_NUMBER always assigns a unique number with no ties regardless of identical values. Choose DENSE_RANK when downstream logic depends on a continuous sequence of rank values.",
+    "tags": [
+      "sql",
+      "postgresql",
+      "window functions",
+      "rank",
+      "dense_rank"
+    ]
+  },
+  {
+    "id": "sql-postgresql-028",
+    "topicId": "sql-postgresql",
+    "topicTitle": "SQL & PostgreSQL",
+    "level": "mid",
+    "type": "coding",
+    "difficulty": "medium",
+    "title": "CTE to find top spenders",
+    "question": "Write a query using a CTE (WITH clause) that identifies the top 3 customers by total spend and then retrieves all their orders.",
+    "problem": "Using a CTE, first compute total spend per customer from the orders table. Then select the top 3 customers by spend. Finally, join back to orders to return all individual orders for those top 3 customers, including order_id, customer_id, total_amount, and created_at.",
+    "inputExample": "orders(order_id INT, customer_id INT, total_amount NUMERIC, created_at TIMESTAMP)\n\nSample: customer 10 spent 500, customer 11 spent 300, customer 12 spent 700, customer 13 spent 100, customer 14 spent 600",
+    "expectedOutput": "All orders belonging to customer_id 12 (700), 14 (600), and 10 (500), ordered by customer_id and created_at.",
+    "hint": "Write a CTE that groups by customer_id and sums total_amount. Use ORDER BY total_spend DESC LIMIT 3. Then JOIN the CTE back to orders.",
+    "solutionLanguage": "sql",
+    "solution": "WITH top_spenders AS (\n  SELECT\n    customer_id,\n    SUM(total_amount) AS total_spend\n  FROM orders\n  GROUP BY customer_id\n  ORDER BY total_spend DESC\n  LIMIT 3\n)\nSELECT\n  o.order_id,\n  o.customer_id,\n  o.total_amount,\n  o.created_at\nFROM orders o\nINNER JOIN top_spenders ts ON o.customer_id = ts.customer_id\nORDER BY o.customer_id, o.created_at;",
+    "explanation": "The CTE named top_spenders aggregates total spend per customer and selects the top 3 using ORDER BY + LIMIT. The main query then joins all original order rows back to those 3 customer IDs. CTEs improve readability by naming intermediate result sets and can be referenced multiple times in the same query. In PostgreSQL, CTEs are not automatically materialized as optimization fences in modern versions (12+) unless marked WITH MATERIALIZED.",
+    "commonMistakes": [
+      "Putting LIMIT inside the main query instead of inside the CTE, returning only 3 order rows total instead of all orders for the top 3 customers",
+      "Forgetting that ORDER BY inside a CTE without LIMIT may be ignored by the optimizer",
+      "Referencing the CTE before it is defined — CTEs are defined top-to-bottom and referenced by name in the main query"
+    ],
+    "followUps": [
+      "How does a CTE differ from a subquery in terms of readability and optimizer behavior?",
+      "What does WITH MATERIALIZED do in PostgreSQL 12+?",
+      "How would you chain multiple CTEs to compute a multi-step data transformation?"
+    ],
+    "tags": [
+      "sql",
+      "postgresql",
+      "cte",
+      "with clause",
+      "aggregation",
+      "join"
+    ]
+  },
+  {
+    "id": "sql-postgresql-029",
+    "topicId": "sql-postgresql",
+    "topicTitle": "SQL & PostgreSQL",
+    "level": "senior",
+    "type": "coding",
+    "difficulty": "hard",
+    "title": "Recursive CTE for hierarchical category tree",
+    "question": "Write a recursive CTE that returns all ancestors of a given category in a self-referential categories table.",
+    "problem": "The categories table has a self-referential parent_id column. Given a target category_id, write a recursive CTE that walks up the tree and returns all ancestor rows including the target category itself. Return category_id, name, parent_id, and depth (0 for the target, 1 for its parent, etc.).",
+    "inputExample": "categories(category_id INT, name VARCHAR, parent_id INT)\n\nSample rows:\n(1, 'Electronics',   NULL)\n(2, 'Computers',     1)\n(3, 'Laptops',       2)\n(4, 'Gaming Laptops', 3)\n\nTarget: category_id = 4",
+    "expectedOutput": "category_id | name            | parent_id | depth\n4           | Gaming Laptops  | 3         | 0\n3           | Laptops         | 2         | 1\n2           | Computers       | 1         | 2\n1           | Electronics     | NULL      | 3",
+    "hint": "The anchor selects the starting row; the recursive part joins categories to the CTE on categories.category_id = cte.parent_id. Increment depth each step.",
+    "solutionLanguage": "sql",
+    "solution": "WITH RECURSIVE ancestors AS (\n  -- Anchor: start from the target category\n  SELECT\n    category_id,\n    name,\n    parent_id,\n    0 AS depth\n  FROM categories\n  WHERE category_id = 4\n\n  UNION ALL\n\n  -- Recursive: walk up to the parent\n  SELECT\n    c.category_id,\n    c.name,\n    c.parent_id,\n    a.depth + 1\n  FROM categories c\n  INNER JOIN ancestors a ON c.category_id = a.parent_id\n)\nSELECT category_id, name, parent_id, depth\nFROM ancestors\nORDER BY depth;",
+    "explanation": "A recursive CTE has two parts separated by UNION ALL: the anchor (base case) selects the starting row; the recursive term joins the CTE back to the base table to walk one level up the tree per iteration. PostgreSQL stops recursing when the recursive term returns zero rows — which happens when parent_id IS NULL and there is no parent to join to. The depth counter tracks how many hops from the target. Recursive CTEs are the standard SQL solution for hierarchical data without Nested Sets or LTREE.",
+    "commonMistakes": [
+      "Using UNION instead of UNION ALL inside the recursive CTE — UNION deduplicates, which can cause premature termination in some tree shapes",
+      "Forgetting the join direction — joining on a.category_id = c.parent_id walks DOWN the tree; for ancestors you join c.category_id = a.parent_id to walk UP",
+      "Not having a termination condition — PostgreSQL enforces a default recursion depth limit but an incorrect join can produce an infinite loop"
+    ],
+    "followUps": [
+      "How would you modify this to walk DOWN the tree and return all descendants instead?",
+      "How does the PostgreSQL max_recursion_depth setting protect against infinite recursion?",
+      "When would you use the LTREE extension instead of a recursive CTE for hierarchical data?"
+    ],
+    "tags": [
+      "sql",
+      "postgresql",
+      "recursive cte",
+      "hierarchical data",
+      "with recursive"
+    ]
+  },
+  {
+    "id": "sql-postgresql-030",
+    "topicId": "sql-postgresql",
+    "topicTitle": "SQL & PostgreSQL",
+    "level": "senior",
+    "type": "quiz",
+    "difficulty": "medium",
+    "question": "In PostgreSQL, what is the primary difference between a materialized view and a regular view?",
+    "choices": [
+      "A materialized view stores the query result on disk; a regular view re-executes the query on each access",
+      "A regular view stores the query result on disk; a materialized view re-executes the query on each access",
+      "Materialized views support INSERT and UPDATE; regular views do not",
+      "There is no difference — both cache results automatically"
+    ],
+    "correctAnswer": "A materialized view stores the query result on disk; a regular view re-executes the query on each access",
+    "explanation": "A regular (non-materialized) view is essentially a saved query — every time you SELECT from it, PostgreSQL re-executes the underlying query. A materialized view physically stores the query result like a table. This makes reads faster but the data can become stale; you must run REFRESH MATERIALIZED VIEW to update it. For SDET work, materialized views are useful for pre-computing expensive validation datasets in staging environments, but you need to remember to refresh them after test data changes.",
+    "tags": [
+      "sql",
+      "postgresql",
+      "materialized view",
+      "view",
+      "performance"
+    ]
+  },
+  {
+    "id": "sql-postgresql-031",
+    "topicId": "sql-postgresql",
+    "topicTitle": "SQL & PostgreSQL",
+    "level": "mid",
+    "type": "coding",
+    "difficulty": "medium",
+    "title": "UPSERT with ON CONFLICT DO UPDATE",
+    "question": "Write a SQL statement that inserts a new user record or updates the email and updated_at fields if the username already exists.",
+    "problem": "Given a users table with a unique constraint on the username column, write an INSERT ... ON CONFLICT statement that inserts the new row if the username is new, or updates the email and updated_at columns if the username already exists. This pattern is commonly used in test data seeding to make setup scripts idempotent.",
+    "inputExample": "users(user_id SERIAL, username VARCHAR UNIQUE, email VARCHAR, updated_at TIMESTAMP)\n\nExisting row: (1, 'alice', 'old@test.com', '2024-01-01')\nUpsert target: username='alice', email='new@test.com', updated_at=NOW()",
+    "expectedOutput": "After execution: row for 'alice' has email='new@test.com' and updated_at set to current timestamp. No duplicate row inserted.",
+    "hint": "Use INSERT INTO ... ON CONFLICT (username) DO UPDATE SET email = EXCLUDED.email, updated_at = EXCLUDED.updated_at.",
+    "solutionLanguage": "sql",
+    "solution": "INSERT INTO users (username, email, updated_at)\nVALUES ('alice', 'new@test.com', NOW())\nON CONFLICT (username)\nDO UPDATE SET\n  email      = EXCLUDED.email,\n  updated_at = EXCLUDED.updated_at;",
+    "explanation": "ON CONFLICT (username) specifies the conflict target — the unique column that triggers the conflict. DO UPDATE SET uses the special EXCLUDED table, which contains the values from the attempted INSERT row. This makes the statement atomic and idempotent: running it multiple times always results in exactly one row with the latest values. The alternative ON CONFLICT DO NOTHING silently ignores conflicts without updating — useful when you want to insert-only-if-new. This pattern is the PostgreSQL equivalent of MERGE or INSERT OR REPLACE in other databases.",
+    "commonMistakes": [
+      "Referencing the table name instead of EXCLUDED — writing SET email = users.email copies the old value back instead of the new one",
+      "Omitting the conflict target column — ON CONFLICT without specifying which constraint causes a syntax error in most cases",
+      "Using ON CONFLICT DO NOTHING when you actually need to update — the old data silently remains unchanged"
+    ],
+    "followUps": [
+      "How would you use ON CONFLICT to increment a counter column rather than replace it?",
+      "What is the difference between ON CONFLICT DO NOTHING and ON CONFLICT DO UPDATE with no SET changes?",
+      "How does UPSERT help make test data seeding scripts idempotent in CI pipelines?"
+    ],
+    "tags": [
+      "sql",
+      "postgresql",
+      "upsert",
+      "on conflict",
+      "insert",
+      "idempotent",
+      "test data"
+    ]
+  },
+  {
+    "id": "sql-postgresql-032",
+    "topicId": "sql-postgresql",
+    "topicTitle": "SQL & PostgreSQL",
+    "level": "mid",
+    "type": "quiz",
+    "difficulty": "easy",
+    "question": "Which PostgreSQL clause is used to return only one row per distinct value of a specific column, keeping the first row in a given ORDER BY order?",
+    "choices": [
+      "GROUP BY with LIMIT 1",
+      "DISTINCT ON (column)",
+      "ROW_NUMBER() OVER (PARTITION BY column) = 1",
+      "UNIQUE BY column"
+    ],
+    "correctAnswer": "DISTINCT ON (column)",
+    "explanation": "DISTINCT ON (column) is a PostgreSQL-specific extension that returns one row per distinct value of the specified column. Combined with ORDER BY, it keeps whichever row sorts first for each distinct value. For example, SELECT DISTINCT ON (customer_id) * FROM orders ORDER BY customer_id, created_at DESC returns the most recent order per customer. It is more concise than a window function subquery for simple cases, but it is not standard SQL and is PostgreSQL-specific.",
+    "tags": [
+      "sql",
+      "postgresql",
+      "distinct on",
+      "deduplication"
+    ]
+  },
+  {
+    "id": "sql-postgresql-033",
+    "topicId": "sql-postgresql",
+    "topicTitle": "SQL & PostgreSQL",
+    "level": "senior",
+    "type": "coding",
+    "difficulty": "hard",
+    "title": "Query JSONB field for test validation",
+    "question": "Write a SQL query that extracts fields from a JSONB column and filters rows based on a nested JSON value.",
+    "problem": "The events table stores a JSONB payload column containing event metadata. Write a query that returns event_id, event_type, and the value at payload->>'user_id' as event_user_id, filtering to only rows where payload->>'status' equals 'completed' and the payload contains a 'retry_count' key with a value greater than 0. This simulates validating event records in a test environment.",
+    "inputExample": "events(event_id INT, event_type VARCHAR, payload JSONB, created_at TIMESTAMP)\n\nSample payloads:\n{\"user_id\": \"42\", \"status\": \"completed\", \"retry_count\": 2}\n{\"user_id\": \"43\", \"status\": \"pending\",   \"retry_count\": 0}\n{\"user_id\": \"44\", \"status\": \"completed\", \"retry_count\": 0}",
+    "expectedOutput": "event_id | event_type | event_user_id\n(row for user_id 42 only — completed and retry_count > 0)",
+    "hint": "Use ->> to extract text values from JSONB. Cast to INT for numeric comparison: (payload->>'retry_count')::INT > 0.",
+    "solutionLanguage": "sql",
+    "solution": "SELECT\n  event_id,\n  event_type,\n  payload->>'user_id' AS event_user_id\nFROM events\nWHERE payload->>'status' = 'completed'\n  AND (payload->>'retry_count')::INT > 0;",
+    "explanation": "The ->> operator extracts a top-level JSONB key as text. The -> operator extracts as JSONB (useful for nested objects or arrays). Since ->> returns text, numeric comparisons require an explicit cast with ::INT or ::NUMERIC. Filtering on JSONB fields without indexes causes a full table scan; in production you would add a GIN index on the payload column or an expression index on the extracted field. For SDET work, JSONB queries are essential for validating event-driven systems that store structured payloads in the database.",
+    "commonMistakes": [
+      "Using -> instead of ->> and comparing JSONB to a text literal — this fails because '\"completed\"'::jsonb != 'completed'::text",
+      "Forgetting to cast the extracted string to a number before using > comparison — string comparison of '9' > '10' is TRUE lexicographically",
+      "Not using a GIN index on the JSONB column and hitting performance issues on large event tables"
+    ],
+    "followUps": [
+      "What is the difference between -> and ->> in PostgreSQL JSONB?",
+      "How would you query for events where the payload contains a specific key regardless of its value using the ? operator?",
+      "How would you create a GIN index on the payload column to speed up JSONB queries?"
+    ],
+    "tags": [
+      "sql",
+      "postgresql",
+      "jsonb",
+      "json operators",
+      "event validation"
+    ]
+  },
+  {
+    "id": "sql-postgresql-034",
+    "topicId": "sql-postgresql",
+    "topicTitle": "SQL & PostgreSQL",
+    "level": "senior",
+    "type": "interview",
+    "difficulty": "hard",
+    "question": "How do you read and interpret EXPLAIN ANALYZE output to diagnose a slow test data query?",
+    "shortAnswer": "Look at actual vs estimated row counts, identify expensive nodes (Seq Scan vs Index Scan), and focus on the nodes with the highest actual time contribution.",
+    "interviewAnswer": "When a test data query is slow I run EXPLAIN (ANALYZE, BUFFERS) to get the actual execution plan with real row counts and timing. I look for three things. First, Seq Scan on a large table usually means a missing or unused index — I check whether the WHERE clause columns are indexed and whether the planner is choosing the index. Second, row count misestimation: if estimated rows are 10 but actual rows are 100,000 the planner chose the wrong plan because statistics are stale — I run ANALYZE on the table to update them. Third, I sum up the 'actual time' values in each node to find the bottleneck. A Nested Loop with a large outer set causes repeated index lookups and is often better replaced with a Hash Join by rewriting the query. For SDET work, slow setup queries inflate test runtime. I set statement_timeout and use EXPLAIN to profile any setup query that takes more than a few hundred milliseconds.",
+    "realProjectExample": "A pytest session fixture that loaded 50,000 test event rows into a staging table was taking 90 seconds. EXPLAIN ANALYZE showed a Seq Scan on a 10-million-row events table with a WHERE clause on an unindexed event_type column. Adding a partial index on (event_type) WHERE is_processed = FALSE cut the fixture time to under 3 seconds.",
+    "followUps": [
+      "What does the Buffers section of EXPLAIN (ANALYZE, BUFFERS) tell you?",
+      "When would you use EXPLAIN without ANALYZE to avoid running the query?",
+      "What is the difference between 'actual time' and 'total time' in a plan node?"
+    ],
+    "tags": [
+      "sql",
+      "postgresql",
+      "explain analyze",
+      "query optimization",
+      "performance",
+      "indexing"
+    ]
+  },
+  {
+    "id": "sql-postgresql-035",
+    "topicId": "sql-postgresql",
+    "topicTitle": "SQL & PostgreSQL",
+    "level": "senior",
+    "type": "quiz",
+    "difficulty": "medium",
+    "question": "What does a partial index in PostgreSQL index, and when is it beneficial?",
+    "choices": [
+      "An index that only stores the first N characters of a text column",
+      "An index built over a subset of table rows matching a WHERE condition",
+      "An index on a subset of columns in the table",
+      "A compressed index that uses less disk space than a full index"
+    ],
+    "correctAnswer": "An index built over a subset of table rows matching a WHERE condition",
+    "explanation": "A partial index includes only rows matching a specified WHERE predicate, for example: CREATE INDEX idx_active_users ON users(email) WHERE is_active = TRUE. This makes the index smaller and faster to scan because it excludes irrelevant rows. Queries that filter on the same condition can use the partial index. For SDET work, partial indexes are useful when test queries consistently filter on a status flag (e.g., is_processed = FALSE) and the unfiltered table is large — the index dramatically reduces fixture query time.",
+    "tags": [
+      "sql",
+      "postgresql",
+      "partial index",
+      "indexing",
+      "performance"
+    ]
+  },
+  {
+    "id": "sql-postgresql-036",
+    "topicId": "sql-postgresql",
+    "topicTitle": "SQL & PostgreSQL",
+    "level": "senior",
+    "type": "interview",
+    "difficulty": "hard",
+    "question": "How do transaction isolation levels affect test data setup and teardown in PostgreSQL?",
+    "shortAnswer": "The isolation level controls whether a transaction can see uncommitted changes from other transactions. Tests using READ COMMITTED may see partial state from concurrent writes, while SERIALIZABLE prevents all anomalies but increases lock contention.",
+    "interviewAnswer": "PostgreSQL's default isolation level is READ COMMITTED, which means each statement in a transaction sees only committed data at the time the statement runs. For test isolation, this means two concurrent test transactions can both see the committed baseline data but cannot see each other's uncommitted inserts. The safer pattern for test isolation is to wrap each test in a transaction and roll it back at teardown — this ensures test data never commits to the database and other tests never see it, regardless of isolation level. If a test must commit (e.g., testing a commit trigger), I use a dedicated schema or table prefix and DELETE in teardown instead. REPEATABLE READ prevents non-repeatable reads — useful if a test reads the same data twice and expects consistency. SERIALIZABLE prevents phantom reads and write skew but adds overhead and serialization failures that tests must handle with retries.",
+    "realProjectExample": "On a multi-tenant API test suite, parallel pytest workers were inserting tenant rows and occasionally reading each other's data because all used the same schema with READ COMMITTED. I switched test setup to use BEGIN + ROLLBACK per test and configured SQLAlchemy to use a session-scoped transaction that never commits. Flakiness dropped from 15% to under 1%.",
+    "followUps": [
+      "What is a phantom read and which isolation level prevents it?",
+      "How does SAVEPOINT help with partial rollbacks inside a test transaction?",
+      "What is the risk of using TRUNCATE inside a transaction for test cleanup?"
+    ],
+    "tags": [
+      "sql",
+      "postgresql",
+      "transaction isolation",
+      "test isolation",
+      "read committed",
+      "serializable"
+    ]
+  },
+  {
+    "id": "sql-postgresql-037",
+    "topicId": "sql-postgresql",
+    "topicTitle": "SQL & PostgreSQL",
+    "level": "mid",
+    "type": "coding",
+    "difficulty": "easy",
+    "title": "Use DISTINCT ON to get latest status per order",
+    "question": "Write a PostgreSQL query using DISTINCT ON to retrieve the most recent status entry for each order from an order_status_history table.",
+    "problem": "The order_status_history table records every status change for each order. Using DISTINCT ON, return one row per order_id containing the most recent status and changed_at timestamp. Do not use window functions.",
+    "inputExample": "order_status_history(history_id INT, order_id INT, status VARCHAR, changed_at TIMESTAMP)\n\nSample rows:\n(1, 100, 'pending',   '2024-03-01 10:00')\n(2, 100, 'shipped',   '2024-03-02 12:00')\n(3, 100, 'delivered', '2024-03-04 09:00')\n(4, 101, 'pending',   '2024-03-03 08:00')\n(5, 101, 'cancelled', '2024-03-03 15:00')",
+    "expectedOutput": "order_id | status    | changed_at\n100      | delivered | 2024-03-04 09:00\n101      | cancelled | 2024-03-03 15:00",
+    "hint": "DISTINCT ON (order_id) keeps the first row per order_id in the ORDER BY sequence. Order by order_id, changed_at DESC to make the latest row come first.",
+    "solutionLanguage": "sql",
+    "solution": "SELECT DISTINCT ON (order_id)\n  order_id,\n  status,\n  changed_at\nFROM order_status_history\nORDER BY order_id, changed_at DESC;",
+    "explanation": "DISTINCT ON (order_id) is PostgreSQL-specific syntax that returns exactly one row per distinct order_id. The ORDER BY clause determines which row is kept: ordering by order_id first (required to match the DISTINCT ON column) and then changed_at DESC ensures the most recent change is the one retained. This is more concise than an equivalent window function approach for simple latest-row-per-group queries. It is not portable to other databases.",
+    "commonMistakes": [
+      "Putting a different column first in ORDER BY — PostgreSQL requires the DISTINCT ON column(s) to appear leftmost in ORDER BY",
+      "Using DISTINCT (without ON) which deduplicates all selected columns, not just the target column",
+      "Expecting this to be portable to MySQL or SQL Server — DISTINCT ON is PostgreSQL-only"
+    ],
+    "followUps": [
+      "How would you rewrite this query using ROW_NUMBER() for portability to other databases?",
+      "What happens if you include columns that differ between rows of the same order_id in the SELECT list?",
+      "When would you prefer DISTINCT ON over a CTE with ROW_NUMBER?"
+    ],
+    "tags": [
+      "sql",
+      "postgresql",
+      "distinct on",
+      "latest row per group",
+      "deduplication"
+    ]
+  },
+  {
+    "id": "sql-postgresql-038",
+    "topicId": "sql-postgresql",
+    "topicTitle": "SQL & PostgreSQL",
+    "level": "senior",
+    "type": "coding",
+    "difficulty": "hard",
+    "title": "LATERAL join to get top N rows per group",
+    "question": "Write a SQL query using a LATERAL join to return the 2 most recent orders for each customer.",
+    "problem": "Given a customers table and an orders table, use a LATERAL join to return the 2 most recent orders per customer efficiently. Return customer_id, customer email, order_id, total_amount, and created_at. Only include customers who have at least one order.",
+    "inputExample": "customers(customer_id INT, email VARCHAR)\norders(order_id INT, customer_id INT, total_amount NUMERIC, created_at TIMESTAMP)\n\nCustomer 10 has 4 orders; customer 11 has 1 order; customer 12 has 0 orders",
+    "expectedOutput": "customer_id | email          | order_id | total_amount | created_at\n10          | c10@test.com   | (latest) | ...          | ...\n10          | c10@test.com   | (2nd)    | ...          | ...\n11          | c11@test.com   | (only)   | ...          | ...",
+    "hint": "Use CROSS JOIN LATERAL (SELECT ... FROM orders WHERE customer_id = c.customer_id ORDER BY created_at DESC LIMIT 2) AS recent_orders.",
+    "solutionLanguage": "sql",
+    "solution": "SELECT\n  c.customer_id,\n  c.email,\n  ro.order_id,\n  ro.total_amount,\n  ro.created_at\nFROM customers c\nCROSS JOIN LATERAL (\n  SELECT order_id, total_amount, created_at\n  FROM orders o\n  WHERE o.customer_id = c.customer_id\n  ORDER BY o.created_at DESC\n  LIMIT 2\n) AS ro\nORDER BY c.customer_id, ro.created_at DESC;",
+    "explanation": "A LATERAL subquery can reference columns from the preceding FROM item (here, c.customer_id), making it behave like a correlated subquery but as a join. CROSS JOIN LATERAL executes the subquery once per customer row and returns up to 2 rows per customer. Customers with no orders produce zero rows from the lateral subquery, so they are naturally excluded (equivalent to INNER JOIN). Use LEFT JOIN LATERAL ... ON TRUE to keep customers with no orders. LATERAL joins are more readable and often more efficient than window function subqueries for top-N-per-group patterns with small N.",
+    "commonMistakes": [
+      "Using a plain subquery without LATERAL — a plain subquery cannot reference outer query columns in the FROM clause",
+      "Using LEFT JOIN LATERAL when you want to exclude customers with no orders — use CROSS JOIN LATERAL or INNER JOIN LATERAL instead",
+      "Forgetting ON TRUE with LEFT JOIN LATERAL — the ON clause is required even though the join condition is expressed inside the subquery's WHERE"
+    ],
+    "followUps": [
+      "How does LATERAL differ from a correlated subquery in the SELECT list?",
+      "When would you prefer LATERAL over ROW_NUMBER() for top-N-per-group?",
+      "How does LATERAL interact with LEFT JOIN to preserve customers with zero orders?"
+    ],
+    "tags": [
+      "sql",
+      "postgresql",
+      "lateral join",
+      "top-n per group",
+      "correlated subquery"
+    ]
+  },
+  {
+    "id": "sql-postgresql-039",
+    "topicId": "sql-postgresql",
+    "topicTitle": "SQL & PostgreSQL",
+    "level": "senior",
+    "type": "quiz",
+    "difficulty": "hard",
+    "question": "You run EXPLAIN ANALYZE on a query and see 'Rows Removed by Filter: 980000' under a Seq Scan node. What does this indicate and what should you do?",
+    "choices": [
+      "The query is using an index efficiently and 980,000 rows were indexed",
+      "The filter is applied after scanning 980,000+ rows, indicating a missing index on the filter column",
+      "The query returned 980,000 rows and the filter was unnecessary",
+      "The Seq Scan is optimal because PostgreSQL chose it over an available index"
+    ],
+    "correctAnswer": "The filter is applied after scanning 980,000+ rows, indicating a missing index on the filter column",
+    "explanation": "'Rows Removed by Filter' means PostgreSQL scanned all those rows and then discarded them because they did not match the WHERE clause. A large value here is a strong signal that an index on the filter column would allow PostgreSQL to skip those rows entirely using an Index Scan or Bitmap Index Scan. The fix is typically to create an index on the filtered column. Note: even with an index, if the table is small or the filter selectivity is very low, PostgreSQL may still choose a Seq Scan — but 980,000 removed rows almost always indicates a missing or unused index.",
+    "tags": [
+      "sql",
+      "postgresql",
+      "explain analyze",
+      "seq scan",
+      "indexing",
+      "performance"
+    ]
+  },
+  {
+    "id": "sql-postgresql-040",
+    "topicId": "sql-postgresql",
+    "topicTitle": "SQL & PostgreSQL",
+    "level": "mid",
+    "type": "coding",
+    "difficulty": "medium",
+    "title": "Seed test data with COPY from CSV",
+    "question": "Write the PostgreSQL COPY command to load test data from a CSV file into a users table, and a companion SELECT to verify the row count after loading.",
+    "problem": "You have a CSV file at /tmp/test_users.csv with a header row and columns: username, email, is_active. Write the COPY command to load it into the users table, then write a SELECT to count the loaded rows grouped by is_active to validate the load.",
+    "inputExample": "File /tmp/test_users.csv:\nusername,email,is_active\nalice,alice@test.com,true\nbob,bob@test.com,false\ncarol,carol@test.com,true\n\nTable: users(user_id SERIAL, username VARCHAR, email VARCHAR, is_active BOOLEAN)",
+    "expectedOutput": "COPY 3 (PostgreSQL feedback)\n\nVerification query result:\nis_active | count\ntrue      | 2\nfalse     | 1",
+    "hint": "Use COPY users(username, email, is_active) FROM '/tmp/test_users.csv' WITH (FORMAT csv, HEADER true). Then SELECT is_active, COUNT(*) FROM users GROUP BY is_active.",
+    "solutionLanguage": "sql",
+    "solution": "-- Load data\nCOPY users (username, email, is_active)\nFROM '/tmp/test_users.csv'\nWITH (FORMAT csv, HEADER true);\n\n-- Verify the load\nSELECT\n  is_active,\n  COUNT(*) AS count\nFROM users\nGROUP BY is_active\nORDER BY is_active DESC;",
+    "explanation": "COPY is the fastest way to bulk-load data into PostgreSQL — it bypasses row-by-row INSERT overhead and is orders of magnitude faster for large datasets. FORMAT csv tells PostgreSQL the file is comma-separated; HEADER true skips the first row. Specifying column names after the table name lets you match CSV columns to table columns while letting the SERIAL primary key auto-generate. From psycopg2 or Python, use cursor.copy_expert() or cursor.copy_from() to pipe data without writing a file to disk. Always run a post-load count or checksum query to validate the load completed correctly.",
+    "commonMistakes": [
+      "Using \\COPY (backslash) instead of COPY — \\COPY is the psql client command that runs on the client machine; COPY (no backslash) runs server-side and requires the file to be on the server",
+      "Forgetting HEADER true when the CSV has a header row, causing the header to be loaded as a data row",
+      "Not specifying column order when the CSV column order differs from the table column order"
+    ],
+    "followUps": [
+      "How would you use COPY TO export query results to a CSV file for use as a test fixture?",
+      "What is the difference between server-side COPY and client-side \\COPY in psql?",
+      "How would you use psycopg2's copy_expert() to stream CSV data from a Python string without a temp file?"
+    ],
+    "tags": [
+      "sql",
+      "postgresql",
+      "copy",
+      "bulk load",
+      "test data",
+      "csv"
+    ]
+  },
+  {
+    "id": "sql-postgresql-041",
+    "topicId": "sql-postgresql",
+    "topicTitle": "SQL & PostgreSQL",
+    "level": "senior",
+    "type": "interview",
+    "difficulty": "medium",
+    "question": "How do you use psycopg2 in Python to set up and tear down test data safely in a PostgreSQL database?",
+    "shortAnswer": "Use a transaction-wrapped connection with autocommit=False, execute setup SQL, run the test, then ROLLBACK to undo all changes — ensuring no test data persists between runs.",
+    "interviewAnswer": "In a pytest fixture I open a psycopg2 connection with autocommit=False (the default), execute all test data setup SQL within that transaction, yield control to the test, then call conn.rollback() in the teardown phase. This means every INSERT, UPDATE, or DELETE from setup is undone automatically after each test without requiring explicit DELETE statements. For tests that must commit (testing triggers, sequences, or multi-connection scenarios), I use a dedicated test schema or table name prefix and run DELETE FROM test_schema.table_name in teardown. I always use parameterized queries with %s placeholders rather than string formatting to prevent SQL injection in test helpers. I also set a connection_timeout and statement_timeout to prevent a stuck test from blocking the database indefinitely.",
+    "realProjectExample": "Our API test suite used psycopg2 to seed 200 rows per test with manual DELETE teardown. After switching to a transaction rollback pattern in a session fixture, test setup went from 800ms to under 50ms because the database never committed the rows and index updates were skipped. We wrapped the pattern in a db_session fixture that yielded a cursor and called conn.rollback() in the finally block.",
+    "followUps": [
+      "How would you handle a test that explicitly calls COMMIT inside the code under test?",
+      "What is the risk of sharing a single psycopg2 connection across parallel pytest-xdist workers?",
+      "How does using a context manager (with conn.cursor() as cur) help with resource cleanup?"
+    ],
+    "tags": [
+      "sql",
+      "postgresql",
+      "psycopg2",
+      "python",
+      "test data",
+      "transaction",
+      "pytest"
+    ]
+  },
+  {
+    "id": "sql-postgresql-042",
+    "topicId": "sql-postgresql",
+    "topicTitle": "SQL & PostgreSQL",
+    "level": "mid",
+    "type": "quiz",
+    "difficulty": "medium",
+    "question": "Which psycopg2 method correctly executes a parameterized query to prevent SQL injection?",
+    "choices": [
+      "cursor.execute(f\"SELECT * FROM users WHERE email = '{email}'\")",
+      "cursor.execute(\"SELECT * FROM users WHERE email = %s\", (email,))",
+      "cursor.execute(\"SELECT * FROM users WHERE email = ?\", [email])",
+      "cursor.execute(\"SELECT * FROM users WHERE email = :email\", {\"email\": email})"
+    ],
+    "correctAnswer": "cursor.execute(\"SELECT * FROM users WHERE email = %s\", (email,))",
+    "explanation": "psycopg2 uses %s as the placeholder for all parameter types (not ? or :name). Parameters are passed as a tuple (or list) as the second argument to cursor.execute(). psycopg2 handles quoting, escaping, and type conversion automatically, preventing SQL injection. f-string interpolation (option A) is dangerous and must never be used for user-supplied values. The ? placeholder is SQLite syntax. The :name syntax is used by SQLAlchemy Core and some other drivers, not native psycopg2.",
+    "tags": [
+      "sql",
+      "postgresql",
+      "psycopg2",
+      "python",
+      "sql injection",
+      "parameterized queries"
+    ]
+  },
+  {
+    "id": "sql-postgresql-043",
+    "topicId": "sql-postgresql",
+    "topicTitle": "SQL & PostgreSQL",
+    "level": "senior",
+    "type": "scenario",
+    "difficulty": "hard",
+    "question": "Your test suite inserts rows into a shared staging database and runs assertions, but tests randomly fail when run in parallel. Rows inserted by one test are visible to another test, causing count mismatches. How do you diagnose and fix this?",
+    "shortAnswer": "The tests are sharing database state across parallel workers. Fix by isolating each test in a rolled-back transaction, using per-worker schemas, or using a unique run ID to partition inserted data.",
+    "interviewAnswer": "The root cause is shared mutable state: parallel test workers all write to the same tables and read each other's uncommitted or committed rows. I diagnose by adding the worker ID to every query's WHERE clause to see if the interference goes away. The three standard fixes in order of preference are: (1) Wrap each test in a transaction and roll it back at teardown — workers never see each other's data because it never commits. This works if the code under test does not need to commit. (2) If commits are necessary, assign each worker a unique schema (worker_1, worker_2) and run all tests against that schema using SET search_path. (3) If schema-per-worker is too expensive, add a test_run_id column to test tables and filter every query by that ID — this is the least elegant but simplest to retrofit. I also check whether the test database has autocommit enabled on the connection pool, which would cause rollback-based isolation to fail silently.",
+    "realProjectExample": "A pytest-xdist suite with 4 workers was failing because all workers inserted into the same orders table and then did SELECT COUNT(*). The fix was a session-scoped fixture that ran SET search_path TO worker_{worker_id}, public before the first test, with a separate schema pre-created per worker. COUNT(*) in each schema only saw its own data and flakiness disappeared entirely.",
+    "followUps": [
+      "How does pytest-xdist assign worker IDs and how can you access the worker ID in a fixture?",
+      "What are the trade-offs between schema-per-worker and transaction rollback isolation strategies?",
+      "How would you use PostgreSQL advisory locks to serialize critical sections in parallel tests?"
+    ],
+    "tags": [
+      "sql",
+      "postgresql",
+      "test isolation",
+      "parallel testing",
+      "pytest-xdist",
+      "transaction"
+    ]
+  },
+  {
+    "id": "sql-postgresql-044",
+    "topicId": "sql-postgresql",
+    "topicTitle": "SQL & PostgreSQL",
+    "level": "senior",
+    "type": "quiz",
+    "difficulty": "hard",
+    "question": "What does pg_stat_statements extension provide and how is it useful for SDET work?",
+    "choices": [
+      "It provides row-level change tracking for auditing purposes",
+      "It collects execution statistics (call count, total time, mean time) for every normalized SQL statement executed in the database",
+      "It logs every SQL statement to a file for compliance auditing",
+      "It shows currently active queries and their lock status in real time"
+    ],
+    "correctAnswer": "It collects execution statistics (call count, total time, mean time) for every normalized SQL statement executed in the database",
+    "explanation": "pg_stat_statements is a PostgreSQL extension that tracks execution statistics for all SQL statements: total calls, total execution time, mean time, rows returned, and cache hit ratios. Statements are normalized (literal values replaced with $1, $2) so semantically identical queries with different parameters are aggregated together. For SDET work, querying pg_stat_statements after running a test suite reveals which queries are slow, called most often, or responsible for most database time — enabling targeted optimization of test fixtures and application queries alike. You query it with: SELECT query, calls, mean_exec_time FROM pg_stat_statements ORDER BY mean_exec_time DESC LIMIT 10.",
+    "tags": [
+      "sql",
+      "postgresql",
+      "pg_stat_statements",
+      "performance",
+      "query optimization"
+    ]
+  },
+  {
+    "id": "sql-postgresql-045",
+    "topicId": "sql-postgresql",
+    "topicTitle": "SQL & PostgreSQL",
+    "level": "mid",
+    "type": "coding",
+    "difficulty": "medium",
+    "title": "FIRST_VALUE to compare each order to the customer's first order",
+    "question": "Write a SQL query using FIRST_VALUE to return each order along with the amount of that customer's very first order.",
+    "problem": "Given an orders table, return order_id, customer_id, total_amount, created_at, and the total_amount of the earliest order for that customer as first_order_amount. Use FIRST_VALUE window function. This is useful in tests validating that first-order discounts are applied correctly.",
+    "inputExample": "orders(order_id INT, customer_id INT, total_amount NUMERIC, created_at TIMESTAMP)\n\nSample:\n(1, 10, 100.00, '2024-01-01')  -- first order for customer 10\n(2, 10, 150.00, '2024-01-05')\n(3, 10, 80.00,  '2024-01-10')\n(4, 11, 200.00, '2024-02-01')  -- first and only order for customer 11",
+    "expectedOutput": "order_id | customer_id | total_amount | created_at  | first_order_amount\n1        | 10          | 100.00       | 2024-01-01  | 100.00\n2        | 10          | 150.00       | 2024-01-05  | 100.00\n3        | 10          | 80.00        | 2024-01-10  | 100.00\n4        | 11          | 200.00       | 2024-02-01  | 200.00",
+    "hint": "Use FIRST_VALUE(total_amount) OVER (PARTITION BY customer_id ORDER BY created_at ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING).",
+    "solutionLanguage": "sql",
+    "solution": "SELECT\n  order_id,\n  customer_id,\n  total_amount,\n  created_at,\n  FIRST_VALUE(total_amount) OVER (\n    PARTITION BY customer_id\n    ORDER BY created_at\n    ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING\n  ) AS first_order_amount\nFROM orders\nORDER BY customer_id, created_at;",
+    "explanation": "FIRST_VALUE returns the value of the first row in the window frame. Partitioning by customer_id ensures each customer's orders are considered independently. Ordering by created_at ascending means the first row in the frame is the oldest order. The ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING frame clause is important: without it, the default frame for an ordered window is RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW, which still returns FIRST_VALUE correctly here, but being explicit avoids subtle bugs with other value functions. LAST_VALUE without an explicit full frame would return the current row's value, not the actual last row.",
+    "commonMistakes": [
+      "Using LAST_VALUE without expanding the frame — without ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING, LAST_VALUE returns the current row's value, not the actual last row",
+      "Forgetting PARTITION BY and computing the first order across all customers instead of per customer",
+      "Confusing FIRST_VALUE with MIN — MIN returns the minimum value in the partition, FIRST_VALUE returns the value from the first row in the specified order (which equals MIN only when ordering by the same column)"
+    ],
+    "followUps": [
+      "How does FIRST_VALUE differ from MIN() as a window aggregate?",
+      "How would you use LAST_VALUE to get the most recent order amount for each customer in the same query?",
+      "How would you compute the percentage difference between each order and the customer's first order amount?"
+    ],
+    "tags": [
+      "sql",
+      "postgresql",
+      "window functions",
+      "first_value",
+      "partition by"
+    ]
+  },
+  {
+    "id": "sql-postgresql-046",
+    "topicId": "sql-postgresql",
+    "topicTitle": "SQL & PostgreSQL",
+    "level": "senior",
+    "type": "scenario",
+    "difficulty": "medium",
+    "question": "You need to test a feature where a scheduled job partitions order data by month. After the job runs, your test query returns zero rows from the expected partition. How do you diagnose the problem?",
+    "shortAnswer": "Check that the partition exists for the target month, that rows were routed to it correctly, that the query's WHERE clause matches the partition key range, and that constraint exclusion is enabled.",
+    "interviewAnswer": "I start by querying the partition directly by name: SELECT * FROM orders_2024_03 LIMIT 10. If it is empty, the job either did not run or routed rows to the wrong partition — I check the parent table and child partition definitions with \\d+ orders in psql or by querying pg_inherits and pg_class. I also run SELECT tableoid::regclass, COUNT(*) FROM orders GROUP BY 1 to see which partition holds which rows and confirm data routing. If the partition exists and has rows but my query returns nothing, the WHERE clause may not align with the partition key range — PostgreSQL's constraint exclusion only prunes partitions when the WHERE clause contains a condition on the partition key column. I check that the query filters on the same column used for partitioning (e.g., created_at) and that the range boundary matches exactly. I also verify that constraint_exclusion is set to 'partition' or 'on' in postgresql.conf for declarative partitioning.",
+    "realProjectExample": "A test for a monthly archival job checked SELECT COUNT(*) FROM orders WHERE created_at >= '2024-03-01' AND created_at < '2024-04-01'. The count returned zero because the DBA had created the partition with a TIMESTAMPTZ type but the test data was inserted with a plain TIMESTAMP, causing a type mismatch in the partition key routing that silently sent all rows to the default partition instead.",
+    "followUps": [
+      "How do you list all partitions of a partitioned table in PostgreSQL?",
+      "What is the difference between range partitioning and list partitioning?",
+      "How does a default partition help prevent data loss when no matching partition exists?"
+    ],
+    "tags": [
+      "sql",
+      "postgresql",
+      "table partitioning",
+      "partition pruning",
+      "data validation",
+      "debugging"
+    ]
+  },
+  {
+    "id": "sql-postgresql-047",
+    "topicId": "sql-postgresql",
+    "topicTitle": "SQL & PostgreSQL",
+    "level": "mid",
+    "type": "quiz",
+    "difficulty": "medium",
+    "question": "What is the correct way to generate a UUID primary key in PostgreSQL using the uuid-ossp extension?",
+    "choices": [
+      "DEFAULT AUTO_INCREMENT",
+      "DEFAULT uuid_generate_v4()",
+      "DEFAULT NEWID()",
+      "DEFAULT gen_uuid()"
+    ],
+    "correctAnswer": "DEFAULT uuid_generate_v4()",
+    "explanation": "After running CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\", the function uuid_generate_v4() generates a random UUID (version 4). You set it as a column default: user_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(). PostgreSQL 13+ also provides gen_random_uuid() built-in (no extension needed), which is now the preferred approach. AUTO_INCREMENT is MySQL syntax; NEWID() is SQL Server syntax. Using UUIDs as primary keys in test data is useful because IDs are globally unique and do not conflict across test environments or parallel workers.",
+    "tags": [
+      "sql",
+      "postgresql",
+      "uuid",
+      "uuid-ossp",
+      "extensions",
+      "primary key"
+    ]
+  },
+  {
+    "id": "sql-postgresql-048",
+    "topicId": "sql-postgresql",
+    "topicTitle": "SQL & PostgreSQL",
+    "level": "senior",
+    "type": "coding",
+    "difficulty": "hard",
+    "title": "Full-text search on product descriptions",
+    "question": "Write a PostgreSQL query that uses full-text search to find products whose description contains all the words 'wireless' and 'charging', ranked by relevance.",
+    "problem": "The products table has a description TEXT column. Write a query using tsvector and tsquery to find all products whose description matches both 'wireless' and 'charging', and order results by relevance score (ts_rank) descending. Return product_id, name, and the relevance rank.",
+    "inputExample": "products(product_id INT, name VARCHAR, description TEXT)\n\nSample descriptions:\n'Fast wireless charging pad for smartphones'\n'Wireless earbuds with noise cancellation'\n'USB-C wired charging cable 2m'",
+    "expectedOutput": "product_id | name                              | rank\n(row for 'Fast wireless charging pad...' ranked highest — contains both words)\n(other matches with lower rank below)",
+    "hint": "Use to_tsvector('english', description) @@ to_tsquery('english', 'wireless & charging') in the WHERE clause. Use ts_rank() for ordering.",
+    "solutionLanguage": "sql",
+    "solution": "SELECT\n  product_id,\n  name,\n  ts_rank(\n    to_tsvector('english', description),\n    to_tsquery('english', 'wireless & charging')\n  ) AS rank\nFROM products\nWHERE to_tsvector('english', description) @@ to_tsquery('english', 'wireless & charging')\nORDER BY rank DESC;",
+    "explanation": "to_tsvector converts a text string into a tsvector (a sorted list of lexemes — normalized word stems). to_tsquery parses a query string where & means AND, | means OR, and ! means NOT. The @@ operator tests whether the tsvector matches the tsquery. ts_rank scores how well the document matches the query based on term frequency and position. For production use, you would store the tsvector in a generated column or separate column and create a GIN index on it to avoid recalculating it on every query. This technique is commonly used in SDET work to test search feature correctness at the database layer.",
+    "commonMistakes": [
+      "Using LIKE '%wireless%' AND LIKE '%charging%' instead of full-text search — LIKE does not understand stemming and is much slower on large tables",
+      "Using plainto_tsquery instead of to_tsquery when you need boolean operators like & — plainto_tsquery treats all words as AND but does not support explicit operators in the input",
+      "Forgetting to specify the language ('english') — using the wrong language affects stemming (e.g., 'charges' may not match 'charging' without the correct language)"
+    ],
+    "followUps": [
+      "How would you create a GIN index to speed up full-text search queries?",
+      "What is the difference between to_tsquery and plainto_tsquery?",
+      "How would you highlight matching terms in the returned text using ts_headline()?"
+    ],
+    "tags": [
+      "sql",
+      "postgresql",
+      "full-text search",
+      "tsvector",
+      "tsquery",
+      "ts_rank",
+      "gin index"
+    ]
+  },
+  {
+    "id": "sql-postgresql-049",
+    "topicId": "sql-postgresql",
+    "topicTitle": "SQL & PostgreSQL",
+    "level": "senior",
+    "type": "interview",
+    "difficulty": "hard",
+    "question": "How do you use PostgreSQL sequences and SERIAL columns to manage primary key generation in test data, and what pitfalls should you watch for?",
+    "shortAnswer": "SERIAL creates a sequence-backed integer column with auto-increment. Sequences do not roll back with transactions, so gaps appear after rollbacks. Explicitly resetting sequences in test setup prevents key collisions.",
+    "interviewAnswer": "SERIAL (and BIGSERIAL for 64-bit) is syntactic sugar that creates a SEQUENCE object and sets the column default to nextval('sequence_name'). In test environments this causes two common problems. First, sequences do not roll back when a transaction is rolled back — if a transaction inserts 100 rows and rolls back, the sequence has advanced 100 positions and those IDs are permanently skipped. This means test ID values are non-deterministic across runs. Second, if a test explicitly inserts a row with a hardcoded ID like 1, the sequence can later generate the same ID and cause a primary key conflict. The fix is to call SELECT setval('users_user_id_seq', MAX(user_id)) FROM users after any manual inserts, or to use uuid_generate_v4() or gen_random_uuid() as the primary key instead of sequential integers so there are no sequence conflicts. For test data generation I also use INSERT ... RETURNING id to capture auto-generated IDs without having to query the sequence separately.",
+    "realProjectExample": "A test suite that inserted rows with hardcoded IDs like 1, 2, 3 for predictable assertions started failing after a schema migration that pre-seeded reference data using those same IDs. I fixed it by using OVERRIDING SYSTEM VALUE in the insert (PostgreSQL 10+) or switching all test inserts to use RETURNING id and storing the generated IDs in variables rather than hardcoding them.",
+    "followUps": [
+      "How do you reset a sequence to a specific value in PostgreSQL?",
+      "What is the difference between SERIAL, BIGSERIAL, and IDENTITY columns in modern PostgreSQL?",
+      "How does INSERT ... RETURNING work and how is it used in psycopg2 to capture generated IDs?"
+    ],
+    "tags": [
+      "sql",
+      "postgresql",
+      "sequences",
+      "serial",
+      "primary key",
+      "test data",
+      "identity"
+    ]
+  },
+  {
+    "id": "sql-postgresql-050",
+    "topicId": "sql-postgresql",
+    "topicTitle": "SQL & PostgreSQL",
+    "level": "senior",
+    "type": "quiz",
+    "difficulty": "hard",
+    "question": "You need two concurrent PostgreSQL sessions to coordinate access to a shared test resource without using a table lock. Which feature enables this?",
+    "choices": [
+      "Row-level locking with SELECT FOR UPDATE",
+      "Advisory locks using pg_try_advisory_lock() or pg_advisory_lock()",
+      "Serializable transaction isolation level",
+      "LISTEN/NOTIFY channel subscription"
+    ],
+    "correctAnswer": "Advisory locks using pg_try_advisory_lock() or pg_advisory_lock()",
+    "explanation": "Advisory locks are application-defined locks managed by PostgreSQL's lock manager but not tied to any specific table row or object. You acquire them by calling pg_advisory_lock(key) with any integer key you choose; they are released when the session ends or when pg_advisory_unlock(key) is called. pg_try_advisory_lock() returns FALSE immediately if the lock is held (non-blocking), while pg_advisory_lock() blocks until the lock is available. For SDET work, advisory locks are useful for serializing access to a shared test resource — for example, ensuring only one parallel test worker modifies a shared configuration table at a time. SELECT FOR UPDATE locks specific rows but requires knowing which rows to lock; advisory locks work on arbitrary integer keys you define.",
+    "tags": [
+      "sql",
+      "postgresql",
+      "advisory locks",
+      "concurrency",
+      "parallel testing",
+      "pg_advisory_lock"
+    ]
   }
 ]
