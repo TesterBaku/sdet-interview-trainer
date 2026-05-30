@@ -4,7 +4,7 @@ import { useState } from "react";
 import { shuffleArray } from "@/lib/questionUtils";
 
 export function useShuffledList<T>(source: T[]) {
-  const [list, setList] = useState(source);
+  const [list, setList] = useState(() => [...source]);
   const [shuffled, setShuffled] = useState(false);
 
   function toggle(onReset?: () => void) {
