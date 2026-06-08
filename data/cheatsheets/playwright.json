@@ -181,7 +181,7 @@
       "choices": [
         "Set a global proxy in the config to redirect all backend calls to a stub server",
         "page.RouteAsync to intercept the request and fulfil it with controlled data",
-        "Override the JavaScript fetch function via an injected init script on each page",
+        "Record the real API response once with the HAR recorder and let Playwright auto-mock it on every later run by default",
         "Use page.WaitForResponseAsync to replace the real response payload with fixed JSON"
       ],
       "correctAnswer": "page.RouteAsync to intercept the request and fulfil it with controlled data",

@@ -226,7 +226,7 @@
       "difficulty": "medium",
       "question": "How do you de-duplicate keeping the latest row?",
       "choices": [
-        "groupBy the key and take max(ts), then join back the full row",
+        "groupBy the key and call first(ts) to return the single newest row per key",
         "distinct() after orderBy(ts desc) to drop the older duplicates",
         "row_number() over partitionBy(key).orderBy(ts desc), keep rn = 1",
         "dropDuplicates on the key, which always retains the most recent row"

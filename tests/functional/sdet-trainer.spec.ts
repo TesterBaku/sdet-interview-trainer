@@ -765,6 +765,19 @@ test("a cheat sheet renders converted concept sections, TOC, and a quiz link", a
   await expect(page.getByRole("heading", { name: "SQL Quiz" })).toBeVisible();
 });
 
+test("cheat sheet Rapid-Fire Q&A reveals verbatim answers on demand", async ({ page }) => {
+  await page.goto("/cheatsheets/sql");
+
+  const detail = page.locator("details").filter({ hasText: "WHERE vs HAVING?" });
+  await expect(detail).toBeVisible();
+
+  // Answer is present but collapsed until the user opens it
+  const answer = detail.getByText("HAVING filters groups after GROUP BY", { exact: false });
+  await expect(answer).toBeHidden();
+  await detail.locator("summary").click();
+  await expect(answer).toBeVisible();
+});
+
 test("cheat-sheet quiz scores answers and saves progress under a cs- id", async ({ page }) => {
   await clearAppState(page);
   await page.goto("/cheatsheets/sql/quiz");

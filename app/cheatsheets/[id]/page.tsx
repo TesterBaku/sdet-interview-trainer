@@ -57,6 +57,14 @@ export default async function CheatSheetDetailPage({ params }: { params: Promise
                   </a>
                 </li>
               ))}
+              {sheet.quiz.length > 0 ? (
+                <li>
+                  <a className="flex gap-2 text-ink/75 transition hover:text-signal" href="#rapid-fire">
+                    <span className="font-mono text-xs text-ink/40">{String(sheet.sections.length + 1).padStart(2, "0")}</span>
+                    Rapid-Fire Q&amp;A
+                  </a>
+                </li>
+              ) : null}
             </ol>
           </div>
         </nav>
@@ -81,6 +89,35 @@ export default async function CheatSheetDetailPage({ params }: { params: Promise
               />
             </section>
           ))}
+
+          {sheet.quiz.length > 0 ? (
+            <section
+              className="scroll-mt-24 rounded-[2rem] border border-ink/10 bg-white/80 p-6 shadow-panel sm:p-8"
+              id="rapid-fire"
+            >
+              <h2 className="flex items-baseline gap-3 font-display text-2xl font-black text-blueprint">
+                <span className="font-mono text-base font-bold" style={{ color: sheet.accent }}>
+                  {String(sheet.sections.length + 1).padStart(2, "0")}
+                </span>
+                Rapid-Fire Q&amp;A
+              </h2>
+              <p className="mt-2 text-ink/70">
+                Reveal each answer to self-check, then{" "}
+                <Link className="font-bold text-signal" href={`/cheatsheets/${sheet.id}/quiz`}>
+                  test yourself with the quiz
+                </Link>
+                .
+              </p>
+              <div className="mt-4 space-y-2">
+                {sheet.quiz.map((item) => (
+                  <details className="rounded-xl border border-ink/10 bg-paper/60 p-4" key={item.id}>
+                    <summary className="cursor-pointer font-bold text-blueprint focus-ring">{item.question}</summary>
+                    <p className="mt-2 leading-7 text-ink/75">{item.explanation}</p>
+                  </details>
+                ))}
+              </div>
+            </section>
+          ) : null}
         </div>
       </div>
     </div>

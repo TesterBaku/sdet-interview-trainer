@@ -291,7 +291,7 @@
       "difficulty": "medium",
       "question": "How do you get the 2nd highest salary?",
       "choices": [
-        "Use MAX(salary) where salary is below the overall MAX, never window functions",
+        "Use AVG(salary) and round up to the nearest higher salary value",
         "DENSE_RANK() over salary DESC and filter rank = 2, or a correlated subquery / OFFSET 1 LIMIT 1 on distinct salaries",
         "ORDER BY salary ASC and take LIMIT 2 to get the second-highest value",
         "ROW_NUMBER() over salary ASC and filter rank = 2 to skip the top earner"

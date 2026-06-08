@@ -98,7 +98,7 @@
       "difficulty": "medium",
       "question": "Why class-level and not method-level parallelism?",
       "choices": [
-        "Method-level parallelism is unsafe because XCTest methods share mutable state by default",
+        "Method-level parallelism would run faster but Xcode disables it on simulators to save memory",
         "That's how Xcode's simulator-clone model works, so you design class grouping around it",
         "Class-level parallelism is the only mode that supports addUIInterruptionMonitor",
         "Apple deprecated method-level parallelism in favor of per-scheme test plans"
