@@ -39,3 +39,210 @@ a {
 .focus-ring {
   @apply focus:outline-none focus:ring-2 focus:ring-signal focus:ring-offset-2 focus:ring-offset-paper;
 }
+
+/* Cheat-sheet reading content: converted from the source HTML study pages and styled
+   onto the app palette (ink #101820, paper #f6efe3, brass #b98736, blueprint #17324d,
+   signal #d84f2a). Scoped so it never leaks into the rest of the app. */
+.cheatsheet-prose {
+  color: #101820;
+  line-height: 1.7;
+}
+
+.cheatsheet-prose > * + * {
+  margin-top: 0.9rem;
+}
+
+.cheatsheet-prose strong {
+  font-weight: 700;
+  color: #101820;
+}
+
+.cheatsheet-prose em {
+  font-style: italic;
+}
+
+.cheatsheet-prose a {
+  color: #d84f2a;
+  text-decoration: underline;
+}
+
+.cheatsheet-prose h3 {
+  font-family: Georgia, Cambria, "Times New Roman", serif;
+  font-weight: 700;
+  font-size: 1.2rem;
+  color: #17324d;
+  margin-top: 1.4rem;
+}
+
+/* Lists */
+.cheatsheet-prose ul.clean {
+  list-style: none;
+  padding-left: 0;
+}
+
+.cheatsheet-prose ul.clean li {
+  position: relative;
+  padding-left: 1.5rem;
+  margin-top: 0.5rem;
+}
+
+.cheatsheet-prose ul.clean li::before {
+  content: "";
+  position: absolute;
+  left: 0.3rem;
+  top: 0.62rem;
+  width: 7px;
+  height: 7px;
+  background: #d84f2a;
+  transform: rotate(45deg);
+}
+
+.cheatsheet-prose ul:not(.clean) {
+  list-style: disc;
+  padding-left: 1.3rem;
+}
+
+.cheatsheet-prose ul:not(.clean) li,
+.cheatsheet-prose ol:not(.numbered) li {
+  margin-top: 0.4rem;
+}
+
+.cheatsheet-prose ol.numbered {
+  list-style: none;
+  counter-reset: n;
+  padding-left: 0;
+}
+
+.cheatsheet-prose ol.numbered li {
+  counter-increment: n;
+  position: relative;
+  padding-left: 2.5rem;
+  margin-top: 0.6rem;
+}
+
+.cheatsheet-prose ol.numbered li::before {
+  content: counter(n);
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1.7rem;
+  height: 1.7rem;
+  border: 1.5px solid rgba(16, 24, 32, 0.15);
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: ui-monospace, "JetBrains Mono", monospace;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #d84f2a;
+}
+
+.cheatsheet-prose ol:not(.numbered) {
+  list-style: decimal;
+  padding-left: 1.5rem;
+}
+
+/* Code */
+.cheatsheet-prose code {
+  font-family: ui-monospace, "JetBrains Mono", "SFMono-Regular", monospace;
+  font-size: 0.85em;
+  background: rgba(23, 50, 77, 0.08);
+  color: #17324d;
+  padding: 1px 6px;
+  border-radius: 5px;
+}
+
+.cheatsheet-prose pre {
+  background: #1b2330;
+  color: #eef2f6;
+  border-radius: 14px;
+  padding: 1rem 1.1rem;
+  overflow-x: auto;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  font-size: 0.85rem;
+  line-height: 1.6;
+}
+
+.cheatsheet-prose pre code {
+  background: none;
+  color: inherit;
+  padding: 0;
+  font-size: inherit;
+}
+
+/* Tables */
+.cheatsheet-prose table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.92rem;
+  display: block;
+  overflow-x: auto;
+}
+
+.cheatsheet-prose th {
+  text-align: left;
+  font-family: ui-monospace, "JetBrains Mono", monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #b98736;
+  border-bottom: 2px solid rgba(16, 24, 32, 0.14);
+  padding: 8px 10px;
+}
+
+.cheatsheet-prose td {
+  border-bottom: 1px solid rgba(16, 24, 32, 0.1);
+  padding: 9px 10px;
+  vertical-align: top;
+}
+
+.cheatsheet-prose td:first-child {
+  font-family: ui-monospace, "JetBrains Mono", monospace;
+  font-weight: 600;
+  color: #17324d;
+}
+
+/* Callouts */
+.cheatsheet-prose .keynote {
+  background: #1b2330;
+  color: #eef2f6;
+  border-radius: 14px;
+  padding: 1rem 1.25rem;
+  border-left: 4px solid #e7b34a;
+}
+
+.cheatsheet-prose .keynote strong {
+  color: #e7b34a;
+}
+
+.cheatsheet-prose .keynote code {
+  background: rgba(255, 255, 255, 0.1);
+  color: #e7b34a;
+}
+
+.cheatsheet-prose .layer {
+  background: #fffdf8;
+  border: 1px solid rgba(16, 24, 32, 0.1);
+  border-radius: 12px;
+  padding: 0.9rem 1.1rem;
+}
+
+.cheatsheet-prose .ltitle {
+  font-family: ui-monospace, "JetBrains Mono", monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #b98736;
+  margin-bottom: 4px;
+}
+
+.cheatsheet-prose .pullquote {
+  font-family: Georgia, Cambria, "Times New Roman", serif;
+  font-style: italic;
+  font-size: 1.2rem;
+  line-height: 1.45;
+  color: #17324d;
+  border-left: 4px solid #b98736;
+  padding-left: 1rem;
+}

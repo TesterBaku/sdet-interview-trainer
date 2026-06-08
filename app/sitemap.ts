@@ -1,4 +1,5 @@
 import type { MetadataRoute } from "next";
+import { cheatSheets } from "@/lib/cheatsheets";
 import { topics } from "@/lib/questionUtils";
 
 const base = "https://sdet-interview-trainer.vercel.app";
@@ -10,6 +11,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${base}/topics`, lastModified: now, changeFrequency: "weekly", priority: 0.9 },
     { url: `${base}/daily-practice`, lastModified: now, changeFrequency: "daily", priority: 0.9 },
     { url: `${base}/coding-gym`, lastModified: now, changeFrequency: "monthly", priority: 0.8 },
+    { url: `${base}/cheatsheets`, lastModified: now, changeFrequency: "weekly", priority: 0.9 },
+    { url: `${base}/quizzes`, lastModified: now, changeFrequency: "weekly", priority: 0.9 },
     { url: `${base}/review`, lastModified: now, changeFrequency: "never", priority: 0.5 },
     { url: `${base}/progress`, lastModified: now, changeFrequency: "never", priority: 0.5 },
   ];
@@ -21,5 +24,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${base}/mock-interview/${topic.id}`, lastModified: now, changeFrequency: "monthly" as const, priority: 0.7 },
   ]);
 
-  return [...staticRoutes, ...topicRoutes];
+  const cheatSheetRoutes: MetadataRoute.Sitemap = cheatSheets.flatMap((sheet) => [
+    { url: `${base}/cheatsheets/${sheet.id}`, lastModified: now, changeFrequency: "monthly" as const, priority: 0.7 },
+    { url: `${base}/cheatsheets/${sheet.id}/quiz`, lastModified: now, changeFrequency: "monthly" as const, priority: 0.6 },
+  ]);
+
+  return [...staticRoutes, ...topicRoutes, ...cheatSheetRoutes];
 }

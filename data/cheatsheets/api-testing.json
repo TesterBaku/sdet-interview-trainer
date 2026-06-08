@@ -1,0 +1,223 @@
+{
+  "id": "api-testing",
+  "title": "API Testing",
+  "group": "API & Data",
+  "accent": "#1f6f6b",
+  "summary": "HTTP fundamentals, what to validate, test-case design, authentication, schema and contract testing, and C# / Playwright implementation — with rapid-fire Q&A.",
+  "tags": [
+    "HTTP & REST",
+    "Status Codes",
+    "Auth / JWT / OAuth",
+    "Schema & Contract",
+    "RestSharp · Playwright"
+  ],
+  "sections": [
+    {
+      "id": "http",
+      "title": "Core HTTP",
+      "bodyHtml": "<h3>Methods &amp; semantics</h3>\n    <ul class=\"clean\">\n      <li><strong>GET</strong> — retrieve, no body, idempotent, cacheable.</li>\n      <li><strong>POST</strong> — create, <em>not</em> idempotent (two calls = two resources).</li>\n      <li><strong>PUT</strong> — full replace/update, idempotent.</li>\n      <li><strong>PATCH</strong> — partial update, not necessarily idempotent.</li>\n      <li><strong>DELETE</strong> — remove, idempotent.</li>\n    </ul>\n    <div class=\"keynote\">\n      <strong>Idempotency</strong> = the same request made once or many times leaves the server in the same state. Note: idempotent ≠ same response — DELETE twice returns 200 then 404, but the end <em>state</em> is identical.\n    </div>"
+    },
+    {
+      "id": "status",
+      "title": "Status Codes — Know These Cold",
+      "bodyHtml": "<table>\n      <thead><tr><th>Code</th><th>Meaning &amp; when</th></tr></thead>\n      <tbody>\n        <tr><td>200</td><td>OK — successful GET / general success.</td></tr>\n        <tr><td>201</td><td>Created — POST succeeded; often returns a <code>Location</code> header.</td></tr>\n        <tr><td>202</td><td>Accepted — request queued for async processing.</td></tr>\n        <tr><td>204</td><td>No Content — success with empty body (DELETE / PUT).</td></tr>\n        <tr><td>301/302</td><td>Permanent / temporary redirect.</td></tr>\n        <tr><td>304</td><td>Not Modified — caching / conditional requests.</td></tr>\n        <tr><td>400</td><td>Bad Request — malformed syntax / payload.</td></tr>\n        <tr><td>401</td><td>Unauthorized — not authenticated (who are you?).</td></tr>\n        <tr><td>403</td><td>Forbidden — authenticated but no permission (you can't do this).</td></tr>\n        <tr><td>404</td><td>Not Found.</td></tr>\n        <tr><td>405</td><td>Method Not Allowed.</td></tr>\n        <tr><td>409</td><td>Conflict — e.g. duplicate creation.</td></tr>\n        <tr><td>422</td><td>Unprocessable Entity — semantic / validation failure.</td></tr>\n        <tr><td>429</td><td>Too Many Requests — rate limited.</td></tr>\n        <tr><td>500</td><td>Internal Server Error.</td></tr>\n        <tr><td>502/503/504</td><td>Bad Gateway / Service Unavailable / Gateway Timeout.</td></tr>\n      </tbody>\n    </table>\n    <p class=\"pullquote\">401 vs 403 is a classic — 401 means the server doesn't know who you are; 403 means it knows you and you're still not allowed.</p>"
+    },
+    {
+      "id": "validate",
+      "title": "What You Actually Validate",
+      "bodyHtml": "<p>For any API response, check beyond just the status line:</p>\n    <ol class=\"numbered\">\n      <li><strong>Status code</strong> — correct for the scenario.</li>\n      <li><strong>Response body</strong> — correct values and correct data types.</li>\n      <li><strong>Schema</strong> — structure matches the contract (JSON Schema: required fields, shape, types).</li>\n      <li><strong>Headers</strong> — <code>Content-Type</code>, auth, caching, rate-limit headers.</li>\n      <li><strong>Response time</strong> — within the SLA.</li>\n      <li><strong>Side effects</strong> — did the POST actually persist? Verify with a follow-up GET.</li>\n    </ol>"
+    },
+    {
+      "id": "design",
+      "title": "Test Case Design",
+      "bodyHtml": "<div class=\"layer\">\n      <div class=\"ltitle\">Positive</div>\n      <p>Valid inputs produce the expected success response and the expected persisted state.</p>\n    </div>\n    <div class=\"layer\">\n      <div class=\"ltitle\">Negative</div>\n      <ul class=\"clean\" style=\"margin-bottom:0;\">\n        <li>Missing required fields → 400 / 422.</li>\n        <li>Invalid data types or malformed JSON → 400.</li>\n        <li>Missing / invalid / expired auth token → 401.</li>\n        <li>Insufficient permissions → 403.</li>\n        <li>Non-existent resource → 404.</li>\n        <li>Duplicate creation → 409.</li>\n        <li>Boundary values — empty string, max length, zero, negatives, oversized payloads.</li>\n      </ul>\n    </div>\n    <div class=\"layer\">\n      <div class=\"ltitle\">Other dimensions</div>\n      <p>Pagination, filtering / sorting parameters, rate limiting (429), concurrency, and idempotency keys.</p>\n    </div>"
+    },
+    {
+      "id": "auth",
+      "title": "Authentication",
+      "bodyHtml": "<ul class=\"clean\">\n      <li><strong>API Key</strong> — static key in a header or query param.</li>\n      <li><strong>Bearer token / JWT</strong> — <code>Authorization: Bearer &lt;token&gt;</code>. A JWT is <code>header.payload.signature</code>; the payload carries claims (<code>exp</code>, <code>sub</code>, roles).</li>\n      <li><strong>OAuth 2.0</strong> — token-exchange flow; in tests you typically grab a token via client-credentials or password grant in setup, then reuse it.</li>\n      <li><strong>Basic Auth</strong> — base64 <code>user:pass</code>, rarely used now.</li>\n    </ul>\n    <div class=\"keynote\">\n      <strong>Common question:</strong> how do you handle token expiry in a suite? → Fetch the token once in a setup / fixture, cache it, and refresh when it expires rather than logging in per test.\n    </div>"
+    },
+    {
+      "id": "schema",
+      "title": "Schema & Contract",
+      "bodyHtml": "<h3>JSON Schema validation</h3>\n    <p>Assert the <em>shape</em> — required fields present, correct types, structure intact — not just individual values. More robust and maintainable than field-by-field assertions when the payload is large.</p>\n    <h3>Contract testing (Pact)</h3>\n    <p>Consumer and provider agree on a contract; it catches breaking changes between services without a full integration environment. It's consumer-driven.</p>\n    <p class=\"pullquote\">Schema validation checks the shape of one response. Contract testing verifies the agreement between two services stays intact.</p>"
+    },
+    {
+      "id": "pyramid",
+      "title": "API vs UI Testing",
+      "bodyHtml": "<ul class=\"clean\">\n      <li>API tests are <strong>faster, more stable, and less flaky</strong> — no rendering, no waiting on elements.</li>\n      <li>They exercise business logic and data integrity directly.</li>\n      <li>They sit in the <strong>middle of the test pyramid</strong> — many fast unit tests at the base, a healthy API/integration layer in the middle, few UI/E2E tests at the top.</li>\n      <li>They catch issues earlier and pinpoint failures more precisely than UI tests.</li>\n    </ul>"
+    },
+    {
+      "id": "mocking",
+      "title": "Mocking & Test Data",
+      "bodyHtml": "<ul class=\"clean\">\n      <li><strong>Mock / stub</strong> external dependencies (WireMock, mock servers) to isolate the service under test and control responses.</li>\n      <li><strong>Setup / teardown</strong> — create preconditions via API, clean up after; keep each test independent and idempotent.</li>\n      <li><strong>Environment management</strong> — base URLs, secrets, and tokens configured per environment (dev / staging).</li>\n    </ul>"
+    },
+    {
+      "id": "csharp",
+      "title": "C# Implementation",
+      "bodyHtml": "<h3>RestSharp</h3>\n    <pre><code>var client = new RestClient(\"https://api.example.com\");\nvar request = new RestRequest(\"/users/1\", Method.Get);\nrequest.AddHeader(\"Authorization\", $\"Bearer {token}\");\nvar response = await client.ExecuteAsync(request);\n\nAssert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));\nvar user = JsonConvert.DeserializeObject&lt;User&gt;(response.Content);\nAssert.That(user.Id, Is.EqualTo(1));</code></pre>\n\n    <h3>Playwright API testing</h3>\n    <pre><code>var request = await playwright.APIRequest.NewContextAsync(new()\n{\n    BaseURL = \"https://api.example.com\",\n    ExtraHTTPHeaders = new Dictionary&lt;string, string&gt;\n    {\n        [\"Authorization\"] = $\"Bearer {token}\"\n    }\n});\n\nvar response = await request.GetAsync(\"/users/1\");\nAssert.That(response.Status, Is.EqualTo(200));\nvar body = await response.JsonAsync();</code></pre>\n\n    <div class=\"keynote\">\n      <strong>Strong talking point:</strong> Playwright's <code style=\"background:#2c3a37;color:#e7b34a;\">APIRequestContext</code> lets you mix API setup with UI tests in one framework — e.g. create test data via API, then verify it in the UI. Clean way to seed state without clicking through the app.\n    </div>\n\n    <h3>Suite structure to raise</h3>\n    <ul class=\"clean\">\n      <li>A base / client wrapper class for the HTTP client and auth.</li>\n      <li>POCO models for request / response deserialization.</li>\n      <li><code>[SetUp]</code> / <code>[OneTimeSetUp]</code> for token acquisition (NUnit), or fixtures (xUnit).</li>\n      <li>Data-driven tests (<code>[TestCase]</code>, <code>[TestCaseSource]</code>) for negative cases.</li>\n      <li>Separate config per environment.</li>\n    </ul>"
+    }
+  ],
+  "quiz": [
+    {
+      "id": "cs-api-testing-001",
+      "topicId": "api-testing",
+      "topicTitle": "API Testing",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "PUT vs PATCH?",
+      "choices": [
+        "PUT does a partial update; PATCH replaces the whole resource",
+        "PUT replaces the whole resource and is idempotent; PATCH updates only sent fields",
+        "Both replace the whole resource, but PATCH is never idempotent",
+        "PUT updates only sent fields; PATCH resets the rest to defaults"
+      ],
+      "correctAnswer": "PUT replaces the whole resource and is idempotent; PATCH updates only sent fields",
+      "explanation": "PUT replaces the whole resource (missing fields get reset); PATCH updates only the fields sent. PUT is idempotent; PATCH usually is but not guaranteed.",
+      "tags": [
+        "api-testing"
+      ]
+    },
+    {
+      "id": "cs-api-testing-002",
+      "topicId": "api-testing",
+      "topicTitle": "API Testing",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "401 vs 403?",
+      "choices": [
+        "401 = authenticated but forbidden; 403 = not authenticated",
+        "401 = the resource doesn't exist; 403 = the request was malformed",
+        "401 = not authenticated; 403 = authenticated but not permitted for this resource",
+        "401 and 403 both mean the credentials were rejected at login"
+      ],
+      "correctAnswer": "401 = not authenticated; 403 = authenticated but not permitted for this resource",
+      "explanation": "401 = not authenticated, server doesn't know you. 403 = authenticated but not permitted for this resource.",
+      "tags": [
+        "api-testing"
+      ]
+    },
+    {
+      "id": "cs-api-testing-003",
+      "topicId": "api-testing",
+      "topicTitle": "API Testing",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "How do you validate a response beyond status code?",
+      "choices": [
+        "Only the status code and the Content-Length header need checking",
+        "Body values & types, schema, headers, response time, and side effects",
+        "Just deserialize the body and confirm it isn't null",
+        "Re-send the request and confirm you get the same status twice"
+      ],
+      "correctAnswer": "Body values & types, schema, headers, response time, and side effects",
+      "explanation": "Body values & types, schema/structure, headers, response time, and side effects (verify a POST persisted with a follow-up GET).",
+      "tags": [
+        "api-testing"
+      ]
+    },
+    {
+      "id": "cs-api-testing-004",
+      "topicId": "api-testing",
+      "topicTitle": "API Testing",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "How do you test an authenticated endpoint?",
+      "choices": [
+        "Log in fresh inside every test and skip negative auth cases",
+        "Hard-code a long-lived token and never test expiry or roles",
+        "Disable auth in the test environment so endpoints respond openly",
+        "Acquire a token in setup, attach Bearer, reuse it, and test 401/403 cases"
+      ],
+      "correctAnswer": "Acquire a token in setup, attach Bearer, reuse it, and test 401/403 cases",
+      "explanation": "Acquire a token in setup, attach Authorization: Bearer, reuse/refresh it. Also test no-token → 401, expired → 401, wrong role → 403.",
+      "tags": [
+        "api-testing"
+      ]
+    },
+    {
+      "id": "cs-api-testing-005",
+      "topicId": "api-testing",
+      "topicTitle": "API Testing",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "What's idempotency?",
+      "choices": [
+        "Making the same request repeatedly always returns an identical response body",
+        "A request that leaves the server in the same state whether made once or many times",
+        "A request that can safely be cached by intermediaries and proxies",
+        "An operation that must always succeed and never return an error"
+      ],
+      "correctAnswer": "A request that leaves the server in the same state whether made once or many times",
+      "explanation": "A request that, made once or many times, leaves the server in the same state. GET/PUT/DELETE yes, POST no. Refers to state, not response.",
+      "tags": [
+        "api-testing"
+      ]
+    },
+    {
+      "id": "cs-api-testing-006",
+      "topicId": "api-testing",
+      "topicTitle": "API Testing",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "How do you handle dynamic / changing response data?",
+      "choices": [
+        "Don't hard-assert volatile fields; assert type/format or capture values at runtime",
+        "Hard-code expected IDs and timestamps and update them when tests fail",
+        "Strip all dynamic fields from the response before asserting anything",
+        "Disable the fields server-side so responses stay constant during tests"
+      ],
+      "correctAnswer": "Don't hard-assert volatile fields; assert type/format or capture values at runtime",
+      "explanation": "Don't hard-assert volatile fields (IDs, timestamps). Assert type/format or capture generated values at runtime and reuse them; validate format or a range for timestamps.",
+      "tags": [
+        "api-testing"
+      ]
+    },
+    {
+      "id": "cs-api-testing-007",
+      "topicId": "api-testing",
+      "topicTitle": "API Testing",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "How do you keep API tests independent?",
+      "choices": [
+        "Run tests in a fixed order so shared state is built up predictably",
+        "Reuse one global record across tests to avoid setup overhead",
+        "Each test sets up and cleans its own data with unique values, no shared state",
+        "Run everything serially so concurrency never causes interference"
+      ],
+      "correctAnswer": "Each test sets up and cleans its own data with unique values, no shared state",
+      "explanation": "Each test sets up its own data and cleans up; no shared mutable state, no order dependency; unique/generated data (GUIDs) for safe parallel runs.",
+      "tags": [
+        "api-testing"
+      ]
+    },
+    {
+      "id": "cs-api-testing-008",
+      "topicId": "api-testing",
+      "topicTitle": "API Testing",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "Where do API tests fit in the test pyramid?",
+      "choices": [
+        "At the top, above UI tests, since they exercise full workflows",
+        "At the very base, replacing unit tests as the fastest layer",
+        "The middle layer — above unit, below UI — best balance of speed and coverage",
+        "Outside the pyramid, as a separate manual exploratory activity"
+      ],
+      "correctAnswer": "The middle layer — above unit, below UI — best balance of speed and coverage",
+      "explanation": "The middle layer — above unit, below UI — the best balance of coverage, speed, and stability.",
+      "tags": [
+        "api-testing"
+      ]
+    }
+  ]
+}

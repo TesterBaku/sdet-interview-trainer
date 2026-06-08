@@ -62,6 +62,27 @@ Key exports:
 | `/mock-interview/[topicId]` | Textarea + 60–90s/4-step answer guide + reveal model answer + self-rate + Back to topic on last prompt |
 | `/coding-gym`           | All coding tasks; `?topic=<id>` filters to one topic; sandbox draft auto-saves per task |
 
+### 3b. Cheat sheets module (self-contained)
+
+Reference content + quizzes converted from the source HTML study pages, kept separate from the
+10-topic question system so it doesn't distort topic pages, the Daily Plan, or `/progress` totals.
+
+```text
+scripts/build-cheatsheets.mjs   converts source HTML → data/cheatsheets/*.json (run manually)
+data/cheatsheets/*.json         13 sheets (sections + Question[] quiz, ids cs-<sheet>-NNN)
+lib/cheatsheets.ts              cheatSheets, getCheatSheet, getCheatSheetQuiz, cheatSheetsByGroup
+types/CheatSheet.ts
+```
+
+| Route | Purpose |
+|---|---|
+| `/cheatsheets` | Grid of all 13 sheets grouped by `group` |
+| `/cheatsheets/[id]` | Reading page — converted sections + in-page TOC + "Take the quiz" |
+| `/cheatsheets/[id]/quiz` | MCQ quiz; reuses `QuizQuestion` + `useProgress` + `useShuffledList` |
+| `/quizzes` | "Learn through quizzes" landing — all sheets with per-sheet answered progress |
+
+Section bodies render as sanitized HTML inside the `.cheatsheet-prose` block in `globals.css`.
+
 ### 4. Aggregator surfaces
 
 | Route | Purpose |

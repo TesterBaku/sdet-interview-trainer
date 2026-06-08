@@ -1,0 +1,214 @@
+{
+  "id": "playwright",
+  "title": "Playwright",
+  "group": "Test Frameworks",
+  "accent": "#6c4ad6",
+  "summary": "Auto-waiting, locators, the page/context/browser model, fixtures, network interception, parallelism, and how Playwright differs from Selenium — with rapid-fire Q&A.",
+  "tags": [
+    "Auto-wait",
+    "Locators",
+    "Fixtures",
+    "Network Mocking",
+    "Parallel",
+    "C# / NUnit"
+  ],
+  "sections": [
+    {
+      "id": "what",
+      "title": "What Playwright Is",
+      "bodyHtml": "<p>Playwright is a modern end-to-end testing framework from Microsoft. It drives Chromium, Firefox, and WebKit through a single API, talks to browsers over the <strong>DevTools/CDP-style protocol</strong> rather than the WebDriver wire protocol, and ships official bindings for C#, JavaScript/TypeScript, Python, and Java.</p><p class='pullquote'>The headline advantage over Selenium: a single process talking to the browser over a persistent connection, with auto-waiting built into every action.</p><ul class='clean'><li>Cross-browser via one API (Chromium, Firefox, WebKit).</li><li>Auto-waiting and web-first assertions reduce flakiness.</li><li>Built-in network interception, tracing, video, and screenshots.</li><li>Fast parallel execution out of the box.</li></ul>"
+    },
+    {
+      "id": "arch",
+      "title": "Browser / Context / Page",
+      "bodyHtml": "<div class='layer'><div class='ltitle'>Browser</div><p>A single browser instance. Expensive to launch — you reuse it across tests.</p></div><div class='layer'><div class='ltitle'>BrowserContext</div><p>An isolated session inside the browser — its own cookies, storage, and cache. Like a fresh incognito profile. Cheap to create, so each test gets its own context for isolation. This is how Playwright achieves clean state without relaunching the browser.</p></div><div class='layer'><div class='ltitle'>Page</div><p>A single tab within a context. Most interactions happen here.</p></div><div class='keynote'><strong>Why it matters:</strong> reusing one Browser but giving each test its own Context is what makes Playwright both fast and fully isolated — a common interview point.</div>"
+    },
+    {
+      "id": "locators",
+      "title": "Locators & Auto-Waiting",
+      "bodyHtml": "<p>A <code>Locator</code> is a lazy, re-queried handle to an element — it re-resolves the DOM every time you act on it, which avoids stale-element problems.</p><p>Recommended, user-facing locators (in priority order):</p><ul class='clean'><li><code>GetByRole</code> — by ARIA role + accessible name; most resilient.</li><li><code>GetByLabel</code>, <code>GetByPlaceholder</code>, <code>GetByText</code>.</li><li><code>GetByTestId</code> — stable <code>data-testid</code> hooks.</li><li>CSS / XPath as a fallback.</li></ul><p><strong>Auto-waiting:</strong> before acting, Playwright waits for the element to be attached, visible, stable, enabled, and able to receive events — so explicit waits and <code>sleep()</code> are rarely needed.</p><p><strong>Web-first assertions</strong> (<code>Expect(locator).ToBeVisibleAsync()</code>) auto-retry until the condition holds or times out — no manual polling.</p><pre><code>await page.GetByRole(AriaRole.Button, new() { Name = \"Sign in\" }).ClickAsync();\r\nawait Expect(page.GetByText(\"Welcome\")).ToBeVisibleAsync();</code></pre>"
+    },
+    {
+      "id": "network",
+      "title": "Network Interception & Mocking",
+      "bodyHtml": "<p>Playwright can observe and modify network traffic, which is powerful for isolating the UI from flaky backends.</p><ul class='clean'><li><code>page.RouteAsync</code> — intercept a URL pattern and fulfil, modify, or abort the request.</li><li>Stub an API to return fixed JSON so a UI test is deterministic.</li><li>Wait for a specific response with <code>page.WaitForResponseAsync</code>.</li></ul><pre><code>await page.RouteAsync(\"**/api/users\", async route =&gt;\r\n    await route.FulfillAsync(new() { Status = 200, Body = \"[]\" }));</code></pre>"
+    },
+    {
+      "id": "fixtures",
+      "title": "Fixtures, Config & Auth Reuse",
+      "bodyHtml": "<ul class='clean'><li><strong>Storage state</strong> — log in once, save cookies/localStorage to a file, and load it into new contexts so tests skip the login UI. Big speed win.</li><li><strong>Config</strong> — base URL, browser projects, timeouts, retries, trace/video settings centralized (in C# via fixtures/runsettings, or the JS <code>playwright.config</code>).</li><li><strong>Projects</strong> — run the same suite across multiple browsers / viewports.</li></ul><div class='keynote'><strong>Auth pattern:</strong> authenticate once in setup, persist <code>storageState</code>, and reuse it — the equivalent of seeding a logged-in session instead of clicking through login per test.</div>"
+    },
+    {
+      "id": "parallel",
+      "title": "Parallelism & CI",
+      "bodyHtml": "<p>Playwright runs tests in parallel by default using multiple worker processes; each worker gets its own browser/context, so isolation is preserved. Context-level isolation is exactly what makes safe parallelism possible.</p><ul class='clean'><li>Workers scale to CPU cores; tune for the CI runner.</li><li><strong>Retries</strong> for flaky tests, configured centrally.</li><li><strong>Trace Viewer</strong> — record a trace on failure/first-retry; it captures DOM snapshots, network, and console for post-mortem debugging without re-running.</li><li>Sharding splits the suite across CI machines.</li></ul>"
+    },
+    {
+      "id": "debug",
+      "title": "Debugging & Tooling",
+      "bodyHtml": "<ul class='clean'><li><strong>Codegen</strong> — records your clicks into a test script with good locators.</li><li><strong>Trace Viewer</strong> — the main triage tool; step through a failed run frame by frame.</li><li><strong>UI Mode / headed + slowmo</strong> for live observation.</li><li>Auto screenshots and video on failure.</li></ul>"
+    }
+  ],
+  "quiz": [
+    {
+      "id": "cs-playwright-001",
+      "topicId": "playwright",
+      "topicTitle": "Playwright",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "How does Playwright avoid flakiness?",
+      "choices": [
+        "Auto-waiting on every action plus web-first assertions that auto-retry until the condition holds",
+        "Inserting fixed sleep() calls between every action to let the DOM settle",
+        "Running each test three times and taking the majority result",
+        "Polling the network layer until all XHR requests have completed"
+      ],
+      "correctAnswer": "Auto-waiting on every action plus web-first assertions that auto-retry until the condition holds",
+      "explanation": "Auto-waiting on every action (attached, visible, stable, enabled) plus web-first assertions that auto-retry until the condition holds or times out.",
+      "tags": [
+        "playwright"
+      ]
+    },
+    {
+      "id": "cs-playwright-002",
+      "topicId": "playwright",
+      "topicTitle": "Playwright",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "Browser vs Context vs Page?",
+      "choices": [
+        "Browser, Context, and Page are interchangeable names for a single tab session",
+        "Browser = a tab; Context = the instance; Page = isolated cookie storage",
+        "Browser = reused instance; Context = isolated session with own cookies/storage; Page = a tab",
+        "Browser = isolated session per test; Context = reused instance; Page = the cookie jar"
+      ],
+      "correctAnswer": "Browser = reused instance; Context = isolated session with own cookies/storage; Page = a tab",
+      "explanation": "Browser = the instance (reused); Context = isolated session with its own cookies/storage (one per test); Page = a tab.",
+      "tags": [
+        "playwright"
+      ]
+    },
+    {
+      "id": "cs-playwright-003",
+      "topicId": "playwright",
+      "topicTitle": "Playwright",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "Why prefer GetByRole over CSS?",
+      "choices": [
+        "It runs faster because role lookups skip the DOM query engine entirely",
+        "It matches how users and assistive tech perceive the page, so it resists markup changes",
+        "It guarantees a unique match by hashing the element's full XPath",
+        "It is the only locator that supports Playwright's auto-waiting mechanism"
+      ],
+      "correctAnswer": "It matches how users and assistive tech perceive the page, so it resists markup changes",
+      "explanation": "It matches how users and assistive tech perceive the page, so it's resilient to markup changes and encourages accessible UIs.",
+      "tags": [
+        "playwright"
+      ]
+    },
+    {
+      "id": "cs-playwright-004",
+      "topicId": "playwright",
+      "topicTitle": "Playwright",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "How do you reuse login across tests?",
+      "choices": [
+        "Hard-code the session token into playwright.config so every worker shares it",
+        "Re-run the login UI steps inside a beforeEach hook for each test",
+        "Authenticate once, save storageState (cookies + localStorage), load it into new contexts",
+        "Keep a single Context alive and share it across all tests to preserve the session"
+      ],
+      "correctAnswer": "Authenticate once, save storageState (cookies + localStorage), load it into new contexts",
+      "explanation": "Authenticate once, save storageState (cookies + localStorage), load it into new contexts so tests skip the login flow.",
+      "tags": [
+        "playwright"
+      ]
+    },
+    {
+      "id": "cs-playwright-005",
+      "topicId": "playwright",
+      "topicTitle": "Playwright",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "How does Playwright handle parallelism?",
+      "choices": [
+        "A single worker runs tests sequentially but in separate browser tabs",
+        "Multiple worker processes, each with isolated browser context, shardable across CI machines",
+        "All tests share one browser context and rely on locking to avoid collisions",
+        "It spawns one thread per test inside a single process for lightweight parallelism"
+      ],
+      "correctAnswer": "Multiple worker processes, each with isolated browser context, shardable across CI machines",
+      "explanation": "Multiple worker processes, each with isolated browser context; configured by worker count and shardable across CI machines.",
+      "tags": [
+        "playwright"
+      ]
+    },
+    {
+      "id": "cs-playwright-006",
+      "topicId": "playwright",
+      "topicTitle": "Playwright",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "Playwright vs Selenium, briefly?",
+      "choices": [
+        "Both use the WebDriver wire protocol, but Playwright adds a nicer assertion library",
+        "Selenium has built-in auto-wait and tracing, while Playwright requires manual waits",
+        "Single API over a persistent CDP-style connection with built-in auto-wait, mocking, and tracing",
+        "Playwright only drives Chromium, whereas Selenium is the only true cross-browser option"
+      ],
+      "correctAnswer": "Single API over a persistent CDP-style connection with built-in auto-wait, mocking, and tracing",
+      "explanation": "Single API over a persistent CDP-style connection with built-in auto-wait, network mocking, and tracing — vs Selenium's WebDriver protocol where you assemble waits and tooling yourself.",
+      "tags": [
+        "playwright"
+      ]
+    },
+    {
+      "id": "cs-playwright-007",
+      "topicId": "playwright",
+      "topicTitle": "Playwright",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "How do you mock an API in a UI test?",
+      "choices": [
+        "Set a global proxy in the config to redirect all backend calls to a stub server",
+        "page.RouteAsync to intercept the request and fulfil it with controlled data",
+        "Override the JavaScript fetch function via an injected init script on each page",
+        "Use page.WaitForResponseAsync to replace the real response payload with fixed JSON"
+      ],
+      "correctAnswer": "page.RouteAsync to intercept the request and fulfil it with controlled data",
+      "explanation": "page.RouteAsync to intercept the request and fulfil it with controlled data, making the test deterministic.",
+      "tags": [
+        "playwright"
+      ]
+    },
+    {
+      "id": "cs-playwright-008",
+      "topicId": "playwright",
+      "topicTitle": "Playwright",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "What's the Trace Viewer?",
+      "choices": [
+        "A live dashboard that streams CPU and memory metrics during a test run",
+        "A linter that scans your test scripts for fragile locators before execution",
+        "A post-mortem tool recording DOM snapshots, network, and console per step to debug failures",
+        "A code generator that records your clicks and emits a test script with good locators"
+      ],
+      "correctAnswer": "A post-mortem tool recording DOM snapshots, network, and console per step to debug failures",
+      "explanation": "A post-mortem tool that records DOM snapshots, network, and console per step so you debug a failed run without reproducing it.",
+      "tags": [
+        "playwright"
+      ]
+    }
+  ]
+}

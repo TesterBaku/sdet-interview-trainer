@@ -1,0 +1,300 @@
+{
+  "id": "java",
+  "title": "Java",
+  "group": "Languages",
+  "accent": "#c4641c",
+  "summary": "A to-the-point review of the Java an SDET gets asked about: data types, modifiers, OOP, strings, collections, exceptions, generics & streams — plus the JUnit/TestNG ecosystem. Short explanations, short examples.",
+  "tags": [
+    "Data Types",
+    "Modifiers",
+    "OOP",
+    "Strings",
+    "Collections",
+    "Exceptions",
+    "Streams"
+  ],
+  "sections": [
+    {
+      "id": "types",
+      "title": "Data Types & Variables",
+      "bodyHtml": "<p>Java has two kinds of types: <strong>primitives</strong> and <strong>reference types</strong>.</p><ul class='clean'><li><strong>Primitives</strong> hold the value directly and are <strong>copied</strong> on assignment: <code>int</code>, <code>long</code>, <code>double</code>, <code>float</code>, <code>boolean</code>, <code>char</code>, <code>byte</code>, <code>short</code>.</li><li><strong>Reference types</strong> (objects, arrays, <code>String</code>) hold a <strong>reference</strong> to data on the heap; assigning copies the reference, so both variables point at the same object.</li><li>Each primitive has a <strong>wrapper class</strong> (<code>int</code>↔<code>Integer</code>, <code>boolean</code>↔<code>Boolean</code>) for use in generics/collections. Converting between them is <strong>autoboxing</strong> / unboxing.</li></ul><pre><code>int a = 1; int b = a; b = 9;            // a stays 1 (value copied)\r\n\r\nint[] x = { 1 }; int[] y = x; y[0] = 9; // x[0] is now 9 (same array)\r\n\r\nList&lt;Integer&gt; nums = new ArrayList&lt;&gt;();\r\nnums.add(5);                            // autobox: int -> Integer</code></pre><div class='keynote'><strong>Pass-by-value:</strong> Java always passes by value. For objects the <em>reference</em> is copied, so a method can change the object's fields but cannot reseat the caller's variable. <code>var</code> (Java 10+) infers a local variable's type.</div>"
+    },
+    {
+      "id": "modifiers",
+      "title": "Modifiers & Keywords",
+      "bodyHtml": "<p><strong>Access modifiers</strong> — who can see a member:</p><ul class='clean'><li><code>public</code> — anywhere.</li><li><code>private</code> — only inside the same class.</li><li><code>protected</code> — same package + subclasses.</li><li><em>(no modifier)</em> — <strong>package-private</strong>: visible only within the same package. This is the default.</li></ul><p><strong>Other key modifiers:</strong></p><ul class='clean'><li><code>static</code> — belongs to the class, not an instance.</li><li><code>final</code> — can't change: a <code>final</code> variable is a constant, a <code>final</code> method can't be overridden, a <code>final</code> class can't be subclassed.</li><li><code>abstract</code> — no body; a subclass must implement it.</li></ul>"
+    },
+    {
+      "id": "oop",
+      "title": "OOP Pillars",
+      "bodyHtml": "<ul class='clean'><li><strong>Encapsulation</strong> — <code>private</code> fields + public getters/setters.</li><li><strong>Inheritance</strong> — <code>extends</code> one class; prefer composition over deep hierarchies.</li><li><strong>Polymorphism</strong> — overriding (runtime) vs overloading (compile-time).</li><li><strong>Abstraction</strong> — abstract classes and interfaces hide detail behind a contract.</li></ul><div class='layer'><div class='ltitle'>Abstract class vs Interface — when &amp; how</div><p><strong>Abstract class</strong> = a partial base with shared code/state; a class <code>extends</code> <strong>one</strong> of them and overrides its abstract methods. Use it for an \"is-a\" relationship.<br><strong>Interface</strong> = a contract / capability; a class <code>implements</code> <strong>many</strong> and provides the methods. Since Java 8 it can have <code>default</code> methods. Use it for a \"can-do\" capability.</p></div><pre><code>abstract class Shape {                  // shared base\r\n    abstract double area();             // no body -> subclass must implement\r\n}\r\ninterface Drawable {                    // capability\r\n    void draw();\r\n}\r\n\r\n// extend ONE class, implement MANY interfaces\r\nclass Circle extends Shape implements Drawable {\r\n    final double r;\r\n    Circle(double r) { this.r = r; }\r\n    @Override double area() { return Math.PI * r * r; }\r\n    @Override public void draw() { System.out.println(\"O r=\" + r); }\r\n}</code></pre><div class='layer'><div class='ltitle'>Overloading vs Overriding</div><p><strong>Overloading</strong> = same method name, different parameters, chosen at <strong>compile time</strong>. <strong>Overriding</strong> = a subclass redefines a method with the same signature, chosen at <strong>runtime</strong>.</p></div>"
+    },
+    {
+      "id": "strings",
+      "title": "Strings & Immutability",
+      "bodyHtml": "<p><code>String</code> is a reference type but <strong>immutable</strong> — once created it never changes. Every \"modification\" returns a <strong>new</strong> String and leaves the original alone.</p><pre><code>String s = \"hello\";\r\ns.toUpperCase();      // returns \"HELLO\" but s is STILL \"hello\"\r\ns = s.toUpperCase();  // reassign to keep the result</code></pre><p><strong>Why immutable?</strong> Thread-safety, safe use as <code>HashMap</code> keys (a stable hashCode), and the <strong>String pool</strong> — identical literals are interned and shared.</p><pre><code>String a = \"hi\", b = \"hi\";\r\na == b;                 // true  -> same pooled object\r\nnew String(\"hi\") == a;  // false -> a brand-new object\r\na.equals(b);            // true  -> ALWAYS compare strings with equals()</code></pre><p>Building a string in a loop creates a new object each pass. Use <strong><code>StringBuilder</code></strong> (or <code>StringBuffer</code> when thread-safe).</p><pre><code>StringBuilder sb = new StringBuilder();\r\nfor (String row : rows) sb.append(row).append('\\n');\r\nString out = sb.toString();   // one final allocation</code></pre><div class='keynote'><strong>== vs equals():</strong> <code>==</code> compares references (same object); <code>equals()</code> compares value. For Strings and objects, always use <code>equals()</code>.</div>"
+    },
+    {
+      "id": "collections",
+      "title": "Collections Framework",
+      "bodyHtml": "<p>Everything sits under <code>List</code>, <code>Set</code>, <code>Map</code>, or <code>Queue</code>:</p><ul class='clean'><li><strong>List</strong> = ordered, duplicates allowed.</li><li><strong>Set</strong> = no duplicates.</li><li><strong>Map</strong> = key/value pairs.</li></ul><table><thead><tr><th>Type</th><th>Notes</th></tr></thead><tbody><tr><td>ArrayList</td><td>Resizable array; fast index access — the default List.</td></tr><tr><td>LinkedList</td><td>Doubly-linked; fast add/remove at the ends.</td></tr><tr><td>HashMap</td><td>Key→value, O(1) average, no ordering — the default Map.</td></tr><tr><td>LinkedHashMap</td><td>HashMap that keeps insertion order.</td></tr><tr><td>TreeMap</td><td>Keys sorted, O(log n).</td></tr><tr><td>HashSet</td><td>Unique elements, backed by a HashMap.</td></tr></tbody></table><p><strong>Used most in practice:</strong> <code>ArrayList</code> for ordered lists and <code>HashMap</code> for key lookups.</p><pre><code>List&lt;String&gt; names = new ArrayList&lt;&gt;();\r\nnames.add(\"Ada\");\r\nboolean has = names.contains(\"Ada\");\r\n\r\nMap&lt;String, Integer&gt; ages = new HashMap&lt;&gt;();\r\nages.put(\"Ada\", 36);\r\nages.getOrDefault(\"Bob\", 0);          // safe read, no null\r\nages.merge(\"Ada\", 1, Integer::sum);   // count / increment</code></pre><div class='layer'><div class='ltitle'>equals() &amp; hashCode()</div><p>Hash collections (<code>HashMap</code>, <code>HashSet</code>) find an object by its hash first, then check <code>equals</code>. The rule: <strong>if two objects are equal they must return the same hashCode</strong>. Override both together (using the same fields) or hash lookups break — entries go missing and duplicates slip in. A <code>record</code> (Java 16+) generates both for you.</p></div>"
+    },
+    {
+      "id": "exceptions",
+      "title": "Exceptions",
+      "bodyHtml": "<p>Two kinds:</p><ul class='clean'><li><strong>Checked</strong> — must be handled or declared with <code>throws</code> (e.g. <code>IOException</code>); enforced at compile time.</li><li><strong>Unchecked</strong> — <code>RuntimeException</code>s like <code>NullPointerException</code>, <code>IllegalArgumentException</code>; not enforced.</li></ul><ul class='clean'><li><code>try</code> / <code>catch</code> / <code>finally</code> — <code>finally</code> always runs.</li><li><strong>try-with-resources</strong> auto-closes anything <code>AutoCloseable</code>, even on exception.</li><li><code>throw</code> raises an exception; <code>throws</code> declares one a method may propagate.</li></ul><pre><code>// try / catch / finally\r\ntry {\r\n    int x = Integer.parseInt(input);\r\n} catch (NumberFormatException e) {\r\n    System.out.println(\"not a number\");\r\n} finally {\r\n    System.out.println(\"always runs\");\r\n}\r\n\r\n// try-with-resources: reader closed automatically\r\ntry (BufferedReader r = new BufferedReader(new FileReader(\"data.csv\"))) {\r\n    return r.readLine();\r\n} catch (IOException e) {\r\n    throw new RuntimeException(\"read failed\", e);  // wrap, keep the cause\r\n}</code></pre><div class='keynote'><strong>Good hygiene:</strong> catch the narrowest exception, never leave an empty <code>catch</code>, and keep the original cause when you wrap. In tests, let unexpected errors fail loudly.</div>"
+    },
+    {
+      "id": "generics",
+      "title": "Generics & Streams",
+      "bodyHtml": "<p><strong>Generics</strong> add compile-time type safety and remove casts: a <code>List&lt;String&gt;</code> can only hold Strings.</p><p><strong>Streams (Java 8+)</strong> process a collection as a pipeline: source → intermediate ops (lazy) → one terminal op. Nothing runs until the terminal op.</p><pre><code>List&lt;String&gt; names = people.stream()\r\n    .filter(p -&gt; p.getAge() &gt; 18)   // keep adults\r\n    .map(Person::getName)           // transform\r\n    .sorted()\r\n    .collect(Collectors.toList());  // terminal op\r\n\r\nlong adults = people.stream().filter(p -&gt; p.getAge() &gt; 18).count();\r\n\r\nMap&lt;String, List&lt;Person&gt;&gt; byDept = people.stream()\r\n    .collect(Collectors.groupingBy(Person::getDept));</code></pre><p><code>Optional&lt;T&gt;</code> models \"maybe a value\" and avoids null checks: <code>opt.map(...).orElse(default)</code>.</p><div class='keynote'><strong>Streams vs loops:</strong> streams read well for filter/map/collect pipelines; a plain <code>for</code> loop is fine (and faster) for simple iteration or when you need to break early. Don't force everything into a stream.</div>"
+    },
+    {
+      "id": "testing",
+      "title": "Test Ecosystem",
+      "bodyHtml": "<ul class='clean'><li><strong>JUnit 5</strong> — <code>@Test</code>, <code>@BeforeEach</code>/<code>@AfterEach</code>, <code>@BeforeAll</code>/<code>@AfterAll</code>, <code>@ParameterizedTest</code>, <code>@DisplayName</code>, assertions, and a flexible extensions model.</li><li><strong>TestNG</strong> — groups, data providers, dependencies, flexible parallel config, suite XML; common in Selenium frameworks.</li><li><strong>Mockito</strong> — mock/stub dependencies; verify interactions.</li><li><strong>AssertJ / Hamcrest</strong> — fluent, readable assertions.</li><li><strong>Maven / Gradle</strong> — build &amp; dependency management; Surefire/Failsafe run tests in CI.</li></ul><pre><code>@ParameterizedTest\r\n@CsvSource({ \"2,4\", \"3,9\", \"5,25\" })\r\nvoid squares(int in, int expected) {\r\n    assertEquals(expected, in * in);\r\n}\r\n\r\n@Test\r\nvoid usesMock() {\r\n    UserRepo repo = mock(UserRepo.class);\r\n    when(repo.find(1)).thenReturn(new User(1, \"Ada\"));\r\n    assertEquals(\"Ada\", new UserService(repo).nameOf(1));\r\n    verify(repo).find(1);\r\n}</code></pre><div class='keynote'><strong>JUnit vs TestNG:</strong> TestNG has richer built-in suite/parallel/group features and data providers; JUnit 5 is modular, extensible, and the default in modern Java. Both are fine — know <em>why</em> a framework picked one.</div>"
+    }
+  ],
+  "quiz": [
+    {
+      "id": "cs-java-001",
+      "topicId": "java",
+      "topicTitle": "Java",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "Primitive vs reference type?",
+      "choices": [
+        "Primitives store a reference to a heap object; reference types store the value inline",
+        "Primitives are immutable; reference types can always be mutated freely",
+        "Primitives hold the value and copy on assignment; reference types hold a reference to a heap object",
+        "Primitives live on the heap; reference types live on the stack and copy on assignment"
+      ],
+      "correctAnswer": "Primitives hold the value and copy on assignment; reference types hold a reference to a heap object",
+      "explanation": "Primitives hold the value and copy on assignment (int, boolean); reference types hold a reference to a heap object (objects, arrays, String).",
+      "tags": [
+        "java"
+      ]
+    },
+    {
+      "id": "cs-java-002",
+      "topicId": "java",
+      "topicTitle": "Java",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "Is Java pass-by-value or by-reference?",
+      "choices": [
+        "Always pass-by-value; the object reference is copied, so you can mutate the object but not reseat the caller's variable",
+        "Pass-by-reference for objects and pass-by-value for primitives",
+        "Always pass-by-reference; methods can reseat the caller's variable",
+        "Pass-by-value, but the original object becomes immutable inside the method"
+      ],
+      "correctAnswer": "Always pass-by-value; the object reference is copied, so you can mutate the object but not reseat the caller's variable",
+      "explanation": "Always pass-by-value; for objects the reference is copied, so you can change the object but not reseat the caller's variable.",
+      "tags": [
+        "java"
+      ]
+    },
+    {
+      "id": "cs-java-003",
+      "topicId": "java",
+      "topicTitle": "Java",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "Default (package-private) vs protected?",
+      "choices": [
+        "Package-private = same package plus subclasses; protected = same package only",
+        "Package-private = visible only within the same package; protected = same package plus subclasses",
+        "Package-private = visible everywhere; protected = only inside the same class",
+        "Package-private = same class only; protected = anywhere via inheritance"
+      ],
+      "correctAnswer": "Package-private = visible only within the same package; protected = same package plus subclasses",
+      "explanation": "No modifier = visible only within the same package; protected = same package plus subclasses.",
+      "tags": [
+        "java"
+      ]
+    },
+    {
+      "id": "cs-java-004",
+      "topicId": "java",
+      "topicTitle": "Java",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "What does final do?",
+      "choices": [
+        "final variable can be reassigned once; final method is abstract; final class is static",
+        "final variable = constant; final method = can't be overridden; final class = can't be subclassed",
+        "final variable = constant; final method = can't be overloaded; final class = can't be instantiated",
+        "final variable = thread-safe; final method = synchronized; final class = sealed"
+      ],
+      "correctAnswer": "final variable = constant; final method = can't be overridden; final class = can't be subclassed",
+      "explanation": "final variable = constant; final method = can't be overridden; final class = can't be subclassed.",
+      "tags": [
+        "java"
+      ]
+    },
+    {
+      "id": "cs-java-005",
+      "topicId": "java",
+      "topicTitle": "Java",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "Abstract class vs interface?",
+      "choices": [
+        "Abstract class = contract, implement MANY; interface = shared code, extend ONE",
+        "Both allow multiple inheritance of state and require all methods to have bodies",
+        "Abstract class = shared code/state, extend ONE; interface = contract, implement MANY, with default methods since Java 8",
+        "Abstract class can't have constructors; interface can hold instance fields and constructors"
+      ],
+      "correctAnswer": "Abstract class = shared code/state, extend ONE; interface = contract, implement MANY, with default methods since Java 8",
+      "explanation": "Abstract class = shared code/state, extend ONE (\"is-a\"); interface = contract, implement MANY (\"can-do\"), with default methods since Java 8.",
+      "tags": [
+        "java"
+      ]
+    },
+    {
+      "id": "cs-java-006",
+      "topicId": "java",
+      "topicTitle": "Java",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "Overloading vs overriding?",
+      "choices": [
+        "Overloading = same signature in a subclass, runtime; overriding = different params, compile-time",
+        "Overloading = same name, different params, compile-time; overriding = same signature in a subclass, runtime",
+        "Overloading and overriding are both resolved at runtime based on the object's type",
+        "Overloading = changing the return type only; overriding = changing the access modifier only"
+      ],
+      "correctAnswer": "Overloading = same name, different params, compile-time; overriding = same signature in a subclass, runtime",
+      "explanation": "Overloading = same name, different params, compile-time; overriding = same signature in a subclass, runtime.",
+      "tags": [
+        "java"
+      ]
+    },
+    {
+      "id": "cs-java-007",
+      "topicId": "java",
+      "topicTitle": "Java",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "== vs equals()?",
+      "choices": [
+        "== compares references; equals() compares value — always use equals() for Strings and objects",
+        "== compares value; equals() compares references — always use == for Strings",
+        "== and equals() are identical for objects; both compare value",
+        "== compares value for primitives and value for objects; equals() compares hash codes"
+      ],
+      "correctAnswer": "== compares references; equals() compares value — always use equals() for Strings and objects",
+      "explanation": "== compares references; equals() compares value — always use equals() for Strings and objects.",
+      "tags": [
+        "java"
+      ]
+    },
+    {
+      "id": "cs-java-008",
+      "topicId": "java",
+      "topicTitle": "Java",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "Why is String immutable?",
+      "choices": [
+        "So strings can be mutated in place without reallocation",
+        "Thread-safety, safe HashMap keys, and string-pool sharing; use StringBuilder for heavy concatenation",
+        "To make every concatenation faster than StringBuilder",
+        "Because immutability lets the JVM compare strings with == reliably"
+      ],
+      "correctAnswer": "Thread-safety, safe HashMap keys, and string-pool sharing; use StringBuilder for heavy concatenation",
+      "explanation": "Thread-safety, safe HashMap keys, and string-pool sharing; use StringBuilder for heavy concatenation.",
+      "tags": [
+        "java"
+      ]
+    },
+    {
+      "id": "cs-java-009",
+      "topicId": "java",
+      "topicTitle": "Java",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "Why override hashCode with equals?",
+      "choices": [
+        "Because equals() internally calls hashCode() and would otherwise recurse forever",
+        "So objects can be sorted in a TreeMap by their natural ordering",
+        "Hash collections find objects by hash first; equal objects must share a hashCode or HashMap/HashSet lookups break",
+        "Hash collections compare objects only by equals(), so hashCode keeps the toString() consistent"
+      ],
+      "correctAnswer": "Hash collections find objects by hash first; equal objects must share a hashCode or HashMap/HashSet lookups break",
+      "explanation": "Hash collections find objects by hash first; equal objects must share a hashCode or HashMap/HashSet lookups break.",
+      "tags": [
+        "java"
+      ]
+    },
+    {
+      "id": "cs-java-010",
+      "topicId": "java",
+      "topicTitle": "Java",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "Checked vs unchecked exception?",
+      "choices": [
+        "Checked exceptions are RuntimeExceptions; unchecked must be declared with throws",
+        "Checked must be handled or declared (compile-time enforced); unchecked (RuntimeException) need not be",
+        "Checked are thrown by the JVM at runtime; unchecked are caught only by finally blocks",
+        "Checked exceptions can't be caught; unchecked must always be caught"
+      ],
+      "correctAnswer": "Checked must be handled or declared (compile-time enforced); unchecked (RuntimeException) need not be",
+      "explanation": "Checked must be handled or declared (compile-time enforced); unchecked (RuntimeException) need not be.",
+      "tags": [
+        "java"
+      ]
+    },
+    {
+      "id": "cs-java-011",
+      "topicId": "java",
+      "topicTitle": "Java",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "ArrayList vs LinkedList?",
+      "choices": [
+        "ArrayList = fast add/remove at the ends; LinkedList = fast index access",
+        "Both offer O(1) random access, but LinkedList uses less memory per element",
+        "ArrayList = fast index access (the usual choice); LinkedList = fast add/remove at the ends",
+        "ArrayList is thread-safe by default; LinkedList must be synchronized manually"
+      ],
+      "correctAnswer": "ArrayList = fast index access (the usual choice); LinkedList = fast add/remove at the ends",
+      "explanation": "ArrayList = fast index access (the usual choice); LinkedList = fast add/remove at the ends.",
+      "tags": [
+        "java"
+      ]
+    },
+    {
+      "id": "cs-java-012",
+      "topicId": "java",
+      "topicTitle": "Java",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "What is a Stream?",
+      "choices": [
+        "A thread-safe collection that automatically parallelizes every operation",
+        "A Java 8 pipeline over a collection — filter / map / collect — that stays lazy until a terminal operation runs",
+        "A mutable data structure that replaces ArrayList for ordered storage",
+        "An eager pipeline that executes each intermediate operation immediately as it's added"
+      ],
+      "correctAnswer": "A Java 8 pipeline over a collection — filter / map / collect — that stays lazy until a terminal operation runs",
+      "explanation": "A Java 8 pipeline over a collection — filter / map / collect — that stays lazy until a terminal operation runs.",
+      "tags": [
+        "java"
+      ]
+    }
+  ]
+}

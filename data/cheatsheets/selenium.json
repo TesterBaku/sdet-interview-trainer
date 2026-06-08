@@ -1,0 +1,214 @@
+{
+  "id": "selenium",
+  "title": "Selenium",
+  "group": "Test Frameworks",
+  "accent": "#3c8a3f",
+  "summary": "Architecture, locators, the three wait types, stale elements, Page Object Model, frames/windows/alerts, Grid, and how Selenium contrasts with Playwright — with rapid-fire Q&A.",
+  "tags": [
+    "WebDriver",
+    "Locators",
+    "Waits",
+    "Page Object",
+    "Grid",
+    "Flakiness"
+  ],
+  "sections": [
+    {
+      "id": "arch",
+      "title": "Architecture",
+      "bodyHtml": "<p>Selenium WebDriver drives real browsers through a browser-specific <strong>driver</strong> (chromedriver, geckodriver). Your test code sends commands over the <strong>W3C WebDriver protocol</strong> (HTTP/JSON) to the driver, which translates them into native browser actions.</p><p class='pullquote'>Client → WebDriver protocol → browser driver → browser. Each command is a separate HTTP round trip — the root of much of the latency and flakiness you manage with waits.</p><p>Selenium 4 standardized on the W3C protocol and added relative locators and CDP access.</p>"
+    },
+    {
+      "id": "locators",
+      "title": "Locators",
+      "bodyHtml": "<p>Eight strategies, in rough order of preference:</p><ul class='clean'><li><code>id</code> — fastest, most stable when present.</li><li><code>name</code>, <code>className</code>, <code>tagName</code>.</li><li><code>linkText</code>, <code>partialLinkText</code>.</li><li><code>cssSelector</code> — fast, flexible; generally preferred over XPath.</li><li><code>xpath</code> — most powerful (can traverse up the DOM, match text) but slower and more brittle.</li></ul><div class='keynote'><strong>CSS vs XPath:</strong> prefer CSS for speed and readability; reach for XPath only when you need text matching or to walk to a parent/ancestor.</div>"
+    },
+    {
+      "id": "waits",
+      "title": "The Three Wait Types",
+      "bodyHtml": "<p>The most important Selenium interview topic — the heart of flakiness control.</p><div class='layer'><div class='ltitle'>Implicit Wait</div><p>A global setting: poll the DOM up to N seconds when finding any element. Simple but blunt — applies everywhere and can mask issues.</p></div><div class='layer'><div class='ltitle'>Explicit Wait</div><p><code>WebDriverWait</code> + <code>ExpectedConditions</code> — wait for a specific condition (element clickable, visible, present) on a specific element. The recommended approach.</p></div><div class='layer'><div class='ltitle'>Fluent Wait</div><p>An explicit wait with a custom polling interval and ignored exception types — fine-grained control.</p></div><div class='keynote'><strong>Warning:</strong> never mix implicit and explicit waits — the combination produces unpredictable cumulative timeouts. Pick explicit. And avoid <code>Thread.sleep()</code> entirely.</div><pre><code>new WebDriverWait(driver, Duration.ofSeconds(10))\r\n    .until(ExpectedConditions.elementToBeClickable(By.id(\"submit\")));</code></pre>"
+    },
+    {
+      "id": "stale",
+      "title": "StaleElementReferenceException",
+      "bodyHtml": "<p>Thrown when a previously found element reference is no longer attached to the DOM — typically after the page re-rendered or navigated. Causes and fixes:</p><ul class='clean'><li>Re-find the element right before interacting instead of caching it.</li><li>Wait for the new element after a DOM change.</li><li>This is exactly the problem Playwright's lazy locators avoid by re-querying automatically.</li></ul>"
+    },
+    {
+      "id": "context",
+      "title": "Frames, Windows & Alerts",
+      "bodyHtml": "<ul class='clean'><li><strong>iframes</strong> — <code>switchTo().frame(...)</code> before interacting; <code>defaultContent()</code> to return.</li><li><strong>Windows/tabs</strong> — <code>getWindowHandles()</code> + <code>switchTo().window(handle)</code>.</li><li><strong>Alerts</strong> — <code>switchTo().alert()</code> then <code>accept()</code>/<code>dismiss()</code>.</li><li><strong>Actions API</strong> for hover, drag-drop, key chords.</li></ul>"
+    },
+    {
+      "id": "pom",
+      "title": "Page Object Model & Grid",
+      "bodyHtml": "<p><strong>POM</strong> — one class per page encapsulating locators and actions, so UI changes touch one file. <strong>PageFactory</strong> (<code>@FindBy</code>) is the classic Selenium helper.</p><p><strong>Selenium Grid</strong> — distribute tests across multiple machines/browsers via a hub-and-node (Selenium 4: router/distributor/node) model for parallel, cross-browser execution. Pairs with TestNG/JUnit parallel config.</p>"
+    },
+    {
+      "id": "vs",
+      "title": "Selenium vs Playwright",
+      "bodyHtml": "<table><thead><tr><th>Aspect</th><th>Selenium / Playwright</th></tr></thead><tbody><tr><td>Protocol</td><td>W3C WebDriver (HTTP per command) / persistent CDP-style connection.</td></tr><tr><td>Waiting</td><td>You add explicit waits / auto-wait built into actions.</td></tr><tr><td>Network mocking</td><td>Limited (CDP) / first-class.</td></tr><tr><td>Setup</td><td>Manage driver binaries / bundled browsers.</td></tr><tr><td>Maturity</td><td>Huge ecosystem, any language/browser / newer, faster, fewer integrations.</td></tr></tbody></table><p>Selenium's strengths: maturity, language breadth, real-browser fidelity, and broad grid/cloud support. Playwright's: speed, reliability, and built-in tooling.</p>"
+    }
+  ],
+  "quiz": [
+    {
+      "id": "cs-selenium-001",
+      "topicId": "selenium",
+      "topicTitle": "Selenium",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "Implicit vs explicit wait?",
+      "choices": [
+        "Implicit polls globally for all element lookups; explicit waits for a specific condition on a specific element",
+        "Implicit waits for a condition; explicit polls globally for every lookup",
+        "Implicit pauses a fixed time; explicit polls the DOM globally",
+        "Implicit and explicit are aliases that should always be combined"
+      ],
+      "correctAnswer": "Implicit polls globally for all element lookups; explicit waits for a specific condition on a specific element",
+      "explanation": "Implicit = global polling for all element lookups; explicit = wait for a specific condition on a specific element. Prefer explicit; never mix them.",
+      "tags": [
+        "selenium"
+      ]
+    },
+    {
+      "id": "cs-selenium-002",
+      "topicId": "selenium",
+      "topicTitle": "Selenium",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "Why avoid Thread.sleep?",
+      "choices": [
+        "It silently ignores ExpectedConditions and never polls",
+        "It disables implicit waits globally for the rest of the session",
+        "It's a fixed blind wait — slow when too long, flaky when too short",
+        "It throws StaleElementReferenceException on slow pages"
+      ],
+      "correctAnswer": "It's a fixed blind wait — slow when too long, flaky when too short",
+      "explanation": "It's a fixed blind wait — slow when too long, flaky when too short; explicit waits react to actual state.",
+      "tags": [
+        "selenium"
+      ]
+    },
+    {
+      "id": "cs-selenium-003",
+      "topicId": "selenium",
+      "topicTitle": "Selenium",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "What causes StaleElementReferenceException?",
+      "choices": [
+        "A locator matched more than one element on the page",
+        "The cached element detached from the DOM after a re-render or navigation",
+        "The element was found before the implicit wait timeout elapsed",
+        "The browser driver binary version mismatched the browser version"
+      ],
+      "correctAnswer": "The cached element detached from the DOM after a re-render or navigation",
+      "explanation": "The cached element detached from the DOM after a re-render/navigation; re-find it before interacting.",
+      "tags": [
+        "selenium"
+      ]
+    },
+    {
+      "id": "cs-selenium-004",
+      "topicId": "selenium",
+      "topicTitle": "Selenium",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "CSS selector vs XPath?",
+      "choices": [
+        "XPath is faster and cleaner; CSS can match text and walk to ancestors",
+        "Both perform identically; the choice is purely stylistic preference",
+        "CSS is faster and cleaner; XPath can match text and traverse to parents but is slower",
+        "CSS can traverse to parents and match text; XPath only matches by id"
+      ],
+      "correctAnswer": "CSS is faster and cleaner; XPath can match text and traverse to parents but is slower",
+      "explanation": "CSS is faster and cleaner; XPath can match text and traverse to parents/ancestors but is slower and more brittle.",
+      "tags": [
+        "selenium"
+      ]
+    },
+    {
+      "id": "cs-selenium-005",
+      "topicId": "selenium",
+      "topicTitle": "Selenium",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "How do you handle an iframe?",
+      "choices": [
+        "Call switchTo().frame(...) before interacting, then switchTo().defaultContent() to leave",
+        "Use getWindowHandles() then switchTo().window(handle) to enter the frame",
+        "Call switchTo().alert() then accept() to access frame content",
+        "Frames are handled automatically; no context switch is ever needed"
+      ],
+      "correctAnswer": "Call switchTo().frame(...) before interacting, then switchTo().defaultContent() to leave",
+      "explanation": "switchTo().frame(...) before interacting, then switchTo().defaultContent() to leave.",
+      "tags": [
+        "selenium"
+      ]
+    },
+    {
+      "id": "cs-selenium-006",
+      "topicId": "selenium",
+      "topicTitle": "Selenium",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "How does Selenium talk to the browser?",
+      "choices": [
+        "It injects JavaScript directly into the page to manipulate the DOM",
+        "It opens a persistent CDP WebSocket connection to the browser",
+        "It sends W3C WebDriver commands over HTTP to a browser-specific driver",
+        "It controls the browser through OS-level screen and input automation"
+      ],
+      "correctAnswer": "It sends W3C WebDriver commands over HTTP to a browser-specific driver",
+      "explanation": "Test code sends W3C WebDriver commands over HTTP to a browser-specific driver, which performs native actions.",
+      "tags": [
+        "selenium"
+      ]
+    },
+    {
+      "id": "cs-selenium-007",
+      "topicId": "selenium",
+      "topicTitle": "Selenium",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "What is Selenium Grid?",
+      "choices": [
+        "A hub/node setup to run tests in parallel across multiple machines, browsers, and OSes",
+        "A built-in recorder that generates Page Object classes from clicks",
+        "A network proxy that mocks API responses during test runs",
+        "A wait strategy that polls the DOM across multiple browser tabs"
+      ],
+      "correctAnswer": "A hub/node setup to run tests in parallel across multiple machines, browsers, and OSes",
+      "explanation": "A hub/node setup to run tests in parallel across multiple machines, browsers, and OSes.",
+      "tags": [
+        "selenium"
+      ]
+    },
+    {
+      "id": "cs-selenium-008",
+      "topicId": "selenium",
+      "topicTitle": "Selenium",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "How do you reduce flakiness?",
+      "choices": [
+        "Add long Thread.sleep calls and combine implicit with explicit waits",
+        "Explicit waits, stable locators, re-finding elements, no sleeps, and test independence",
+        "Cache element references globally and share state between tests",
+        "Rely solely on implicit waits and XPath locators for every element"
+      ],
+      "correctAnswer": "Explicit waits, stable locators, re-finding elements, no sleeps, and test independence",
+      "explanation": "Explicit waits, stable locators (id/css), re-finding elements, no sleeps, and test independence.",
+      "tags": [
+        "selenium"
+      ]
+    }
+  ]
+}

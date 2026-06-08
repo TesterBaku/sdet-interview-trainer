@@ -1,0 +1,301 @@
+{
+  "id": "kubernetes",
+  "title": "Kubernetes",
+  "group": "DevOps & CI",
+  "accent": "#2f63c4",
+  "summary": "A to-the-point review of the Kubernetes an SDET gets asked about: what the control plane does, Pods / Deployments / Services / Ingress, ConfigMaps & Secrets, health probes, scaling & self-healing, and how you deploy and test apps on a cluster. Builds on the Docker page — containers are the unit K8s schedules. Short explanations, short examples.",
+  "tags": [
+    "Why K8s",
+    "Architecture",
+    "Pods & Deployments",
+    "Services & Ingress",
+    "Config & Secrets",
+    "Probes",
+    "Scaling",
+    "Testing & CI"
+  ],
+  "sections": [
+    {
+      "id": "why",
+      "title": "What Kubernetes Is — and Why",
+      "bodyHtml": "<p>Docker runs <em>a</em> container on <em>a</em> host. <strong>Kubernetes</strong> (K8s) runs <em>thousands</em> across a fleet of machines — scheduling them, restarting failures, scaling on load, and rolling out new versions with zero downtime.</p><p class='pullquote'>You declare the <strong>desired state</strong> (“3 replicas of this image”); Kubernetes continuously reconciles reality to match it.</p><ul class='clean'><li><strong>Self-healing</strong> — a crashed Pod is recreated; a dead node’s Pods are rescheduled.</li><li><strong>Horizontal scaling</strong> — add/remove replicas by hand or automatically on CPU/metrics.</li><li><strong>Rolling updates &amp; rollback</strong> — ship a new version gradually, revert instantly if it’s bad.</li><li><strong>Service discovery &amp; load balancing</strong> — stable names and traffic spreading across replicas.</li></ul><div class='keynote'><strong>Mental model:</strong> Docker is the <em>package</em>; Kubernetes is the <em>operations team</em> that runs the packages and keeps them alive.</div>"
+    },
+    {
+      "id": "arch",
+      "title": "Cluster Architecture",
+      "bodyHtml": "<p>A cluster = a <strong>control plane</strong> (the brain) + <strong>worker nodes</strong> (where Pods run).</p><table><tr><th>Component</th><th>Role</th></tr><tr><td>API server</td><td>the front door — every command/tool talks to it</td></tr><tr><td>etcd</td><td>key-value store holding the whole cluster state</td></tr><tr><td>scheduler</td><td>decides which node a new Pod runs on</td></tr><tr><td>controller manager</td><td>reconciliation loops driving actual → desired state</td></tr><tr><td>kubelet</td><td>agent on each node that runs &amp; reports on Pods</td></tr><tr><td>kube-proxy</td><td>node networking rules for Services</td></tr></table><div class='keynote'><strong>The core idea — control loops:</strong> controllers constantly compare desired state (your YAML) to actual state and act to close the gap. That loop is <em>why</em> K8s self-heals.</div>"
+    },
+    {
+      "id": "workloads",
+      "title": "Pods, ReplicaSets & Deployments",
+      "bodyHtml": "<ul class='clean'><li><strong>Pod</strong> — the smallest unit: one (or a few tightly-coupled) containers sharing a network/IP and storage. Pods are <strong>ephemeral</strong> — they come and go with new IPs.</li><li><strong>ReplicaSet</strong> — keeps N identical Pods running.</li><li><strong>Deployment</strong> — manages ReplicaSets to give you <strong>rolling updates and rollbacks</strong>; what you actually write for stateless apps.</li><li><strong>StatefulSet</strong> — for stateful apps (databases) needing stable identity and storage; <strong>DaemonSet</strong> — one Pod per node (agents); <strong>Job/CronJob</strong> — run-to-completion / scheduled tasks.</li></ul><pre><code>apiVersion: apps/v1\r\nkind: Deployment\r\nmetadata: { name: web }\r\nspec:\r\n  replicas: 3                 # desired state\r\n  selector: { matchLabels: { app: web } }\r\n  template:\r\n    metadata: { labels: { app: web } }\r\n    spec:\r\n      containers:\r\n        - name: web\r\n          image: myapp:1.2\r\n          ports: [{ containerPort: 3000 }]</code></pre><div class='keynote'><strong>Say this:</strong> you rarely create Pods directly — you create a Deployment, and it manages the Pods (and their replacement on update or failure) for you.</div>"
+    },
+    {
+      "id": "services",
+      "title": "Services & Ingress",
+      "bodyHtml": "<p>Pods are ephemeral with changing IPs, so you never talk to a Pod directly. A <strong>Service</strong> gives a stable virtual IP + DNS name and load-balances across the matching Pods.</p><table><tr><th>Type</th><th>Reachable from</th></tr><tr><td>ClusterIP (default)</td><td>inside the cluster only</td></tr><tr><td>NodePort</td><td>a fixed port on every node</td></tr><tr><td>LoadBalancer</td><td>an external cloud load balancer</td></tr></table><p><strong>Ingress</strong> sits in front of Services as an HTTP(S) router — host/path rules, TLS termination — so many apps share one external entry point instead of one LoadBalancer each.</p><div class='keynote'><strong>Selector glue:</strong> a Service finds its Pods by <strong>label selector</strong> (<code>app: web</code>), not by IP — which is how it keeps working as Pods are replaced.</div>"
+    },
+    {
+      "id": "config",
+      "title": "ConfigMaps & Secrets",
+      "bodyHtml": "<ul class='clean'><li><strong>ConfigMap</strong> — non-sensitive config (URLs, feature flags) injected as env vars or mounted files. Keeps config out of the image.</li><li><strong>Secret</strong> — same idea for sensitive data (passwords, tokens, TLS keys); base64-encoded and access-controlled (enable encryption-at-rest / external secret stores in prod).</li><li><strong>Namespaces</strong> — virtual partitions of one cluster (e.g. <code>dev</code>, <code>staging</code>, <code>test</code>) for isolation and quotas.</li></ul><pre><code>env:\r\n  - name: LOG_LEVEL\r\n    valueFrom: { configMapKeyRef: { name: app-config, key: log_level } }\r\n  - name: DB_PASSWORD\r\n    valueFrom: { secretKeyRef: { name: db-secret, key: password } }</code></pre><div class='keynote'><strong>Interview note:</strong> a Secret is only base64-<em>encoded</em>, not encrypted by default — call that out and mention RBAC, encryption-at-rest, and tools like Sealed Secrets / Vault.</div>"
+    },
+    {
+      "id": "probes",
+      "title": "Health Probes & Self-Healing",
+      "bodyHtml": "<p>K8s keeps apps healthy using <strong>probes</strong> — periodic checks the kubelet runs against each container.</p><ul class='clean'><li><strong>Liveness</strong> — “is it alive?” Fails → container is <strong>restarted</strong>. Catches deadlocks.</li><li><strong>Readiness</strong> — “can it serve traffic?” Fails → Pod is pulled from the Service’s load balancer (but not killed). Catches warm-up/dependency waits.</li><li><strong>Startup</strong> — guards slow-starting apps so liveness doesn’t kill them prematurely.</li></ul><pre><code>readinessProbe:\r\n  httpGet: { path: /healthz, port: 3000 }\r\n  initialDelaySeconds: 5\r\n  periodSeconds: 10</code></pre><div class='keynote'><strong>Liveness vs readiness — the classic question:</strong> liveness failing <em>restarts</em> the container; readiness failing only <em>removes it from rotation</em> until it recovers. Mixing them up causes restart loops.</div>"
+    },
+    {
+      "id": "scaling",
+      "title": "Scaling & Rollouts",
+      "bodyHtml": "<ul class='clean'><li><strong>Manual scale</strong> — <code>kubectl scale deploy/web --replicas=5</code>.</li><li><strong>HPA (Horizontal Pod Autoscaler)</strong> — adds/removes replicas automatically on CPU/memory/custom metrics.</li><li><strong>Rolling update</strong> — the default: replace Pods gradually so there’s no downtime; <code>kubectl rollout undo</code> reverts.</li><li><strong>Resource requests/limits</strong> — <code>requests</code> guide scheduling; <code>limits</code> cap usage (over the memory limit → the container is OOM-killed).</li></ul><pre><code>kubectl set image deploy/web web=myapp:1.3   # trigger a rolling update\r\nkubectl rollout status deploy/web            # watch it\r\nkubectl rollout undo  deploy/web             # roll back if bad</code></pre>"
+    },
+    {
+      "id": "testing",
+      "title": "Kubernetes for Testing & CI",
+      "bodyHtml": "<p>Where an SDET actually touches K8s:</p><ul class='clean'><li><strong>Ephemeral test environments</strong> — spin up a namespace (or a whole throwaway cluster) per branch/PR, deploy the app, run E2E, tear it down.</li><li><strong>Local clusters</strong> — <strong>kind</strong> (Kubernetes-in-Docker) or <strong>minikube</strong> to run a real cluster in CI or on your laptop.</li><li><strong>kubectl for debugging</strong> — <code>get</code>, <code>describe</code>, <code>logs</code>, <code>exec</code>, <code>port-forward</code> are your triage toolkit when a test deployment misbehaves.</li><li><strong>Helm</strong> — templated, versioned manifests (“charts”) so the same deploy is parameterized across dev/test/prod.</li></ul><pre><code>kubectl get pods -n test                 # what's running\r\nkubectl describe pod web-xyz -n test     # events: why is it pending/crashing?\r\nkubectl logs -f web-xyz -n test          # app output\r\nkubectl port-forward svc/web 8080:80     # hit the service locally for a test</code></pre><div class='keynote'><strong>First triage move:</strong> a Pod stuck <code>Pending</code> or <code>CrashLoopBackOff</code>? <code>kubectl describe pod</code> — the <em>Events</em> section almost always names the cause (no node fits, image pull failed, failing probe).</div>"
+    }
+  ],
+  "quiz": [
+    {
+      "id": "cs-kubernetes-001",
+      "topicId": "kubernetes",
+      "topicTitle": "Kubernetes",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "Docker vs Kubernetes?",
+      "choices": [
+        "Docker and Kubernetes both build images, but Kubernetes adds a registry layer",
+        "Docker runs a container on a host; Kubernetes orchestrates many containers across a cluster with scheduling, self-healing, scaling, and rollouts",
+        "Kubernetes builds containers while Docker only schedules them across nodes",
+        "Docker and Kubernetes are competing container runtimes that cannot coexist"
+      ],
+      "correctAnswer": "Docker runs a container on a host; Kubernetes orchestrates many containers across a cluster with scheduling, self-healing, scaling, and rollouts",
+      "explanation": "Docker builds and runs a container on a host; Kubernetes orchestrates many containers across a cluster — scheduling, self-healing, scaling, and rollouts.",
+      "tags": [
+        "kubernetes"
+      ]
+    },
+    {
+      "id": "cs-kubernetes-002",
+      "topicId": "kubernetes",
+      "topicTitle": "Kubernetes",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "What is a Pod?",
+      "choices": [
+        "A single container plus its image, treated as one immutable unit",
+        "A group of nodes that share networking and storage across the cluster",
+        "The smallest deployable unit: one or more tightly-coupled containers sharing a network/IP and storage, and is ephemeral",
+        "A permanent worker that keeps a fixed IP and persistent disk for its lifetime"
+      ],
+      "correctAnswer": "The smallest deployable unit: one or more tightly-coupled containers sharing a network/IP and storage, and is ephemeral",
+      "explanation": "The smallest deployable unit: one or more tightly-coupled containers sharing a network/IP and storage. Pods are ephemeral.",
+      "tags": [
+        "kubernetes"
+      ]
+    },
+    {
+      "id": "cs-kubernetes-003",
+      "topicId": "kubernetes",
+      "topicTitle": "Kubernetes",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "Pod vs Deployment?",
+      "choices": [
+        "A Deployment manages a ReplicaSet of identical Pods and gives you rolling updates, rollbacks, and self-healing; you create the Deployment, not Pods directly",
+        "A Pod manages Deployments, scaling them up and down based on load",
+        "A Deployment is a single Pod with extra metadata for versioning",
+        "Pods handle rollbacks while Deployments only define the container image"
+      ],
+      "correctAnswer": "A Deployment manages a ReplicaSet of identical Pods and gives you rolling updates, rollbacks, and self-healing; you create the Deployment, not Pods directly",
+      "explanation": "A Deployment manages a ReplicaSet of identical Pods and gives you rolling updates, rollbacks, and self-healing — you create the Deployment, not Pods directly.",
+      "tags": [
+        "kubernetes"
+      ]
+    },
+    {
+      "id": "cs-kubernetes-004",
+      "topicId": "kubernetes",
+      "topicTitle": "Kubernetes",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "Why do you need a Service?",
+      "choices": [
+        "A Service stores the Pod's persistent data so it survives restarts",
+        "Pods are ephemeral with changing IPs; a Service gives a stable IP/DNS name and load-balances across Pods matching its label selector",
+        "A Service schedules Pods onto nodes and restarts them when they crash",
+        "Services encrypt traffic between Pods using their fixed individual IPs"
+      ],
+      "correctAnswer": "Pods are ephemeral with changing IPs; a Service gives a stable IP/DNS name and load-balances across Pods matching its label selector",
+      "explanation": "Pods are ephemeral with changing IPs; a Service provides a stable IP/DNS name and load-balances across the Pods matching its label selector.",
+      "tags": [
+        "kubernetes"
+      ]
+    },
+    {
+      "id": "cs-kubernetes-005",
+      "topicId": "kubernetes",
+      "topicTitle": "Kubernetes",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "ClusterIP vs NodePort vs LoadBalancer?",
+      "choices": [
+        "ClusterIP exposes a node port; NodePort is internal; LoadBalancer routes HTTP paths",
+        "All three are external; they differ only in which cloud provider they target",
+        "ClusterIP = internal only; NodePort = a fixed port on each node; LoadBalancer = an external cloud LB; Ingress routes HTTP across Services",
+        "ClusterIP = external LB; NodePort = internal only; LoadBalancer = a port per node"
+      ],
+      "correctAnswer": "ClusterIP = internal only; NodePort = a fixed port on each node; LoadBalancer = an external cloud LB; Ingress routes HTTP across Services",
+      "explanation": "ClusterIP = internal only; NodePort = a fixed port on each node; LoadBalancer = an external cloud LB. Ingress routes HTTP across many Services.",
+      "tags": [
+        "kubernetes"
+      ]
+    },
+    {
+      "id": "cs-kubernetes-006",
+      "topicId": "kubernetes",
+      "topicTitle": "Kubernetes",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "Liveness vs readiness probe?",
+      "choices": [
+        "Liveness failing restarts the container; readiness failing removes the Pod from the Service load balancer until it recovers, with no restart",
+        "Liveness removes the Pod from rotation; readiness restarts the container on failure",
+        "Both probes restart the container, but liveness runs more frequently",
+        "Liveness checks dependencies; readiness checks for deadlocks and kills the node"
+      ],
+      "correctAnswer": "Liveness failing restarts the container; readiness failing removes the Pod from the Service load balancer until it recovers, with no restart",
+      "explanation": "Liveness failing restarts the container; readiness failing removes the Pod from the Service load balancer until it recovers (no restart).",
+      "tags": [
+        "kubernetes"
+      ]
+    },
+    {
+      "id": "cs-kubernetes-007",
+      "topicId": "kubernetes",
+      "topicTitle": "Kubernetes",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "ConfigMap vs Secret?",
+      "choices": [
+        "A Secret is fully encrypted at rest by default, while a ConfigMap is plaintext",
+        "ConfigMaps hold sensitive data and Secrets hold non-sensitive config",
+        "Both inject config; ConfigMap is for non-sensitive data, Secret for sensitive — but a Secret is only base64-encoded, not encrypted by default",
+        "Secrets are mounted as files only, while ConfigMaps can only be env vars"
+      ],
+      "correctAnswer": "Both inject config; ConfigMap is for non-sensitive data, Secret for sensitive — but a Secret is only base64-encoded, not encrypted by default",
+      "explanation": "Both inject config as env/files; ConfigMap is for non-sensitive data, Secret for sensitive — but a Secret is only base64-encoded, not encrypted by default.",
+      "tags": [
+        "kubernetes"
+      ]
+    },
+    {
+      "id": "cs-kubernetes-008",
+      "topicId": "kubernetes",
+      "topicTitle": "Kubernetes",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "How does self-healing work?",
+      "choices": [
+        "The API server pings each Pod and emails an operator when one dies",
+        "etcd stores backup Pods and swaps them in instantly when one fails",
+        "The scheduler restarts the entire node whenever any container exits",
+        "Controllers run reconciliation loops comparing actual to desired state and recreate/reschedule Pods to close the gap"
+      ],
+      "correctAnswer": "Controllers run reconciliation loops comparing actual to desired state and recreate/reschedule Pods to close the gap",
+      "explanation": "Controllers run reconciliation loops comparing actual to desired state and recreate/reschedule Pods to close the gap.",
+      "tags": [
+        "kubernetes"
+      ]
+    },
+    {
+      "id": "cs-kubernetes-009",
+      "topicId": "kubernetes",
+      "topicTitle": "Kubernetes",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "How do you scale?",
+      "choices": [
+        "kubectl scale, or an HPA that adjusts replicas automatically based on CPU/memory/custom metrics",
+        "Edit etcd directly to add more Pod entries to the cluster state",
+        "Add more containers to a single Pod until the load is handled",
+        "Restart the Deployment, which doubles the replica count each time"
+      ],
+      "correctAnswer": "kubectl scale, or an HPA that adjusts replicas automatically based on CPU/memory/custom metrics",
+      "explanation": "kubectl scale, or an HPA that adjusts replicas automatically based on CPU/memory/custom metrics.",
+      "tags": [
+        "kubernetes"
+      ]
+    },
+    {
+      "id": "cs-kubernetes-010",
+      "topicId": "kubernetes",
+      "topicTitle": "Kubernetes",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "How do you do a zero-downtime deploy?",
+      "choices": [
+        "Delete all old Pods, then create the new ones once they are gone",
+        "A rolling update replaces Pods gradually behind a readiness probe; kubectl rollout undo reverts to the previous version",
+        "Scale to zero, swap the image, then scale back up to restore traffic",
+        "Take the Service offline, update every Pod at once, then bring it back"
+      ],
+      "correctAnswer": "A rolling update replaces Pods gradually behind a readiness probe; kubectl rollout undo reverts to the previous version",
+      "explanation": "A rolling update replaces Pods gradually behind a readiness probe; kubectl rollout undo reverts to the previous version.",
+      "tags": [
+        "kubernetes"
+      ]
+    },
+    {
+      "id": "cs-kubernetes-011",
+      "topicId": "kubernetes",
+      "topicTitle": "Kubernetes",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "requests vs limits?",
+      "choices": [
+        "limits reserve resources for scheduling; requests cap usage and trigger OOM kills",
+        "requests reserve resources for scheduling; limits cap them — exceeding the memory limit gets the container OOM-killed",
+        "requests and limits both cap usage, but requests apply only to CPU",
+        "requests cap usage while limits are advisory hints ignored by the scheduler"
+      ],
+      "correctAnswer": "requests reserve resources for scheduling; limits cap them — exceeding the memory limit gets the container OOM-killed",
+      "explanation": "requests reserve resources for scheduling; limits cap them — exceeding the memory limit gets the container OOM-killed.",
+      "tags": [
+        "kubernetes"
+      ]
+    },
+    {
+      "id": "cs-kubernetes-012",
+      "topicId": "kubernetes",
+      "topicTitle": "Kubernetes",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "How do you debug a failing Pod?",
+      "choices": [
+        "Restart the cluster and watch whether the Pod comes back healthy",
+        "Check etcd for the Pod's stored error log and stack trace",
+        "kubectl describe pod (read the Events), kubectl logs, and exec/port-forward — Pending/CrashLoopBackOff usually explains itself in the events",
+        "kubectl delete pod, since recreating it is the only way to see the failure cause"
+      ],
+      "correctAnswer": "kubectl describe pod (read the Events), kubectl logs, and exec/port-forward — Pending/CrashLoopBackOff usually explains itself in the events",
+      "explanation": "kubectl describe pod (read the Events), kubectl logs, and exec/port-forward — Pending/CrashLoopBackOff usually explains itself in the events.",
+      "tags": [
+        "kubernetes"
+      ]
+    }
+  ]
+}

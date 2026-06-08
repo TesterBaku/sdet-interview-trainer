@@ -1,0 +1,306 @@
+{
+  "id": "sql",
+  "title": "SQL",
+  "group": "API & Data",
+  "accent": "#0a7d8c",
+  "summary": "A to-the-point review of the SQL an SDET gets asked about: SELECT execution order, the join types, GROUP BY vs HAVING vs WHERE, subqueries vs CTEs, window functions, indexes, NULL handling, transactions & ACID — plus how you use SQL to validate data in tests. Short explanations, short examples.",
+  "tags": [
+    "Query Order",
+    "Joins",
+    "Aggregation",
+    "Subqueries / CTE",
+    "Window",
+    "Indexes",
+    "NULLs",
+    "Transactions"
+  ],
+  "sections": [
+    {
+      "id": "order",
+      "title": "How a SELECT Actually Runs",
+      "bodyHtml": "<p>You <em>write</em> <code>SELECT</code> first, but the database <strong>evaluates clauses in a different order</strong> — knowing this explains most “why can’t I use that alias here” questions.</p><table><tr><th>#</th><th>Clause</th><th>What it does</th></tr><tr><td>1</td><td>FROM / JOIN</td><td>pick &amp; combine the source rows</td></tr><tr><td>2</td><td>WHERE</td><td>filter rows (before grouping)</td></tr><tr><td>3</td><td>GROUP BY</td><td>collapse into groups</td></tr><tr><td>4</td><td>HAVING</td><td>filter groups</td></tr><tr><td>5</td><td>SELECT</td><td>pick columns / compute expressions</td></tr><tr><td>6</td><td>ORDER BY</td><td>sort the result</td></tr><tr><td>7</td><td>LIMIT</td><td>cut the rows returned</td></tr></table><div class='keynote'><strong>Why it matters:</strong> <code>WHERE</code> runs before <code>SELECT</code>, so a column alias defined in <code>SELECT</code> isn’t visible in <code>WHERE</code> — but it <em>is</em> visible in <code>ORDER BY</code> (which runs last).</div>"
+    },
+    {
+      "id": "joins",
+      "title": "Joins",
+      "bodyHtml": "<p>A join combines rows from two tables on a matching condition. The type decides what happens to <strong>non-matching</strong> rows.</p><ul class='clean'><li><strong>INNER</strong> — only rows that match on both sides.</li><li><strong>LEFT</strong> — all left rows; right columns are <code>NULL</code> where there’s no match.</li><li><strong>RIGHT</strong> — mirror of LEFT (all right rows).</li><li><strong>FULL OUTER</strong> — all rows from both; <code>NULL</code>s where either side is missing.</li><li><strong>CROSS</strong> — every combination (Cartesian product); usually accidental.</li><li><strong>SELF</strong> — a table joined to itself (e.g. employee → manager).</li></ul><pre><code>-- customers with no orders (the classic LEFT-JOIN/NULL pattern)\r\nSELECT c.id, c.name\r\nFROM customers c\r\nLEFT JOIN orders o ON o.customer_id = c.id\r\nWHERE o.id IS NULL;</code></pre><div class='keynote'><strong>Common trap:</strong> filtering the right table in <code>WHERE</code> turns a LEFT JOIN back into an INNER JOIN (the <code>NULL</code> rows get filtered out). Put that condition in the <code>ON</code> clause to keep them.</div>"
+    },
+    {
+      "id": "agg",
+      "title": "GROUP BY, HAVING & WHERE",
+      "bodyHtml": "<p>Aggregate functions — <code>COUNT</code>, <code>SUM</code>, <code>AVG</code>, <code>MIN</code>, <code>MAX</code> — collapse many rows into one value per group.</p><ul class='clean'><li><strong>WHERE</strong> filters <em>rows</em> before grouping (can’t use aggregates).</li><li><strong>HAVING</strong> filters <em>groups</em> after grouping (can use aggregates).</li><li>Every non-aggregated <code>SELECT</code> column must appear in <code>GROUP BY</code>.</li><li><code>COUNT(*)</code> counts rows; <code>COUNT(col)</code> skips <code>NULL</code>s; <code>COUNT(DISTINCT col)</code> counts unique non-null values.</li></ul><pre><code>SELECT customer_id, COUNT(*) AS orders, SUM(amount) AS total\r\nFROM orders\r\nWHERE status = 'paid'        -- filter rows first\r\nGROUP BY customer_id\r\nHAVING SUM(amount) &gt; 1000     -- then filter groups\r\nORDER BY total DESC;</code></pre>"
+    },
+    {
+      "id": "subq",
+      "title": "Subqueries & CTEs",
+      "bodyHtml": "<ul class='clean'><li><strong>Subquery</strong> — a query nested inside another (in <code>WHERE</code>, <code>FROM</code>, or <code>SELECT</code>).</li><li><strong>Correlated subquery</strong> — references the outer row, so it re-runs per row; powerful but can be slow.</li><li><strong>CTE</strong> (<code>WITH</code>) — a named, readable temporary result; great for breaking a complex query into steps and for <strong>recursion</strong> (hierarchies).</li><li><code>EXISTS</code> is usually faster than <code>IN</code> for existence checks and handles <code>NULL</code>s more predictably.</li></ul><pre><code>WITH ranked AS (\r\n  SELECT *, RANK() OVER (PARTITION BY dept ORDER BY salary DESC) AS r\r\n  FROM employees\r\n)\r\nSELECT dept, name, salary\r\nFROM ranked\r\nWHERE r &lt;= 3;          -- top 3 earners per department</code></pre><div class='keynote'><strong>IN vs EXISTS with NULLs:</strong> <code>NOT IN</code> against a subquery that returns a <code>NULL</code> yields no rows at all — a notorious bug. Prefer <code>NOT EXISTS</code>.</div>"
+    },
+    {
+      "id": "window",
+      "title": "Window Functions",
+      "bodyHtml": "<p>Window functions compute across a set of related rows <strong>without collapsing them</strong> (unlike <code>GROUP BY</code>). The go-to for ranking, running totals, and row-to-row comparisons.</p><ul class='clean'><li><code>ROW_NUMBER()</code> — unique sequential number; <code>RANK()</code> leaves gaps on ties, <code>DENSE_RANK()</code> doesn’t.</li><li><code>LAG()</code> / <code>LEAD()</code> — value from the previous / next row (deltas, trends).</li><li>Aggregates as windows — <code>SUM(...) OVER (...)</code> for running totals.</li><li><code>PARTITION BY</code> = the group; <code>ORDER BY</code> = the sequence inside it.</li></ul><pre><code>-- de-duplicate: keep the latest row per id\r\nSELECT * FROM (\r\n  SELECT *,\r\n         ROW_NUMBER() OVER (PARTITION BY id ORDER BY updated_at DESC) AS rn\r\n  FROM events\r\n) t\r\nWHERE rn = 1;</code></pre><div class='keynote'><strong>Classic ask:</strong> “2nd highest salary” or “latest record per key” — both are <code>ROW_NUMBER()</code>/<code>DENSE_RANK()</code> over a partition, then filter the rank.</div>"
+    },
+    {
+      "id": "index",
+      "title": "Indexes & Performance",
+      "bodyHtml": "<p>An <strong>index</strong> is a sorted lookup structure (usually a B-tree) that lets the database find rows without scanning the whole table — the trade is slower writes and extra storage.</p><ul class='clean'><li><strong>Clustered</strong> index = the table’s physical order (one per table, often the primary key); <strong>non-clustered</strong> = a separate structure pointing back to rows.</li><li><strong>Composite</strong> index on <code>(a, b)</code> helps filters on <code>a</code> or <code>a, b</code> — <strong>left-prefix rule</strong> — but not on <code>b</code> alone.</li><li>Indexes help <code>WHERE</code>, <code>JOIN</code>, <code>ORDER BY</code>; they’re ignored if you wrap the column in a function (<code>WHERE YEAR(d) = 2024</code>) — that kills index use.</li><li>Use <code>EXPLAIN</code> / <code>EXPLAIN ANALYZE</code> to see whether a query does an index seek or a full scan.</li></ul><div class='keynote'><strong>Say this:</strong> indexes speed up reads and slow down writes — index the columns you filter/join/sort on, not every column.</div>"
+    },
+    {
+      "id": "nulls",
+      "title": "NULL Handling",
+      "bodyHtml": "<p><code>NULL</code> means <strong>unknown</strong>, not zero or empty string — and it spreads through expressions, which trips people up.</p><ul class='clean'><li>Compare with <code>IS NULL</code> / <code>IS NOT NULL</code> — never <code>= NULL</code> (always unknown).</li><li>Any arithmetic with <code>NULL</code> is <code>NULL</code> (<code>5 + NULL = NULL</code>).</li><li>Aggregates <strong>skip</strong> <code>NULL</code>s — <code>AVG(col)</code> ignores them, which can surprise you.</li><li><code>COALESCE(a, b, ...)</code> returns the first non-null; <code>NULLIF(a, b)</code> returns <code>NULL</code> if they’re equal.</li></ul><pre><code>SELECT id, COALESCE(nickname, name, 'anonymous') AS display\r\nFROM users;\r\n\r\n-- guard a divide-by-zero:\r\nSELECT total / NULLIF(count, 0) AS avg_value FROM stats;</code></pre>"
+    },
+    {
+      "id": "tx",
+      "title": "Transactions & ACID",
+      "bodyHtml": "<p>A <strong>transaction</strong> groups statements so they succeed or fail as a unit. <strong>ACID</strong> is what makes that reliable.</p><table><tr><th>Property</th><th>Meaning</th></tr><tr><td>Atomicity</td><td>all statements commit, or none do (<code>ROLLBACK</code>).</td></tr><tr><td>Consistency</td><td>constraints hold before and after.</td></tr><tr><td>Isolation</td><td>concurrent transactions don’t corrupt each other.</td></tr><tr><td>Durability</td><td>once committed, it survives a crash.</td></tr></table><p><strong>Isolation levels</strong> trade consistency for concurrency, each allowing more anomalies: <em>Read Uncommitted</em> (dirty reads) → <em>Read Committed</em> → <em>Repeatable Read</em> (stops non-repeatable reads) → <em>Serializable</em> (stops phantoms; strictest).</p><pre><code>BEGIN;\r\nUPDATE accounts SET balance = balance - 100 WHERE id = 1;\r\nUPDATE accounts SET balance = balance + 100 WHERE id = 2;\r\nCOMMIT;   -- both apply or, on error, ROLLBACK leaves nothing changed</code></pre>"
+    },
+    {
+      "id": "testing",
+      "title": "SQL for Test Automation",
+      "bodyHtml": "<p>For an SDET, SQL is a <strong>verification tool</strong>: you assert against the database, not just the UI/API.</p><ul class='clean'><li><strong>Back-end validation</strong> — after an action, query the DB to confirm the row was written with the right values.</li><li><strong>Data-quality checks</strong> — duplicates, orphaned rows, null required fields, row-count reconciliation between source and target.</li><li><strong>Test setup/teardown</strong> — seed fixtures and clean up state with SQL inside your test framework.</li><li><strong>DDL vs DML vs DCL/TCL</strong> — know the families: DDL (<code>CREATE</code>/<code>ALTER</code>/<code>DROP</code>), DML (<code>SELECT</code>/<code>INSERT</code>/<code>UPDATE</code>/<code>DELETE</code>), TCL (<code>COMMIT</code>/<code>ROLLBACK</code>).</li></ul><pre><code>-- duplicate-key audit\r\nSELECT email, COUNT(*) AS n\r\nFROM users\r\nGROUP BY email\r\nHAVING COUNT(*) &gt; 1;\r\n\r\n-- orphaned rows (referential integrity)\r\nSELECT o.id FROM orders o\r\nLEFT JOIN customers c ON c.id = o.customer_id\r\nWHERE c.id IS NULL;</code></pre>"
+    }
+  ],
+  "quiz": [
+    {
+      "id": "cs-sql-001",
+      "topicId": "sql",
+      "topicTitle": "SQL",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "WHERE vs HAVING?",
+      "choices": [
+        "Both filter rows, but HAVING runs first on the raw rows",
+        "WHERE filters rows before grouping and can't use aggregates; HAVING filters groups after GROUP BY and can",
+        "WHERE filters groups after grouping; HAVING filters individual rows before it",
+        "HAVING filters rows before grouping; WHERE filters the resulting groups"
+      ],
+      "correctAnswer": "WHERE filters rows before grouping and can't use aggregates; HAVING filters groups after GROUP BY and can",
+      "explanation": "WHERE filters rows before grouping and can’t use aggregates; HAVING filters groups after GROUP BY and can.",
+      "tags": [
+        "sql"
+      ]
+    },
+    {
+      "id": "cs-sql-002",
+      "topicId": "sql",
+      "topicTitle": "SQL",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "INNER vs LEFT JOIN?",
+      "choices": [
+        "INNER keeps all left rows; LEFT keeps only the matching rows from both",
+        "Both return every combination of rows from the two tables",
+        "INNER keeps only matching rows; LEFT keeps all left rows, filling right columns with NULL where there's no match",
+        "INNER keeps all rows from both sides; LEFT drops non-matching rows"
+      ],
+      "correctAnswer": "INNER keeps only matching rows; LEFT keeps all left rows, filling right columns with NULL where there's no match",
+      "explanation": "INNER keeps only matching rows; LEFT keeps all left rows, filling right columns with NULL where there’s no match.",
+      "tags": [
+        "sql"
+      ]
+    },
+    {
+      "id": "cs-sql-003",
+      "topicId": "sql",
+      "topicTitle": "SQL",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "How do you find rows with no match?",
+      "choices": [
+        "INNER JOIN the other table and filter WHERE other.key IS NOT NULL",
+        "Use a CROSS JOIN and filter out the duplicate combinations",
+        "Compare both tables with WHERE a.key = b.key AND b.key IS NULL",
+        "LEFT JOIN the other table and filter WHERE other.key IS NULL (or use NOT EXISTS)"
+      ],
+      "correctAnswer": "LEFT JOIN the other table and filter WHERE other.key IS NULL (or use NOT EXISTS)",
+      "explanation": "LEFT JOIN the other table and filter WHERE other.key IS NULL (or use NOT EXISTS).",
+      "tags": [
+        "sql"
+      ]
+    },
+    {
+      "id": "cs-sql-004",
+      "topicId": "sql",
+      "topicTitle": "SQL",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "DELETE vs TRUNCATE vs DROP?",
+      "choices": [
+        "DELETE removes rows (logged, can WHERE, can rollback); TRUNCATE empties the table fast (minimal logging); DROP removes the table itself",
+        "DELETE empties the whole table; TRUNCATE removes specific rows; DROP just clears the data",
+        "DELETE drops the table; TRUNCATE removes rows with a WHERE clause; DROP empties it fast",
+        "All three remove rows but only DROP can be rolled back afterwards"
+      ],
+      "correctAnswer": "DELETE removes rows (logged, can WHERE, can rollback); TRUNCATE empties the table fast (minimal logging); DROP removes the table itself",
+      "explanation": "DELETE removes rows (logged, can WHERE, can rollback); TRUNCATE empties the table fast (minimal logging); DROP removes the table itself.",
+      "tags": [
+        "sql"
+      ]
+    },
+    {
+      "id": "cs-sql-005",
+      "topicId": "sql",
+      "topicTitle": "SQL",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "RANK vs DENSE_RANK vs ROW_NUMBER?",
+      "choices": [
+        "ROW_NUMBER leaves gaps on ties; RANK is always unique; DENSE_RANK skips numbers",
+        "ROW_NUMBER is always unique; RANK leaves gaps after ties (1,1,3); DENSE_RANK doesn't (1,1,2)",
+        "All three return identical results unless an ORDER BY is supplied",
+        "RANK is always unique; ROW_NUMBER leaves gaps (1,1,3); DENSE_RANK repeats numbers"
+      ],
+      "correctAnswer": "ROW_NUMBER is always unique; RANK leaves gaps after ties (1,1,3); DENSE_RANK doesn't (1,1,2)",
+      "explanation": "ROW_NUMBER is always unique; RANK leaves gaps after ties (1,1,3); DENSE_RANK doesn’t (1,1,2).",
+      "tags": [
+        "sql"
+      ]
+    },
+    {
+      "id": "cs-sql-006",
+      "topicId": "sql",
+      "topicTitle": "SQL",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "What does an index cost?",
+      "choices": [
+        "Faster writes on indexed columns, but slower reads and less storage used",
+        "No runtime cost at all; indexes only consume a little extra disk space",
+        "Faster reads on indexed columns, but slower INSERT/UPDATE/DELETE and extra storage — index what you filter/join/sort on",
+        "Faster reads and writes everywhere, at the cost of slightly more memory"
+      ],
+      "correctAnswer": "Faster reads on indexed columns, but slower INSERT/UPDATE/DELETE and extra storage — index what you filter/join/sort on",
+      "explanation": "Faster reads on indexed columns, but slower INSERT/UPDATE/DELETE and extra storage — index what you filter/join/sort on.",
+      "tags": [
+        "sql"
+      ]
+    },
+    {
+      "id": "cs-sql-007",
+      "topicId": "sql",
+      "topicTitle": "SQL",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "Why doesn’t my index get used?",
+      "choices": [
+        "Because the table is too small, so the optimizer always prefers the index",
+        "Because you used IS NULL, which indexes can never satisfy",
+        "Because the column appears in the SELECT list rather than the WHERE clause",
+        "Often because the column is wrapped in a function or implicitly cast (e.g. WHERE YEAR(d)=2024) — rewrite as a range so it's sargable"
+      ],
+      "correctAnswer": "Often because the column is wrapped in a function or implicitly cast (e.g. WHERE YEAR(d)=2024) — rewrite as a range so it's sargable",
+      "explanation": "Often because the column is wrapped in a function or implicitly cast (e.g. WHERE YEAR(d)=2024) — rewrite as a range so it’s sargable.",
+      "tags": [
+        "sql"
+      ]
+    },
+    {
+      "id": "cs-sql-008",
+      "topicId": "sql",
+      "topicTitle": "SQL",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "= NULL vs IS NULL?",
+      "choices": [
+        "= NULL is always unknown (never true); use IS NULL / IS NOT NULL to test for nulls",
+        "= NULL returns true for null values; IS NULL is just an older synonym for it",
+        "Both are equivalent, but = NULL is faster because it avoids a function call",
+        "= NULL tests for empty strings; IS NULL tests for truly missing values"
+      ],
+      "correctAnswer": "= NULL is always unknown (never true); use IS NULL / IS NOT NULL to test for nulls",
+      "explanation": "= NULL is always unknown (never true); use IS NULL / IS NOT NULL to test for nulls.",
+      "tags": [
+        "sql"
+      ]
+    },
+    {
+      "id": "cs-sql-009",
+      "topicId": "sql",
+      "topicTitle": "SQL",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "UNION vs UNION ALL?",
+      "choices": [
+        "UNION keeps duplicates and is faster; UNION ALL removes them with extra cost",
+        "UNION removes duplicates (extra sort/dedupe cost); UNION ALL keeps them and is faster",
+        "UNION ALL sorts the result; UNION returns rows in arbitrary order",
+        "Both remove duplicates, but UNION ALL also requires matching column names"
+      ],
+      "correctAnswer": "UNION removes duplicates (extra sort/dedupe cost); UNION ALL keeps them and is faster",
+      "explanation": "UNION removes duplicates (extra sort/dedupe cost); UNION ALL keeps them and is faster.",
+      "tags": [
+        "sql"
+      ]
+    },
+    {
+      "id": "cs-sql-010",
+      "topicId": "sql",
+      "topicTitle": "SQL",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "Correlated subquery?",
+      "choices": [
+        "A subquery that runs once before the outer query and caches its result",
+        "A subquery placed only in the FROM clause that acts as a derived table",
+        "A subquery that references the outer query's row, so it's evaluated once per outer row — can be slow; often rewritable as a join",
+        "A subquery joined to itself to build a recursive hierarchy"
+      ],
+      "correctAnswer": "A subquery that references the outer query's row, so it's evaluated once per outer row — can be slow; often rewritable as a join",
+      "explanation": "A subquery that references the outer query’s row, so it’s evaluated once per outer row — can be slow; often rewritable as a join.",
+      "tags": [
+        "sql"
+      ]
+    },
+    {
+      "id": "cs-sql-011",
+      "topicId": "sql",
+      "topicTitle": "SQL",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "What is ACID?",
+      "choices": [
+        "Association, Concurrency, Indexing, Durability",
+        "Atomicity, Consistency, Isolation, Durability — the guarantees that make transactions reliable",
+        "Atomicity, Concurrency, Integrity, Distribution — the four pillars of scaling",
+        "Availability, Consistency, Isolation, Distribution — the guarantees behind replication"
+      ],
+      "correctAnswer": "Atomicity, Consistency, Isolation, Durability — the guarantees that make transactions reliable",
+      "explanation": "Atomicity, Consistency, Isolation, Durability — the guarantees that make transactions reliable.",
+      "tags": [
+        "sql"
+      ]
+    },
+    {
+      "id": "cs-sql-012",
+      "topicId": "sql",
+      "topicTitle": "SQL",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "How do you get the 2nd highest salary?",
+      "choices": [
+        "Use MAX(salary) where salary is below the overall MAX, never window functions",
+        "DENSE_RANK() over salary DESC and filter rank = 2, or a correlated subquery / OFFSET 1 LIMIT 1 on distinct salaries",
+        "ORDER BY salary ASC and take LIMIT 2 to get the second-highest value",
+        "ROW_NUMBER() over salary ASC and filter rank = 2 to skip the top earner"
+      ],
+      "correctAnswer": "DENSE_RANK() over salary DESC and filter rank = 2, or a correlated subquery / OFFSET 1 LIMIT 1 on distinct salaries",
+      "explanation": "DENSE_RANK() over salary DESC and filter rank = 2, or a correlated subquery / OFFSET 1 LIMIT 1 on distinct salaries.",
+      "tags": [
+        "sql"
+      ]
+    }
+  ]
+}

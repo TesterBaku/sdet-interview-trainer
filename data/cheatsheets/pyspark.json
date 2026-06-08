@@ -1,0 +1,321 @@
+{
+  "id": "pyspark",
+  "title": "PySpark & ETL",
+  "group": "API & Data",
+  "accent": "#e2680f",
+  "summary": "How Spark actually runs your job, the RDD/DataFrame/Dataset split, lazy evaluation, shuffles and skew, window functions, Delta Lake & ACID, CDC, and — the part interviewers care about for a Test Automation Engineer — how you validate a pipeline. Short explanations, short examples.",
+  "tags": [
+    "Execution Model",
+    "DataFrames",
+    "Shuffles",
+    "Skew",
+    "Windows",
+    "Delta / ACID",
+    "Data Quality",
+    "Testing"
+  ],
+  "sections": [
+    {
+      "id": "model",
+      "title": "How Spark Runs a Job",
+      "bodyHtml": "<p>Spark is a <strong>distributed</strong> engine: one <strong>driver</strong> plans the work and many <strong>executors</strong> run it in parallel across the cluster. Understanding this split explains almost every performance and correctness question.</p><ul class='clean'><li><strong>Driver</strong> — runs your <code>main</code>, builds the logical plan, and schedules tasks. The <code>SparkSession</code> lives here.</li><li><strong>Executors</strong> — JVM processes on worker nodes that run tasks and hold cached data in memory.</li><li><strong>Partition</strong> — a chunk of the data; <strong>one task processes one partition</strong>. Parallelism = number of partitions you can run at once.</li></ul><p class='pullquote'>Spark is <strong>lazy</strong>: transformations only build a plan; nothing runs until an action asks for a result.</p><p>The <strong>Catalyst optimizer</strong> rewrites that logical plan (predicate pushdown, column pruning, join reordering) and <strong>Tungsten</strong> generates efficient bytecode — which is exactly why you stay on DataFrames instead of hand-rolling RDDs.</p>"
+    },
+    {
+      "id": "abstractions",
+      "title": "RDD vs DataFrame vs Dataset",
+      "bodyHtml": "<p>Three abstractions, in order of how much Spark can optimize for you:</p><table><tr><th>API</th><th>What it is</th><th>When</th></tr><tr><td>RDD</td><td>Low-level distributed collection of objects. Full control, <strong>no</strong> Catalyst optimization, no schema.</td><td>Rarely — custom partitioning or unstructured data only.</td></tr><tr><td>DataFrame</td><td>Distributed table with a <strong>schema</strong> (named, typed columns). Optimized by Catalyst. The default in PySpark.</td><td>Almost always.</td></tr><tr><td>Dataset</td><td>DataFrame + compile-time type safety. JVM only (Scala/Java).</td><td>N/A in Python — PySpark has no typed Dataset.</td></tr></table><div class='keynote'><strong>Say this in an interview:</strong> in PySpark you work with DataFrames; the Dataset API is Scala/Java-only, so “DataFrame vs Dataset” collapses to “use DataFrames” for us.</div><pre><code>df = (spark.read\r\n        .schema(schema)              # never inferSchema in prod\r\n        .parquet(\"s3://lake/events/\"))\r\n\r\ndf.filter(df.country == \"DE\").select(\"user_id\", \"amount\")</code></pre>"
+    },
+    {
+      "id": "lazy",
+      "title": "Transformations & Actions",
+      "bodyHtml": "<p>Every DataFrame operation is one of two kinds:</p><ul class='clean'><li><strong>Transformations</strong> (<code>select</code>, <code>filter</code>, <code>join</code>, <code>groupBy</code>, <code>withColumn</code>) are <strong>lazy</strong> — they return a new DataFrame and add to the plan.</li><li><strong>Actions</strong> (<code>count</code>, <code>collect</code>, <code>show</code>, <code>write</code>, <code>take</code>) <strong>trigger execution</strong> of the whole plan.</li></ul><p>Transformations are further split by how data moves:</p><ul class='clean'><li><strong>Narrow</strong> (<code>filter</code>, <code>map</code>, <code>select</code>) — each output partition depends on one input partition. No data movement; cheap.</li><li><strong>Wide</strong> (<code>groupBy</code>, <code>join</code>, <code>distinct</code>, <code>orderBy</code>) — rows must be regrouped across partitions. Triggers a <strong>shuffle</strong>; expensive.</li></ul><div class='keynote'><strong>Testing trap:</strong> <code>collect()</code> pulls every row to the driver and can OOM it. In tests assert on aggregates or a bounded <code>limit(...).collect()</code>, never on a full <code>collect()</code> of production-scale data.</div>"
+    },
+    {
+      "id": "shuffle",
+      "title": "Shuffling, Partitions & Joins",
+      "bodyHtml": "<p>A <strong>shuffle</strong> redistributes data across executors for a wide transformation — it writes intermediate data to disk and reads it back over the network. It is the <strong>single most expensive thing</strong> Spark does, so most tuning is about avoiding or shrinking it.</p><h3>Repartition vs Coalesce</h3><ul class='clean'><li><code>repartition(n)</code> — full shuffle to <em>exactly</em> <code>n</code> partitions (can increase or decrease); use to fix skew or raise parallelism.</li><li><code>coalesce(n)</code> — merges partitions <strong>without a full shuffle</strong>; only decreases. Use before writing to avoid thousands of tiny files.</li></ul><h3>Broadcast join</h3><p>If one side of a join is small (default &lt; 10 MB, tunable), Spark <strong>broadcasts</strong> it to every executor so the join happens locally — no shuffle of the big table.</p><pre><code>from pyspark.sql.functions import broadcast\r\n\r\nbig.join(broadcast(small_dim), \"product_id\", \"left\")\r\n# forces a broadcast hash join, skipping the shuffle</code></pre><div class='keynote'><strong>Default partitions:</strong> post-shuffle partition count is <code>spark.sql.shuffle.partitions</code> (default 200). Too high → tiny tasks &amp; overhead; too low → huge tasks &amp; spill. Adaptive Query Execution now tunes this at runtime.</div>"
+    },
+    {
+      "id": "skew",
+      "title": "Data Skew & Salting",
+      "bodyHtml": "<p><strong>Skew</strong> = a few keys hold most of the rows (one hot <code>user_id</code>, a <code>NULL</code> join key, a default value). One task gets a giant partition and the whole stage waits on it — you see 199 tasks finish in seconds and 1 run for an hour.</p><p><strong>Fixes, in order of preference:</strong></p><ol class='numbered'><li><strong>Adaptive Query Execution (AQE)</strong> — enable <code>spark.sql.adaptive.skewJoin.enabled</code>; Spark splits skewed partitions automatically. First thing to reach for.</li><li><strong>Broadcast</strong> the small side if it fits — no shuffle, so no skew.</li><li><strong>Salting</strong> — append a random suffix to the hot key on both sides to spread it across partitions, then strip it after the join.</li><li><strong>Isolate</strong> — handle <code>NULL</code>/sentinel keys separately and union the results.</li></ol><pre><code>from pyspark.sql.functions import concat, lit, rand, floor\r\n\r\nN = 8\r\nbig_salted = big.withColumn(\"k\", concat(\"user_id\", lit(\"_\"),\r\n                                        floor(rand() * N)))\r\n# explode the small side into N salted copies, then join on k</code></pre>"
+    },
+    {
+      "id": "window",
+      "title": "Window Functions",
+      "bodyHtml": "<p>Window functions compute across a set of related rows <strong>without collapsing them</strong> (unlike <code>groupBy</code>, which reduces to one row per group). Ideal for ranking, running totals, and period-over-period deltas.</p><ul class='clean'><li><code>partitionBy</code> — the group the function runs within (e.g. per <code>region</code>).</li><li><code>orderBy</code> — the sequence inside the partition (e.g. by <code>date</code>).</li><li>The function — <code>row_number()</code>, <code>rank()</code>, <code>lag()</code>/<code>lead()</code>, or an aggregate like <code>sum()</code>.</li></ul><pre><code>from pyspark.sql.window import Window\r\nfrom pyspark.sql.functions import row_number, sum as _sum\r\n\r\nw = Window.partitionBy(\"region\").orderBy(\"date\")\r\n\r\ndf.withColumn(\"running_total\", _sum(\"sales\").over(w))\r\n# de-dupe: keep the latest row per key\r\nlatest = (df.withColumn(\"rn\", row_number().over(\r\n              Window.partitionBy(\"id\").orderBy(df.ts.desc())))\r\n            .filter(\"rn = 1\").drop(\"rn\"))</code></pre><div class='keynote'><strong>Common ask:</strong> “deduplicate keeping the most recent record” — <code>row_number()</code> over <code>partitionBy(key).orderBy(ts.desc())</code>, keep <code>rn = 1</code>.</div>"
+    },
+    {
+      "id": "quality",
+      "title": "Schema & Data Quality — the QA Mindset",
+      "bodyHtml": "<p>This is where a <strong>Test Automation Engineer</strong> earns the role: a pipeline that runs green can still emit wrong data. You test the <em>data</em>, not just the code.</p><h3>Pin the schema</h3><p>Always pass an explicit schema. <code>inferSchema</code> reads the file twice and silently changes types between runs — a flaky-test factory.</p><h3>The checks interviewers expect you to name</h3><ul class='clean'><li><strong>Completeness</strong> — no unexpected <code>NULL</code>s in required columns.</li><li><strong>Uniqueness</strong> — primary keys aren’t duplicated.</li><li><strong>Row-count / reconciliation</strong> — output count reconciles with source (no silent drops from an inner join).</li><li><strong>Range / domain</strong> — <code>amount &gt;= 0</code>, status in an allowed set.</li><li><strong>Referential</strong> — every foreign key resolves to a dimension row.</li><li><strong>Freshness</strong> — the latest partition is recent enough.</li></ul><pre><code>from pyspark.sql.functions import col, count, when\r\n\r\n# null + duplicate audit in one pass\r\nbad = df.select([\r\n    count(when(col(c).isNull(), c)).alias(c) for c in df.columns\r\n]).collect()[0]\r\n\r\ndupes = df.groupBy(\"id\").count().filter(\"count > 1\").count()\r\nassert dupes == 0, f\"{dupes} duplicate ids\"</code></pre><div class='keynote'><strong>Quarantine, don’t crash:</strong> mature pipelines route bad rows to a <strong>dead-letter/quarantine</strong> table instead of failing the whole job — good data flows, bad data is captured for triage.</div>"
+    },
+    {
+      "id": "delta",
+      "title": "Delta Lake & ACID",
+      "bodyHtml": "<p>Plain Parquet on object storage has no transactions — a half-finished write leaves readers seeing partial data. <strong>Delta Lake</strong> (and Iceberg/Hudi) add a transaction log on top to bring <strong>ACID</strong> to the lake.</p><table><tr><th>Property</th><th>Meaning</th></tr><tr><td>Atomicity</td><td>A write fully commits or not at all — no partial files visible.</td></tr><tr><td>Consistency</td><td>Schema is enforced on write; bad writes are rejected.</td></tr><tr><td>Isolation</td><td>Concurrent readers/writers don’t see each other’s in-progress data (snapshot isolation).</td></tr><tr><td>Durability</td><td>Once committed, it survives crashes.</td></tr></table><p><strong>What Delta buys you:</strong></p><ul class='clean'><li><strong>MERGE / upserts</strong> — update &amp; delete historical rows, not just append.</li><li><strong>Time travel</strong> — query a past version (<code>VERSION AS OF</code> / <code>TIMESTAMP AS OF</code>); great for diffing a regression.</li><li><strong>Schema enforcement &amp; evolution</strong> — reject mismatches, or opt in to <code>mergeSchema</code>.</li></ul><pre><code>-- idempotent upsert (the CDC workhorse)\r\nMERGE INTO target t USING updates u ON t.id = u.id\r\nWHEN MATCHED THEN UPDATE SET *\r\nWHEN NOT MATCHED THEN INSERT *</code></pre><div class='keynote'><strong>Time travel for QA:</strong> when last night’s run looks wrong, diff <code>VERSION AS OF</code> the previous good version against the current one to isolate exactly which rows changed.</div>"
+    },
+    {
+      "id": "cdc",
+      "title": "Incremental Processing & CDC",
+      "bodyHtml": "<p><strong>Goal:</strong> process only what changed since the last run instead of reprocessing everything — the difference between a 5-minute and a 5-hour job.</p><ul class='clean'><li><strong>Watermark column</strong> (simplest) — read where <code>updated_at &gt; last_run_ts</code>. Misses hard deletes.</li><li><strong>Log-based CDC</strong> (e.g. Debezium) — reads the database’s transaction log and emits every insert/update/<strong>delete</strong> exactly. The reliable standard.</li></ul><p>You make incremental loads safe by making them <strong>idempotent</strong>: a <code>MERGE</code> keyed on the primary key, so re-running the same batch produces the same table — no duplicates. That idempotency is itself a test case.</p><div class='keynote'><strong>Watermark gotcha:</strong> use <code>&gt;=</code> with dedupe, or you lose rows that landed in the same second as the boundary; and a pure <code>updated_at</code> filter never sees deletes.</div>"
+    },
+    {
+      "id": "etl",
+      "title": "ETL vs ELT",
+      "bodyHtml": "<ul class='clean'><li><strong>ETL</strong> — Extract, <em>Transform</em>, Load. Clean and shape data <strong>before</strong> it lands in the warehouse.</li><li><strong>ELT</strong> — Extract, Load, <em>Transform</em>. Load raw first, transform <strong>in</strong> the warehouse with its own compute (dbt on Snowflake/BigQuery/Databricks).</li></ul><p><strong>Trend:</strong> ELT dominates because cloud warehouses make compute cheap and elastic, and keeping the raw layer lets you re-derive everything downstream. A typical lake is layered <strong>bronze (raw) → silver (cleaned) → gold (aggregated)</strong>, and you put data-quality gates between the layers.</p>"
+    },
+    {
+      "id": "perf",
+      "title": "Performance & Reliability",
+      "bodyHtml": "<p>The levers you should be able to list:</p><ul class='clean'><li><strong>cache() / persist()</strong> — materialize a DataFrame reused many times; don’t cache a one-shot.</li><li><strong>Partition pruning</strong> — partition by a column you filter on (e.g. <code>date</code>) so Spark skips whole directories.</li><li><strong>Predicate &amp; projection pushdown</strong> — columnar formats (<strong>Parquet</strong>) let Spark read only needed columns/row-groups; prefer them over CSV/JSON.</li><li><strong>Adaptive Query Execution (AQE)</strong> — coalesces shuffle partitions, flips to broadcast joins, and splits skew at runtime.</li><li><strong>Avoid Python UDFs</strong> — they break Catalyst and serialize row-by-row; use built-in <code>pyspark.sql.functions</code>, or a <strong>pandas/Arrow UDF</strong> if you must.</li><li><strong>Small-files problem</strong> — <code>coalesce</code> before writing and compact periodically.</li></ul><div class='keynote'><strong>UDF rule of thumb:</strong> if a native function exists, never write a UDF — native functions are optimized and vectorized; a plain Python UDF is a black box Catalyst can’t see into.</div>"
+    },
+    {
+      "id": "testing",
+      "title": "Testing a PySpark Pipeline",
+      "bodyHtml": "<p>Pipelines are testable like any other code — the trick is structuring them so you can.</p><ul class='clean'><li><strong>Pure transform functions</strong> — keep logic in functions that take a DataFrame and return a DataFrame; no I/O inside. Now you can unit-test them on tiny in-memory inputs.</li><li><strong>Local SparkSession</strong> — a session-scoped <code>local[*]</code> fixture; build inputs with <code>spark.createDataFrame</code>.</li><li><strong>DataFrame equality</strong> — use <strong>chispa</strong> (<code>assert_df_equality</code>) or the built-in <code>assertDataFrameEqual</code> (Spark 3.5+) instead of comparing collected lists — it handles column order, nullability, and gives readable diffs.</li><li><strong>Data-quality / contract tests</strong> — <strong>Great Expectations</strong> or <strong>dbt tests</strong> running the completeness/uniqueness/range checks as a gate in CI.</li></ul><pre><code>import pytest\r\nfrom pyspark.sql import SparkSession\r\nfrom chispa import assert_df_equality\r\n\r\n@pytest.fixture(scope=\"session\")\r\ndef spark():\r\n    return SparkSession.builder.master(\"local[*]\").getOrCreate()\r\n\r\ndef test_dedupe_keeps_latest(spark):\r\n    src = spark.createDataFrame(\r\n        [(1, \"2024-01-01\"), (1, \"2024-02-01\")], [\"id\", \"ts\"])\r\n    expected = spark.createDataFrame([(1, \"2024-02-01\")], [\"id\", \"ts\"])\r\n    assert_df_equality(dedupe_latest(src), expected, ignore_row_order=True)</code></pre>"
+    }
+  ],
+  "quiz": [
+    {
+      "id": "cs-pyspark-001",
+      "topicId": "pyspark",
+      "topicTitle": "PySpark & ETL",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "Why is Spark lazy?",
+      "choices": [
+        "So that failed transformations can be automatically retried without recomputation",
+        "Deferring execution until an action lets Catalyst optimize the whole DAG before running",
+        "To stream partial results to the driver as soon as each partition completes",
+        "So executors can cache every intermediate DataFrame in memory by default"
+      ],
+      "correctAnswer": "Deferring execution until an action lets Catalyst optimize the whole DAG before running",
+      "explanation": "Transformations only build a plan; deferring until an action lets Catalyst optimize the whole DAG (pushdown, pruning, join reorder) before anything runs.",
+      "tags": [
+        "pyspark"
+      ]
+    },
+    {
+      "id": "cs-pyspark-002",
+      "topicId": "pyspark",
+      "topicTitle": "PySpark & ETL",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "Narrow vs wide transformation?",
+      "choices": [
+        "Narrow runs on the driver; wide runs distributed across executors",
+        "Narrow reads from disk; wide reads from cached memory partitions",
+        "Narrow output depends on one input partition (no movement); wide regroups rows across partitions (shuffle)",
+        "Narrow uses fewer columns; wide processes every column in the schema"
+      ],
+      "correctAnswer": "Narrow output depends on one input partition (no movement); wide regroups rows across partitions (shuffle)",
+      "explanation": "Narrow = output partition depends on one input partition, no movement (filter, select). Wide = rows regroup across partitions, triggering a shuffle (groupBy, join).",
+      "tags": [
+        "pyspark"
+      ]
+    },
+    {
+      "id": "cs-pyspark-003",
+      "topicId": "pyspark",
+      "topicTitle": "PySpark & ETL",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "What is a shuffle and why care?",
+      "choices": [
+        "Caching a DataFrame in executor memory to speed up reuse",
+        "Redistributing data across executors via disk and network — the most expensive operation",
+        "Splitting one partition into many to raise parallelism on a stage",
+        "Broadcasting a small table to every executor to avoid a join"
+      ],
+      "correctAnswer": "Redistributing data across executors via disk and network — the most expensive operation",
+      "explanation": "Redistributing data across executors via disk + network for a wide op — the most expensive operation, so tuning is mostly about avoiding or shrinking it.",
+      "tags": [
+        "pyspark"
+      ]
+    },
+    {
+      "id": "cs-pyspark-004",
+      "topicId": "pyspark",
+      "topicTitle": "PySpark & ETL",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "repartition vs coalesce?",
+      "choices": [
+        "repartition merges down without shuffle; coalesce does a full shuffle to exactly n",
+        "Both do a full shuffle, but coalesce can only increase partition count",
+        "repartition(n) does a full shuffle to exactly n; coalesce(n) merges down with no full shuffle",
+        "repartition only decreases partitions; coalesce can increase or decrease them"
+      ],
+      "correctAnswer": "repartition(n) does a full shuffle to exactly n; coalesce(n) merges down with no full shuffle",
+      "explanation": "repartition(n) = full shuffle to exactly n (up or down); coalesce(n) = merge down with no full shuffle. Coalesce before writing to avoid tiny files.",
+      "tags": [
+        "pyspark"
+      ]
+    },
+    {
+      "id": "cs-pyspark-005",
+      "topicId": "pyspark",
+      "topicTitle": "PySpark & ETL",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "How do you fix a skewed join?",
+      "choices": [
+        "Enable AQE skew-join, broadcast the small side, or salt the hot key on both sides",
+        "Increase spark.sql.shuffle.partitions until the skewed partition splits evenly",
+        "Cache the larger table before the join so the hot key stays in memory",
+        "Switch the join to an RDD and apply a custom hash partitioner"
+      ],
+      "correctAnswer": "Enable AQE skew-join, broadcast the small side, or salt the hot key on both sides",
+      "explanation": "Enable AQE skew-join, broadcast the small side if it fits, or salt the hot key on both sides; isolate NULL/sentinel keys separately.",
+      "tags": [
+        "pyspark"
+      ]
+    },
+    {
+      "id": "cs-pyspark-006",
+      "topicId": "pyspark",
+      "topicTitle": "PySpark & ETL",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "When does Spark broadcast a join?",
+      "choices": [
+        "When both sides exceed the shuffle partition threshold of 200",
+        "When one side is under autoBroadcastJoinThreshold (~10MB), shipping it to every executor",
+        "When the join key is the partition column on both tables",
+        "When AQE detects skew and replicates the larger side everywhere"
+      ],
+      "correctAnswer": "When one side is under autoBroadcastJoinThreshold (~10MB), shipping it to every executor",
+      "explanation": "When one side is under spark.sql.autoBroadcastJoinThreshold (~10MB); it ships that side to every executor so the join is local — no shuffle of the big table.",
+      "tags": [
+        "pyspark"
+      ]
+    },
+    {
+      "id": "cs-pyspark-007",
+      "topicId": "pyspark",
+      "topicTitle": "PySpark & ETL",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "RDD vs DataFrame vs Dataset in PySpark?",
+      "choices": [
+        "RDD is the default; DataFrame adds schemas; Dataset is the Python typed API",
+        "DataFrame is the default (schema + Catalyst); RDD is low-level with no optimizer; Dataset is JVM-only",
+        "All three are optimized by Catalyst, differing only in syntax style",
+        "Dataset is the PySpark default for compile-time type safety; RDD has a schema"
+      ],
+      "correctAnswer": "DataFrame is the default (schema + Catalyst); RDD is low-level with no optimizer; Dataset is JVM-only",
+      "explanation": "DataFrame is the default (schema + Catalyst). RDD is low-level with no optimizer. Dataset is JVM-only — PySpark has no typed Dataset.",
+      "tags": [
+        "pyspark"
+      ]
+    },
+    {
+      "id": "cs-pyspark-008",
+      "topicId": "pyspark",
+      "topicTitle": "PySpark & ETL",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "How do you de-duplicate keeping the latest row?",
+      "choices": [
+        "groupBy the key and take max(ts), then join back the full row",
+        "distinct() after orderBy(ts desc) to drop the older duplicates",
+        "row_number() over partitionBy(key).orderBy(ts desc), keep rn = 1",
+        "dropDuplicates on the key, which always retains the most recent row"
+      ],
+      "correctAnswer": "row_number() over partitionBy(key).orderBy(ts desc), keep rn = 1",
+      "explanation": "row_number() over partitionBy(key).orderBy(ts desc), keep rn = 1.",
+      "tags": [
+        "pyspark"
+      ]
+    },
+    {
+      "id": "cs-pyspark-009",
+      "topicId": "pyspark",
+      "topicTitle": "PySpark & ETL",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "What does Delta Lake add over Parquet?",
+      "choices": [
+        "Columnar compression and predicate pushdown that Parquet lacks",
+        "ACID transactions, MERGE/upserts, time travel, and schema enforcement via a transaction log",
+        "Automatic conversion of all RDDs into optimized DataFrames",
+        "In-memory caching of the table across the whole cluster"
+      ],
+      "correctAnswer": "ACID transactions, MERGE/upserts, time travel, and schema enforcement via a transaction log",
+      "explanation": "ACID transactions, MERGE/upserts, time travel, and schema enforcement via a transaction log — Parquet alone has none of these.",
+      "tags": [
+        "pyspark"
+      ]
+    },
+    {
+      "id": "cs-pyspark-010",
+      "topicId": "pyspark",
+      "topicTitle": "PySpark & ETL",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "Why avoid a Python UDF?",
+      "choices": [
+        "Catalyst can't optimize it and it serializes row-by-row; prefer built-in functions",
+        "UDFs run only on the driver, so they bottleneck the whole cluster",
+        "They cannot return more than one column, unlike native functions",
+        "They bypass the schema, silently corrupting typed columns"
+      ],
+      "correctAnswer": "Catalyst can't optimize it and it serializes row-by-row; prefer built-in functions",
+      "explanation": "Catalyst can’t optimize it and it serializes row-by-row; prefer built-in functions, or an Arrow/pandas UDF when unavoidable.",
+      "tags": [
+        "pyspark"
+      ]
+    },
+    {
+      "id": "cs-pyspark-011",
+      "topicId": "pyspark",
+      "topicTitle": "PySpark & ETL",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "How do you validate a pipeline’s output?",
+      "choices": [
+        "Re-run the job twice and confirm the logs show no exceptions",
+        "Compare the output file size against the previous successful run",
+        "Schema plus completeness, uniqueness, row-count reconciliation, range, and referential checks",
+        "Collect the full output to the driver and eyeball a sample of rows"
+      ],
+      "correctAnswer": "Schema plus completeness, uniqueness, row-count reconciliation, range, and referential checks",
+      "explanation": "Schema + completeness, uniqueness, row-count reconciliation, range/domain, and referential checks — via Great Expectations or assertions, gating CI.",
+      "tags": [
+        "pyspark"
+      ]
+    },
+    {
+      "id": "cs-pyspark-012",
+      "topicId": "pyspark",
+      "topicTitle": "PySpark & ETL",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "How do you unit-test a transformation?",
+      "choices": [
+        "Run it against the production table and assert the row count is unchanged",
+        "Keep transforms as pure DataFrame→DataFrame functions, feed small inputs, compare with chispa",
+        "Mock the SparkSession entirely and assert on the generated logical plan",
+        "Collect both DataFrames to Python lists and compare them with =="
+      ],
+      "correctAnswer": "Keep transforms as pure DataFrame→DataFrame functions, feed small inputs, compare with chispa",
+      "explanation": "Keep transforms as pure DataFrame→DataFrame functions, feed small createDataFrame inputs on a local SparkSession, and compare with chispa / assertDataFrameEqual.",
+      "tags": [
+        "pyspark"
+      ]
+    }
+  ]
+}

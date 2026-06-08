@@ -1,0 +1,300 @@
+{
+  "id": "python",
+  "title": "Python",
+  "group": "Languages",
+  "accent": "#1d6fa5",
+  "summary": "Data types, mutability, comprehensions, generators, decorators, OOP, exceptions, the GIL, the standard library, and the pytest ecosystem — the parts that surface in SDET interviews, with worked examples.",
+  "tags": [
+    "Mutability",
+    "Comprehensions",
+    "Decorators",
+    "OOP",
+    "GIL",
+    "Std Lib",
+    "pytest"
+  ],
+  "sections": [
+    {
+      "id": "types",
+      "title": "Data Types & Mutability",
+      "bodyHtml": "<ul class='clean'><li><strong>Immutable</strong>: <code>int</code>, <code>float</code>, <code>bool</code>, <code>str</code>, <code>tuple</code>, <code>frozenset</code>, <code>bytes</code>.</li><li><strong>Mutable</strong>: <code>list</code>, <code>dict</code>, <code>set</code>, <code>bytearray</code>.</li></ul><p>Everything is an object; a variable is a <em>name bound to an object</em>, not a typed box. Assignment binds names — it never copies. That's why aliasing surprises people:</p><pre><code>a = [1, 2, 3]\r\nb = a          # same object — NOT a copy\r\nb.append(4)\r\nprint(a)       # [1, 2, 3, 4]  -- a changed too\r\n\r\nc = a[:]       # shallow copy via slice\r\nimport copy\r\nd = copy.deepcopy(a)   # fully independent</code></pre><div class='keynote'><strong>Classic gotcha:</strong> never use a mutable default argument (<code>def f(x=[])</code>) — the default is created <em>once</em> at definition and shared across every call. Use <code>None</code> as the sentinel and create inside:<br><code>def f(x=None): x = x or []</code></div><p><code>list</code> vs <code>tuple</code>: list is mutable and dynamic; tuple is immutable and hashable (so it can be a dict key / set member). <code>is</code> compares identity (same object); <code>==</code> compares value.</p>"
+    },
+    {
+      "id": "comprehensions",
+      "title": "Comprehensions & Generators",
+      "bodyHtml": "<p>Comprehensions build collections in one readable expression — list, dict, and set forms:</p><pre><code>squares  = [n*n for n in range(10) if n % 2 == 0]   # list\r\nlookup   = {u.id: u.name for u in users}            # dict\r\nuniques  = {w.lower() for w in words}               # set\r\nmatrix   = [[r*c for c in range(3)] for r in range(3)]  # nested</code></pre><p><strong>Generators</strong> produce values lazily with <code>yield</code>, holding one item in memory at a time — ideal for large or infinite streams. A generator expression just swaps brackets for parentheses:</p><pre><code>def read_large(path):\r\n    with open(path) as f:\r\n        for line in f:           # lazy: one line at a time\r\n            yield line.strip()\r\n\r\ntotal = sum(len(line) for line in read_large(\"huge.log\"))  # gen expression\r\n</code></pre><p class='pullquote'>A list comprehension builds the whole list in memory; a generator yields items on demand — the memory difference is the interview point.</p>"
+    },
+    {
+      "id": "functions",
+      "title": "Functions, *args & Decorators",
+      "bodyHtml": "<ul class='clean'><li><code>*args</code> collects extra positional args into a tuple; <code>**kwargs</code> collects extra keyword args into a dict.</li><li>Functions are <strong>first-class</strong> — assign them, pass them, return them, store them in lists/dicts.</li><li><strong>Closures</strong> capture enclosing-scope variables; the basis of decorators.</li><li><strong>Decorators</strong> wrap a function to add behavior (logging, timing, retry, caching) without changing its body. <code>functools.wraps</code> preserves the wrapped function's name/docstring.</li></ul><pre><code>import functools, time\r\n\r\ndef retry(times=3):                 # decorator WITH arguments\r\n    def decorator(fn):\r\n        @functools.wraps(fn)\r\n        def wrapper(*args, **kwargs):\r\n            for attempt in range(times):\r\n                try:\r\n                    return fn(*args, **kwargs)\r\n                except Exception:\r\n                    if attempt == times - 1:\r\n                        raise\r\n        return wrapper\r\n    return decorator\r\n\r\n@retry(times=5)\r\ndef flaky_call():\r\n    ...</code></pre><div class='keynote'><strong>Common built-in decorators:</strong> <code>@property</code>, <code>@staticmethod</code>, <code>@classmethod</code>, <code>@functools.lru_cache</code> (memoize), and pytest's <code>@pytest.fixture</code> / <code>@pytest.mark.parametrize</code>.</div>"
+    },
+    {
+      "id": "oop",
+      "title": "OOP in Python",
+      "bodyHtml": "<ul class='clean'><li><code>class</code>, <code>__init__</code> constructor, <code>self</code> as the explicit instance reference.</li><li>No true private — convention: <code>_protected</code>, <code>__name</code> triggers name-mangling.</li><li><code>@classmethod</code> (gets <code>cls</code>, e.g. factories), <code>@staticmethod</code> (no instance), <code>@property</code> (computed attribute).</li><li><strong>Dunder methods</strong>: <code>__str__</code>/<code>__repr__</code>, <code>__eq__</code>, <code>__hash__</code>, <code>__len__</code>, <code>__enter__</code>/<code>__exit__</code> (context managers), <code>__iter__</code>.</li></ul><pre><code>from dataclasses import dataclass\r\n\r\n@dataclass(frozen=True)          # auto __init__/__repr__/__eq__; frozen = immutable + hashable\r\nclass User:\r\n    id: int\r\n    name: str\r\n    role: str = \"member\"         # default field\r\n\r\n    @property\r\n    def is_admin(self) -&gt; bool:\r\n        return self.role == \"admin\"\r\n\r\nu = User(1, \"Ada\", \"admin\")\r\nu.is_admin          # True\r\nUser(1, \"Ada\", \"admin\") == u   # True — value equality from @dataclass</code></pre><p><strong>MRO &amp; super():</strong> Python supports multiple inheritance, resolved by the C3 linearization (method resolution order); <code>super()</code> follows the MRO chain.</p>"
+    },
+    {
+      "id": "exceptions",
+      "title": "Exceptions & Context Managers",
+      "bodyHtml": "<p><code>try / except / else / finally</code>. <code>else</code> runs only if no exception was raised; <code>finally</code> always runs. Catch specific exceptions, not a bare <code>except:</code>. Raise with <code>raise ValueError(\"msg\")</code>; chain causes with <code>raise X from err</code>; custom exceptions subclass <code>Exception</code>.</p><pre><code>class ConfigError(Exception):\r\n    pass\r\n\r\ntry:\r\n    cfg = load(path)\r\nexcept FileNotFoundError as e:\r\n    raise ConfigError(f\"missing {path}\") from e   # preserve original cause\r\nelse:\r\n    print(\"loaded ok\")          # only if no exception\r\nfinally:\r\n    cleanup()                    # always</code></pre><p><strong>Context managers</strong> (<code>with open(...) as f:</code>) guarantee setup/cleanup via <code>__enter__</code>/<code>__exit__</code> — the Pythonic equivalent of try-with-resources. Write your own with <code>@contextlib.contextmanager</code>:</p><pre><code>from contextlib import contextmanager\r\n\r\n@contextmanager\r\ndef timer(label):\r\n    start = perf_counter()\r\n    try:\r\n        yield                # body runs here\r\n    finally:\r\n        print(f\"{label}: {perf_counter() - start:.3f}s\")\r\n\r\nwith timer(\"db query\"):\r\n    run_query()</code></pre>"
+    },
+    {
+      "id": "gil",
+      "title": "The GIL & Concurrency",
+      "bodyHtml": "<p>The <strong>Global Interpreter Lock</strong> lets only one thread execute Python bytecode at a time in CPython, so threads don't give true multi-core CPU parallelism.</p><ul class='clean'><li><strong>threading</strong> — good for I/O-bound work (network, files, browser actions); the GIL releases during blocking I/O, so threads overlap.</li><li><strong>multiprocessing</strong> — separate processes, each with its own interpreter and GIL; the way to use multiple cores for CPU-bound work.</li><li><strong>asyncio</strong> — single-threaded cooperative concurrency (<code>async</code>/<code>await</code>) for very high-I/O workloads (thousands of sockets).</li></ul><pre><code>import asyncio, aiohttp\r\n\r\nasync def fetch(session, url):\r\n    async with session.get(url) as r:\r\n        return await r.text()\r\n\r\nasync def main(urls):\r\n    async with aiohttp.ClientSession() as s:\r\n        return await asyncio.gather(*(fetch(s, u) for u in urls))  # concurrent</code></pre><div class='keynote'><strong>For test automation:</strong> I/O-bound parallelism (API calls, browser actions) benefits from threads/async; pytest itself parallelizes across <em>processes</em> with <code>pytest-xdist</code> (<code>-n auto</code>), sidestepping the GIL entirely.</div>"
+    },
+    {
+      "id": "stdlib",
+      "title": "Standard Library & Idioms",
+      "bodyHtml": "<p>The batteries-included modules that come up constantly in SDET work:</p><table><thead><tr><th>Module</th><th>Use</th></tr></thead><tbody><tr><td>collections</td><td><code>defaultdict</code>, <code>Counter</code>, <code>namedtuple</code>, <code>deque</code>.</td></tr><tr><td>itertools</td><td>Lazy combinatorics: <code>chain</code>, <code>groupby</code>, <code>product</code>.</td></tr><tr><td>json</td><td><code>loads</code>/<code>dumps</code> for API payloads.</td></tr><tr><td>pathlib</td><td>Object-oriented file paths (<code>Path(\"x\")/\"y\"</code>).</td></tr><tr><td>os / subprocess</td><td>Env vars, running external commands.</td></tr><tr><td>re</td><td>Regular expressions.</td></tr><tr><td>datetime</td><td>Timestamps, durations.</td></tr></tbody></table><pre><code>from collections import Counter, defaultdict\r\n\r\nCounter(\"mississippi\").most_common(2)   # [('i', 4), ('s', 4)]\r\n\r\ngroups = defaultdict(list)\r\nfor user in users:\r\n    groups[user.dept].append(user)        # no KeyError on first insert\r\n\r\n# f-strings — the default formatting idiom\r\nname, n = \"Ada\", 3\r\nf\"{name} ran {n} test{'s' if n != 1 else ''} ({n/10:.0%})\"</code></pre>"
+    },
+    {
+      "id": "pytest",
+      "title": "pytest Ecosystem",
+      "bodyHtml": "<ul class='clean'><li>Plain <code>assert</code> with rich introspection — pytest rewrites it to show both sides on failure; no special assert methods.</li><li><strong>Fixtures</strong> (<code>@pytest.fixture</code>) for setup/teardown, with scopes (function/class/module/session) and dependency injection by argument name. <code>yield</code> separates setup from teardown.</li><li><code>@pytest.mark.parametrize</code> for data-driven tests; <code>pytest.raises</code> for expected exceptions.</li><li>Markers (<code>@pytest.mark.smoke</code>), <code>conftest.py</code> for shared fixtures, <code>pytest-xdist</code> for parallel runs, <code>monkeypatch</code> for patching.</li><li>Playwright's pytest plugin gives a <code>page</code> fixture directly.</li></ul><pre><code>import pytest\r\n\r\n@pytest.fixture(scope=\"module\")\r\ndef api_client():\r\n    client = ApiClient(base_url=\"https://test\")   # setup\r\n    yield client\r\n    client.close()                                  # teardown\r\n\r\n@pytest.mark.parametrize(\"value,expected\", [(2, 4), (3, 9), (5, 25)])\r\ndef test_square(value, expected):\r\n    assert value * value == expected\r\n\r\ndef test_raises():\r\n    with pytest.raises(ValueError, match=\"negative\"):\r\n        sqrt(-1)</code></pre>"
+    }
+  ],
+  "quiz": [
+    {
+      "id": "cs-python-001",
+      "topicId": "python",
+      "topicTitle": "Python",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "list vs tuple?",
+      "choices": [
+        "List is mutable and dynamic; tuple is immutable and hashable (usable as dict key/set member)",
+        "Tuple is mutable and dynamic; list is immutable and hashable",
+        "Both are mutable, but only tuples preserve insertion order",
+        "List is ordered and tuple is unordered; both are mutable"
+      ],
+      "correctAnswer": "List is mutable and dynamic; tuple is immutable and hashable (usable as dict key/set member)",
+      "explanation": "List is mutable and dynamic; tuple is immutable and hashable (can be a dict key / set member).",
+      "tags": [
+        "python"
+      ]
+    },
+    {
+      "id": "cs-python-002",
+      "topicId": "python",
+      "topicTitle": "Python",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "is vs ==?",
+      "choices": [
+        "Both is and == compare values, but is is faster",
+        "is checks value equality; == checks identity (same object in memory)",
+        "is and == are interchangeable for all objects",
+        "is checks identity (same object in memory); == checks value equality via __eq__"
+      ],
+      "correctAnswer": "is checks identity (same object in memory); == checks value equality via __eq__",
+      "explanation": "is checks identity (same object in memory); == checks value equality via __eq__.",
+      "tags": [
+        "python"
+      ]
+    },
+    {
+      "id": "cs-python-003",
+      "topicId": "python",
+      "topicTitle": "Python",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "Mutable default argument trap?",
+      "choices": [
+        "The default is re-evaluated on every call, wasting memory",
+        "Defaults evaluate once at definition; a shared mutable default persists across calls — use None",
+        "Mutable defaults raise a SyntaxError at definition time",
+        "Each call gets a fresh copy of the mutable default automatically"
+      ],
+      "correctAnswer": "Defaults evaluate once at definition; a shared mutable default persists across calls — use None",
+      "explanation": "Defaults are evaluated once at definition; a shared mutable default persists across calls — use None and create inside.",
+      "tags": [
+        "python"
+      ]
+    },
+    {
+      "id": "cs-python-004",
+      "topicId": "python",
+      "topicTitle": "Python",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "What is a generator?",
+      "choices": [
+        "A function that returns a full list of all values at once",
+        "A lazy iterator using yield that produces values on demand, keeping memory flat",
+        "A cached function that memoizes its return values",
+        "A coroutine that runs concurrently in a separate thread"
+      ],
+      "correctAnswer": "A lazy iterator using yield that produces values on demand, keeping memory flat",
+      "explanation": "A lazy iterator using yield that produces values on demand, keeping memory flat for large sequences.",
+      "tags": [
+        "python"
+      ]
+    },
+    {
+      "id": "cs-python-005",
+      "topicId": "python",
+      "topicTitle": "Python",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "What's a decorator?",
+      "choices": [
+        "A class method that runs before the constructor",
+        "A callable that wraps a function to add behavior without modifying its code",
+        "A type annotation that validates function arguments at runtime",
+        "A function that converts a method into a static method"
+      ],
+      "correctAnswer": "A callable that wraps a function to add behavior without modifying its code",
+      "explanation": "A callable that wraps a function to add behavior (retry, timing, logging) without modifying its code; use functools.wraps to preserve metadata.",
+      "tags": [
+        "python"
+      ]
+    },
+    {
+      "id": "cs-python-006",
+      "topicId": "python",
+      "topicTitle": "Python",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "Explain the GIL.",
+      "choices": [
+        "A lock that prevents two processes from sharing memory",
+        "Only one thread runs Python bytecode at a time in CPython; multiprocessing for CPU-bound work",
+        "A mechanism that lets threads run on multiple cores simultaneously",
+        "A garbage-collection lock that pauses all I/O operations"
+      ],
+      "correctAnswer": "Only one thread runs Python bytecode at a time in CPython; multiprocessing for CPU-bound work",
+      "explanation": "Only one thread runs Python bytecode at a time in CPython; use multiprocessing for CPU-bound and threads/asyncio for I/O-bound work.",
+      "tags": [
+        "python"
+      ]
+    },
+    {
+      "id": "cs-python-007",
+      "topicId": "python",
+      "topicTitle": "Python",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "How do pytest fixtures work?",
+      "choices": [
+        "They run automatically before every test without being referenced",
+        "They are global variables shared across the whole test session",
+        "@pytest.fixture functions provide setup/teardown and inject into tests by argument name",
+        "They replace assert statements with rich comparison output"
+      ],
+      "correctAnswer": "@pytest.fixture functions provide setup/teardown and inject into tests by argument name",
+      "explanation": "Functions marked @pytest.fixture provide setup/teardown (yield splits the two) and are injected into tests by matching argument name; scopes control reuse.",
+      "tags": [
+        "python"
+      ]
+    },
+    {
+      "id": "cs-python-008",
+      "topicId": "python",
+      "topicTitle": "Python",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "Shallow vs deep copy?",
+      "choices": [
+        "Shallow copies everything recursively; deep copy only the top container",
+        "Both produce fully independent copies with no shared references",
+        "Shallow (a[:], copy.copy) copies the container but shares nested objects; deepcopy duplicates recursively",
+        "Deep copy shares nested objects; shallow copy duplicates everything"
+      ],
+      "correctAnswer": "Shallow (a[:], copy.copy) copies the container but shares nested objects; deepcopy duplicates recursively",
+      "explanation": "Shallow (a[:], copy.copy) copies the container but shares nested objects; copy.deepcopy duplicates everything recursively.",
+      "tags": [
+        "python"
+      ]
+    },
+    {
+      "id": "cs-python-009",
+      "topicId": "python",
+      "topicTitle": "Python",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "What does @dataclass give you?",
+      "choices": [
+        "Auto-generated __init__, __repr__, and __eq__ from typed fields; frozen=True makes instances immutable",
+        "Automatic conversion of the class into a dictionary",
+        "Runtime type checking and validation of every field",
+        "Lazy attribute evaluation and built-in JSON serialization"
+      ],
+      "correctAnswer": "Auto-generated __init__, __repr__, and __eq__ from typed fields; frozen=True makes instances immutable",
+      "explanation": "Auto-generated __init__, __repr__, and __eq__ from typed fields; frozen=True makes instances immutable and hashable.",
+      "tags": [
+        "python"
+      ]
+    },
+    {
+      "id": "cs-python-010",
+      "topicId": "python",
+      "topicTitle": "Python",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "How do you test an expected exception?",
+      "choices": [
+        "Wrap the call in try/except and assert in the except block",
+        "Use @pytest.mark.parametrize to list expected exceptions",
+        "with pytest.raises(ValueError): — the block passes only if that exception is raised",
+        "Decorate the test with @pytest.expects(ValueError)"
+      ],
+      "correctAnswer": "with pytest.raises(ValueError): — the block passes only if that exception is raised",
+      "explanation": "with pytest.raises(ValueError): — the block passes only if that exception is raised.",
+      "tags": [
+        "python"
+      ]
+    },
+    {
+      "id": "cs-python-011",
+      "topicId": "python",
+      "topicTitle": "Python",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "@staticmethod vs @classmethod?",
+      "choices": [
+        "staticmethod gets no implicit first arg; classmethod gets cls for factories/alt constructors",
+        "staticmethod gets cls; classmethod gets self as the first argument",
+        "Both receive the instance, but classmethod also receives the class",
+        "staticmethod gets self; classmethod gets no implicit argument"
+      ],
+      "correctAnswer": "staticmethod gets no implicit first arg; classmethod gets cls for factories/alt constructors",
+      "explanation": "staticmethod gets no implicit first arg; classmethod gets cls and is used for alternative constructors/factories.",
+      "tags": [
+        "python"
+      ]
+    },
+    {
+      "id": "cs-python-012",
+      "topicId": "python",
+      "topicTitle": "Python",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "threading vs multiprocessing vs asyncio?",
+      "choices": [
+        "multiprocessing for I/O-bound work; threading for CPU-bound parallelism",
+        "threading/asyncio for I/O-bound concurrency; multiprocessing for CPU-bound parallelism across cores",
+        "asyncio for CPU-bound work; multiprocessing for I/O-bound concurrency",
+        "All three give true multi-core parallelism for CPU-bound code"
+      ],
+      "correctAnswer": "threading/asyncio for I/O-bound concurrency; multiprocessing for CPU-bound parallelism across cores",
+      "explanation": "threading/asyncio for I/O-bound concurrency; multiprocessing for CPU-bound parallelism across cores.",
+      "tags": [
+        "python"
+      ]
+    }
+  ]
+}

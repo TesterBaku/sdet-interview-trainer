@@ -1,0 +1,301 @@
+{
+  "id": "testng",
+  "title": "TestNG",
+  "group": "Test Frameworks",
+  "accent": "#b03a5b",
+  "summary": "TestNG as the representative test-runner: annotations & lifecycle, hard vs soft assertions, data-driven tests, groups / priority / dependencies, parallel execution via testng.xml, and listeners & retries — with side notes mapping each idea to JUnit 5, NUnit, and pytest. Short explanations, short examples.",
+  "tags": [
+    "Why TestNG",
+    "Lifecycle",
+    "Assertions",
+    "Data-Driven",
+    "Groups & Deps",
+    "Parallel",
+    "Listeners",
+    "vs Others"
+  ],
+  "sections": [
+    {
+      "id": "why",
+      "title": "What TestNG Is — and Why It Represents the Family",
+      "bodyHtml": "<p>TestNG is a Java testing framework built for more than unit tests — its name (“Next Generation”) signals the extras: flexible configuration, data-driven tests, grouping, dependencies, and built-in parallelism. It’s the default runner in most Java + Selenium stacks.</p><p class='pullquote'>Almost every test runner shares the same skeleton: lifecycle hooks, assertions, data-driven inputs, parallelism, and reporting. Learn TestNG and you can read JUnit 5, NUnit, and pytest at a glance.</p><ul class='clean'><li><strong>JUnit 5</strong> (Java) — the closest cousin; same ideas, different annotation names.</li><li><strong>NUnit</strong> (C#) — your Playwright stack’s runner; near-identical concepts with C# attribute syntax.</li><li><strong>pytest</strong> (Python) — same capabilities via fixtures and decorators instead of annotations.</li></ul><div class='keynote'><strong>Where TestNG is richer:</strong> its <code>testng.xml</code> suite file and <code>@DataProvider</code> give finer control over grouping and parallelism than vanilla JUnit — a fair point to raise when asked “why TestNG over JUnit?”.</div>"
+    },
+    {
+      "id": "lifecycle",
+      "title": "Annotations & Lifecycle",
+      "bodyHtml": "<p>TestNG runs methods in a fixed order driven by annotations, scoped from the whole suite down to a single method.</p><table><tr><th>Annotation</th><th>Runs</th></tr><tr><td>@BeforeSuite / @AfterSuite</td><td>once around the whole suite</td></tr><tr><td>@BeforeTest / @AfterTest</td><td>around a <code>&lt;test&gt;</code> tag in testng.xml</td></tr><tr><td>@BeforeClass / @AfterClass</td><td>once per class</td></tr><tr><td>@BeforeMethod / @AfterMethod</td><td>before/after every @Test method</td></tr><tr><td>@Test</td><td>the actual test</td></tr></table><pre><code>public class LoginTest {\r\n  @BeforeMethod public void setUp()    { driver = new ChromeDriver(); }\r\n  @Test         public void canLogin() { /* ... */ }\r\n  @AfterMethod  public void tearDown() { driver.quit(); }\r\n}</code></pre><div class='keynote'><strong>Maps to:</strong> JUnit 5 <code>@BeforeEach</code>/<code>@BeforeAll</code>, NUnit <code>[SetUp]</code>/<code>[OneTimeSetUp]</code>, pytest fixtures with <code>scope=\"function\"/\"class\"/\"session\"</code>. Same lifecycle, different spelling.</div>"
+    },
+    {
+      "id": "assert",
+      "title": "Hard vs Soft Assertions",
+      "bodyHtml": "<ul class='clean'><li><strong>Hard assertion</strong> (<code>Assert.assertEquals</code>) — fails fast: the test stops at the first failed check.</li><li><strong>Soft assertion</strong> (<code>SoftAssert</code>) — collects all failures and reports them together when you call <code>assertAll()</code>; nothing fails until then.</li></ul><p>Soft asserts shine when you want to validate several independent things in one test (e.g. five fields on a page) and see <em>all</em> the broken ones in one run.</p><pre><code>SoftAssert soft = new SoftAssert();\r\nsoft.assertEquals(user.getName(), \"Ada\");\r\nsoft.assertEquals(user.getRole(), \"admin\");   // still runs even if name failed\r\nsoft.assertAll();                              // reports every failure now</code></pre><div class='keynote'><strong>Maps to:</strong> JUnit 5 <code>assertAll(...)</code>, NUnit <code>Assert.Multiple</code>, AssertJ/Playwright’s soft assertions. The hard-vs-soft distinction is a common interview question.</div>"
+    },
+    {
+      "id": "data",
+      "title": "Data-Driven Tests",
+      "bodyHtml": "<p>Two ways to feed inputs into a test:</p><ul class='clean'><li><strong>@DataProvider</strong> — a method returning <code>Object[][]</code>; TestNG runs the test once per row. Best for in-code or computed datasets.</li><li><strong>@Parameters</strong> — inject simple values from <code>testng.xml</code> (e.g. a browser name or base URL).</li></ul><pre><code>@DataProvider(name = \"logins\")\r\npublic Object[][] logins() {\r\n  return new Object[][] {\r\n    { \"ada@test.dev\", true },\r\n    { \"bad@test.dev\", false },\r\n  };\r\n}\r\n\r\n@Test(dataProvider = \"logins\")\r\npublic void login(String email, boolean expected) {\r\n  assertEquals(authService.login(email), expected);\r\n}</code></pre><div class='keynote'><strong>Maps to:</strong> JUnit 5 <code>@ParameterizedTest</code> + <code>@MethodSource</code>/<code>@CsvSource</code>, NUnit <code>[TestCase]</code>/<code>[TestCaseSource]</code>, pytest <code>@pytest.mark.parametrize</code>. TestNG’s <code>@DataProvider</code> can also be <code>parallel = true</code>.</div>"
+    },
+    {
+      "id": "groups",
+      "title": "Groups, Priority & Dependencies",
+      "bodyHtml": "<ul class='clean'><li><strong>Groups</strong> — tag tests (<code>@Test(groups = \"smoke\")</code>) and run a subset from <code>testng.xml</code> or the CLI. Like JUnit 5 <code>@Tag</code>, NUnit <code>[Category]</code>, pytest markers.</li><li><strong>Priority</strong> — <code>@Test(priority = 1)</code> orders tests (default 0); lower runs first.</li><li><strong>Dependencies</strong> — <code>dependsOnMethods</code> / <code>dependsOnGroups</code> skip a test if its prerequisite failed, rather than reporting a misleading second failure.</li></ul><pre><code>@Test(groups = \"smoke\")\r\npublic void createUser() { /* ... */ }\r\n\r\n@Test(dependsOnMethods = \"createUser\")   // skipped if createUser fails\r\npublic void deleteUser() { /* ... */ }</code></pre><div class='keynote'><strong>Note for interviews:</strong> heavy use of <code>dependsOnMethods</code> couples tests and hurts isolation/parallelism. Prefer independent tests; use dependencies only for genuine setup ordering. JUnit deliberately limits ordering for this reason.</div>"
+    },
+    {
+      "id": "parallel",
+      "title": "Parallel Execution & testng.xml",
+      "bodyHtml": "<p>The <strong>testng.xml</strong> suite file is TestNG’s control center — it selects classes/groups, injects parameters, and configures parallelism without touching code.</p><pre><code>&lt;suite name=\"regression\" parallel=\"methods\" thread-count=\"4\"&gt;\r\n  &lt;test name=\"chrome\"&gt;\r\n    &lt;parameter name=\"browser\" value=\"chrome\"/&gt;\r\n    &lt;classes&gt;\r\n      &lt;class name=\"tests.LoginTest\"/&gt;\r\n    &lt;/classes&gt;\r\n  &lt;/test&gt;\r\n&lt;/suite&gt;</code></pre><ul class='clean'><li><code>parallel=\"methods|tests|classes|instances\"</code> with <code>thread-count</code> sets the concurrency model.</li><li>Parallel tests must be <strong>thread-safe</strong> — share no mutable state; in Selenium use a <code>ThreadLocal&lt;WebDriver&gt;</code> so each thread gets its own driver.</li></ul><div class='keynote'><strong>Maps to:</strong> JUnit 5 parallel execution (<code>junit-platform.properties</code>), NUnit <code>[Parallelizable]</code>, pytest-xdist (<code>-n auto</code>). Built-in suite-level parallelism is one of TestNG’s headline features.</div>"
+    },
+    {
+      "id": "listeners",
+      "title": "Listeners, Retries & Reporting",
+      "bodyHtml": "<ul class='clean'><li><strong>Listeners</strong> — hook into the test lifecycle (<code>ITestListener</code>, <code>IRetryAnalyzer</code>) to add logging, screenshots on failure, or custom reporting.</li><li><strong>Retry</strong> — implement <code>IRetryAnalyzer</code> to re-run a failed test N times (use sparingly — masks real flakiness).</li><li><strong>Reporting</strong> — TestNG emits HTML/XML reports; teams usually layer <strong>Allure</strong> or <strong>ExtentReports</strong> on top for richer output.</li></ul><pre><code>public class ScreenshotOnFail implements ITestListener {\r\n  @Override public void onTestFailure(ITestResult result) {\r\n    captureScreenshot(result.getName());   // attach to report\r\n  }\r\n}\r\n// register: @Listeners(ScreenshotOnFail.class) or in testng.xml</code></pre><div class='keynote'><strong>Maps to:</strong> JUnit 5 extensions (<code>TestWatcher</code>), NUnit <code>ITestAction</code>, pytest hooks (<code>conftest.py</code>) + plugins. Same extension-point idea everywhere.</div>"
+    },
+    {
+      "id": "compare",
+      "title": "TestNG vs JUnit 5 vs NUnit vs pytest",
+      "bodyHtml": "<p>The cheat sheet — same concept, four dialects:</p><table><tr><th>Concept</th><th>TestNG</th><th>JUnit 5</th><th>NUnit</th><th>pytest</th></tr><tr><td>test</td><td>@Test</td><td>@Test</td><td>[Test]</td><td>def test_*</td></tr><tr><td>before each</td><td>@BeforeMethod</td><td>@BeforeEach</td><td>[SetUp]</td><td>fixture (function)</td></tr><tr><td>before all</td><td>@BeforeClass</td><td>@BeforeAll</td><td>[OneTimeSetUp]</td><td>fixture (class/module)</td></tr><tr><td>data-driven</td><td>@DataProvider</td><td>@ParameterizedTest</td><td>[TestCase]</td><td>@parametrize</td></tr><tr><td>tag / group</td><td>groups</td><td>@Tag</td><td>[Category]</td><td>markers</td></tr><tr><td>skip</td><td>@Test(enabled=false)</td><td>@Disabled</td><td>[Ignore]</td><td>@skip</td></tr><tr><td>parallel</td><td>testng.xml</td><td>properties file</td><td>[Parallelizable]</td><td>pytest-xdist</td></tr></table><div class='keynote'><strong>One-liner:</strong> TestNG and JUnit 5 are the two Java options — pick TestNG for built-in suite-level config/parallelism and richer data providers, JUnit 5 for the modern default and tighter ecosystem integration.</div>"
+    }
+  ],
+  "quiz": [
+    {
+      "id": "cs-testng-001",
+      "topicId": "testng",
+      "topicTitle": "TestNG",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "TestNG vs JUnit, briefly?",
+      "choices": [
+        "Same core ideas, but TestNG adds testng.xml suite config, @DataProvider, groups, and dependsOnMethods",
+        "TestNG is for unit tests only while JUnit handles integration and E2E suites",
+        "TestNG runs on .NET while JUnit is the equivalent runner for Java",
+        "JUnit has built-in suite parallelism that TestNG lacks entirely"
+      ],
+      "correctAnswer": "Same core ideas, but TestNG adds testng.xml suite config, @DataProvider, groups, and dependsOnMethods",
+      "explanation": "Same core ideas; TestNG adds built-in suite configuration via testng.xml, flexible @DataProvider, groups, and dependsOnMethods — handy for integration/E2E suites.",
+      "tags": [
+        "testng"
+      ]
+    },
+    {
+      "id": "cs-testng-002",
+      "topicId": "testng",
+      "topicTitle": "TestNG",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "Order of TestNG annotations?",
+      "choices": [
+        "Method → Class → Test → Suite, then the @After hooks run in the same order",
+        "@BeforeClass, @BeforeSuite, @BeforeTest, @BeforeMethod, @Test, then @After hooks",
+        "Suite → Test → Class → Method around @Test, with the @After hooks in reverse",
+        "All @Before hooks run alphabetically, then @Test, then all @After hooks alphabetically"
+      ],
+      "correctAnswer": "Suite → Test → Class → Method around @Test, with the @After hooks in reverse",
+      "explanation": "Suite → Test → Class → Method around the @Test: @BeforeSuite, @BeforeTest, @BeforeClass, @BeforeMethod, @Test, then the matching @After… in reverse.",
+      "tags": [
+        "testng"
+      ]
+    },
+    {
+      "id": "cs-testng-003",
+      "topicId": "testng",
+      "topicTitle": "TestNG",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "Hard vs soft assertion?",
+      "choices": [
+        "Hard collects all failures for assertAll(); soft stops at the first failed check",
+        "Both stop at the first failure, but soft also writes the failures to the HTML report",
+        "Hard stops at the first failure; soft collects all failures and reports them at assertAll()",
+        "Hard asserts run in parallel while soft asserts always run sequentially"
+      ],
+      "correctAnswer": "Hard stops at the first failure; soft collects all failures and reports them at assertAll()",
+      "explanation": "Hard stops at the first failure; soft (SoftAssert) collects all failures and reports them together at assertAll().",
+      "tags": [
+        "testng"
+      ]
+    },
+    {
+      "id": "cs-testng-004",
+      "topicId": "testng",
+      "topicTitle": "TestNG",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "How do you run data-driven tests?",
+      "choices": [
+        "@DataProvider returns Object[][] running once per row; or @Parameters injects from testng.xml",
+        "Use @Repeat(count) to run the same test method with random inputs each time",
+        "@DataProvider injects single values from testng.xml; @Parameters returns Object[][]",
+        "Annotate the test with @CsvSource and pass a comma-separated list of values"
+      ],
+      "correctAnswer": "@DataProvider returns Object[][] running once per row; or @Parameters injects from testng.xml",
+      "explanation": "@DataProvider returns Object[][] and the @Test runs once per row; or @Parameters injects values from testng.xml.",
+      "tags": [
+        "testng"
+      ]
+    },
+    {
+      "id": "cs-testng-005",
+      "topicId": "testng",
+      "topicTitle": "TestNG",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "How do you run a subset like smoke tests?",
+      "choices": [
+        "Set @Test(priority=\"smoke\") so only those tests run first in the suite",
+        "Tag with @Test(groups=\"smoke\") and select that group in testng.xml or the CLI",
+        "Wrap the smoke tests in a @Smoke class-level annotation and run that class",
+        "Use dependsOnGroups=\"smoke\" so only the smoke prerequisites execute"
+      ],
+      "correctAnswer": "Tag with @Test(groups=\"smoke\") and select that group in testng.xml or the CLI",
+      "explanation": "Tag with @Test(groups=\"smoke\") and select that group in testng.xml or on the CLI.",
+      "tags": [
+        "testng"
+      ]
+    },
+    {
+      "id": "cs-testng-006",
+      "topicId": "testng",
+      "topicTitle": "TestNG",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "What does dependsOnMethods do?",
+      "choices": [
+        "Reruns the prerequisite method N times before the dependent test starts",
+        "Runs the dependent test in parallel with its prerequisite for speed",
+        "Runs a test only after its prerequisite passes; skips the dependent if it fails",
+        "Marks the dependent test as failed whenever its prerequisite fails"
+      ],
+      "correctAnswer": "Runs a test only after its prerequisite passes; skips the dependent if it fails",
+      "explanation": "Runs a test only after its prerequisite passes; if the prerequisite fails, the dependent test is skipped, not failed.",
+      "tags": [
+        "testng"
+      ]
+    },
+    {
+      "id": "cs-testng-007",
+      "topicId": "testng",
+      "topicTitle": "TestNG",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "How does TestNG do parallelism?",
+      "choices": [
+        "Set parallel and thread-count in testng.xml; tests must be thread-safe (ThreadLocal in Selenium)",
+        "Annotate each method with @Parallel and TestNG spawns one JVM per test",
+        "TestNG runs everything in parallel by default; set thread-count to disable it",
+        "Add parallel=\"true\" in code via @Test; no testng.xml configuration is needed"
+      ],
+      "correctAnswer": "Set parallel and thread-count in testng.xml; tests must be thread-safe (ThreadLocal in Selenium)",
+      "explanation": "Set parallel (methods/tests/classes) and thread-count in testng.xml; tests must be thread-safe — use ThreadLocal in Selenium.",
+      "tags": [
+        "testng"
+      ]
+    },
+    {
+      "id": "cs-testng-008",
+      "topicId": "testng",
+      "topicTitle": "TestNG",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "How do you take a screenshot on failure?",
+      "choices": [
+        "Override @AfterMethod to call takeScreenshot() after every test method runs",
+        "Add a @Screenshot(onFailure=true) annotation to each test method you care about",
+        "Implement ITestListener.onTestFailure to capture; register via @Listeners or testng.xml",
+        "Wrap each assertion in try/catch and screenshot inside the catch block"
+      ],
+      "correctAnswer": "Implement ITestListener.onTestFailure to capture; register via @Listeners or testng.xml",
+      "explanation": "Implement ITestListener.onTestFailure (or a TestWatcher equivalent) and capture there; register via @Listeners or testng.xml.",
+      "tags": [
+        "testng"
+      ]
+    },
+    {
+      "id": "cs-testng-009",
+      "topicId": "testng",
+      "topicTitle": "TestNG",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "How do you retry a flaky test?",
+      "choices": [
+        "Set @Test(retryCount=N) directly on the flaky test method",
+        "Implement IRetryAnalyzer to re-run N times — use sparingly; it hides instability",
+        "Add @Flaky to the method so TestNG automatically reruns it until it passes",
+        "Implement ITestListener.onTestFailure and re-invoke the test from there"
+      ],
+      "correctAnswer": "Implement IRetryAnalyzer to re-run N times — use sparingly; it hides instability",
+      "explanation": "Implement IRetryAnalyzer to re-run N times — use sparingly; it hides real instability.",
+      "tags": [
+        "testng"
+      ]
+    },
+    {
+      "id": "cs-testng-010",
+      "topicId": "testng",
+      "topicTitle": "TestNG",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "priority vs dependsOnMethods?",
+      "choices": [
+        "priority creates a prerequisite that can skip dependents; dependsOnMethods just orders tests",
+        "priority orders independent tests; dependsOnMethods creates a real prerequisite that can skip dependents",
+        "Both order tests, but priority also skips lower-priority tests when a higher one fails",
+        "priority works only across classes; dependsOnMethods works only within a single class"
+      ],
+      "correctAnswer": "priority orders independent tests; dependsOnMethods creates a real prerequisite that can skip dependents",
+      "explanation": "priority just orders independent tests; dependsOnMethods creates a real prerequisite relationship that can skip dependents.",
+      "tags": [
+        "testng"
+      ]
+    },
+    {
+      "id": "cs-testng-011",
+      "topicId": "testng",
+      "topicTitle": "TestNG",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "Why prefer independent tests?",
+      "choices": [
+        "Independent tests run faster because TestNG caches their shared setup state",
+        "Dependencies are required for parallelism; independent tests must run sequentially",
+        "Isolation enables safe parallelism and clear failures; chained tests cascade and block concurrency",
+        "Chained tests give cleaner reports because one failure stops the whole suite early"
+      ],
+      "correctAnswer": "Isolation enables safe parallelism and clear failures; chained tests cascade and block concurrency",
+      "explanation": "Isolation enables safe parallelism and clear failures; chained dependencies make one failure cascade and block concurrency.",
+      "tags": [
+        "testng"
+      ]
+    },
+    {
+      "id": "cs-testng-012",
+      "topicId": "testng",
+      "topicTitle": "TestNG",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "What is testng.xml?",
+      "choices": [
+        "A build file that compiles the test classes before TestNG executes them",
+        "The per-test config file generated automatically after each test run completes",
+        "A reporting template that defines the layout of the TestNG HTML output",
+        "The suite descriptor — selects classes/groups, passes parameters, and configures parallelism without recompiling"
+      ],
+      "correctAnswer": "The suite descriptor — selects classes/groups, passes parameters, and configures parallelism without recompiling",
+      "explanation": "The suite descriptor — selects classes/groups, passes parameters, and configures parallelism without recompiling.",
+      "tags": [
+        "testng"
+      ]
+    }
+  ]
+}

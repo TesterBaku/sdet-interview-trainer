@@ -68,7 +68,7 @@ test("home, topics, and topic detail render the MVP navigation path", async ({ p
   await expect(page.getByRole("heading", { name: "Practice like the interview is already scheduled." })).toBeVisible();
   await expect(page.getByRole("link", { name: "Topics" })).toBeVisible();
   await expect(page.getByText("TOTAL")).toBeVisible();
-  await expect(page.getByText("250")).toBeVisible();
+  await expect(page.getByText("500")).toBeVisible();
 
   await page.getByRole("link", { name: "Topics" }).click();
   await expect(page).toHaveURL("/topics");
@@ -81,7 +81,7 @@ test("home, topics, and topic detail render the MVP navigation path", async ({ p
   await expect(page).toHaveURL("/topics/python-coding");
   await expect(page.getByRole("heading", { name: "Topic progress" })).toBeVisible();
   await expect(page.getByRole("link", { name: /Flashcards/ })).toBeVisible();
-  await expect(page.getByRole("link", { name: /Quiz/ })).toBeVisible();
+  await expect(page.getByRole("link", { name: /Quiz Practice/ })).toBeVisible();
   await expect(page.getByRole("link", { name: /Mock Interview/ })).toBeVisible();
   await expect(page.getByRole("link", { name: /Review Weak Questions/ })).toBeVisible();
 });
@@ -90,7 +90,7 @@ test("flashcards reveal answers, navigate cards, and save weak status to progres
   await clearAppState(page);
   await page.goto("/flashcards/python-coding");
 
-  await expect(page.getByText("Card 1 of 12")).toBeVisible();
+  await expect(page.getByText("Card 1 of 21")).toBeVisible();
   await page.getByRole("button", { name: "Reveal answer" }).click();
   await expect(page.getByText("Correct answer")).toBeVisible();
   await expect(page.getByText("set", { exact: true })).toBeVisible();
@@ -104,24 +104,28 @@ test("flashcards reveal answers, navigate cards, and save weak status to progres
     });
 
   await page.getByRole("button", { name: "Next" }).click();
-  await expect(page.getByText("Card 2 of 12")).toBeVisible();
+  await expect(page.getByText("Card 2 of 21")).toBeVisible();
   await page.getByRole("button", { name: "Reveal answer" }).click();
   await expect(page.getByText("Short answer")).toBeVisible();
   await expect(page.getByText("Validate required structure and business-critical fields", { exact: false })).toBeVisible();
 });
 
-// playwright-python flashcard questions: 16 non-coding out of 25 total.
-// Last card is playwright-python-025 (interview). Update these if questions change.
+// playwright-python flashcard questions: 29 non-coding out of 50 total.
+// Last card is playwright-python-050. Update these if questions change.
 const playwrightPythonFlashcardIds = [
   "playwright-python-001", "playwright-python-002", "playwright-python-004",
   "playwright-python-006", "playwright-python-008", "playwright-python-010",
   "playwright-python-012", "playwright-python-014", "playwright-python-016",
   "playwright-python-018", "playwright-python-019", "playwright-python-021",
   "playwright-python-022", "playwright-python-023", "playwright-python-024",
-  "playwright-python-025"
+  "playwright-python-025", "playwright-python-026", "playwright-python-027",
+  "playwright-python-030", "playwright-python-032", "playwright-python-034",
+  "playwright-python-036", "playwright-python-038", "playwright-python-040",
+  "playwright-python-042", "playwright-python-044", "playwright-python-046",
+  "playwright-python-048", "playwright-python-050"
 ];
 const ppLastCard = playwrightPythonFlashcardIds[playwrightPythonFlashcardIds.length - 1];
-const ppTotalCards = playwrightPythonFlashcardIds.length; // 16
+const ppTotalCards = playwrightPythonFlashcardIds.length; // 29
 
 test("flashcards last card requires marking before Finish is enabled", async ({ page }) => {
   await clearAppState(page);
@@ -212,22 +216,22 @@ test("flashcards previously marked card enables Finish immediately on return", a
 
 test("quiz preserves correctness and final save is idempotent", async ({ page }) => {
   await clearAppState(page);
-  // test-automation-strategy has 9 quiz questions; navigate through Q1–Q8 quickly,
-  // then test correctness + idempotency on Q9 (test-automation-strategy-011).
+  // test-automation-strategy has 18 quiz questions; navigate through Q1–Q17 quickly,
+  // then test correctness + idempotency on Q18 (test-automation-strategy-041).
   await page.goto("/quiz/test-automation-strategy");
 
-  for (let i = 0; i < 8; i++) {
+  for (let i = 0; i < 17; i++) {
     await page.locator("label").first().click();
     await page.getByRole("button", { name: "Submit answer" }).click();
     await page.getByRole("button", { name: "Save and continue" }).click();
   }
 
-  // Q9 — wrong answer to verify correctness feedback
-  await page.getByLabel("A manual sign-off step before any deployment").check();
+  // Q18 — wrong answer to verify correctness feedback
+  await page.getByLabel("Network latency from slow external APIs").check();
   await expect(page.getByRole("button", { name: "Submit answer" })).toBeEnabled();
   await page.getByRole("button", { name: "Submit answer" }).click();
   await expect(
-    page.getByText("Incorrect. Correct answer: A defined threshold that must be met before a pipeline stage can proceed")
+    page.getByText("Incorrect. Correct answer: Shared mutable state between tests that run in parallel")
   ).toBeVisible();
   await page.getByRole("button", { name: "Save and finish" }).click();
 
@@ -237,14 +241,14 @@ test("quiz preserves correctness and final save is idempotent", async ({ page })
     .poll(async () => page.evaluate((key) => JSON.parse(window.localStorage.getItem(key) ?? "{}"), progressKey))
     .toMatchObject({
       records: expect.arrayContaining([
-        expect.objectContaining({ questionId: "test-automation-strategy-011", status: "review", attempts: 1 })
+        expect.objectContaining({ questionId: "test-automation-strategy-041", status: "review", attempts: 1 })
       ])
     });
 
   // Idempotency: force-click Saved again, attempts must not increment
   await page.getByRole("button", { name: "Saved" }).click({ force: true });
   const progress = await page.evaluate((key) => JSON.parse(window.localStorage.getItem(key) ?? "{}"), progressKey);
-  const lastRecord = progress.records.find((r: { questionId: string }) => r.questionId === "test-automation-strategy-011");
+  const lastRecord = progress.records.find((r: { questionId: string }) => r.questionId === "test-automation-strategy-041");
   expect(lastRecord.attempts).toBe(1);
 });
 
@@ -431,8 +435,8 @@ test("progress page reflects saved localStorage records", async ({ page }) => {
   await page.goto("/progress");
 
   await expect(page.getByRole("heading", { name: "Track readiness by topic" })).toBeVisible();
-  await expect(page.getByText("2/25 completed, 1 weak")).toBeVisible();
-  await expect(page.getByText("8%").first()).toBeVisible();
+  await expect(page.getByText("2/50 completed, 1 weak")).toBeVisible();
+  await expect(page.getByText("4%").first()).toBeVisible();
 });
 
 // ── Daily Practice ──────────────────────────────────────────────────────────
@@ -653,36 +657,40 @@ test("topic detail shows Coding Tasks card for topics with coding questions", as
   await expect(page.getByRole("link", { name: /Review Weak Questions/ })).toHaveAttribute("href", "/review?topic=python-coding");
 });
 
-test("topic detail omits Coding Tasks card for topics without coding questions", async ({ page }) => {
+test("topic detail shows Coding Tasks card for aws (now has coding questions)", async ({ page }) => {
   await clearAppState(page);
   await page.goto("/topics/aws");
 
   await expect(page.getByRole("link", { name: /Flashcards/ })).toBeVisible();
-  await expect(page.getByRole("link", { name: /Coding Tasks/ })).toHaveCount(0);
+  // Every topic now ships coding questions, so the Coding Tasks card is always shown.
+  await expect(page.getByRole("link", { name: /Coding Tasks/ })).toHaveAttribute(
+    "href",
+    "/coding-gym?topic=aws"
+  );
 });
 
 test("coding gym filters tasks when ?topic= query is set", async ({ page }) => {
   await clearAppState(page);
   await page.goto("/coding-gym?topic=python-coding");
 
-  await expect(page.getByText(/Showing 13 tasks for Python Coding/i)).toBeVisible();
+  await expect(page.getByText(/Showing 29 tasks for Python Coding/i)).toBeVisible();
 
   const cards = page.locator("article");
-  await expect(cards).toHaveCount(13);
+  await expect(cards).toHaveCount(29);
 
   await page.getByRole("link", { name: "Show all topics" }).click();
   await expect(page).toHaveURL("/coding-gym");
-  // back to unfiltered view: more than 13 tasks total
+  // back to unfiltered view: more tasks than the single-topic count
   await expect(page.locator("article").first()).toBeVisible();
   const totalCards = await page.locator("article").count();
-  expect(totalCards).toBeGreaterThan(13);
+  expect(totalCards).toBeGreaterThan(29);
 });
 
 test("coding gym opens a requested task first when question query is set", async ({ page }) => {
   await clearAppState(page);
   await page.goto("/coding-gym?topic=java-coding&question=java-coding-007");
 
-  await expect(page.getByText(/Showing 11 tasks for Java Coding/i)).toBeVisible();
+  await expect(page.getByText(/Showing 25 tasks for Java Coding/i)).toBeVisible();
   await expect(
     page.locator("article").first().getByRole("heading", { name: "Build a Selenium-style explicit wait helper" })
   ).toBeVisible();
@@ -717,6 +725,101 @@ test("coding gym cards do not overflow the viewport on mobile", async ({ page })
       expect(box.width).toBeLessThanOrEqual(390);
     }
   }
+});
+
+// ── Cheat sheets + quizzes ───────────────────────────────────────────────────
+
+test("navigation includes Cheat Sheets and Quizzes links", async ({ page }) => {
+  await page.goto("/");
+  await expect(page.getByRole("link", { name: "Cheat Sheets", exact: true })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Quizzes", exact: true })).toBeVisible();
+});
+
+test("cheat sheets index lists all 13 grouped sheets", async ({ page }) => {
+  await page.goto("/cheatsheets");
+
+  await expect(page.getByRole("heading", { name: "Study the core concepts" })).toBeVisible();
+  // 13 sheets each render an "Open cheat sheet" link
+  await expect(page.getByRole("link", { name: "Open cheat sheet" })).toHaveCount(13);
+  // Group headers from the source hub
+  await expect(page.getByRole("heading", { name: "Test Frameworks" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Languages" })).toBeVisible();
+
+  await page.getByRole("link", { name: "Open cheat sheet" }).first().click();
+  await expect(page).toHaveURL(/\/cheatsheets\/[a-z-]+$/);
+});
+
+test("a cheat sheet renders converted concept sections, TOC, and a quiz link", async ({ page }) => {
+  await page.goto("/cheatsheets/sql");
+
+  await expect(page.getByRole("heading", { name: "SQL", exact: true })).toBeVisible();
+  // Converted section content (heading + keynote callout + code) renders natively
+  await expect(page.getByRole("heading", { name: /How a SELECT Actually Runs/ })).toBeVisible();
+  await expect(page.getByText("Why it matters:")).toBeVisible();
+  await expect(page.locator(".cheatsheet-prose table").first()).toBeVisible();
+
+  const quizLink = page.getByRole("link", { name: /Take the 12-question quiz/ });
+  await expect(quizLink).toHaveAttribute("href", "/cheatsheets/sql/quiz");
+  await quizLink.click();
+  await expect(page).toHaveURL("/cheatsheets/sql/quiz");
+  await expect(page.getByRole("heading", { name: "SQL Quiz" })).toBeVisible();
+});
+
+test("cheat-sheet quiz scores answers and saves progress under a cs- id", async ({ page }) => {
+  await clearAppState(page);
+  await page.goto("/cheatsheets/sql/quiz");
+
+  await expect(page.getByText("Question 1 of 12")).toBeVisible();
+
+  // Choose the correct option for cs-sql-001 (WHERE vs HAVING)
+  await page.locator("label").filter({ hasText: "HAVING filters groups after GROUP BY and can" }).click();
+  await page.getByRole("button", { name: "Submit answer" }).click();
+  await expect(page.getByRole("heading", { name: "Correct" })).toBeVisible();
+  await page.getByRole("button", { name: "Save and continue" }).click();
+
+  await expect(page.getByText("Question 2 of 12")).toBeVisible();
+  await expect
+    .poll(async () => page.evaluate((key) => JSON.parse(window.localStorage.getItem(key) ?? "{}"), progressKey))
+    .toMatchObject({
+      records: expect.arrayContaining([
+        expect.objectContaining({ questionId: "cs-sql-001", status: "known", attempts: 1 })
+      ])
+    });
+});
+
+test("cheat-sheet quiz progress does not pollute the main question totals", async ({ page }) => {
+  await clearAppState(page);
+  await page.goto("/cheatsheets/sql/quiz");
+  await page.locator("label").filter({ hasText: "HAVING filters groups after GROUP BY and can" }).click();
+  await page.getByRole("button", { name: "Submit answer" }).click();
+  await page.getByRole("button", { name: "Save and continue" }).click();
+
+  // The cs- record is saved, but overall progress (the main question bank) stays at 0% —
+  // cheat-sheet quiz ids are excluded from summarizeProgress's allQuestions set.
+  await page.goto("/progress");
+  const overall = page.locator("section").filter({ has: page.getByRole("heading", { name: "Overall Progress" }) });
+  await expect(overall.getByText("0%")).toBeVisible();
+});
+
+test("quizzes index lists every sheet and shows answered progress", async ({ page }) => {
+  await clearAppState(page);
+  await page.goto("/quizzes");
+
+  await expect(page.getByRole("heading", { name: "Learn through quizzes" })).toBeVisible();
+  await expect(page.getByRole("link", { name: /Start quiz/ })).toHaveCount(13);
+
+  await page.getByRole("link", { name: /Start quiz/ }).first().click();
+  await expect(page).toHaveURL(/\/cheatsheets\/[a-z-]+\/quiz$/);
+});
+
+test("sitemap includes cheat-sheet and quiz URLs", async ({ page }) => {
+  const response = await page.goto("/sitemap.xml");
+  expect(response?.status()).toBe(200);
+  const body = await page.content();
+  expect(body).toContain("/cheatsheets");
+  expect(body).toContain("/cheatsheets/sql");
+  expect(body).toContain("/cheatsheets/sql/quiz");
+  expect(body).toContain("/quizzes");
 });
 
 // ── Security headers ─────────────────────────────────────────────────────────
