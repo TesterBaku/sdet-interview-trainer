@@ -735,15 +735,16 @@ test("navigation includes Cheat Sheets and Quizzes links", async ({ page }) => {
   await expect(page.getByRole("link", { name: "Quizzes", exact: true })).toBeVisible();
 });
 
-test("cheat sheets index lists all 13 grouped sheets", async ({ page }) => {
+test("cheat sheets index lists all grouped sheets", async ({ page }) => {
   await page.goto("/cheatsheets");
 
   await expect(page.getByRole("heading", { name: "Study the core concepts" })).toBeVisible();
-  // 13 sheets each render an "Open cheat sheet" link
-  await expect(page.getByRole("link", { name: "Open cheat sheet" })).toHaveCount(13);
-  // Group headers from the source hub
+  // 13 SDET sheets + 1 certification sheet each render an "Open cheat sheet" link
+  await expect(page.getByRole("link", { name: "Open cheat sheet" })).toHaveCount(14);
+  // Group headers from the source hub, plus the Certifications group
   await expect(page.getByRole("heading", { name: "Test Frameworks" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Languages" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Certifications" })).toBeVisible();
 
   await page.getByRole("link", { name: "Open cheat sheet" }).first().click();
   await expect(page).toHaveURL(/\/cheatsheets\/[a-z-]+$/);
@@ -825,6 +826,70 @@ test("quizzes index lists every sheet and shows answered progress", async ({ pag
   await expect(page).toHaveURL(/\/cheatsheets\/[a-z-]+\/quiz$/);
 });
 
+// ── Certification track: CCA cheat sheet + mock exam ─────────────────────────
+
+test("navigation includes a Mock Exam link", async ({ page }) => {
+  await page.goto("/");
+  await expect(page.getByRole("link", { name: "Mock Exam", exact: true })).toBeVisible();
+});
+
+test("CCA cheat sheet sits in Certifications and routes to the mock exam (no inline quiz)", async ({ page }) => {
+  await page.goto("/cheatsheets/cca-foundations");
+
+  await expect(page.getByRole("heading", { name: "Claude Certified Architect", exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /Model Tiers/ })).toBeVisible();
+
+  const cta = page.getByRole("link", { name: /Take the Mock Exam/ });
+  await expect(cta).toHaveAttribute("href", "/mock-exam/cca-foundations");
+
+  // No Rapid-Fire Q&A block, since this sheet has no inline quiz
+  await expect(page.getByRole("heading", { name: /Rapid-Fire/ })).toHaveCount(0);
+});
+
+test("quizzes index excludes the mock-exam-only cheat sheet", async ({ page }) => {
+  await clearAppState(page);
+  await page.goto("/quizzes");
+
+  await expect(page.getByRole("heading", { name: "Learn through quizzes" })).toBeVisible();
+  await expect(page.getByRole("link", { name: /Start quiz/ })).toHaveCount(13);
+  await expect(page.getByText("Claude Certified Architect")).toHaveCount(0);
+});
+
+test("the mock-exam-backed cheat sheet exposes no empty inline quiz route", async ({ page }) => {
+  const res = await page.goto("/cheatsheets/cca-foundations/quiz");
+  expect(res?.status()).toBe(404);
+});
+
+test("mock exam scores an answer, reveals the explanation, submits, and breaks down by domain", async ({ page }) => {
+  await page.goto("/mock-exam/cca-foundations");
+
+  await expect(page.getByRole("heading", { name: /Claude Certified Architect/ })).toBeVisible();
+  await expect(page.getByText("0 of 40 answered")).toBeVisible();
+
+  // Answer Q1 correctly (the fan-out/fan-in pattern)
+  await page.getByRole("button", { name: "Fan-out / fan-in (parallel) pattern" }).click();
+  await expect(page.getByText("✓ Correct", { exact: false })).toBeVisible();
+
+  // Submit → results with pass/fail verdict and a per-domain breakdown
+  await page.getByRole("button", { name: /Submit/ }).click();
+  await expect(page.getByRole("heading", { name: "Score by domain" })).toBeVisible();
+  await expect(page.getByText("Below pass", { exact: false })).toBeVisible();
+
+  await page.getByRole("button", { name: "Restart exam" }).click();
+  await expect(page.getByText("0 of 40 answered")).toBeVisible();
+});
+
+test("mock exam domain filter narrows the visible questions", async ({ page }) => {
+  await page.goto("/mock-exam/cca-foundations");
+
+  // All 40 questions render as articles by default
+  await expect(page.locator("article")).toHaveCount(40);
+
+  // Filter to D4 (MCP & Tool Design) — 7 questions
+  await page.getByRole("button", { name: /D4: MCP & Tool Design/ }).click();
+  await expect(page.locator("article")).toHaveCount(7);
+});
+
 test("sitemap includes cheat-sheet and quiz URLs", async ({ page }) => {
   const response = await page.goto("/sitemap.xml");
   expect(response?.status()).toBe(200);
@@ -833,6 +898,9 @@ test("sitemap includes cheat-sheet and quiz URLs", async ({ page }) => {
   expect(body).toContain("/cheatsheets/sql");
   expect(body).toContain("/cheatsheets/sql/quiz");
   expect(body).toContain("/quizzes");
+  expect(body).toContain("/mock-exam");
+  expect(body).toContain("/mock-exam/cca-foundations");
+  expect(body).toContain("/cheatsheets/cca-foundations");
 });
 
 // ── Security headers ─────────────────────────────────────────────────────────

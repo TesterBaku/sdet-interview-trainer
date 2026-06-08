@@ -83,6 +83,25 @@ types/CheatSheet.ts
 
 Section bodies render as sanitized HTML inside the `.cheatsheet-prose` block in `globals.css`.
 
+A cheat sheet may carry `mockExamId` (with `quiz: []`) to route its self-test to a dedicated Mock
+Exam instead of an inline quiz — used by the "Certifications" group's CCA Foundations sheet.
+
+### 3c. Mock Exam module (self-contained)
+
+A session-scored certification exam simulator.
+
+```text
+scripts/build-cca-exam.mjs   extracts the 40-question array from the source HTML → data/mock-exams/*.json
+data/mock-exams/*.json       MockExam { passThreshold, domains, questions }
+lib/mockExams.ts             mockExams, getMockExam(id)
+types/MockExam.ts
+```
+
+| Route | Purpose |
+|---|---|
+| `/mock-exam` | Index of available mock exams |
+| `/mock-exam/[examId]` | Exam simulator: answer→reveal explanation, domain filter, Submit → %, pass/fail vs `passThreshold`, per-domain breakdown, Restart. Session state only (no localStorage). |
+
 ### 4. Aggregator surfaces
 
 | Route | Purpose |

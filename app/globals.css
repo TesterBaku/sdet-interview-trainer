@@ -40,6 +40,21 @@ a {
   @apply focus:outline-none focus:ring-2 focus:ring-signal focus:ring-offset-2 focus:ring-offset-paper;
 }
 
+/* Inline rich text inside mock-exam explanations (trusted <strong>/<code>/<br> markup). */
+.exam-rich code {
+  font-family: ui-monospace, "JetBrains Mono", "SFMono-Regular", monospace;
+  font-size: 0.85em;
+  background: rgba(23, 50, 77, 0.08);
+  color: #17324d;
+  padding: 1px 5px;
+  border-radius: 5px;
+}
+
+.exam-rich strong {
+  font-weight: 700;
+  color: #101820;
+}
+
 /* Cheat-sheet reading content: converted from the source HTML study pages and styled
    onto the app palette (ink #101820, paper #f6efe3, brass #b98736, blueprint #17324d,
    signal #d84f2a). Scoped so it never leaks into the rest of the app. */

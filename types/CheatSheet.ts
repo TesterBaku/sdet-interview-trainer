@@ -6,7 +6,7 @@ export type CheatSheetSection = {
   bodyHtml: string;
 };
 
-export type CheatSheetGroup = "Test Frameworks" | "API & Data" | "DevOps & CI" | "Languages";
+export type CheatSheetGroup = "Test Frameworks" | "API & Data" | "DevOps & CI" | "Languages" | "Certifications";
 
 export type CheatSheet = {
   id: string;
@@ -17,4 +17,7 @@ export type CheatSheet = {
   tags: string[];
   sections: CheatSheetSection[];
   quiz: Question[];
+  // When set, this sheet's self-test is a dedicated Mock Exam (see lib/mockExams) rather
+  // than the inline per-sheet quiz (quiz is empty in that case).
+  mockExamId?: string;
 };

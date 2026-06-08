@@ -6,8 +6,13 @@ import { summarizeProgress, useProgress } from "@/lib/progress";
 
 export function QuizzesClient() {
   const { progress } = useProgress();
-  const groups = cheatSheetsByGroup();
+  // Only sheets with an inline quiz appear here; cheat sheets backed by a dedicated
+  // mock exam (e.g. the CCA cert) have an empty quiz and are reached via /mock-exam.
+  const groups = cheatSheetsByGroup()
+    .map((bucket) => ({ ...bucket, sheets: bucket.sheets.filter((sheet) => sheet.quiz.length > 0) }))
+    .filter((bucket) => bucket.sheets.length > 0);
   const totalQuestions = cheatSheets.reduce((sum, sheet) => sum + sheet.quiz.length, 0);
+  const quizzableCount = cheatSheets.filter((sheet) => sheet.quiz.length > 0).length;
 
   return (
     <div className="space-y-8">
@@ -15,7 +20,7 @@ export function QuizzesClient() {
         <p className="text-sm font-black uppercase tracking-[0.28em] text-signal">Quizzes</p>
         <h1 className="mt-2 font-display text-3xl font-black text-blueprint sm:text-5xl">Learn through quizzes</h1>
         <p className="mt-4 text-lg leading-8 text-ink/75">
-          {totalQuestions} multiple-choice questions across {cheatSheets.length} topics, drawn from the{" "}
+          {totalQuestions} multiple-choice questions across {quizzableCount} topics, drawn from the{" "}
           <Link className="font-bold text-signal" href="/cheatsheets">
             cheat sheets
           </Link>

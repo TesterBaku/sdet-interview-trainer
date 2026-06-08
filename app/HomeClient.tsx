@@ -84,6 +84,22 @@ export function HomeClient() {
         </Link>
       </div>
 
+      <Link
+        className="block rounded-[2.5rem] border border-ink/15 bg-ink p-6 text-paper shadow-panel transition hover:-translate-y-1 sm:p-8"
+        href="/mock-exam/cca-foundations"
+      >
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="text-sm font-black uppercase tracking-[0.28em] text-paper/60">Certification Track</p>
+            <h2 className="mt-2 font-display text-3xl font-black sm:text-4xl">Claude Certified Architect prep</h2>
+            <p className="mt-2 max-w-2xl text-paper/75">
+              A foundations cheat sheet plus a 40-question mock exam with domain breakdown and pass/fail scoring.
+            </p>
+          </div>
+          <span className="self-start rounded-full bg-signal px-5 py-3 font-bold text-white sm:self-auto">Take the mock exam →</span>
+        </div>
+      </Link>
+
       <div className="grid gap-5 lg:grid-cols-[1.4fr_0.8fr]">
         <ProgressSummary summary={summary} />
         <section className="rounded-[2rem] border border-ink/10 bg-white/75 p-5 shadow-panel">
