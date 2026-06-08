@@ -1,0 +1,301 @@
+{
+  "id": "docker",
+  "title": "Docker",
+  "group": "DevOps & CI",
+  "accent": "#0b78c4",
+  "summary": "A to-the-point review of the Docker an SDET gets asked about: images vs containers, the Dockerfile & layer caching, the container lifecycle, volumes & networking, Docker Compose, and — the part that wins the interview — using containers for reproducible, ephemeral test environments and CI. Short explanations, short examples.",
+  "tags": [
+    "Why Docker",
+    "Images & Layers",
+    "Dockerfile",
+    "Containers",
+    "Volumes",
+    "Networking",
+    "Compose",
+    "Testing & CI"
+  ],
+  "sections": [
+    {
+      "id": "why",
+      "title": "What Docker Is — Containers vs VMs",
+      "bodyHtml": "<p>A <strong>container</strong> packages an app with its dependencies so it runs the same everywhere. It shares the host OS kernel and isolates only the process, filesystem, and network — so it’s far lighter than a VM.</p><table><tr><th></th><th>Container</th><th>Virtual Machine</th></tr><tr><td>Isolates</td><td>process (shares host kernel)</td><td>full OS (own kernel)</td></tr><tr><td>Size / start</td><td>MBs, seconds</td><td>GBs, minutes</td></tr><tr><td>Overhead</td><td>near-native</td><td>hypervisor</td></tr></table><p class='pullquote'>“Works on my machine” disappears: the image <em>is</em> the environment, so dev, CI, and prod run byte-identical dependencies.</p><div class='keynote'><strong>For an SDET:</strong> the pitch is reproducibility — spin up the exact same browser/driver/DB stack locally and in CI, throw it away after, and never debug environment drift again.</div>"
+    },
+    {
+      "id": "images",
+      "title": "Images vs Containers & Layers",
+      "bodyHtml": "<ul class='clean'><li><strong>Image</strong> — a read-only template (the blueprint). Built from a <code>Dockerfile</code>, tagged like <code>myapp:1.2</code>.</li><li><strong>Container</strong> — a running (or stopped) <strong>instance</strong> of an image, with a thin writable layer on top.</li><li><strong>Registry</strong> — where images live (Docker Hub, ECR, GHCR); <code>push</code>/<code>pull</code> moves them.</li></ul><p>An image is a stack of <strong>layers</strong>, one per build instruction. Layers are <strong>cached</strong> and shared between images — so ordering your Dockerfile well is the main build-speed lever.</p><div class='keynote'><strong>Image vs container, in one line:</strong> the image is the class, the container is the object — one image, many containers.</div>"
+    },
+    {
+      "id": "dockerfile",
+      "title": "The Dockerfile & Build Caching",
+      "bodyHtml": "<p>A <code>Dockerfile</code> is the recipe for an image. Each instruction adds a layer.</p><pre><code>FROM node:20-alpine            # base image\r\nWORKDIR /app\r\nCOPY package*.json ./          # copy deps manifest FIRST\r\nRUN npm ci                     # cached unless package*.json changes\r\nCOPY . .                       # then the source\r\nEXPOSE 3000\r\nCMD [\"node\", \"server.js\"]      # default process</code></pre><ul class='clean'><li><strong>Cache order matters:</strong> copy the dependency manifest and install <em>before</em> copying source, so a code change doesn’t bust the (slow) dependency layer.</li><li><code>CMD</code> vs <code>ENTRYPOINT</code> — <code>CMD</code> sets the default command (easily overridden); <code>ENTRYPOINT</code> sets the fixed executable, with <code>CMD</code> as its default args.</li><li><strong>Multi-stage builds</strong> — build in a heavy image, copy only the artifact into a tiny runtime image; smaller, safer final images.</li><li>Use a <code>.dockerignore</code> to keep <code>node_modules</code>/<code>.git</code> out of the build context.</li></ul><div class='keynote'><strong>Common trap:</strong> putting <code>COPY . .</code> before <code>RUN npm ci</code> means every source edit reinstalls all dependencies — the #1 slow-build mistake.</div>"
+    },
+    {
+      "id": "containers",
+      "title": "Running Containers",
+      "bodyHtml": "<p>The everyday commands an SDET should be fluent in:</p><table><tr><th>Command</th><th>Does</th></tr><tr><td>docker run</td><td>create + start a container from an image</td></tr><tr><td>docker ps / ps -a</td><td>list running / all containers</td></tr><tr><td>docker exec -it</td><td>run a command (e.g. a shell) inside a running container</td></tr><tr><td>docker logs</td><td>view a container’s stdout/stderr</td></tr><tr><td>docker stop / rm</td><td>stop / delete a container</td></tr><tr><td>docker build -t</td><td>build an image from a Dockerfile</td></tr></table><pre><code>docker run -d --name web -p 8080:3000 -e NODE_ENV=test myapp:1.2\r\n#        |    |            |             |\r\n#   detached  name    host:container  env var\r\n\r\ndocker exec -it web sh        # shell into it\r\ndocker logs -f web            # follow the logs\r\ndocker rm -f web             # stop + remove</code></pre><div class='keynote'><strong>Ports:</strong> <code>-p 8080:3000</code> maps host 8080 → container 3000. Without publishing a port the service isn’t reachable from the host.</div>"
+    },
+    {
+      "id": "volumes",
+      "title": "Volumes & Data Persistence",
+      "bodyHtml": "<p>A container’s writable layer is <strong>ephemeral</strong> — delete the container and its data is gone. <strong>Volumes</strong> persist data outside the container lifecycle.</p><ul class='clean'><li><strong>Named volume</strong> — Docker-managed storage (<code>-v mydata:/var/lib/postgresql/data</code>); the right choice for databases.</li><li><strong>Bind mount</strong> — maps a host directory into the container (<code>-v $(pwd):/app</code>); great for live-reloading source in dev.</li><li><strong>tmpfs</strong> — in-memory only; fast and wiped on stop.</li></ul><div class='keynote'><strong>For tests:</strong> bind-mount your test code in for fast iteration, but keep test <em>data</em> ephemeral so every run starts from a clean, known state.</div>"
+    },
+    {
+      "id": "network",
+      "title": "Networking",
+      "bodyHtml": "<ul class='clean'><li><strong>bridge</strong> (default) — containers on the same user-defined bridge network reach each other <strong>by name</strong> (built-in DNS).</li><li><strong>host</strong> — share the host’s network stack (no port mapping, less isolation).</li><li><strong>none</strong> — no networking.</li></ul><p>Inside a Compose network a service connects to another by its <strong>service name</strong> as the hostname — e.g. the app reaches the DB at <code>postgres:5432</code>, not <code>localhost</code>.</p><div class='keynote'><strong>Classic gotcha:</strong> a container’s <code>localhost</code> is the container itself, not the host or another container — use the service/container name (or, from inside a container to the host, <code>host.docker.internal</code>).</div>"
+    },
+    {
+      "id": "compose",
+      "title": "Docker Compose",
+      "bodyHtml": "<p><strong>Compose</strong> defines a multi-container app in one YAML file and brings it all up with a single command — perfect for a test stack (app + DB + mock server).</p><pre><code>services:\r\n  app:\r\n    build: .\r\n    ports: [\"8080:3000\"]\r\n    environment:\r\n      DB_URL: postgres://db:5432/test\r\n    depends_on: [db]\r\n  db:\r\n    image: postgres:16\r\n    environment:\r\n      POSTGRES_DB: test\r\n    tmpfs: [\"/var/lib/postgresql/data\"]   # ephemeral test DB</code></pre><ul class='clean'><li><code>docker compose up -d</code> / <code>down</code> — start / tear down the whole stack.</li><li><code>depends_on</code> controls start order (not readiness — add a healthcheck for that).</li><li>One network is created automatically, so services resolve each other by name.</li></ul>"
+    },
+    {
+      "id": "testing",
+      "title": "Docker for Testing & CI",
+      "bodyHtml": "<p>This is where containers earn their keep for an SDET — disposable, identical environments on every run.</p><ul class='clean'><li><strong>Ephemeral dependencies</strong> — spin up a real Postgres/Redis/Kafka in a container for integration tests instead of mocking, then throw it away.</li><li><strong>Testcontainers</strong> — a library (Java/.NET/Python/Node) that starts containers <em>from your test code</em> and tears them down after, with dynamic ports — no leftover state.</li><li><strong>Selenium/Playwright in Docker</strong> — official browser images and Selenium Grid containers give consistent, headless browsers in CI.</li><li><strong>CI</strong> — GitHub Actions / GitLab run jobs <em>inside</em> containers (<code>services:</code> / <code>container:</code>), so the build environment is version-pinned and reproducible.</li></ul><pre><code>// Testcontainers (Java) — a throwaway Postgres for one test class\r\n@Container\r\nstatic PostgreSQLContainer&lt;?&gt; db =\r\n    new PostgreSQLContainer&lt;&gt;(\"postgres:16\");\r\n// db.getJdbcUrl() gives a dynamic URL; container is removed after tests</code></pre><div class='keynote'><strong>Say this:</strong> Testcontainers gives you real dependencies with the isolation of unit tests — no shared staging DB, no flaky cross-test contamination.</div>"
+    }
+  ],
+  "quiz": [
+    {
+      "id": "cs-docker-001",
+      "topicId": "docker",
+      "topicTitle": "Docker",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "Container vs VM?",
+      "choices": [
+        "A container shares the host kernel and isolates only the process — MBs, seconds; a VM virtualizes a full OS with its own kernel — GBs, minutes",
+        "A container virtualizes a full OS with its own kernel; a VM shares the host kernel and is lighter",
+        "Containers and VMs both run their own kernel, but containers boot faster due to caching",
+        "A VM isolates only the process while a container needs a hypervisor to run"
+      ],
+      "correctAnswer": "A container shares the host kernel and isolates only the process — MBs, seconds; a VM virtualizes a full OS with its own kernel — GBs, minutes",
+      "explanation": "A container shares the host kernel and isolates just the process — MBs and seconds; a VM virtualizes a full OS with its own kernel — GBs and minutes.",
+      "tags": [
+        "docker"
+      ]
+    },
+    {
+      "id": "cs-docker-002",
+      "topicId": "docker",
+      "topicTitle": "Docker",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "Image vs container?",
+      "choices": [
+        "Both are read-only templates; the container just has a newer tag than the image",
+        "An image is a running process; a container is the saved snapshot you push to a registry",
+        "The image is a read-only template (the class); a container is a running instance of it (the object) with a writable layer",
+        "An image is a container that has been stopped; a container is an image that is running"
+      ],
+      "correctAnswer": "The image is a read-only template (the class); a container is a running instance of it (the object) with a writable layer",
+      "explanation": "The image is a read-only template (the class); a container is a running instance of it (the object) with a writable layer on top.",
+      "tags": [
+        "docker"
+      ]
+    },
+    {
+      "id": "cs-docker-003",
+      "topicId": "docker",
+      "topicTitle": "Docker",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "Why order Dockerfile instructions carefully?",
+      "choices": [
+        "Docker runs instructions in parallel, so ordering decides which layer wins the race",
+        "Each instruction is a cached layer; copy and install dependencies before source so code changes don't bust the dependency layer",
+        "Instructions execute bottom-to-top, so the CMD must come before FROM to build",
+        "Ordering only affects the final image size, never the build speed or caching"
+      ],
+      "correctAnswer": "Each instruction is a cached layer; copy and install dependencies before source so code changes don't bust the dependency layer",
+      "explanation": "Each instruction is a cached layer; copy the dependency manifest and install before copying source so code changes don’t bust the dependency layer.",
+      "tags": [
+        "docker"
+      ]
+    },
+    {
+      "id": "cs-docker-004",
+      "topicId": "docker",
+      "topicTitle": "Docker",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "CMD vs ENTRYPOINT?",
+      "choices": [
+        "ENTRYPOINT sets the default command that is easily overridden; CMD is the fixed executable",
+        "CMD and ENTRYPOINT are aliases; both set the container's hostname at runtime",
+        "CMD sets the default command (easily overridden); ENTRYPOINT sets the fixed executable, with CMD supplying default arguments",
+        "CMD runs at build time while ENTRYPOINT runs only when you exec into the container"
+      ],
+      "correctAnswer": "CMD sets the default command (easily overridden); ENTRYPOINT sets the fixed executable, with CMD supplying default arguments",
+      "explanation": "CMD sets the default command (easily overridden at run); ENTRYPOINT sets the fixed executable, with CMD supplying its default arguments.",
+      "tags": [
+        "docker"
+      ]
+    },
+    {
+      "id": "cs-docker-005",
+      "topicId": "docker",
+      "topicTitle": "Docker",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "How do you persist data?",
+      "choices": [
+        "Use a volume (named volume for DBs, bind mount for live source); the writable layer is deleted with the container",
+        "Commit the container to a new image after every write to keep the data",
+        "Store data in the container's writable layer, which Docker persists automatically on stop",
+        "Use EXPOSE to map the data directory to the host so it survives removal"
+      ],
+      "correctAnswer": "Use a volume (named volume for DBs, bind mount for live source); the writable layer is deleted with the container",
+      "explanation": "Use a volume (named volume for DBs, bind mount for live source) — the container’s own writable layer is deleted with the container.",
+      "tags": [
+        "docker"
+      ]
+    },
+    {
+      "id": "cs-docker-006",
+      "topicId": "docker",
+      "topicTitle": "Docker",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "How do two containers talk?",
+      "choices": [
+        "Each container's localhost points to the others, so they connect via localhost and the port",
+        "They must publish ports to the host with -p and connect through the host's IP",
+        "On a shared user-defined/Compose network they resolve each other by service or container name via built-in DNS",
+        "They communicate only through a shared bind-mounted volume on disk"
+      ],
+      "correctAnswer": "On a shared user-defined/Compose network they resolve each other by service or container name via built-in DNS",
+      "explanation": "On a shared user-defined/Compose network they resolve each other by service or container name via Docker’s built-in DNS — not localhost.",
+      "tags": [
+        "docker"
+      ]
+    },
+    {
+      "id": "cs-docker-007",
+      "topicId": "docker",
+      "topicTitle": "Docker",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "What does -p 8080:3000 do?",
+      "choices": [
+        "Maps container port 8080 to host port 3000 in the reverse direction",
+        "Forwards host port 8080 to another container's port 3000 on the same network",
+        "Opens both ports 8080 and 3000 on the host for redundancy",
+        "Publishes (maps) host port 8080 to container port 3000 so the service is reachable from the host"
+      ],
+      "correctAnswer": "Publishes (maps) host port 8080 to container port 3000 so the service is reachable from the host",
+      "explanation": "Publishes (maps) host port 8080 to container port 3000 so the service is reachable from the host.",
+      "tags": [
+        "docker"
+      ]
+    },
+    {
+      "id": "cs-docker-008",
+      "topicId": "docker",
+      "topicTitle": "Docker",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "What is a multi-stage build?",
+      "choices": [
+        "Build in a heavy image, then COPY only the artifact into a small runtime image — smaller, more secure final images",
+        "Building one image that runs across multiple host stages of a CI pipeline",
+        "Splitting a Dockerfile into multiple files that are merged at runtime",
+        "Running several build stages in parallel to combine their layers into one large image"
+      ],
+      "correctAnswer": "Build in a heavy image, then COPY only the artifact into a small runtime image — smaller, more secure final images",
+      "explanation": "Build in a heavy image, then COPY only the artifact into a small runtime image — smaller, more secure final images.",
+      "tags": [
+        "docker"
+      ]
+    },
+    {
+      "id": "cs-docker-009",
+      "topicId": "docker",
+      "topicTitle": "Docker",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "What is Docker Compose for?",
+      "choices": [
+        "Defining and running a multi-container app from one YAML file with a single up/down",
+        "Compressing multiple images into a single layer to speed up registry pushes",
+        "Orchestrating containers across a cluster of hosts with automatic failover",
+        "Building a single image from several Dockerfiles in one command"
+      ],
+      "correctAnswer": "Defining and running a multi-container app from one YAML file with a single up/down",
+      "explanation": "Defining and running a multi-container app (app + DB + mocks) from one YAML file with a single up/down.",
+      "tags": [
+        "docker"
+      ]
+    },
+    {
+      "id": "cs-docker-010",
+      "topicId": "docker",
+      "topicTitle": "Docker",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "How does Docker help testing?",
+      "choices": [
+        "By caching test results inside image layers so reruns skip already-passing tests",
+        "It mocks all external dependencies automatically so no real services are needed",
+        "Reproducible, disposable environments — real dependencies via Testcontainers and consistent browsers in CI, with clean state every run",
+        "It runs tests faster by sharing one long-lived staging database across all test runs"
+      ],
+      "correctAnswer": "Reproducible, disposable environments — real dependencies via Testcontainers and consistent browsers in CI, with clean state every run",
+      "explanation": "Reproducible, disposable environments — real dependencies via Testcontainers and consistent browsers in CI, with clean state every run.",
+      "tags": [
+        "docker"
+      ]
+    },
+    {
+      "id": "cs-docker-011",
+      "topicId": "docker",
+      "topicTitle": "Docker",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "Image too big — what do you do?",
+      "choices": [
+        "Run more layers so Docker can compress them together into a smaller image",
+        "Use a slim/alpine base, multi-stage builds, a .dockerignore, and combine RUN steps to cut layers",
+        "Switch from images to bind mounts so nothing is stored in the image",
+        "Add a full OS base image so the layers deduplicate against the host"
+      ],
+      "correctAnswer": "Use a slim/alpine base, multi-stage builds, a .dockerignore, and combine RUN steps to cut layers",
+      "explanation": "Use a slim/alpine base, multi-stage builds, a .dockerignore, and combine RUN steps to cut layers.",
+      "tags": [
+        "docker"
+      ]
+    },
+    {
+      "id": "cs-docker-012",
+      "topicId": "docker",
+      "topicTitle": "Docker",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "depends_on guarantees readiness?",
+      "choices": [
+        "Yes — it waits for the dependency's healthcheck to pass before starting the service",
+        "Yes — it blocks until the dependent container's main process is fully initialized",
+        "No — it only controls start order; add a healthcheck (or app retry) to wait until the dependency is actually ready",
+        "No — it does nothing at all and is ignored unless you also set restart: always"
+      ],
+      "correctAnswer": "No — it only controls start order; add a healthcheck (or app retry) to wait until the dependency is actually ready",
+      "explanation": "No — it only controls start order; add a healthcheck (or retry in the app) to wait until the dependency is actually ready.",
+      "tags": [
+        "docker"
+      ]
+    }
+  ]
+}

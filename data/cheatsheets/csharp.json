@@ -1,0 +1,310 @@
+{
+  "id": "csharp",
+  "title": "C#",
+  "group": "Languages",
+  "accent": "#5a3fb0",
+  "summary": "A to-the-point review of the C# an SDET gets asked about: data types, modifiers, OOP, strings, collections, exceptions, async/await, and LINQ — plus the NUnit/xUnit + Playwright testing stack. Short explanations, short examples.",
+  "tags": [
+    "Data Types",
+    "Modifiers",
+    "OOP",
+    "Strings",
+    "Collections",
+    "async / await",
+    "LINQ"
+  ],
+  "sections": [
+    {
+      "id": "types",
+      "title": "Data Types & Variables",
+      "bodyHtml": "<p>Every type is either a <strong>value type</strong> or a <strong>reference type</strong>. This one distinction explains most C# behaviour questions.</p><ul class='clean'><li><strong>Value types</strong> hold the data itself and are <strong>copied</strong> on assignment. Examples: <code>int</code>, <code>long</code>, <code>double</code>, <code>decimal</code>, <code>bool</code>, <code>char</code>, <code>enum</code>, <code>struct</code>, <code>DateTime</code>.</li><li><strong>Reference types</strong> hold a <strong>reference</strong> to data on the heap; assigning copies the reference, so both variables point to the same object. Examples: <code>class</code>, <code>string</code>, arrays, <code>object</code>, interfaces, delegates.</li></ul><pre><code>int a = 1; int b = a; b = 9;            // a stays 1 (value copied)\r\n\r\nint[] x = { 1 }; int[] y = x; y[0] = 9; // x[0] is now 9 (same array)</code></pre><ul class='clean'><li><code>var</code> — the compiler infers the type; the variable is still strongly typed.</li><li><code>const</code> — compile-time constant. <code>readonly</code> — set once, in the constructor.</li><li><strong>Nullable:</strong> value types are non-null by default; <code>int?</code> allows null. Use <code>?.</code>, <code>??</code>, <code>??=</code> for null-safety (<code>name ??= \"anon\";</code>).</li><li><strong>Boxing</strong> = wrapping a value type in a heap <code>object</code>; unboxing reverses it. It allocates, so avoid it in hot loops.</li></ul><div class='keynote'><strong>Common trap:</strong> passing a reference type to a method lets it mutate the object (the caller sees the change), but <em>reassigning</em> the parameter inside the method does not affect the caller — C# passes the reference by value.</div>"
+    },
+    {
+      "id": "modifiers",
+      "title": "Modifiers & Keywords",
+      "bodyHtml": "<p><strong>Access modifiers</strong> — who can see a member:</p><ul class='clean'><li><code>public</code> — anywhere.</li><li><code>private</code> — only inside the same class (the <em>default</em> for class members).</li><li><code>protected</code> — the class and its subclasses.</li><li><code>internal</code> — anywhere in the same project/assembly.</li><li><code>protected internal</code> / <code>private protected</code> — combinations, rarely needed.</li></ul><p><strong>Other modifiers</strong> you'll be asked about:</p><ul class='clean'><li><code>static</code> — belongs to the type, not an instance.</li><li><code>abstract</code> — no body; must be overridden; the class can't be instantiated.</li><li><code>virtual</code> — has a default body but can be overridden; <code>override</code> replaces it; <code>sealed</code> stops further overriding.</li><li><code>const</code> / <code>readonly</code> — immutability (compile-time vs set-once).</li><li><code>new</code> — hides an inherited member.</li></ul>"
+    },
+    {
+      "id": "oop",
+      "title": "OOP in C#",
+      "bodyHtml": "<p>The four pillars, briefly:</p><ul class='clean'><li><strong>Encapsulation</strong> — keep fields <code>private</code>, expose them through <code>public</code> properties (<code>get/set</code>).</li><li><strong>Inheritance</strong> — a class extends one base class (<code>: Base</code>).</li><li><strong>Polymorphism</strong> — <code>virtual</code>/<code>override</code> so the right method runs for the actual object type.</li><li><strong>Abstraction</strong> — expose <em>what</em>, hide <em>how</em>, via abstract classes and interfaces.</li></ul><div class='layer'><div class='ltitle'>Abstract class vs Interface — when &amp; how</div><p><strong>Abstract class</strong> = a partial base with shared code and state; use it when types are a kind of the same thing (\"is-a\"). A class extends <strong>one</strong> base and <code>override</code>s its abstract members.<br><strong>Interface</strong> = a pure contract / capability; use it when unrelated types must all do the same thing (\"can-do\"). A class implements <strong>many</strong> interfaces and provides every member.</p></div><pre><code>public abstract class Shape {              // shared base\r\n    public string Name { get; init; }\r\n    public abstract double Area();         // no body -> subclass must override\r\n}\r\npublic interface IDrawable {               // capability\r\n    void Draw();\r\n}\r\n\r\n// extend ONE class, implement MANY interfaces\r\npublic sealed class Circle : Shape, IDrawable {\r\n    public double R { get; init; }\r\n    public override double Area() =&gt; Math.PI * R * R;\r\n    public void Draw() =&gt; Console.WriteLine($\"O r={R}\");\r\n}</code></pre><div class='layer'><div class='ltitle'>class vs struct vs record</div><p><strong>class</strong> = reference type, mutable, identity equality. <strong>struct</strong> = value type, copied. <strong>record</strong> = reference type with <em>value</em> equality and concise immutable syntax — ideal for DTOs/test models; <code>with</code> makes a modified copy.</p></div><pre><code>public record User(int Id, string Name);\r\n\r\nvar u1 = new User(1, \"Ada\");\r\nvar u2 = u1 with { Name = \"Grace\" };   // copy with one change\r\nu1 == new User(1, \"Ada\");              // true — value equality</code></pre>"
+    },
+    {
+      "id": "strings",
+      "title": "Strings & Immutability",
+      "bodyHtml": "<p><code>string</code> is a <strong>reference type but immutable</strong> — once created it never changes. Every \"modification\" (<code>+</code>, <code>Replace</code>, <code>ToUpper</code>) returns a <strong>new</strong> string and leaves the original untouched.</p><pre><code>string s = \"hello\";\r\ns.ToUpper();        // returns \"HELLO\" but s is STILL \"hello\"\r\ns = s.ToUpper();    // reassign to keep the result</code></pre><p><strong>Why make it immutable?</strong></p><ul class='clean'><li>Thread-safe by nature — no one can change a shared string underneath you.</li><li>Safe as a dictionary / hash key — its hash never changes.</li><li>Enables <strong>interning</strong>: identical string literals are cached and shared in a pool.</li></ul><p>The cost: concatenating in a loop creates a new object each pass (O(n²) garbage). Use <strong><code>StringBuilder</code></strong> when you build a string in many steps.</p><pre><code>var sb = new StringBuilder();\r\nforeach (var row in rows) sb.Append(row).Append('\\n');\r\nstring report = sb.ToString();   // one final allocation\r\n\r\n\"ab\" == \"a\" + \"b\";               // true — == on strings compares VALUE</code></pre><div class='keynote'><strong>string vs StringBuilder:</strong> use <code>string</code> for fixed or few values; reach for <code>StringBuilder</code> the moment you concatenate inside a loop.</div>"
+    },
+    {
+      "id": "async",
+      "title": "async / await",
+      "bodyHtml": "<p>The single most likely C# deep-dive for a Playwright/SDET role, since the API is async throughout.</p><ul class='clean'><li><code>async</code> marks a method returning <code>Task</code>/<code>Task&lt;T&gt;</code>/<code>ValueTask</code>; <code>await</code> suspends without blocking the calling thread.</li><li>It frees the thread while I/O completes — concurrency without extra threads.</li><li>Return <code>Task</code>, not <code>void</code> (except event handlers); <code>async void</code> can't be awaited and swallows exceptions.</li><li>Avoid <code>.Result</code>/<code>.Wait()</code> — they can deadlock; <strong>await all the way up</strong>.</li><li><code>Task.WhenAll</code> runs work concurrently; <code>CancellationToken</code> cooperatively cancels.</li></ul><pre><code>public async Task&lt;User&gt; GetUserAsync(int id, CancellationToken ct = default)\r\n{\r\n    var resp = await _client.GetAsync($\"/users/{id}\", ct);\r\n    resp.EnsureSuccessStatusCode();\r\n    return await resp.Content.ReadFromJsonAsync&lt;User&gt;(cancellationToken: ct);\r\n}\r\n\r\n// run several requests concurrently, then await all\r\nvar users = await Task.WhenAll(ids.Select(id =&gt; GetUserAsync(id)));</code></pre><div class='keynote'><strong>Why await beats Thread:</strong> awaiting an I/O-bound task returns the thread to the pool until the OS signals completion — so thousands of concurrent requests need only a handful of threads. Threads cost ~1&nbsp;MB of stack each; tasks are cheap.</div>"
+    },
+    {
+      "id": "linq",
+      "title": "LINQ",
+      "bodyHtml": "<p>Declarative querying over any <code>IEnumerable&lt;T&gt;</code>. Method (fluent) syntax is most common in test code:</p><pre><code>var adults = people\r\n    .Where(p =&gt; p.Age &gt;= 18)\r\n    .OrderByDescending(p =&gt; p.Age)\r\n    .Select(p =&gt; p.Name)\r\n    .ToList();\r\n\r\n// grouping &amp; aggregation\r\nvar byDept = people\r\n    .GroupBy(p =&gt; p.Dept)\r\n    .Select(g =&gt; new { Dept = g.Key, Count = g.Count(), AvgAge = g.Average(p =&gt; p.Age) });\r\n\r\nbool anyMinor = people.Any(p =&gt; p.Age &lt; 18);\r\nvar lookup    = people.ToDictionary(p =&gt; p.Id);</code></pre><ul class='clean'><li><strong>Deferred execution</strong> — the query runs when enumerated (<code>ToList</code>, <code>foreach</code>, <code>Count</code>), not when defined; the source can change in between.</li><li>Key operators: <code>Where</code>, <code>Select</code>, <code>SelectMany</code>, <code>First/FirstOrDefault</code>, <code>Single</code>, <code>Any/All</code>, <code>GroupBy</code>, <code>OrderBy</code>, <code>Aggregate</code>.</li><li><code>FirstOrDefault</code>/<code>SingleOrDefault</code> return default instead of throwing when empty — handy in assertions.</li></ul><div class='keynote'><strong>Single vs First:</strong> <code>Single</code> asserts exactly one match (throws otherwise) — use it in tests to prove uniqueness; <code>First</code> just takes the first of possibly many.</div>"
+    },
+    {
+      "id": "delegates",
+      "title": "Delegates, Events, Lambdas & Generics",
+      "bodyHtml": "<p><strong>Delegates</strong> are type-safe function pointers. The built-ins cover most needs: <code>Func&lt;...,TResult&gt;</code> (returns a value), <code>Action&lt;...&gt;</code> (void), <code>Predicate&lt;T&gt;</code> (returns bool). <strong>Lambdas</strong> (<code>x =&gt; x * 2</code>) are inline delegates and the backbone of LINQ.</p><pre><code>Func&lt;int, int&gt; square = x =&gt; x * x;\r\nAction&lt;string&gt; log = msg =&gt; Console.WriteLine(msg);\r\nFunc&lt;User, bool&gt; isAdult = u =&gt; u.Age &gt;= 18;\r\n\r\nsquare(5);                 // 25\r\npeople.Where(isAdult);     // delegates compose with LINQ</code></pre><p><strong>Events</strong> are a publish/subscribe wrapper over delegates (<code>event EventHandler Clicked;</code>). <strong>Generics</strong> give type safety and reuse with constraints (<code>where T : class, new()</code>).</p><pre><code>public static T[] Repeat&lt;T&gt;(T value, int n) where T : struct {\r\n    var arr = new T[n];\r\n    Array.Fill(arr, value);\r\n    return arr;\r\n}</code></pre><div class='layer'><div class='ltitle'>Pattern matching (C# 8+)</div><p>Modern <code>switch</code> expressions and type/property patterns make branching concise — common in parsing API responses.</p></div><pre><code>string Classify(object o) =&gt; o switch {\r\n    int n when n &lt; 0   =&gt; \"negative\",\r\n    int                =&gt; \"non-negative int\",\r\n    string { Length: 0 } =&gt; \"empty string\",\r\n    null               =&gt; \"null\",\r\n    _                  =&gt; \"other\"\r\n};</code></pre>"
+    },
+    {
+      "id": "collections",
+      "title": "Collections",
+      "bodyHtml": "<table><thead><tr><th>Type</th><th>Notes</th></tr></thead><tbody><tr><td>List&lt;T&gt;</td><td>Resizable array; the workhorse; O(1) index, O(n) mid-insert.</td></tr><tr><td>Dictionary&lt;K,V&gt;</td><td>Hash map; O(1) average lookup; <code>TryGetValue</code> to avoid exceptions.</td></tr><tr><td>HashSet&lt;T&gt;</td><td>Unique elements; set operations (UnionWith, IntersectWith).</td></tr><tr><td>Queue / Stack</td><td>FIFO / LIFO.</td></tr><tr><td>IEnumerable&lt;T&gt;</td><td>Lazy sequence; the base abstraction for LINQ.</td></tr><tr><td>ConcurrentDictionary</td><td>Thread-safe map for parallel test state.</td></tr></tbody></table><p><strong>Used most in practice:</strong> <code>List&lt;T&gt;</code> for ordered items and <code>Dictionary&lt;K,V&gt;</code> for key lookups cover the large majority of test code.</p><pre><code>var names = new List&lt;string&gt; { \"Ada\", \"Grace\" };\r\nnames.Add(\"Linus\");\r\nbool has = names.Contains(\"Ada\");\r\n\r\nvar ages = new Dictionary&lt;string, int&gt; { [\"Ada\"] = 36 };\r\nif (ages.TryGetValue(\"Ada\", out var age)) { /* age = 36, no exception */ }</code></pre><p><code>IEnumerable&lt;T&gt;</code> = lazy, forward-only and the base for LINQ. Return the narrowest interface that fits (e.g. <code>IReadOnlyList&lt;T&gt;</code>).</p>"
+    },
+    {
+      "id": "exceptions",
+      "title": "Exceptions & using",
+      "bodyHtml": "<p>All exceptions derive from <code>System.Exception</code>. Unlike Java, C# has <strong>no checked exceptions</strong> — nothing forces you to declare or catch them.</p><ul class='clean'><li><code>try</code> — the code that might fail.</li><li><code>catch</code> — handle a specific exception type (catch the narrowest first).</li><li><code>finally</code> — always runs (cleanup), whether or not an exception was thrown.</li><li><code>throw;</code> rethrows and keeps the original stack trace; <code>throw ex;</code> resets it — prefer <code>throw;</code>.</li></ul><pre><code>try {\r\n    var data = await _client.GetStringAsync(url);\r\n    Process(data);\r\n} catch (HttpRequestException ex) {\r\n    _log.Error(ex, \"request failed\");\r\n    throw;                       // rethrow, preserve the stack trace\r\n} finally {\r\n    _stopwatch.Stop();           // always runs\r\n}</code></pre><p><strong><code>using</code> / IDisposable</strong> gives deterministic cleanup of resources (HTTP clients, browser contexts, files) — <code>Dispose()</code> is called automatically at scope exit, even on exception. <code>await using</code> + <code>IAsyncDisposable</code> handles async cleanup.</p><pre><code>await using var context = await browser.NewContextAsync();\r\nvar page = await context.NewPageAsync();\r\n// context disposed automatically when the scope ends</code></pre><div class='keynote'><strong>GC vs IDisposable:</strong> the garbage collector frees managed memory on its own schedule; <code>using</code>/<code>IDisposable</code> is for things it won't release promptly (sockets, files, handles). Reuse one <code>HttpClient</code> rather than one per request, to avoid socket exhaustion.</div>"
+    },
+    {
+      "id": "testing",
+      "title": "Test Stack (Your Stack)",
+      "bodyHtml": "<ul class='clean'><li><strong>NUnit</strong> — <code>[Test]</code>, <code>[SetUp]</code>/<code>[OneTimeSetUp]</code>, <code>[TestCase]</code>/<code>[TestCaseSource]</code> for data-driven tests, rich <code>Assert.That</code> constraint model.</li><li><strong>xUnit</strong> — <code>[Fact]</code>/<code>[Theory]</code>, constructor + <code>IDisposable</code> for setup/teardown, parallel by default.</li><li><strong>Playwright for .NET</strong> — async API; <code>PageTest</code>/<code>ContextTest</code> base classes wire fixtures and a fresh context per test.</li><li><strong>RestSharp / HttpClient</strong> for API tests; <strong>Moq</strong> for mocking; <strong>FluentAssertions</strong> for readable asserts.</li></ul><pre><code>[TestCase(2, 4)]\r\n[TestCase(3, 9)]\r\npublic void Squares(int input, int expected)\r\n    =&gt; Assert.That(input * input, Is.EqualTo(expected));\r\n\r\n// Moq\r\nvar repo = new Mock&lt;IUserRepo&gt;();\r\nrepo.Setup(r =&gt; r.Find(1)).Returns(new User(1, \"Ada\"));\r\nAssert.That(new UserService(repo.Object).NameOf(1), Is.EqualTo(\"Ada\"));\r\nrepo.Verify(r =&gt; r.Find(1), Times.Once);</code></pre><div class='keynote'><strong>NUnit vs xUnit:</strong> NUnit has more built-in attributes and a fluent constraint model; xUnit is leaner, opinionated, parallel-first, and uses the constructor + <code>IDisposable</code> for setup/teardown instead of attributes.</div>"
+    }
+  ],
+  "quiz": [
+    {
+      "id": "cs-csharp-001",
+      "topicId": "csharp",
+      "topicTitle": "C#",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "Value vs reference type?",
+      "choices": [
+        "Both copy a reference to the same heap object on assignment",
+        "Value types copy the data on assignment; reference types copy a reference to a shared heap object",
+        "Value types live on the heap; reference types live on the stack and are copied",
+        "Reference types copy the data; value types share a single boxed instance"
+      ],
+      "correctAnswer": "Value types copy the data on assignment; reference types copy a reference to a shared heap object",
+      "explanation": "Value types copy the data on assignment (int, struct); reference types copy a reference to a shared heap object (class, string).",
+      "tags": [
+        "csharp"
+      ]
+    },
+    {
+      "id": "cs-csharp-002",
+      "topicId": "csharp",
+      "topicTitle": "C#",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "public / private / protected / internal?",
+      "choices": [
+        "public = anywhere; private = same class (the default); protected = class + subclasses; internal = same assembly",
+        "public = same assembly; private = subclasses; protected = anywhere; internal = same class",
+        "public = anywhere; private = same namespace; protected = same assembly; internal = subclasses only",
+        "public = anywhere; private = subclasses (the default); protected = same assembly; internal = same class"
+      ],
+      "correctAnswer": "public = anywhere; private = same class (the default); protected = class + subclasses; internal = same assembly",
+      "explanation": "public = anywhere; private = same class (the default); protected = class + subclasses; internal = same assembly.",
+      "tags": [
+        "csharp"
+      ]
+    },
+    {
+      "id": "cs-csharp-003",
+      "topicId": "csharp",
+      "topicTitle": "C#",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "Abstract class vs interface?",
+      "choices": [
+        "Both are pure contracts; a class can extend many of either with no shared code",
+        "An interface holds shared state and code; an abstract class is a pure contract you implement once",
+        "Abstract class = shared code/state, extend ONE; interface = pure contract, implement MANY",
+        "Abstract class can be instantiated directly; an interface cannot have any methods"
+      ],
+      "correctAnswer": "Abstract class = shared code/state, extend ONE; interface = pure contract, implement MANY",
+      "explanation": "Abstract class = shared code/state, extend ONE (\"is-a\"); interface = pure contract, implement MANY (\"can-do\"). Interfaces can have default methods since C# 8.",
+      "tags": [
+        "csharp"
+      ]
+    },
+    {
+      "id": "cs-csharp-004",
+      "topicId": "csharp",
+      "topicTitle": "C#",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "Why is string immutable, and what does it cost?",
+      "choices": [
+        "It can't change after creation — thread-safe and hashable, but concatenation makes new objects, so use StringBuilder in loops",
+        "It's mutable in place, which is fast but breaks hashing, so use StringBuilder to make it immutable",
+        "Immutability makes it a value type copied on assignment, costing extra stack memory per use",
+        "It can't change after creation, so concatenation mutates the original buffer in O(1) with no extra cost"
+      ],
+      "correctAnswer": "It can't change after creation — thread-safe and hashable, but concatenation makes new objects, so use StringBuilder in loops",
+      "explanation": "It can't change after creation — so it's thread-safe and hashable; but concatenation makes new objects, so use StringBuilder in loops.",
+      "tags": [
+        "csharp"
+      ]
+    },
+    {
+      "id": "cs-csharp-005",
+      "topicId": "csharp",
+      "topicTitle": "C#",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "class vs struct vs record?",
+      "choices": [
+        "class = value type copied; struct = reference with identity; record = mutable reference with no equality",
+        "All three are reference types; only record differs by being immutable and copied by value",
+        "class = value equality DTO; struct = reference type; record = mutable identity-based reference type",
+        "class = mutable reference w/ identity equality; struct = value type; record = reference type with value equality, ideal for DTOs"
+      ],
+      "correctAnswer": "class = mutable reference w/ identity equality; struct = value type; record = reference type with value equality, ideal for DTOs",
+      "explanation": "class = mutable reference w/ identity equality; struct = value type; record = reference type with value equality and with copies, ideal for DTOs.",
+      "tags": [
+        "csharp"
+      ]
+    },
+    {
+      "id": "cs-csharp-006",
+      "topicId": "csharp",
+      "topicTitle": "C#",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "const vs readonly?",
+      "choices": [
+        "const is set once at runtime in the constructor; readonly is baked into callers at compile time",
+        "const is a compile-time constant baked into callers; readonly is set once at runtime, in the constructor",
+        "Both are evaluated at compile time; const allows instance fields while readonly does not",
+        "readonly is a compile-time constant; const can be reassigned anywhere within the same class"
+      ],
+      "correctAnswer": "const is a compile-time constant baked into callers; readonly is set once at runtime, in the constructor",
+      "explanation": "const is a compile-time constant baked into callers; readonly is set once at runtime, in the constructor.",
+      "tags": [
+        "csharp"
+      ]
+    },
+    {
+      "id": "cs-csharp-007",
+      "topicId": "csharp",
+      "topicTitle": "C#",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "What does async/await do?",
+      "choices": [
+        "It spawns a new dedicated thread per call so work runs truly in parallel",
+        "It blocks the calling thread until the Task finishes, guaranteeing ordered execution",
+        "await suspends the method and returns the thread to the pool until the Task completes — concurrency without blocking threads",
+        "await pauses all threads in the pool until every pending Task has completed"
+      ],
+      "correctAnswer": "await suspends the method and returns the thread to the pool until the Task completes — concurrency without blocking threads",
+      "explanation": "await suspends the method and returns the thread to the pool until the awaited Task completes — concurrency without blocking threads.",
+      "tags": [
+        "csharp"
+      ]
+    },
+    {
+      "id": "cs-csharp-008",
+      "topicId": "csharp",
+      "topicTitle": "C#",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "Why avoid async void?",
+      "choices": [
+        "It can't be awaited and its exceptions escape the caller; return Task except for event handlers",
+        "It blocks the UI thread and cannot be cancelled, so always prefer async void for handlers",
+        "It forces the method onto a background thread, doubling memory use per call",
+        "It can't return a value, so its exceptions are silently logged but still awaitable"
+      ],
+      "correctAnswer": "It can't be awaited and its exceptions escape the caller; return Task except for event handlers",
+      "explanation": "It can't be awaited and its exceptions escape the caller; return Task except for event handlers.",
+      "tags": [
+        "csharp"
+      ]
+    },
+    {
+      "id": "cs-csharp-009",
+      "topicId": "csharp",
+      "topicTitle": "C#",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "What is deferred execution in LINQ?",
+      "choices": [
+        "The query is compiled but never runs until the program exits",
+        "A LINQ query runs when it's enumerated (ToList/foreach), not when defined — so the source can change in between",
+        "A LINQ query runs immediately when defined, caching a snapshot of the source",
+        "Each operator runs on a separate thread as soon as it is chained"
+      ],
+      "correctAnswer": "A LINQ query runs when it's enumerated (ToList/foreach), not when defined — so the source can change in between",
+      "explanation": "A LINQ query runs when it's enumerated (ToList/foreach), not when defined — so the source can change in between.",
+      "tags": [
+        "csharp"
+      ]
+    },
+    {
+      "id": "cs-csharp-010",
+      "topicId": "csharp",
+      "topicTitle": "C#",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "throw vs throw ex?",
+      "choices": [
+        "throw; resets the stack trace; throw ex; preserves it — prefer throw ex;",
+        "Both preserve the original stack trace; throw ex; just adds the current frame",
+        "throw; rethrows and keeps the original stack trace; throw ex; resets it — prefer throw;",
+        "throw ex; rethrows the same object; throw; wraps it in a new exception"
+      ],
+      "correctAnswer": "throw; rethrows and keeps the original stack trace; throw ex; resets it — prefer throw;",
+      "explanation": "throw; rethrows and keeps the original stack trace; throw ex; resets it — prefer throw;.",
+      "tags": [
+        "csharp"
+      ]
+    },
+    {
+      "id": "cs-csharp-011",
+      "topicId": "csharp",
+      "topicTitle": "C#",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "Purpose of using / IDisposable?",
+      "choices": [
+        "It forces the garbage collector to run immediately, freeing managed memory at scope exit",
+        "Deterministic release of unmanaged resources — Dispose() runs at scope exit instead of waiting for the GC",
+        "It marks an object as immutable so the GC can collect it sooner",
+        "It defers all cleanup to a finalizer that the GC invokes on a background thread"
+      ],
+      "correctAnswer": "Deterministic release of unmanaged resources — Dispose() runs at scope exit instead of waiting for the GC",
+      "explanation": "Deterministic release of unmanaged resources — Dispose() runs at scope exit instead of waiting for the GC.",
+      "tags": [
+        "csharp"
+      ]
+    },
+    {
+      "id": "cs-csharp-012",
+      "topicId": "csharp",
+      "topicTitle": "C#",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "NUnit vs xUnit setup?",
+      "choices": [
+        "Both use [SetUp] attributes; xUnit additionally runs every test serially by default",
+        "NUnit uses a constructor + IDisposable; xUnit uses [SetUp] attributes and runs serially",
+        "NUnit uses [BeforeEach] attributes; xUnit uses [Fact] for setup and runs in isolation",
+        "NUnit uses [SetUp] attributes; xUnit uses the test class constructor + IDisposable, and runs in parallel by default"
+      ],
+      "correctAnswer": "NUnit uses [SetUp] attributes; xUnit uses the test class constructor + IDisposable, and runs in parallel by default",
+      "explanation": "NUnit uses [SetUp] attributes; xUnit uses the test class constructor + IDisposable, and runs in parallel by default.",
+      "tags": [
+        "csharp"
+      ]
+    }
+  ]
+}

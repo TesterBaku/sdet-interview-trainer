@@ -61,6 +61,29 @@ export function HomeClient() {
         </Link>
       </div>
 
+      <div className="grid gap-5 sm:grid-cols-2">
+        <Link
+          className="rounded-[2rem] border border-blueprint/20 bg-blueprint/10 p-6 shadow-panel transition hover:-translate-y-1"
+          href="/cheatsheets"
+        >
+          <p className="text-sm font-bold uppercase tracking-[0.2em] text-blueprint/70">Cheat Sheets</p>
+          <h2 className="mt-3 font-display text-2xl font-bold text-blueprint">Study the core concepts</h2>
+          <p className="mt-2 text-ink/75">
+            13 reference pages — Playwright, Selenium, SQL, Docker, Kubernetes, Python, Java, JavaScript, C#, and more.
+          </p>
+        </Link>
+        <Link
+          className="rounded-[2rem] border border-brass/40 bg-brass/15 p-6 shadow-panel transition hover:-translate-y-1"
+          href="/quizzes"
+        >
+          <p className="text-sm font-bold uppercase tracking-[0.2em] text-brass">Quizzes</p>
+          <h2 className="mt-3 font-display text-2xl font-bold text-blueprint">Learn through quizzes</h2>
+          <p className="mt-2 text-ink/75">
+            Multiple-choice questions from every cheat sheet, with instant feedback and explanations.
+          </p>
+        </Link>
+      </div>
+
       <div className="grid gap-5 lg:grid-cols-[1.4fr_0.8fr]">
         <ProgressSummary summary={summary} />
         <section className="rounded-[2rem] border border-ink/10 bg-white/75 p-5 shadow-panel">

@@ -1,0 +1,306 @@
+{
+  "id": "javascript",
+  "title": "JavaScript",
+  "group": "Languages",
+  "accent": "#a98300",
+  "summary": "A to-the-point review of the JavaScript an SDET gets asked about: types & coercion, var/let/const, scope, closures, this, prototypes & classes, the event loop, promises & async/await, and array methods — plus the Jest / Playwright testing stack. Short explanations, short examples.",
+  "tags": [
+    "Types",
+    "let / const",
+    "Scope & Closures",
+    "this",
+    "Prototypes",
+    "Event Loop",
+    "async / await",
+    "Testing"
+  ],
+  "sections": [
+    {
+      "id": "types",
+      "title": "Types & Variables",
+      "bodyHtml": "<p>JavaScript is <strong>dynamically typed</strong>: variables don’t have types, values do. There are <strong>7 primitives</strong> and everything else is an <strong>object</strong>.</p><ul class='clean'><li><strong>Primitives</strong> (immutable, copied by value): <code>string</code>, <code>number</code>, <code>boolean</code>, <code>null</code>, <code>undefined</code>, <code>bigint</code>, <code>symbol</code>.</li><li><strong>Objects</strong> (arrays, functions, plain objects) are <strong>reference types</strong> — assigning copies the reference, so both names point at the same object.</li><li><code>typeof</code> reports the type — with two classic quirks: <code>typeof null === \"object\"</code> (a historic bug) and <code>typeof function(){} === \"function\"</code>.</li></ul><pre><code>let a = 1; let b = a; b = 9;          // a stays 1 (value copied)\r\n\r\nlet x = [1]; let y = x; y[0] = 9;     // x[0] is now 9 (same array)\r\n\r\ntypeof undefined  // \"undefined\"\r\ntypeof null       // \"object\"  (quirk)\r\nNaN === NaN       // false — use Number.isNaN()</code></pre><div class='keynote'><strong>null vs undefined:</strong> <code>undefined</code> = a variable was declared but never assigned (the engine’s default); <code>null</code> = you deliberately set “no value”.</div>"
+    },
+    {
+      "id": "vars",
+      "title": "var, let & const",
+      "bodyHtml": "<table><tr><th>Keyword</th><th>Scope</th><th>Reassign?</th><th>Hoisting</th></tr><tr><td>var</td><td>function</td><td>yes</td><td>hoisted, init <code>undefined</code></td></tr><tr><td>let</td><td>block</td><td>yes</td><td>hoisted but in the TDZ</td></tr><tr><td>const</td><td>block</td><td>no</td><td>hoisted but in the TDZ</td></tr></table><ul class='clean'><li>Default to <code>const</code>; use <code>let</code> only when you reassign; avoid <code>var</code>.</li><li><code>const</code> stops <strong>reassignment</strong>, not <strong>mutation</strong> — <code>const o = {}; o.x = 1</code> is fine.</li><li><strong>TDZ</strong> (temporal dead zone): a <code>let</code>/<code>const</code> exists but can’t be read until its declaration runs — touching it early throws, unlike <code>var</code> which reads as <code>undefined</code>.</li></ul><pre><code>const cfg = { retries: 3 };\r\ncfg.retries = 5;     // OK — mutating\r\ncfg = {};            // TypeError — reassigning a const</code></pre>"
+    },
+    {
+      "id": "scope",
+      "title": "Scope, Hoisting & Closures",
+      "bodyHtml": "<p><strong>Hoisting:</strong> declarations are processed before code runs. <code>function</code> declarations are fully hoisted (callable above their definition); <code>var</code> is hoisted as <code>undefined</code>; <code>let</code>/<code>const</code> are hoisted into the TDZ.</p><p><strong>A closure</strong> is a function that remembers the variables from the scope where it was <em>created</em>, even after that scope has returned. It’s the backbone of private state and the single most-asked JS concept.</p><pre><code>function counter() {\r\n  let n = 0;                 // captured by the closure\r\n  return () =&gt; ++n;          // remembers n after counter() returns\r\n}\r\nconst next = counter();\r\nnext(); next();              // 1, then 2\r\n\r\n// classic interview bug — var is function-scoped:\r\nfor (var i = 0; i &lt; 3; i++) setTimeout(() =&gt; console.log(i));  // 3 3 3\r\nfor (let i = 0; i &lt; 3; i++) setTimeout(() =&gt; console.log(i));  // 0 1 2</code></pre><div class='keynote'><strong>Why <code>let</code> fixes the loop:</strong> <code>let</code> creates a fresh binding per iteration, so each callback closes over its own <code>i</code>; <code>var</code> shares one binding.</div>"
+    },
+    {
+      "id": "this",
+      "title": "this & Function Binding",
+      "bodyHtml": "<p><code>this</code> is decided by <strong>how a function is called</strong>, not where it’s defined — except arrow functions.</p><ul class='clean'><li><strong>Method call</strong> <code>obj.fn()</code> — <code>this</code> is <code>obj</code>.</li><li><strong>Plain call</strong> <code>fn()</code> — <code>this</code> is <code>undefined</code> in strict mode (else the global object).</li><li><strong>Arrow function</strong> — has no own <code>this</code>; it inherits from the enclosing scope. Ideal for callbacks.</li><li><code>call</code>/<code>apply</code> invoke with an explicit <code>this</code>; <code>bind</code> returns a new function permanently bound.</li></ul><pre><code>const user = {\r\n  name: \"Ada\",\r\n  greetLater() {\r\n    setTimeout(() =&gt; console.log(this.name), 0);  // arrow keeps `this` = user\r\n  }\r\n};\r\nuser.greetLater();   // \"Ada\"\r\n\r\nconst loose = user.greetLater;\r\n// loose();          // a plain `function` callback here would lose `this`</code></pre>"
+    },
+    {
+      "id": "proto",
+      "title": "Prototypes & Classes",
+      "bodyHtml": "<p>JS inheritance is <strong>prototype-based</strong>: every object has a hidden link to a <strong>prototype</strong> object, and property lookups walk up that <strong>prototype chain</strong> until found or it hits <code>null</code>.</p><p><code>class</code> (ES6) is <strong>syntactic sugar</strong> over prototypes — cleaner syntax, same mechanism.</p><pre><code>class Animal {\r\n  constructor(name) { this.name = name; }\r\n  speak() { return `${this.name} makes a sound`; }\r\n}\r\nclass Dog extends Animal {\r\n  speak() { return `${this.name} barks`; }   // override\r\n}\r\nnew Dog(\"Rex\").speak();   // \"Rex barks\"\r\n\r\n// equivalent prototype lookup:\r\nObject.getPrototypeOf(new Dog(\"Rex\")) === Dog.prototype;  // true</code></pre><div class='keynote'><strong>Say this:</strong> classes don’t add a new inheritance model — they’re sugar over the prototype chain that already existed.</div>"
+    },
+    {
+      "id": "objects",
+      "title": "Arrays, Objects & Modern Syntax",
+      "bodyHtml": "<ul class='clean'><li><strong>Immutable iteration</strong> — <code>map</code>, <code>filter</code>, <code>reduce</code>, <code>find</code>, <code>some</code>/<code>every</code> return new values without mutating the source.</li><li><strong>Destructuring</strong> — pull fields out of objects/arrays in one line.</li><li><strong>Spread / rest</strong> (<code>...</code>) — copy &amp; merge, or gather arguments.</li><li><strong>Optional chaining</strong> <code>?.</code> and <strong>nullish coalescing</strong> <code>??</code> for safe access and defaults (<code>??</code> only falls back on <code>null</code>/<code>undefined</code>, unlike <code>||</code>).</li></ul><pre><code>const users = [{ id: 1, role: \"admin\" }, { id: 2, role: \"user\" }];\r\nconst admins = users.filter(u =&gt; u.role === \"admin\").map(u =&gt; u.id);\r\n\r\nconst { id, role = \"guest\" } = users[0];      // destructure + default\r\nconst merged = { ...users[0], active: true };  // spread copy\r\n\r\nconst city = order?.address?.city ?? \"unknown\";  // safe + fallback</code></pre><div class='keynote'><strong><code>??</code> vs <code>||</code>:</strong> <code>0 || 5</code> is <code>5</code> (0 is falsy) but <code>0 ?? 5</code> is <code>0</code> — use <code>??</code> when <code>0</code>/<code>\"\"</code>/<code>false</code> are valid values.</div>"
+    },
+    {
+      "id": "eventloop",
+      "title": "The Event Loop",
+      "bodyHtml": "<p>JS is <strong>single-threaded</strong>. The <strong>event loop</strong> is how it does non-blocking work: synchronous code runs on the call stack; async callbacks wait in queues and run only when the stack is empty.</p><ul class='clean'><li><strong>Call stack</strong> — runs synchronous code now.</li><li><strong>Microtask queue</strong> — resolved promise callbacks (<code>.then</code>, <code>await</code> continuations). Drained <strong>fully</strong> after each task, before any macrotask.</li><li><strong>Macrotask queue</strong> — <code>setTimeout</code>, I/O, events. One per loop turn.</li></ul><pre><code>console.log(1);\r\nsetTimeout(() =&gt; console.log(2), 0);   // macrotask\r\nPromise.resolve().then(() =&gt; console.log(3)); // microtask\r\nconsole.log(4);\r\n// prints 1, 4, 3, 2  — microtasks beat the timer</code></pre><div class='keynote'><strong>Why 3 before 2:</strong> the promise callback is a microtask and runs before the next macrotask (the timer), even with a 0 ms delay.</div>"
+    },
+    {
+      "id": "async",
+      "title": "Promises & async / await",
+      "bodyHtml": "<p>A <strong>Promise</strong> represents a future value: <code>pending → fulfilled | rejected</code>. <code>async</code>/<code>await</code> is syntax over promises that reads like synchronous code.</p><ul class='clean'><li><code>await</code> pauses the async function until the promise settles, without blocking the thread.</li><li>Wrap <code>await</code> in <code>try/catch</code> to handle rejections (the equivalent of <code>.catch</code>).</li><li><code>Promise.all</code> runs work <strong>concurrently</strong> and fails fast; <code>Promise.allSettled</code> waits for all regardless; <code>Promise.race</code> takes the first to settle.</li><li>Don’t <code>await</code> in a loop when calls are independent — fire them together with <code>Promise.all</code>.</li></ul><pre><code>async function loadUser(id) {\r\n  try {\r\n    const res = await fetch(`/users/${id}`);\r\n    if (!res.ok) throw new Error(res.status);\r\n    return await res.json();\r\n  } catch (e) {\r\n    console.error(\"load failed\", e);\r\n    throw e;\r\n  }\r\n}\r\n\r\n// concurrent, not sequential:\r\nconst [a, b] = await Promise.all([loadUser(1), loadUser(2)]);</code></pre>"
+    },
+    {
+      "id": "testing",
+      "title": "Test Stack for SDETs",
+      "bodyHtml": "<p>For a Playwright/SDET role the JS testing surface is small and worth naming:</p><ul class='clean'><li><strong>Playwright Test</strong> — the runner you’ll use most: <code>test</code>/<code>expect</code>, fixtures, auto-waiting web-first assertions, parallel projects, trace viewer.</li><li><strong>Jest / Vitest</strong> — unit testing: <code>describe</code>/<code>it</code>/<code>expect</code>, mocks &amp; spies (<code>jest.fn()</code>, <code>jest.mock()</code>), snapshots.</li><li><strong>Cypress</strong> — alternative E2E framework; in-browser, good DX, retry-able assertions.</li><li><strong>TypeScript</strong> — most modern test suites are TS for type-safe page objects and fixtures.</li></ul><pre><code>import { test, expect } from '@playwright/test';\r\n\r\ntest('user can sign in', async ({ page }) =&gt; {\r\n  await page.goto('/login');\r\n  await page.getByLabel('Email').fill('ada@test.dev');\r\n  await page.getByRole('button', { name: 'Sign in' }).click();\r\n  await expect(page.getByText('Welcome')).toBeVisible(); // auto-retries\r\n});</code></pre>"
+    }
+  ],
+  "quiz": [
+    {
+      "id": "cs-javascript-001",
+      "topicId": "javascript",
+      "topicTitle": "JavaScript",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "== vs ===?",
+      "choices": [
+        "=== compares value and type with no coercion; == coerces types first, causing surprises",
+        "== compares value and type strictly; === also checks the variable's memory address",
+        "=== and == are identical; === is just the older, deprecated spelling",
+        "== never coerces but === converts both operands to strings before comparing"
+      ],
+      "correctAnswer": "=== compares value and type with no coercion; == coerces types first, causing surprises",
+      "explanation": "=== compares value and type with no coercion (always prefer it); == coerces types first, giving surprises like 0 == \"\" and null == undefined being true.",
+      "tags": [
+        "javascript"
+      ]
+    },
+    {
+      "id": "cs-javascript-002",
+      "topicId": "javascript",
+      "topicTitle": "JavaScript",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "var vs let vs const?",
+      "choices": [
+        "All three are block-scoped; only var can be reassigned after declaration",
+        "var is block-scoped and hoisted; let/const are function-scoped with no TDZ",
+        "var is function-scoped and hoisted as undefined; let/const are block-scoped with a TDZ and const can't be reassigned",
+        "const is function-scoped and freezes objects; let and var are both block-scoped"
+      ],
+      "correctAnswer": "var is function-scoped and hoisted as undefined; let/const are block-scoped with a TDZ and const can't be reassigned",
+      "explanation": "var is function-scoped and hoisted as undefined; let/const are block-scoped with a temporal dead zone; const can’t be reassigned (but objects can still mutate).",
+      "tags": [
+        "javascript"
+      ]
+    },
+    {
+      "id": "cs-javascript-003",
+      "topicId": "javascript",
+      "topicTitle": "JavaScript",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "What is a closure?",
+      "choices": [
+        "A function that copies all outer variables by value at the moment it is defined",
+        "A function bound to an object so its this never changes when called",
+        "A function that retains access to variables from the scope where it was created, even after that scope returns",
+        "An object that hides its properties so they cannot be enumerated or read"
+      ],
+      "correctAnswer": "A function that retains access to variables from the scope where it was created, even after that scope returns",
+      "explanation": "A function that retains access to variables from the scope where it was created, even after that scope returns — the basis for private state.",
+      "tags": [
+        "javascript"
+      ]
+    },
+    {
+      "id": "cs-javascript-004",
+      "topicId": "javascript",
+      "topicTitle": "JavaScript",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "How is `this` determined?",
+      "choices": [
+        "By where the function is defined; arrow functions get their own fresh this",
+        "By the call site: obj.fn() → obj, plain fn() → undefined in strict mode, arrows inherit from the enclosing scope",
+        "Always the global object unless the function was created with the new keyword",
+        "By the first argument passed, which becomes this inside every function call"
+      ],
+      "correctAnswer": "By the call site: obj.fn() → obj, plain fn() → undefined in strict mode, arrows inherit from the enclosing scope",
+      "explanation": "By the call site: obj.fn() → obj; plain fn() → undefined in strict mode; arrow functions have no own this and inherit it from the enclosing scope.",
+      "tags": [
+        "javascript"
+      ]
+    },
+    {
+      "id": "cs-javascript-005",
+      "topicId": "javascript",
+      "topicTitle": "JavaScript",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "null vs undefined?",
+      "choices": [
+        "undefined is an intentional empty value; null is the engine's default for unassigned",
+        "Both mean the same thing; null is just the older keyword for undefined",
+        "undefined = declared but unassigned (engine default); null = an intentional 'no value' you assign",
+        "undefined means the variable was never declared; null means it was deleted"
+      ],
+      "correctAnswer": "undefined = declared but unassigned (engine default); null = an intentional 'no value' you assign",
+      "explanation": "undefined = declared but unassigned (engine default); null = an intentional 'no value' you assign.",
+      "tags": [
+        "javascript"
+      ]
+    },
+    {
+      "id": "cs-javascript-006",
+      "topicId": "javascript",
+      "topicTitle": "JavaScript",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "What is the event loop?",
+      "choices": [
+        "A background thread that runs async callbacks in parallel with main code",
+        "Single thread runs sync code on the call stack; when empty it drains all microtasks then takes one macrotask per turn",
+        "A queue that runs one microtask and one macrotask alternately each turn",
+        "A scheduler that prioritizes setTimeout callbacks over resolved promises"
+      ],
+      "correctAnswer": "Single thread runs sync code on the call stack; when empty it drains all microtasks then takes one macrotask per turn",
+      "explanation": "Single thread runs sync code on the call stack; when empty it drains all microtasks (promises) then takes one macrotask (setTimeout/IO) per turn.",
+      "tags": [
+        "javascript"
+      ]
+    },
+    {
+      "id": "cs-javascript-007",
+      "topicId": "javascript",
+      "topicTitle": "JavaScript",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "Microtask vs macrotask?",
+      "choices": [
+        "Macrotasks run before microtasks, so setTimeout(…,0) beats a resolved promise",
+        "Microtasks and macrotasks share one queue and run in registration order",
+        "Promise callbacks are microtasks and run before the next macrotask, so a resolved promise beats setTimeout(…, 0)",
+        "Microtasks only run after all macrotasks (timers, IO) have been processed"
+      ],
+      "correctAnswer": "Promise callbacks are microtasks and run before the next macrotask, so a resolved promise beats setTimeout(…, 0)",
+      "explanation": "Promise callbacks are microtasks and run before the next macrotask (timers, IO) — so a resolved promise beats setTimeout(…, 0).",
+      "tags": [
+        "javascript"
+      ]
+    },
+    {
+      "id": "cs-javascript-008",
+      "topicId": "javascript",
+      "topicTitle": "JavaScript",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "Promise.all vs allSettled?",
+      "choices": [
+        "all runs concurrently and rejects on the first failure; allSettled waits for every promise and reports each outcome",
+        "all waits for every promise regardless; allSettled rejects on the first failure",
+        "all runs promises sequentially; allSettled runs them concurrently and fails fast",
+        "both reject on the first failure, but allSettled also returns the rejection reasons"
+      ],
+      "correctAnswer": "all runs concurrently and rejects on the first failure; allSettled waits for every promise and reports each outcome",
+      "explanation": "all runs concurrently and rejects on the first failure; allSettled waits for every promise and reports each outcome.",
+      "tags": [
+        "javascript"
+      ]
+    },
+    {
+      "id": "cs-javascript-009",
+      "topicId": "javascript",
+      "topicTitle": "JavaScript",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "?? vs ||?",
+      "choices": [
+        "|| falls back on any falsy value (0, '', false); ?? falls back only on null/undefined",
+        "?? falls back on any falsy value; || falls back only on null/undefined",
+        "both fall back only on null/undefined, but ?? also treats NaN as nullish",
+        "|| falls back only on undefined; ?? falls back on null, undefined, and 0"
+      ],
+      "correctAnswer": "|| falls back on any falsy value (0, '', false); ?? falls back only on null/undefined",
+      "explanation": "|| falls back on any falsy value (0, '', false); ?? falls back only on null/undefined — use ?? when 0/''/false are valid.",
+      "tags": [
+        "javascript"
+      ]
+    },
+    {
+      "id": "cs-javascript-010",
+      "topicId": "javascript",
+      "topicTitle": "JavaScript",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "Are JS classes real classes?",
+      "choices": [
+        "Yes — ES6 classes introduced a new class-based inheritance model alongside prototypes",
+        "No — syntactic sugar over the prototype chain; extends/super just wire up prototype links",
+        "Yes — class instances no longer use prototypes, only fixed property slots",
+        "No — classes are sugar over closures that store private fields internally"
+      ],
+      "correctAnswer": "No — syntactic sugar over the prototype chain; extends/super just wire up prototype links",
+      "explanation": "No — syntactic sugar over the prototype chain; extends/super just wire up prototype links.",
+      "tags": [
+        "javascript"
+      ]
+    },
+    {
+      "id": "cs-javascript-011",
+      "topicId": "javascript",
+      "topicTitle": "JavaScript",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "How do you avoid the classic loop-var bug?",
+      "choices": [
+        "Wrap the loop body in a setTimeout so each callback fires after the loop ends",
+        "Use let (fresh binding per iteration) instead of var, so each callback closes over its own value",
+        "Declare the loop variable with var outside the loop to give it a stable address",
+        "Use const for the loop counter so it can never be reassigned mid-iteration"
+      ],
+      "correctAnswer": "Use let (fresh binding per iteration) instead of var, so each callback closes over its own value",
+      "explanation": "Use let (fresh binding per iteration) instead of var, so each callback closes over its own value.",
+      "tags": [
+        "javascript"
+      ]
+    },
+    {
+      "id": "cs-javascript-012",
+      "topicId": "javascript",
+      "topicTitle": "JavaScript",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "Shallow vs deep copy?",
+      "choices": [
+        "Spread copies all nested levels; deep copy only duplicates the top level",
+        "JSON.stringify makes a shallow copy; spread makes a full deep copy",
+        "Both spread and structuredClone copy one level; deep copy requires Object.freeze",
+        "Spread/Object.assign copy one level (nested objects stay shared); deep copy needs structuredClone() or a recursive clone"
+      ],
+      "correctAnswer": "Spread/Object.assign copy one level (nested objects stay shared); deep copy needs structuredClone() or a recursive clone",
+      "explanation": "Spread/Object.assign copy one level (nested objects stay shared); deep copy needs structuredClone() or a recursive clone.",
+      "tags": [
+        "javascript"
+      ]
+    }
+  ]
+}

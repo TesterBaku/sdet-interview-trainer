@@ -48,6 +48,31 @@ export type Question = {
 };
 ```
 
+## CheatSheet Type
+
+Cheat sheets are a self-contained content set, separate from the topic/question system. They are
+generated from the source HTML study pages by `scripts/build-cheatsheets.mjs` into
+`data/cheatsheets/<id>.json` and loaded via `lib/cheatsheets.ts`.
+
+```ts
+export type CheatSheetSection = { id: string; title: string; bodyHtml: string };
+export type CheatSheetGroup = "Test Frameworks" | "API & Data" | "DevOps & CI" | "Languages";
+export type CheatSheet = {
+  id: string;            // "sql"
+  title: string;         // "SQL"
+  group: CheatSheetGroup;
+  accent: string;        // hex accent for the card stripe
+  summary: string;       // standfirst
+  tags: string[];        // chip list
+  sections: CheatSheetSection[];  // bodyHtml is sanitized HTML rendered in .cheatsheet-prose
+  quiz: Question[];      // type:"quiz" items; ids namespaced cs-<sheet>-NNN
+};
+```
+
+Quiz items reuse the `Question` type so the existing `QuizQuestion` component and `useProgress`
+hook work unchanged. Their ids (`cs-sql-001`, …) are intentionally NOT part of `allQuestions`, so
+cheat-sheet quiz progress is tracked in localStorage but excluded from the main `/progress` totals.
+
 ## Progress Types
 
 ```ts
