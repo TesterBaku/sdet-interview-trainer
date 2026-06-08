@@ -1,0 +1,219 @@
+{
+  "id": "appium",
+  "title": "Appium",
+  "group": "Test Frameworks",
+  "accent": "#7c3aed",
+  "summary": "Cross-platform mobile automation: client/server architecture, platform drivers, capabilities, locator strategies, waits, gestures, native-vs-webview contexts, and Page Object Model — with rapid-fire Q&A.",
+  "tags": [
+    "Mobile",
+    "WebDriver",
+    "UiAutomator2",
+    "XCUITest",
+    "Capabilities",
+    "Hybrid Apps"
+  ],
+  "sections": [
+    {
+      "id": "arch",
+      "title": "Architecture",
+      "bodyHtml": "<p><strong>Appium</strong> automates native, hybrid, and mobile-web apps on Android and iOS from a single API. It is an HTTP server written in Node.js that exposes the <strong>W3C WebDriver protocol</strong> — the same protocol Selenium speaks — so your existing WebDriver client (Java, Python, JS, C#, Ruby) drives a phone the way it drives a browser.</p><p class='pullquote'>Client → W3C WebDriver (HTTP/JSON) → Appium server → platform driver → vendor automation framework → device/emulator. The cross-platform promise lives in <em>one</em> layer: your test talks to Appium, and Appium delegates to whatever the OS provides.</p><p>The key idea is delegation. Appium itself doesn't know how to tap a button on iOS — it forwards the command to Apple's own <code>XCUITest</code> framework. On Android it forwards to Google's <code>UiAutomator2</code>. Appium is the universal translator; the vendor frameworks do the real driving.</p>"
+    },
+    {
+      "id": "drivers",
+      "title": "Platform Drivers & Appium 2.0",
+      "bodyHtml": "<p>A <strong>driver</strong> is the plugin that bridges Appium to a specific platform's automation engine:</p><ul class='clean'><li><code>UiAutomator2</code> — the default and recommended Android driver (wraps Google's UiAutomator2).</li><li><code>XCUITest</code> — the iOS driver (wraps Apple's XCUITest).</li><li><code>Espresso</code> — alternative Android driver, faster and in-process, but Android-only.</li><li><code>Mac2</code> / <code>Windows</code> / <code>Flutter</code> — desktop and framework-specific drivers.</li></ul><div class='keynote'><strong>Appium 2.0 changed the packaging model:</strong> drivers and plugins are decoupled from the core server and installed on demand — <code>appium driver install uiautomator2</code>. The server ships lean; you add only the drivers you need. The default base path also moved to <code>/</code> (Appium 1.x used <code>/wd/hub</code>).</div>"
+    },
+    {
+      "id": "caps",
+      "title": "Capabilities (Appium Options)",
+      "bodyHtml": "<p>A test session is configured with <strong>capabilities</strong> — key/value pairs telling Appium what to automate. Vendor-specific keys carry an <code>appium:</code> prefix under W3C.</p><div class='layer'><div class='ltitle'>Cross-platform</div><p><code>platformName</code> (Android / iOS), <code>appium:automationName</code> (UiAutomator2 / XCUITest / Espresso), <code>appium:deviceName</code>, <code>appium:platformVersion</code>, <code>appium:udid</code> (a specific real device), <code>appium:app</code> (path/URL to the .apk/.ipa).</p></div><div class='layer'><div class='ltitle'>Android-specific</div><p><code>appium:appPackage</code> and <code>appium:appActivity</code> identify an already-installed app to launch without reinstalling.</p></div><div class='layer'><div class='ltitle'>iOS-specific</div><p><code>appium:bundleId</code> identifies an installed app; real devices also need signing via <code>appium:xcodeOrgId</code> and a provisioning team.</p></div><div class='keynote'><strong>app vs appPackage/bundleId:</strong> use <code>app</code> to install a fresh build; use <code>appPackage</code>/<code>appActivity</code> (Android) or <code>bundleId</code> (iOS) to launch an app already on the device.</div>"
+    },
+    {
+      "id": "locators",
+      "title": "Locator Strategies",
+      "bodyHtml": "<p>Order of preference favors stability and cross-platform reuse:</p><ul class='clean'><li><code>accessibility id</code> — best choice: maps to Android <code>content-desc</code> and iOS <code>accessibilityIdentifier</code>, so one locator can work on both platforms.</li><li><code>id</code> — Android <code>resource-id</code>; fast and stable when present.</li><li><code>-android uiautomator</code> — runs a native <code>UiSelector</code> query on-device (powerful, fast).</li><li><code>-ios predicate string</code> and <code>-ios class chain</code> — native iOS queries, far faster than XPath.</li><li><code>class name</code> — element type (<code>android.widget.Button</code>, <code>XCUIElementTypeButton</code>).</li><li><code>xpath</code> — works everywhere but is the <strong>slowest and most brittle</strong>; the whole UI tree is serialized and searched on every query.</li></ul><div class='keynote'><strong>Interview favorite:</strong> prefer <code>accessibility id</code> for cross-platform locators; avoid XPath on mobile because resolving it walks the entire native element tree and is dramatically slower than on the web.</div>"
+    },
+    {
+      "id": "waits",
+      "title": "Waits & Flakiness",
+      "bodyHtml": "<p>Because Appium is WebDriver-based, the synchronization story mirrors Selenium — and is just as central to interviews.</p><div class='layer'><div class='ltitle'>Implicit Wait</div><p>A global timeout applied to every element lookup. Blunt; can mask real timing issues.</p></div><div class='layer'><div class='ltitle'>Explicit Wait</div><p><code>WebDriverWait</code> + <code>ExpectedConditions</code> on a specific element/condition — the recommended approach.</p></div><div class='keynote'><strong>Never mix implicit and explicit waits</strong> (unpredictable cumulative timeouts), and avoid hard sleeps. Mobile adds its own flake sources: animations, slow app launch, network on real devices, and emulator warm-up.</div><pre><code>new WebDriverWait(driver, Duration.ofSeconds(15))\n    .until(ExpectedConditions.elementToBeClickable(\n        AppiumBy.accessibilityId(\"submit\")));</code></pre>"
+    },
+    {
+      "id": "gestures",
+      "title": "Gestures & Mobile Commands",
+      "bodyHtml": "<p>Taps, swipes, scrolls, and drags are core to mobile. The modern approach uses the <strong>W3C Actions API</strong> (pointer input sequences) or, more simply, driver-side <strong>mobile: commands</strong>.</p><ul class='clean'><li><code>mobile: scroll</code>, <code>mobile: swipe</code>, <code>mobile: tap</code>, <code>mobile: longClickGesture</code> — executed natively by the platform driver; concise and reliable.</li><li><strong>W3C Actions</strong> — build a <code>PointerInput</code> sequence (press → move → release) for custom gestures like pinch or precise drags.</li></ul><div class='keynote'><strong>Deprecated:</strong> the old <code>TouchAction</code> / <code>MultiTouchAction</code> classes are removed in newer clients. Use W3C Actions or <code>executeScript(\"mobile: ...\")</code> instead — a common \"is your knowledge current?\" probe.</div>"
+    },
+    {
+      "id": "contexts",
+      "title": "Native vs WebView (Hybrid Apps)",
+      "bodyHtml": "<p>A <strong>hybrid app</strong> embeds web content (a WebView) inside a native shell. Appium exposes each as a <em>context</em>:</p><ul class='clean'><li><code>NATIVE_APP</code> — drive native widgets via UiAutomator2/XCUITest.</li><li><code>WEBVIEW_*</code> — drive the embedded web page with Selenium-style CSS/DOM locators.</li></ul><p>Switch with the context API:</p><pre><code>driver.getContextHandles();          // [NATIVE_APP, WEBVIEW_com.app]\ndriver.context(\"WEBVIEW_com.app\");   // now use CSS selectors\ndriver.context(\"NATIVE_APP\");        // back to native</code></pre><div class='keynote'>On Android, WebView automation drives an embedded <strong>Chromedriver</strong> that must match the WebView's Chrome version (Appium can auto-download it). Mobile-web testing in a real browser is just a special case: set <code>browserName</code> instead of <code>app</code>.</div>"
+    },
+    {
+      "id": "pom",
+      "title": "Page Objects, Inspector & Appium vs Native",
+      "bodyHtml": "<p><strong>Page Object Model</strong> applies exactly as on the web — one screen object per screen, encapsulating locators and actions, so a UI change touches one file. <strong>Appium Inspector</strong> is the GUI that connects to a session, renders the live element tree, and helps you craft and verify locators.</p><table><thead><tr><th>Aspect</th><th>Appium / Native (Espresso, XCUITest)</th></tr></thead><tbody><tr><td>Platform reach</td><td>One codebase for Android + iOS / one platform only.</td></tr><tr><td>Speed</td><td>Out-of-process, slower / in-process, faster and more stable.</td></tr><tr><td>Language</td><td>Any WebDriver language / the app's language (Kotlin/Java, Swift).</td></tr><tr><td>Setup</td><td>Server + driver + capabilities / built into the IDE toolchain.</td></tr></tbody></table><p>Appium wins on cross-platform reuse and language freedom; native frameworks win on raw speed and stability. The usual recommendation: Appium for broad black-box E2E across both platforms, native frameworks when a single-platform team wants the fastest possible feedback.</p>"
+    }
+  ],
+  "quiz": [
+    {
+      "id": "cs-appium-001",
+      "topicId": "appium",
+      "topicTitle": "Appium",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "How does Appium actually drive a device?",
+      "choices": [
+        "It exposes the W3C WebDriver protocol and delegates commands to the platform's own framework (UiAutomator2 on Android, XCUITest on iOS)",
+        "It injects a native agent into the app process that manipulates views directly",
+        "It controls the device purely through OS-level screen-coordinate automation",
+        "It compiles your test into a native Android/iOS test bundle and runs it on-device"
+      ],
+      "correctAnswer": "It exposes the W3C WebDriver protocol and delegates commands to the platform's own framework (UiAutomator2 on Android, XCUITest on iOS)",
+      "explanation": "Appium is an HTTP server speaking W3C WebDriver; it translates commands and delegates to the vendor frameworks — UiAutomator2 (Android) and XCUITest (iOS).",
+      "tags": [
+        "appium"
+      ]
+    },
+    {
+      "id": "cs-appium-002",
+      "topicId": "appium",
+      "topicTitle": "Appium",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "Which locator strategy is best for cross-platform reuse?",
+      "choices": [
+        "xpath, because the same expression matches on both Android and iOS",
+        "accessibility id, which maps to Android content-desc and iOS accessibilityIdentifier",
+        "class name, since element types are identical across platforms",
+        "id, because resource-id exists on both Android and iOS"
+      ],
+      "correctAnswer": "accessibility id, which maps to Android content-desc and iOS accessibilityIdentifier",
+      "explanation": "accessibility id maps to content-desc (Android) and accessibilityIdentifier (iOS), so one locator can serve both platforms; XPath is the slowest and most brittle on mobile.",
+      "tags": [
+        "appium"
+      ]
+    },
+    {
+      "id": "cs-appium-003",
+      "topicId": "appium",
+      "topicTitle": "Appium",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "Why is XPath discouraged on mobile?",
+      "choices": [
+        "Appium removed XPath support in version 2.0",
+        "XPath cannot match elements by accessibility id",
+        "Resolving XPath serializes and walks the entire native element tree, making it very slow",
+        "XPath only works inside WebView contexts, never native"
+      ],
+      "correctAnswer": "Resolving XPath serializes and walks the entire native element tree, making it very slow",
+      "explanation": "Each XPath query serializes and searches the whole native UI hierarchy on-device — far slower and more brittle than accessibility id, resource-id, or native predicate/UiSelector queries.",
+      "tags": [
+        "appium"
+      ]
+    },
+    {
+      "id": "cs-appium-004",
+      "topicId": "appium",
+      "topicTitle": "Appium",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "How do you automate a hybrid app's embedded web view?",
+      "choices": [
+        "Native and web elements share one tree, so no switching is needed",
+        "Set browserName instead of app to force web mode for the whole session",
+        "Get the context handles and switch to the WEBVIEW context, then use CSS/DOM locators",
+        "Restart the session with automationName set to Chromedriver"
+      ],
+      "correctAnswer": "Get the context handles and switch to the WEBVIEW context, then use CSS/DOM locators",
+      "explanation": "getContextHandles() lists NATIVE_APP and WEBVIEW_*; context(\"WEBVIEW_...\") switches in so you can use web-style selectors, then context(\"NATIVE_APP\") returns to native.",
+      "tags": [
+        "appium"
+      ]
+    },
+    {
+      "id": "cs-appium-005",
+      "topicId": "appium",
+      "topicTitle": "Appium",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "What is the difference between the app and appPackage/bundleId capabilities?",
+      "choices": [
+        "app installs a fresh build; appPackage/appActivity (Android) or bundleId (iOS) launch an app already installed",
+        "app is for iOS only; appPackage is for Android only, and they are interchangeable otherwise",
+        "app launches an installed app; appPackage always reinstalls from the store",
+        "Both reinstall the app, but app is faster"
+      ],
+      "correctAnswer": "app installs a fresh build; appPackage/appActivity (Android) or bundleId (iOS) launch an app already installed",
+      "explanation": "Use app (path/URL to the .apk/.ipa) to install a fresh build; use appPackage/appActivity or bundleId to launch an already-installed app without reinstalling.",
+      "tags": [
+        "appium"
+      ]
+    },
+    {
+      "id": "cs-appium-006",
+      "topicId": "appium",
+      "topicTitle": "Appium",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "What changed about drivers in Appium 2.0?",
+      "choices": [
+        "Drivers were merged into the core server so everything ships by default",
+        "Drivers and plugins are decoupled and installed on demand, e.g. appium driver install uiautomator2",
+        "Only the XCUITest driver remains; Android now requires Espresso",
+        "Capabilities no longer need the appium: prefix because drivers handle it"
+      ],
+      "correctAnswer": "Drivers and plugins are decoupled and installed on demand, e.g. appium driver install uiautomator2",
+      "explanation": "Appium 2.0 decoupled drivers/plugins from the core server — you install only what you need — and moved the default base path to / (1.x used /wd/hub).",
+      "tags": [
+        "appium"
+      ]
+    },
+    {
+      "id": "cs-appium-007",
+      "topicId": "appium",
+      "topicTitle": "Appium",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "What is the current, non-deprecated way to perform a custom swipe?",
+      "choices": [
+        "The TouchAction / MultiTouchAction classes",
+        "Thread.sleep plus tapping fixed screen coordinates",
+        "The W3C Actions API (pointer sequences) or a mobile: command like mobile: swipe",
+        "An implicit wait configured with a swipe direction"
+      ],
+      "correctAnswer": "The W3C Actions API (pointer sequences) or a mobile: command like mobile: swipe",
+      "explanation": "TouchAction/MultiTouchAction are deprecated/removed in modern clients. Use the W3C Actions API or driver-side mobile: commands (mobile: swipe, mobile: scroll).",
+      "tags": [
+        "appium"
+      ]
+    },
+    {
+      "id": "cs-appium-008",
+      "topicId": "appium",
+      "topicTitle": "Appium",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "When would you choose a native framework (Espresso/XCUITest) over Appium?",
+      "choices": [
+        "When you need one test codebase to run on both Android and iOS",
+        "When a single-platform team wants the fastest, most stable in-process feedback",
+        "When you must write tests in Python or C#",
+        "When you need to automate a mobile web browser"
+      ],
+      "correctAnswer": "When a single-platform team wants the fastest, most stable in-process feedback",
+      "explanation": "Native frameworks run in-process and are faster/more stable but single-platform and tied to the app's language. Appium wins on cross-platform reuse and language freedom.",
+      "tags": [
+        "appium"
+      ]
+    }
+  ]
+}

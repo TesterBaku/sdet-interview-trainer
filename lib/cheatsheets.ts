@@ -1,4 +1,5 @@
 import apiTesting from "@/data/cheatsheets/api-testing.json";
+import appium from "@/data/cheatsheets/appium.json";
 import ccaFoundations from "@/data/cheatsheets/cca-foundations.json";
 import csharp from "@/data/cheatsheets/csharp.json";
 import docker from "@/data/cheatsheets/docker.json";
@@ -21,6 +22,7 @@ const cheatSheetData = [
   selenium,
   testng,
   xcuitest,
+  appium,
   apiTesting,
   sql,
   pyspark,
