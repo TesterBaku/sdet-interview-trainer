@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { cheatSheets, getCheatSheet } from "@/lib/cheatsheets";
+import { cheatSheets, cheatSheetSelfTest, getCheatSheet } from "@/lib/cheatsheets";
 
 export function generateStaticParams() {
   return cheatSheets.map((sheet) => ({ id: sheet.id }));
@@ -21,6 +21,7 @@ export default async function CheatSheetDetailPage({ params }: { params: Promise
   const { id } = await params;
   const sheet = getCheatSheet(id);
   if (!sheet) notFound();
+  const selfTest = cheatSheetSelfTest(sheet);
 
   return (
     <div className="space-y-6">
@@ -34,14 +35,16 @@ export default async function CheatSheetDetailPage({ params }: { params: Promise
         </p>
         <h1 className="mt-2 font-display text-3xl font-black text-blueprint sm:text-5xl">{sheet.title}</h1>
         <p className="mt-3 max-w-3xl text-lg leading-8 text-ink/75">{sheet.summary}</p>
-        <div className="mt-5">
-          <Link
-            className="inline-flex items-center justify-center rounded-full bg-signal px-5 py-3 text-sm font-bold text-white transition hover:bg-[#b93e1f] focus-ring"
-            href={`/cheatsheets/${sheet.id}/quiz`}
-          >
-            Take the {sheet.quiz.length}-question quiz →
-          </Link>
-        </div>
+        {selfTest ? (
+          <div className="mt-5">
+            <Link
+              className="inline-flex items-center justify-center rounded-full bg-signal px-5 py-3 text-sm font-bold text-white transition hover:bg-[#b93e1f] focus-ring"
+              href={selfTest.href}
+            >
+              {selfTest.kind === "quiz" ? `Take the ${sheet.quiz.length}-question quiz →` : "Take the Mock Exam →"}
+            </Link>
+          </div>
+        ) : null}
       </header>
 
       <div className="grid gap-6 lg:grid-cols-[220px_1fr]">

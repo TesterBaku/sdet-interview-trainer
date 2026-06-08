@@ -5,7 +5,8 @@ import { cheatSheets, getCheatSheet } from "@/lib/cheatsheets";
 import { CheatSheetQuizClient } from "@/app/cheatsheets/[id]/quiz/CheatSheetQuizClient";
 
 export function generateStaticParams() {
-  return cheatSheets.map((sheet) => ({ id: sheet.id }));
+  // Only sheets with an inline quiz get a quiz route; mock-exam-backed sheets (quiz: []) don't.
+  return cheatSheets.filter((sheet) => sheet.quiz.length > 0).map((sheet) => ({ id: sheet.id }));
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
@@ -22,7 +23,9 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 
 export default async function CheatSheetQuizPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  if (!getCheatSheet(id)) notFound();
+  const sheet = getCheatSheet(id);
+  // Unknown sheet, or a mock-exam-backed sheet with no inline quiz → 404 (not a blank quiz page).
+  if (!sheet || sheet.quiz.length === 0) notFound();
 
   return (
     <Suspense fallback={<div className="rounded-2xl bg-white/80 p-6">Loading...</div>}>

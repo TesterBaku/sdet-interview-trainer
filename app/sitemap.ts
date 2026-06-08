@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { cheatSheets } from "@/lib/cheatsheets";
+import { mockExams } from "@/lib/mockExams";
 import { topics } from "@/lib/questionUtils";
 
 const base = "https://sdet-interview-trainer.vercel.app";
@@ -13,6 +14,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${base}/coding-gym`, lastModified: now, changeFrequency: "monthly", priority: 0.8 },
     { url: `${base}/cheatsheets`, lastModified: now, changeFrequency: "weekly", priority: 0.9 },
     { url: `${base}/quizzes`, lastModified: now, changeFrequency: "weekly", priority: 0.9 },
+    { url: `${base}/mock-exam`, lastModified: now, changeFrequency: "weekly", priority: 0.8 },
     { url: `${base}/review`, lastModified: now, changeFrequency: "never", priority: 0.5 },
     { url: `${base}/progress`, lastModified: now, changeFrequency: "never", priority: 0.5 },
   ];
@@ -26,8 +28,18 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   const cheatSheetRoutes: MetadataRoute.Sitemap = cheatSheets.flatMap((sheet) => [
     { url: `${base}/cheatsheets/${sheet.id}`, lastModified: now, changeFrequency: "monthly" as const, priority: 0.7 },
-    { url: `${base}/cheatsheets/${sheet.id}/quiz`, lastModified: now, changeFrequency: "monthly" as const, priority: 0.6 },
+    // Only advertise the quiz URL when the sheet actually has an inline quiz.
+    ...(sheet.quiz.length > 0
+      ? [{ url: `${base}/cheatsheets/${sheet.id}/quiz`, lastModified: now, changeFrequency: "monthly" as const, priority: 0.6 }]
+      : []),
   ]);
 
-  return [...staticRoutes, ...topicRoutes, ...cheatSheetRoutes];
+  const mockExamRoutes: MetadataRoute.Sitemap = mockExams.map((exam) => ({
+    url: `${base}/mock-exam/${exam.id}`,
+    lastModified: now,
+    changeFrequency: "monthly" as const,
+    priority: 0.7,
+  }));
+
+  return [...staticRoutes, ...topicRoutes, ...cheatSheetRoutes, ...mockExamRoutes];
 }

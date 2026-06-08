@@ -1,7 +1,9 @@
 import Link from "next/link";
+import { cheatSheetSelfTest } from "@/lib/cheatsheets";
 import type { CheatSheet } from "@/types/CheatSheet";
 
 export function CheatSheetCard({ sheet }: { sheet: CheatSheet }) {
+  const selfTest = cheatSheetSelfTest(sheet);
   return (
     <article className="group relative flex h-full flex-col overflow-hidden rounded-[2rem] border border-ink/10 bg-white/75 p-5 pl-6 shadow-panel transition hover:-translate-y-1 hover:bg-white">
       <span aria-hidden className="absolute inset-y-0 left-0 w-1.5" style={{ backgroundColor: sheet.accent }} />
@@ -30,12 +32,14 @@ export function CheatSheetCard({ sheet }: { sheet: CheatSheet }) {
         >
           Open cheat sheet
         </Link>
-        <Link
-          className="inline-flex items-center justify-center rounded-full border border-ink/15 bg-white/70 px-4 py-2.5 text-sm font-bold text-ink transition hover:bg-white focus-ring"
-          href={`/cheatsheets/${sheet.id}/quiz`}
-        >
-          Quiz
-        </Link>
+        {selfTest ? (
+          <Link
+            className="inline-flex items-center justify-center rounded-full border border-ink/15 bg-white/70 px-4 py-2.5 text-sm font-bold text-ink transition hover:bg-white focus-ring"
+            href={selfTest.href}
+          >
+            {selfTest.kind === "quiz" ? "Quiz" : "Mock Exam"}
+          </Link>
+        ) : null}
       </div>
     </article>
   );

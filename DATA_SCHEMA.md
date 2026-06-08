@@ -73,6 +73,32 @@ Quiz items reuse the `Question` type so the existing `QuizQuestion` component an
 hook work unchanged. Their ids (`cs-sql-001`, …) are intentionally NOT part of `allQuestions`, so
 cheat-sheet quiz progress is tracked in localStorage but excluded from the main `/progress` totals.
 
+A cheat sheet may set `mockExamId` instead of an inline quiz (`quiz: []`); its self-test is then a
+dedicated Mock Exam (see below) reached via `/mock-exam/<id>`. The CCA Foundations sheet uses this.
+
+## MockExam Type
+
+A dedicated, session-scored certification exam (distinct from the per-sheet quizzes). Generated from
+the source HTML by `scripts/build-cca-exam.mjs` into `data/mock-exams/<id>.json`, loaded via
+`lib/mockExams.ts`, rendered by `app/mock-exam/[examId]/MockExamClient.tsx`.
+
+```ts
+export type MockExamDomain = { id: number; label: string; weight: string };
+export type MockExamQuestion = {
+  id: number; domain: number; text: string;
+  options: string[]; correct: number; // index into options
+  explanation: string;                // inline HTML (<strong>/<code>/<br>)
+};
+export type MockExam = {
+  id: string; title: string; description: string;
+  passThreshold: number;              // percent, e.g. 70
+  domains: MockExamDomain[]; questions: MockExamQuestion[];
+};
+```
+
+The exam is scored in-session (React state, not localStorage): answer reveals the explanation, Submit
+shows overall % vs `passThreshold`, pass/fail, and a per-domain breakdown.
+
 ## Progress Types
 
 ```ts
