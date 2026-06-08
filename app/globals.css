@@ -41,6 +41,10 @@ a {
 }
 
 /* Inline rich text inside mock-exam explanations (trusted <strong>/<code>/<br> markup). */
+.exam-rich {
+  overflow-wrap: break-word;
+}
+
 .exam-rich code {
   font-family: ui-monospace, "JetBrains Mono", "SFMono-Regular", monospace;
   font-size: 0.85em;
@@ -61,6 +65,10 @@ a {
 .cheatsheet-prose {
   color: #101820;
   line-height: 1.7;
+  /* Long inline-code tokens (method chains, URLs, flags) must break rather than
+     overflow the viewport on narrow screens. <pre> uses white-space: pre, so it
+     is unaffected and keeps scrolling via overflow-x: auto. */
+  overflow-wrap: break-word;
 }
 
 .cheatsheet-prose > * + * {
