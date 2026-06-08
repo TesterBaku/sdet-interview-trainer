@@ -72,7 +72,9 @@ export default async function CheatSheetDetailPage({ params }: { params: Promise
           </div>
         </nav>
 
-        <div className="space-y-5">
+        {/* min-w-0 lets this grid column shrink below its content so wide tables/code
+            blocks scroll inside their own overflow-x containers instead of widening the page. */}
+        <div className="min-w-0 space-y-5">
           {sheet.sections.map((section, i) => (
             <section
               className="scroll-mt-24 rounded-[2rem] border border-ink/10 bg-white/80 p-6 shadow-panel sm:p-8"
@@ -83,7 +85,9 @@ export default async function CheatSheetDetailPage({ params }: { params: Promise
                 <span className="font-mono text-base font-bold" style={{ color: sheet.accent }}>
                   {String(i + 1).padStart(2, "0")}
                 </span>
-                {section.title}
+                {/* min-w-0 + break-words lets long single-word titles (e.g.
+                    "StaleElementReferenceException") wrap instead of overflowing on mobile. */}
+                <span className="min-w-0 break-words">{section.title}</span>
               </h2>
               <div
                 className="cheatsheet-prose mt-4"
