@@ -6,6 +6,8 @@ import docker from "@/data/cheatsheets/docker.json";
 import java from "@/data/cheatsheets/java.json";
 import javascript from "@/data/cheatsheets/javascript.json";
 import kubernetes from "@/data/cheatsheets/kubernetes.json";
+import langchain from "@/data/cheatsheets/langchain.json";
+import nodejs from "@/data/cheatsheets/nodejs.json";
 import playwright from "@/data/cheatsheets/playwright.json";
 import pyspark from "@/data/cheatsheets/pyspark.json";
 import python from "@/data/cheatsheets/python.json";
@@ -31,13 +33,15 @@ const cheatSheetData = [
   python,
   java,
   javascript,
+  nodejs,
   csharp,
+  langchain,
   ccaFoundations,
 ] as CheatSheet[];
 
 export const cheatSheets = cheatSheetData;
 
-const GROUP_ORDER: CheatSheetGroup[] = ["Test Frameworks", "API & Data", "DevOps & CI", "Languages", "Certifications"];
+const GROUP_ORDER: CheatSheetGroup[] = ["Test Frameworks", "API & Data", "DevOps & CI", "Languages", "AI & LLMs", "Certifications"];
 
 export function getCheatSheet(id: string): CheatSheet | undefined {
   return cheatSheets.find((sheet) => sheet.id === id);
