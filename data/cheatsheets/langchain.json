@@ -1,0 +1,219 @@
+{
+  "id": "langchain",
+  "title": "LangChain",
+  "group": "AI & LLMs",
+  "accent": "#0d9488",
+  "summary": "Building LLM apps: models and prompts, the LCEL Runnable interface, output parsers, retrieval and RAG, memory, tools and agents, and LangGraph — with rapid-fire Q&A.",
+  "tags": [
+    "LLM",
+    "LCEL",
+    "RAG",
+    "Agents",
+    "LangGraph",
+    "Prompts"
+  ],
+  "sections": [
+    {
+      "id": "whatis",
+      "title": "What LangChain Is",
+      "bodyHtml": "<p><strong>LangChain</strong> is a framework for building applications powered by large language models. It gives you two things: <strong>standard interfaces</strong> over many providers (so swapping OpenAI for Anthropic is a one-line change) and <strong>composition</strong> primitives to wire models, prompts, retrievers, and tools into pipelines.</p><p class='pullquote'>LangChain's value isn't the model — it's the glue: a common abstraction for models, prompts, parsers, and retrievers, plus a way to chain them and observe what happened.</p><p>The codebase is split into focused packages:</p><ul class='clean'><li><code>langchain-core</code> — the base abstractions (Runnables, messages, prompts, output parsers). Lightweight, few dependencies.</li><li><code>langchain</code> — higher-level chains, agents, and retrieval strategies.</li><li><strong>integration packages</strong> — <code>langchain-openai</code>, <code>langchain-anthropic</code>, etc., one per provider.</li><li><code>langchain-community</code> — community-maintained integrations.</li></ul>"
+    },
+    {
+      "id": "models",
+      "title": "Models, Messages & Prompts",
+      "bodyHtml": "<p>The core object is a <strong>chat model</strong> — it takes a list of <strong>messages</strong> and returns an <code>AIMessage</code>. Messages carry a role: <code>SystemMessage</code>, <code>HumanMessage</code>, <code>AIMessage</code>.</p><p><strong>Prompt templates</strong> turn variables into messages so prompts are reusable and testable:</p><pre><code>from langchain_core.prompts import ChatPromptTemplate\n\nprompt = ChatPromptTemplate.from_messages([\n    (\"system\", \"You are a {role}.\"),\n    (\"human\", \"{question}\"),\n])\nprompt_value = prompt.invoke({\"role\": \"tutor\", \"question\": \"What is RAG?\"})\nmessages = prompt_value.to_messages()  # PromptValue -&gt; list of messages</code></pre><div class='keynote'>Because every provider's chat model implements the same interface, the rest of your pipeline doesn't care which LLM is behind it — that's what makes models swappable. Distinguish <strong>chat models</strong> (message in, message out) from the older text-completion <strong>LLMs</strong> (string in, string out); chat models are the default today.</div>"
+    },
+    {
+      "id": "lcel",
+      "title": "LCEL & the Runnable Interface",
+      "bodyHtml": "<p><strong>LCEL</strong> (LangChain Expression Language) is how you compose components. Every component — prompt, model, parser, retriever — implements the <strong>Runnable</strong> interface, so they share the same methods and snap together with the pipe operator <code>|</code>.</p><pre><code>from langchain_core.output_parsers import StrOutputParser\n\nchain = prompt | model | StrOutputParser()\nchain.invoke({\"role\": \"tutor\", \"question\": \"What is RAG?\"})</code></pre><p>The Runnable interface gives every chain the same execution methods for free:</p><ul class='clean'><li><code>invoke()</code> — run once on a single input.</li><li><code>batch()</code> — run on many inputs concurrently.</li><li><code>stream()</code> — yield output tokens as they're generated.</li><li>async variants — <code>ainvoke</code>, <code>abatch</code>, <code>astream</code>.</li></ul><div class='keynote'>Compose in parallel with <code>RunnableParallel</code> (run branches concurrently and collect a dict) and inject inputs with <code>RunnablePassthrough</code>. Build the pipeline once; get sync, async, batch, and streaming execution without extra code.</div>"
+    },
+    {
+      "id": "parsers",
+      "title": "Output Parsers & Structured Output",
+      "bodyHtml": "<p>Models return free-form text; <strong>output parsers</strong> turn that into something your code can use, as the last step of a chain.</p><ul class='clean'><li><code>StrOutputParser</code> — pull the plain string out of an <code>AIMessage</code>.</li><li><strong>JSON / Pydantic parsers</strong> — coerce the response into a typed object and validate it.</li></ul><p>The more robust modern approach binds a schema directly to the model:</p><pre><code>structured = model.with_structured_output(MySchema)\nstructured.invoke(\"Extract the fields from: ...\")</code></pre><div class='keynote'><code>with_structured_output</code> uses the provider's native tool/JSON-mode support to guarantee the shape, which is more reliable than parsing free text and re-prompting on failure. Reach for it whenever you need machine-readable results.</div>"
+    },
+    {
+      "id": "rag",
+      "title": "Retrieval & RAG",
+      "bodyHtml": "<p><strong>RAG</strong> (Retrieval-Augmented Generation) grounds an LLM in your own data: fetch relevant documents, put them in the prompt, then answer. The ingestion pipeline:</p><ol class='numbered'><li><strong>Document loaders</strong> read sources (PDFs, web pages, databases) into <code>Document</code> objects.</li><li><strong>Text splitters</strong> chunk long documents so each piece fits the embedding and context limits.</li><li><strong>Embeddings</strong> convert each chunk into a vector capturing its meaning.</li><li><strong>Vector store</strong> indexes the vectors for similarity search (Chroma, FAISS, pgvector, Pinecone).</li></ol><p>At query time a <strong>retriever</strong> embeds the question, finds the nearest chunks, and the chain stuffs them into the prompt as context.</p><div class='keynote'>The retriever is itself a Runnable, so RAG is just another LCEL pipeline: <code>retriever</code> → format docs → <code>prompt</code> → <code>model</code> → <code>parser</code>. Chunking strategy and retrieval quality usually matter more to answer quality than the model choice.</div>"
+    },
+    {
+      "id": "memory",
+      "title": "Memory & Conversation State",
+      "bodyHtml": "<p>LLM calls are <strong>stateless</strong> — the model only knows what's in the current request. To hold a conversation you must pass prior turns back in yourself.</p><ul class='clean'><li>Keep a <strong>message history</strong> per session and prepend it to each new prompt, often via a <code>MessagesPlaceholder</code> in the template.</li><li><code>RunnableWithMessageHistory</code> wraps a chain to load and save history automatically, keyed by a session id.</li><li>For long chats, <strong>trim or summarize</strong> old turns so you stay within the context window and control token cost.</li></ul><div class='keynote'>The older <code>ConversationBufferMemory</code>-style classes are largely superseded. Current guidance is explicit message-history wiring or <strong>LangGraph persistence</strong> (checkpointers), which also survives restarts and supports branching.</div>"
+    },
+    {
+      "id": "agents",
+      "title": "Tools & Agents",
+      "bodyHtml": "<p>A <strong>tool</strong> is a function the model can choose to call — a calculator, a search API, a database query. An <strong>agent</strong> is an LLM in a loop: it decides which tool to call, sees the result, and repeats until it can answer.</p><pre><code>from langchain_core.tools import tool\n\n@tool\ndef get_weather(city: str) -&gt; str:\n    \"\"\"Return the weather for a city.\"\"\"\n    return lookup(city)\n\nmodel_with_tools = model.bind_tools([get_weather])</code></pre><p>The flow: <code>bind_tools</code> exposes the schemas to the model; the model replies with <strong>tool calls</strong>; your code runs the tools and feeds results back as <code>ToolMessage</code>s; the loop continues.</p><div class='keynote'>The LLM never executes anything itself — it only <em>requests</em> a call. Your code runs the tool, which is also where you enforce permissions and validation. This tool-calling loop is the foundation every agent framework builds on.</div>"
+    },
+    {
+      "id": "langgraph",
+      "title": "LangGraph & Ecosystem",
+      "bodyHtml": "<p><strong>LangGraph</strong> is LangChain's library for stateful, multi-step agent workflows modeled as a <strong>graph</strong>: nodes do work, edges decide what runs next, and a shared <strong>state</strong> object flows through. Unlike a straight LCEL chain, a graph supports cycles, branching, persistence, and human-in-the-loop pauses.</p><p class='pullquote'>Rule of thumb: a linear pipeline → LCEL chain; a looping, branching, stateful agent → LangGraph. It's the recommended path for production agents over the older AgentExecutor.</p><p>Around the framework:</p><ul class='clean'><li><strong>LangSmith</strong> — tracing, debugging, and evaluation; see every step, token, and latency of a run.</li><li><strong>Streaming &amp; callbacks</strong> — stream tokens or intermediate events to a UI; hook callbacks for logging and metrics.</li></ul><div class='keynote'>LangSmith is provider-agnostic and works even without LangChain, but pairs tightly with it — observability is what turns a demo chain into something you can debug and trust in production.</div>"
+    }
+  ],
+  "quiz": [
+    {
+      "id": "cs-langchain-001",
+      "topicId": "langchain",
+      "topicTitle": "LangChain",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "What does LCEL's pipe operator (|) rely on to compose components?",
+      "choices": [
+        "Python's multiprocessing, running each component in its own process",
+        "The shared Runnable interface that every component implements",
+        "A central registry that routes outputs by component name",
+        "Provider-specific SDKs wired together by the model class"
+      ],
+      "correctAnswer": "The shared Runnable interface that every component implements",
+      "explanation": "Prompts, models, parsers, and retrievers all implement the Runnable interface, so they share invoke/batch/stream/async methods and compose with the pipe operator into a single Runnable chain.",
+      "tags": [
+        "langchain"
+      ]
+    },
+    {
+      "id": "cs-langchain-002",
+      "topicId": "langchain",
+      "topicTitle": "LangChain",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "In LangChain's tool-calling loop, who actually executes a tool?",
+      "choices": [
+        "The LLM runs the tool internally and returns its result",
+        "The model requests a tool call; your application code runs the tool and feeds the result back",
+        "The vector store executes tools as part of retrieval",
+        "LangSmith executes tools and streams the output to the model"
+      ],
+      "correctAnswer": "The model requests a tool call; your application code runs the tool and feeds the result back",
+      "explanation": "The LLM only emits tool calls (name + arguments). Your code executes the tool and returns a ToolMessage — which is also where you enforce permissions and validation. The model never runs code itself.",
+      "tags": [
+        "langchain"
+      ]
+    },
+    {
+      "id": "cs-langchain-003",
+      "topicId": "langchain",
+      "topicTitle": "LangChain",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "When should you choose LangGraph over a plain LCEL chain?",
+      "choices": [
+        "Whenever you call any LLM, since LCEL is deprecated",
+        "Only when you need to swap model providers",
+        "When the workflow needs cycles, branching, persistence, or human-in-the-loop — i.e. a stateful agent",
+        "Only for retrieval/RAG pipelines"
+      ],
+      "correctAnswer": "When the workflow needs cycles, branching, persistence, or human-in-the-loop — i.e. a stateful agent",
+      "explanation": "A linear pipeline is a fine LCEL chain; LangGraph models looping, branching, stateful agent workflows as a graph with persistence and human-in-the-loop, and is the recommended path for production agents.",
+      "tags": [
+        "langchain"
+      ]
+    },
+    {
+      "id": "cs-langchain-004",
+      "topicId": "langchain",
+      "topicTitle": "LangChain",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "What is the correct order of the RAG ingestion pipeline?",
+      "choices": [
+        "Embed → load → split → store",
+        "Load documents → split into chunks → embed chunks → index in a vector store",
+        "Split → store → load → embed",
+        "Load → embed whole documents → retrieve → split"
+      ],
+      "correctAnswer": "Load documents → split into chunks → embed chunks → index in a vector store",
+      "explanation": "Document loaders read sources, text splitters chunk them, embeddings turn chunks into vectors, and a vector store indexes those for similarity search. At query time a retriever embeds the question and finds nearest chunks.",
+      "tags": [
+        "langchain"
+      ]
+    },
+    {
+      "id": "cs-langchain-005",
+      "topicId": "langchain",
+      "topicTitle": "LangChain",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "Why prefer model.with_structured_output(Schema) over parsing free-form text into JSON?",
+      "choices": [
+        "It is the only way to call a model with a prompt template",
+        "It uses the provider's native tool/JSON-mode to guarantee the output shape, instead of parsing and re-prompting",
+        "It runs locally so it never calls the model",
+        "It removes the need for embeddings in RAG"
+      ],
+      "correctAnswer": "It uses the provider's native tool/JSON-mode to guarantee the output shape, instead of parsing and re-prompting",
+      "explanation": "with_structured_output leans on the model's native structured-output/tool support to return a validated, typed object — more reliable than parsing free text and retrying when it doesn't match.",
+      "tags": [
+        "langchain"
+      ]
+    },
+    {
+      "id": "cs-langchain-006",
+      "topicId": "langchain",
+      "topicTitle": "LangChain",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "Why do you need to manage memory/history yourself for a chatbot?",
+      "choices": [
+        "Because LangChain disables the model's built-in memory",
+        "Because LLM calls are stateless — the model only sees what's in the current request",
+        "Because vector stores overwrite the conversation each turn",
+        "Because streaming responses erase prior messages"
+      ],
+      "correctAnswer": "Because LLM calls are stateless — the model only sees what's in the current request",
+      "explanation": "Each model call is stateless, so prior turns must be passed back in. RunnableWithMessageHistory (or LangGraph persistence) loads and saves a per-session message history and prepends it to each prompt; long chats are trimmed or summarized.",
+      "tags": [
+        "langchain"
+      ]
+    },
+    {
+      "id": "cs-langchain-007",
+      "topicId": "langchain",
+      "topicTitle": "LangChain",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "What is the role of langchain-core versus the integration packages like langchain-openai?",
+      "choices": [
+        "langchain-core contains every provider's client; integration packages are just aliases",
+        "langchain-core holds the base abstractions (Runnables, messages, prompts); integration packages add one provider each",
+        "langchain-core is the agent runtime; integration packages hold prompts",
+        "They are the same package published under two names"
+      ],
+      "correctAnswer": "langchain-core holds the base abstractions (Runnables, messages, prompts); integration packages add one provider each",
+      "explanation": "langchain-core defines the lightweight base interfaces (Runnable, messages, prompts, output parsers); provider packages such as langchain-openai and langchain-anthropic implement those interfaces for a specific model provider.",
+      "tags": [
+        "langchain"
+      ]
+    },
+    {
+      "id": "cs-langchain-008",
+      "topicId": "langchain",
+      "topicTitle": "LangChain",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "What is LangSmith used for?",
+      "choices": [
+        "Serving open-source models locally instead of calling a provider",
+        "Tracing, debugging, and evaluating LLM app runs (observability)",
+        "Splitting documents into chunks for RAG",
+        "Compiling LCEL chains into faster native code"
+      ],
+      "correctAnswer": "Tracing, debugging, and evaluating LLM app runs (observability)",
+      "explanation": "LangSmith is the observability platform: it traces every step, token, and latency of a run and supports evaluation. It's provider-agnostic and works with or without LangChain, but pairs tightly with it.",
+      "tags": [
+        "langchain"
+      ]
+    }
+  ]
+}

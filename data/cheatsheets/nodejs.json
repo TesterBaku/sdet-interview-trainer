@@ -1,0 +1,219 @@
+{
+  "id": "nodejs",
+  "title": "Node.js",
+  "group": "Languages",
+  "accent": "#5fa04e",
+  "summary": "The JavaScript runtime: event loop and non-blocking I/O, CommonJS vs ES modules, async patterns, streams, EventEmitter, error handling, and scaling with cluster and worker threads — with rapid-fire Q&A.",
+  "tags": [
+    "Event Loop",
+    "Async",
+    "Streams",
+    "Modules",
+    "Worker Threads",
+    "npm"
+  ],
+  "sections": [
+    {
+      "id": "runtime",
+      "title": "Runtime & Event Loop",
+      "bodyHtml": "<p><strong>Node.js</strong> runs JavaScript outside the browser on Google's <strong>V8</strong> engine, paired with <strong>libuv</strong> — a C library that provides the event loop and a thread pool for I/O. Node is <em>single-threaded</em> for your JavaScript, but I/O is offloaded so it never blocks.</p><p class='pullquote'>Node's model is single-threaded, non-blocking, event-driven. One thread runs your JS; libuv handles file, network, and timer work in the background and queues callbacks for the loop to run.</p><p>The <strong>event loop</strong> processes work in phases, in order, each draining its queue:</p><ol class='numbered'><li><strong>timers</strong> — <code>setTimeout</code> / <code>setInterval</code> callbacks.</li><li><strong>pending callbacks</strong> — deferred I/O callbacks.</li><li><strong>poll</strong> — retrieve new I/O events; execute their callbacks.</li><li><strong>check</strong> — <code>setImmediate</code> callbacks.</li><li><strong>close</strong> — <code>close</code> events (e.g. a socket closing).</li></ol><div class='keynote'><strong>Microtasks run between phases:</strong> <code>process.nextTick</code> fires first, then resolved <code>Promise</code> callbacks — both drain fully before the loop moves on. That's why a runaway <code>nextTick</code> can starve I/O.</div>"
+    },
+    {
+      "id": "modules",
+      "title": "Modules: CommonJS vs ES Modules",
+      "bodyHtml": "<p>Node supports two module systems:</p><table><thead><tr><th>Aspect</th><th>CommonJS / ES Modules</th></tr></thead><tbody><tr><td>Syntax</td><td><code>require()</code> / <code>module.exports</code> &nbsp;—&nbsp; <code>import</code> / <code>export</code></td></tr><tr><td>Loading</td><td>Synchronous <code>require</code> / asynchronous &amp; statically analyzable</td></tr><tr><td>Default in</td><td><code>.cjs</code> (or no type field) / <code>.mjs</code> (or <code>\"type\": \"module\"</code>)</td></tr><tr><td>Top-level await</td><td>No / Yes</td></tr></tbody></table><div class='keynote'>A package's <code>\"type\"</code> field in <code>package.json</code> decides how bare <code>.js</code> files are interpreted — <code>\"commonjs\"</code> (default) or <code>\"module\"</code>. ESM can import CommonJS; CommonJS historically loaded ESM only via dynamic <code>import()</code>, though recent Node added synchronous <code>require()</code> of ES modules.</div>"
+    },
+    {
+      "id": "async",
+      "title": "Async Patterns",
+      "bodyHtml": "<p>Three generations of asynchronous style, each built on the last:</p><div class='layer'><div class='ltitle'>Callbacks (error-first)</div><p>The original Node convention: <code>fn(args, (err, result) =&gt; ...)</code> — the first argument is always the error. Nesting many of them creates \"callback hell\".</p></div><div class='layer'><div class='ltitle'>Promises</div><p>An object representing a future value — <code>.then()</code> / <code>.catch()</code>, chainable and composable. <code>Promise.all</code> / <code>allSettled</code> / <code>race</code> coordinate concurrency.</p></div><div class='layer'><div class='ltitle'>async / await</div><p>Syntactic sugar over Promises — write asynchronous code that reads sequentially, with normal <code>try/catch</code> for errors. The modern default.</p></div><div class='keynote'>Wrap a callback API into a Promise with <code>util.promisify</code>, or use the promise variants of core modules (<code>fs/promises</code>). Run independent async work concurrently with <code>Promise.all</code> rather than awaiting each in sequence.</div>"
+    },
+    {
+      "id": "streams",
+      "title": "Streams & Buffers",
+      "bodyHtml": "<p><strong>Streams</strong> process data in chunks instead of loading it all into memory — essential for large files and network data. Four types:</p><ul class='clean'><li><strong>Readable</strong> — source you read from (<code>fs.createReadStream</code>, an HTTP request).</li><li><strong>Writable</strong> — destination you write to (a file, an HTTP response).</li><li><strong>Duplex</strong> — both readable and writable (a TCP socket).</li><li><strong>Transform</strong> — a duplex stream that modifies data passing through (gzip, encryption).</li></ul><p>Connect them with <code>pipe()</code> or, preferably, <code>stream.pipeline()</code>, which propagates errors and cleans up:</p><pre><code>const { pipeline } = require(\"node:stream/promises\");\nawait pipeline(\n  fs.createReadStream(\"in.txt\"),\n  zlib.createGzip(),\n  fs.createWriteStream(\"out.txt.gz\")\n);</code></pre><div class='keynote'><strong>Backpressure:</strong> when a writable can't keep up, <code>pipe</code>/<code>pipeline</code> automatically pause the readable so memory stays bounded. A <strong>Buffer</strong> holds raw binary data — the chunks streams move around.</div>"
+    },
+    {
+      "id": "events",
+      "title": "EventEmitter",
+      "bodyHtml": "<p>Much of Node's core is built on the <strong>EventEmitter</strong> pattern — objects that emit named events and call registered listeners. Streams, HTTP servers, and sockets are all emitters.</p><pre><code>const { EventEmitter } = require(\"node:events\");\nconst bus = new EventEmitter();\nbus.on(\"order\", (id) =&gt; console.log(\"processing\", id));\nbus.emit(\"order\", 42);</code></pre><ul class='clean'><li><code>on(event, fn)</code> / <code>once(event, fn)</code> — subscribe (persistent / one-shot).</li><li><code>emit(event, ...args)</code> — fire synchronously to all listeners in registration order.</li><li><code>off()</code> / <code>removeListener()</code> — unsubscribe to avoid leaks.</li></ul><div class='keynote'>An <code>\"error\"</code> event with no listener <strong>throws</strong> and can crash the process — always attach an error listener to emitters that can fail.</div>"
+    },
+    {
+      "id": "errors",
+      "title": "Error Handling",
+      "bodyHtml": "<p>Error handling depends on the async style:</p><ul class='clean'><li><strong>Sync &amp; async/await</strong> — <code>try/catch</code>.</li><li><strong>Callbacks</strong> — check the error-first argument every time.</li><li><strong>Promises</strong> — <code>.catch()</code>; an unhandled rejection emits <code>process.on(\"unhandledRejection\")</code>.</li><li><strong>EventEmitters</strong> — listen for the <code>\"error\"</code> event.</li></ul><div class='keynote'><strong>uncaughtException is a last resort, not a recovery tool.</strong> After one, the process is in an undefined state — log, run critical cleanup, and exit. Let a process manager (pm2, systemd, Kubernetes) restart it rather than trying to keep running.</div>"
+    },
+    {
+      "id": "scaling",
+      "title": "Concurrency & Scaling",
+      "bodyHtml": "<p>One Node process uses one CPU core for JS. To use more — or to keep the loop responsive under heavy compute — Node offers three tools, chosen by the <em>kind</em> of work:</p><div class='layer'><div class='ltitle'>cluster</div><p>Forks multiple Node processes that share a listening port; the primary accepts connections and hands them to workers (round-robin by default on Linux/macOS, OS-scheduled on Windows). Scales an <strong>I/O-bound</strong> server across all cores.</p></div><div class='layer'><div class='ltitle'>worker_threads</div><p>Real threads inside one process, sharing memory via <code>SharedArrayBuffer</code>. The right tool for <strong>CPU-bound</strong> work (parsing, image processing) that would otherwise block the event loop.</p></div><div class='layer'><div class='ltitle'>child_process</div><p><code>spawn</code> / <code>exec</code> / <code>fork</code> to run separate programs or Node scripts and communicate over IPC or streams.</p></div><div class='keynote'><strong>Rule of thumb:</strong> I/O-bound and need more throughput → <code>cluster</code>; CPU-bound and blocking the loop → <code>worker_threads</code>.</div>"
+    },
+    {
+      "id": "tooling",
+      "title": "npm, Core Modules & Tooling",
+      "bodyHtml": "<p><strong>npm</strong> manages dependencies via <code>package.json</code>; <code>package-lock.json</code> pins exact versions for reproducible installs. Versions follow <strong>semver</strong> (<code>MAJOR.MINOR.PATCH</code>): <code>^1.2.3</code> allows minor/patch updates, <code>~1.2.3</code> only patch.</p><p>Frequently used built-in (<code>node:</code>) modules:</p><ul class='clean'><li><code>fs</code> / <code>path</code> — files and cross-platform paths.</li><li><code>http</code> / <code>https</code> — servers and clients (plus the global <code>fetch</code>).</li><li><code>os</code> / <code>process</code> — system info, env vars (<code>process.env</code>), arguments.</li><li><code>crypto</code> — hashing, HMAC, encryption.</li><li><code>node:test</code> + <code>node:assert</code> — the built-in test runner, no dependency needed.</li></ul><div class='keynote'>Prefer <code>dependencies</code> for runtime needs and <code>devDependencies</code> for build/test tooling. Use the <code>node:</code> prefix on core imports to make intent explicit and avoid clashes with npm packages.</div>"
+    }
+  ],
+  "quiz": [
+    {
+      "id": "cs-nodejs-001",
+      "topicId": "nodejs",
+      "topicTitle": "Node.js",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "How does single-threaded Node.js handle many concurrent I/O operations without blocking?",
+      "choices": [
+        "It offloads I/O to libuv (background thread pool / OS) and runs their callbacks on the event loop when ready",
+        "It spawns a new OS thread for each incoming request",
+        "It blocks on each operation but switches threads with the cluster module",
+        "V8 runs the JavaScript in parallel across all CPU cores automatically"
+      ],
+      "correctAnswer": "It offloads I/O to libuv (background thread pool / OS) and runs their callbacks on the event loop when ready",
+      "explanation": "Your JS runs on one thread, but libuv performs I/O in the background and queues callbacks; the event loop runs them when the operation completes — non-blocking, event-driven concurrency.",
+      "tags": [
+        "nodejs"
+      ]
+    },
+    {
+      "id": "cs-nodejs-002",
+      "topicId": "nodejs",
+      "topicTitle": "Node.js",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "What runs between event-loop phases, before the loop continues?",
+      "choices": [
+        "setImmediate callbacks, which always run before timers",
+        "The microtask queue: process.nextTick first, then resolved Promise callbacks",
+        "close-event callbacks, which are flushed between every phase",
+        "Nothing — phases run back to back with no work in between"
+      ],
+      "correctAnswer": "The microtask queue: process.nextTick first, then resolved Promise callbacks",
+      "explanation": "Microtasks drain between phases — process.nextTick callbacks first, then the Promise microtask queue — which is why a runaway nextTick can starve I/O.",
+      "tags": [
+        "nodejs"
+      ]
+    },
+    {
+      "id": "cs-nodejs-003",
+      "topicId": "nodejs",
+      "topicTitle": "Node.js",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "What is the key difference between CommonJS and ES modules in Node?",
+      "choices": [
+        "CommonJS supports top-level await; ES modules do not",
+        "CommonJS uses synchronous require/module.exports; ES modules use static import/export and allow top-level await",
+        "ES modules load synchronously; CommonJS loads asynchronously",
+        "They are identical; the file extension is the only difference"
+      ],
+      "correctAnswer": "CommonJS uses synchronous require/module.exports; ES modules use static import/export and allow top-level await",
+      "explanation": "CommonJS is synchronous require/module.exports; ESM is statically analyzable import/export and supports top-level await. The package.json \"type\" field decides how bare .js files are treated.",
+      "tags": [
+        "nodejs"
+      ]
+    },
+    {
+      "id": "cs-nodejs-004",
+      "topicId": "nodejs",
+      "topicTitle": "Node.js",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "For a CPU-bound task that would block the event loop, what should you reach for?",
+      "choices": [
+        "The cluster module, to fork more processes",
+        "setImmediate, to defer the work to the check phase",
+        "worker_threads, to run the computation off the main thread",
+        "A longer setTimeout so the loop has time to recover"
+      ],
+      "correctAnswer": "worker_threads, to run the computation off the main thread",
+      "explanation": "worker_threads run real threads (with shared memory) for CPU-bound work so the main event loop stays responsive. cluster scales I/O-bound servers across cores but doesn't unblock a single heavy computation.",
+      "tags": [
+        "nodejs"
+      ]
+    },
+    {
+      "id": "cs-nodejs-005",
+      "topicId": "nodejs",
+      "topicTitle": "Node.js",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "Why use stream.pipeline() instead of chaining .pipe() calls?",
+      "choices": [
+        "pipeline loads the whole file into memory first, which is faster",
+        "pipeline propagates errors across all stages and cleans up resources; raw pipe does not",
+        "pipe is deprecated and removed in modern Node",
+        "pipeline disables backpressure so data flows faster"
+      ],
+      "correctAnswer": "pipeline propagates errors across all stages and cleans up resources; raw pipe does not",
+      "explanation": "pipeline forwards errors from any stage and destroys all streams on failure, avoiding leaks; chained pipe() calls swallow downstream errors and require manual cleanup. Both preserve backpressure.",
+      "tags": [
+        "nodejs"
+      ]
+    },
+    {
+      "id": "cs-nodejs-006",
+      "topicId": "nodejs",
+      "topicTitle": "Node.js",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "What happens when an EventEmitter emits an 'error' event with no listener attached?",
+      "choices": [
+        "The error is silently ignored",
+        "It is queued until a listener is later added",
+        "It is thrown and can crash the process",
+        "It is automatically routed to process.nextTick"
+      ],
+      "correctAnswer": "It is thrown and can crash the process",
+      "explanation": "An 'error' event with no listener is thrown as an exception and can terminate the process — always attach an error listener to emitters that can fail.",
+      "tags": [
+        "nodejs"
+      ]
+    },
+    {
+      "id": "cs-nodejs-007",
+      "topicId": "nodejs",
+      "topicTitle": "Node.js",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "What is the recommended way to handle process.on('uncaughtException')?",
+      "choices": [
+        "Catch it, log it, and continue running as if nothing happened",
+        "Use it as the primary error-handling mechanism instead of try/catch",
+        "Treat the process as corrupted: log, run critical cleanup, then exit and let a supervisor restart it",
+        "Ignore it; Node recovers the event loop automatically"
+      ],
+      "correctAnswer": "Treat the process as corrupted: log, run critical cleanup, then exit and let a supervisor restart it",
+      "explanation": "After an uncaughtException the process is in an undefined state. Log, do essential cleanup, and exit; rely on a process manager (pm2, systemd, Kubernetes) to restart — don't keep serving from a corrupted state.",
+      "tags": [
+        "nodejs"
+      ]
+    },
+    {
+      "id": "cs-nodejs-008",
+      "topicId": "nodejs",
+      "topicTitle": "Node.js",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "In semver, what does the caret range ^1.2.3 allow?",
+      "choices": [
+        "Only the exact version 1.2.3",
+        "Patch updates only, up to 1.2.x",
+        "Minor and patch updates, up to but not including 2.0.0",
+        "Any version, including the next major release"
+      ],
+      "correctAnswer": "Minor and patch updates, up to but not including 2.0.0",
+      "explanation": "^1.2.3 permits compatible minor and patch updates (>=1.2.3 <2.0.0); ~1.2.3 allows only patch updates (>=1.2.3 <1.3.0). package-lock.json pins the exact resolved versions.",
+      "tags": [
+        "nodejs"
+      ]
+    }
+  ]
+}

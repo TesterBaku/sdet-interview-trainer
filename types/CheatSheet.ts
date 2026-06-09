@@ -6,7 +6,13 @@ export type CheatSheetSection = {
   bodyHtml: string;
 };
 
-export type CheatSheetGroup = "Test Frameworks" | "API & Data" | "DevOps & CI" | "Languages" | "Certifications";
+export type CheatSheetGroup =
+  | "Test Frameworks"
+  | "API & Data"
+  | "DevOps & CI"
+  | "Languages"
+  | "AI & LLMs"
+  | "Certifications";
 
 export type CheatSheet = {
   id: string;
