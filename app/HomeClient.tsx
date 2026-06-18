@@ -5,7 +5,7 @@ import { ProgressSummary } from "@/components/ProgressSummary";
 import { getWeakTopicIds, topics } from "@/lib/questionUtils";
 import { summarizeProgress, summarizeTopicProgress, useProgress } from "@/lib/progress";
 
-export function HomeClient() {
+export function HomeClient({ cheatSheetCount }: { cheatSheetCount: number }) {
   const { progress } = useProgress();
   const summary = summarizeProgress(progress);
   const weakTopicIds = getWeakTopicIds(progress.records);
@@ -72,7 +72,7 @@ export function HomeClient() {
           <p className="text-sm font-bold uppercase tracking-[0.2em] text-blueprint/70">Cheat Sheets</p>
           <h2 className="mt-3 font-display text-2xl font-bold text-blueprint">Study the core concepts</h2>
           <p className="mt-2 text-ink/75">
-            13 reference pages — Playwright, Selenium, SQL, Docker, Kubernetes, Python, Java, JavaScript, C#, and more.
+            {cheatSheetCount} reference pages — Playwright, Selenium, SQL, Docker, Kubernetes, Python, Java, JavaScript, C#, and more.
           </p>
         </Link>
         <Link

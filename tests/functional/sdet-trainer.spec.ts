@@ -561,6 +561,9 @@ test("home hero leads with the Daily Practice CTA and a topics link", async ({ p
   const topicsCta = page.getByRole("link", { name: "Browse training lanes", exact: true });
   await expect(topicsCta).toBeVisible();
   await expect(topicsCta).toHaveAttribute("href", "/topics");
+
+  // Cheat Sheets teaser count is derived from data, not a hardcoded number.
+  await expect(page.getByText(`${cheatSheetCount} reference pages`, { exact: false })).toBeVisible();
 });
 
 test("daily practice renders all 5 sections with the planned mix of items", async ({ page }) => {
