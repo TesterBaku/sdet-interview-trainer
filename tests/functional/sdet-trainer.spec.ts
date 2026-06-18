@@ -466,6 +466,83 @@ test("progress page reflects saved localStorage records", async ({ page }) => {
   await expect(page.getByText("4%").first()).toBeVisible();
 });
 
+test("progress page exports a versioned JSON backup of saved records", async ({ page }) => {
+  await seedProgress(page, [
+    { questionId: "python-coding-001", status: "weak" },
+    { questionId: "sql-001", status: "known" }
+  ]);
+  await page.goto("/progress");
+
+  const downloadPromise = page.waitForEvent("download");
+  await page.getByRole("button", { name: "Export progress" }).click();
+  const download = await downloadPromise;
+  expect(download.suggestedFilename()).toMatch(/^sdet-progress-\d{4}-\d{2}-\d{2}\.json$/);
+
+  const stream = await download.createReadStream();
+  const chunks: Buffer[] = [];
+  for await (const chunk of stream) {
+    chunks.push(chunk as Buffer);
+  }
+  const payload = JSON.parse(Buffer.concat(chunks).toString("utf-8"));
+  expect(payload.app).toBe("sdet-interview-trainer");
+  expect(payload.version).toBe(1);
+  expect(payload.progress.records).toHaveLength(2);
+  expect(payload.progress.records.map((r: { questionId: string }) => r.questionId)).toContain("sql-001");
+
+  await expect(page.getByRole("status")).toHaveText(/Exported 2 records/);
+});
+
+test("progress page imports a backup and updates the summary", async ({ page }) => {
+  await clearAppState(page);
+  await page.goto("/progress");
+
+  const backup = JSON.stringify({
+    app: "sdet-interview-trainer",
+    version: 1,
+    exportedAt: new Date().toISOString(),
+    progress: {
+      records: [
+        { questionId: "python-coding-001", status: "weak", attempts: 3, lastReviewedAt: new Date().toISOString() }
+      ],
+      // Deliberately wrong counts — the importer must recompute, not trust these.
+      completedQuestions: 99,
+      weakQuestions: 99,
+      reviewQuestions: 99
+    }
+  });
+
+  // No existing records → import applies without a confirm dialog.
+  await page.locator('input[aria-label="Import progress backup file"]').setInputFiles({
+    name: "backup.json",
+    mimeType: "application/json",
+    buffer: Buffer.from(backup)
+  });
+
+  await expect(page.getByRole("status")).toHaveText(/Imported 1 records/);
+  // Recomputed counts drive the UI, not the tampered totals in the file.
+  await expect(page.getByText("1/50 completed, 1 weak")).toBeVisible();
+
+  const stored = await page.evaluate(
+    (key) => JSON.parse(window.localStorage.getItem(key) ?? "{}"),
+    progressKey
+  );
+  expect(stored.weakQuestions).toBe(1);
+  expect(stored.records).toHaveLength(1);
+});
+
+test("progress page rejects a malformed import file", async ({ page }) => {
+  await clearAppState(page);
+  await page.goto("/progress");
+
+  await page.locator('input[aria-label="Import progress backup file"]').setInputFiles({
+    name: "broken.json",
+    mimeType: "application/json",
+    buffer: Buffer.from("{ not valid json")
+  });
+
+  await expect(page.getByRole("status")).toHaveText(/isn't valid JSON/);
+});
+
 // ── Daily Practice ──────────────────────────────────────────────────────────
 
 test("home page shows a Daily Practice card linking to /daily-practice", async ({ page }) => {
