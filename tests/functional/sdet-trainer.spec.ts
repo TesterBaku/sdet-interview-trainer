@@ -389,6 +389,27 @@ test("home page has OpenGraph meta tags", async ({ page }) => {
   await expect(ogDesc).toHaveAttribute("content", /.+/);
 });
 
+test("home page exposes og:image and twitter:image social cards", async ({ page, request }) => {
+  await page.goto("/");
+  const ogImage = page.locator('meta[property="og:image"]');
+  const twitterImage = page.locator('meta[name="twitter:image"]');
+  await expect(ogImage).toHaveAttribute("content", /opengraph-image/);
+  await expect(twitterImage).toHaveAttribute("content", /twitter-image/);
+
+  // The generated image must actually resolve to a PNG (not 404). The meta URL is
+  // absolute (metadataBase → prod domain); fetch its path against the local server.
+  const ogUrl = await ogImage.getAttribute("content");
+  expect(ogUrl).toBeTruthy();
+  for (const meta of [ogImage, twitterImage]) {
+    const url = await meta.getAttribute("content");
+    expect(url).toBeTruthy();
+    const path = new URL(url!).pathname + new URL(url!).search;
+    const imageResponse = await request.get(path);
+    expect(imageResponse.status()).toBe(200);
+    expect(imageResponse.headers()["content-type"]).toContain("image/png");
+  }
+});
+
 test("sitemap.xml is reachable and contains topic URLs", async ({ page }) => {
   const response = await page.goto("/sitemap.xml");
   expect(response?.status()).toBe(200);
