@@ -812,6 +812,29 @@ test("coding gym falls back to all tasks when ?topic= is unknown", async ({ page
   expect(totalCards).toBeGreaterThan(13);
 });
 
+test("coding gym renders task content (loading fallback is replaced, not stuck)", async ({ page }) => {
+  await clearAppState(page);
+  await page.goto("/coding-gym");
+
+  // The branded fallback must give way to real task content once hydrated.
+  await expect(page.locator("article").first()).toBeVisible();
+  await expect(page.getByText("Loading coding tasks…")).not.toBeVisible();
+});
+
+test("coding gym offers a path forward when JavaScript is disabled", async ({ browser }) => {
+  const context = await browser.newContext({ javaScriptEnabled: false });
+  const page = await context.newPage();
+  await page.goto("/coding-gym");
+
+  // With no JS the client component can't hydrate; the noscript escape hatch
+  // must point users to a working route instead of leaving a dead spinner.
+  const escapeHatch = page.getByText(/Coding Gym needs JavaScript/i);
+  await expect(escapeHatch).toBeVisible();
+  await expect(page.getByRole("link", { name: "Topics" }).last()).toHaveAttribute("href", "/topics");
+
+  await context.close();
+});
+
 // ── Mobile viewport regression ───────────────────────────────────────────────
 
 test("coding gym cards do not overflow the viewport on mobile", async ({ page }) => {

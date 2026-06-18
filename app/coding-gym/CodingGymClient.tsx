@@ -58,9 +58,30 @@ function CodingGymInner() {
   );
 }
 
+function CodingGymFallback() {
+  return (
+    <div className="rounded-2xl bg-white/80 p-6 shadow-panel">
+      <p className="font-bold text-blueprint" role="status" aria-live="polite">
+        Loading coding tasks…
+      </p>
+      <noscript>
+        <p className="mt-2 text-ink/75">
+          Coding Gym needs JavaScript to run. Enable it, or browse the tasks by topic from the{" "}
+          {/* next/link can't hydrate without JS; a plain anchor is the correct escape hatch here. */}
+          {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
+          <a className="font-bold text-signal underline" href="/topics">
+            Topics
+          </a>{" "}
+          page.
+        </p>
+      </noscript>
+    </div>
+  );
+}
+
 export function CodingGymClient() {
   return (
-    <Suspense fallback={<div className="rounded-2xl bg-white/80 p-6">Loading…</div>}>
+    <Suspense fallback={<CodingGymFallback />}>
       <CodingGymInner />
     </Suspense>
   );
