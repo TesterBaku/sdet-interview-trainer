@@ -24,24 +24,27 @@ export function HomeClient() {
             Flashcards, quizzes, mock interviews, and coding tasks for Python, Java, SQL, Playwright, Selenium, API
             testing, CI/CD, AWS, and automation strategy.
           </p>
+
+          {/* Loud default CTA: the daily plan is the no-decision way in. */}
+          <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:items-center">
+            <Link
+              className="inline-flex items-center justify-center rounded-full bg-ink px-6 py-3 font-bold text-paper shadow-panel transition hover:bg-blueprint focus-ring"
+              href="/daily-practice"
+            >
+              Start Daily Practice →
+            </Link>
+            <Link
+              className="inline-flex items-center justify-center rounded-full border border-ink/15 bg-white/70 px-6 py-3 font-bold text-ink transition hover:bg-white focus-ring"
+              href="/topics"
+            >
+              Browse training lanes
+            </Link>
+          </div>
+          <p className="mt-4 text-sm text-ink/60">
+            Today&rsquo;s plan: 10 focused items — 3 coding · 2 SQL · 2 Playwright/Selenium · 2 API/CI/AWS · 1 strategy.
+          </p>
         </div>
       </section>
-
-      <Link
-        className="block rounded-[2.5rem] border border-brass/40 bg-brass/15 p-6 shadow-panel transition hover:-translate-y-1 sm:p-8"
-        href="/daily-practice"
-      >
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <p className="text-sm font-black uppercase tracking-[0.28em] text-brass">Today&rsquo;s Plan</p>
-            <h2 className="mt-2 font-display text-3xl font-black text-blueprint sm:text-4xl">Start Daily Practice</h2>
-            <p className="mt-2 max-w-2xl text-ink/75">
-              10 focused items: 3 coding · 2 SQL · 2 Playwright/Selenium · 2 API/CI/AWS · 1 strategy.
-            </p>
-          </div>
-          <span className="self-start rounded-full bg-ink px-5 py-3 font-bold text-paper sm:self-auto">Open plan →</span>
-        </div>
-      </Link>
 
       <div className="grid gap-5 lg:grid-cols-3">
         <Link className="rounded-[2rem] bg-ink p-6 text-paper shadow-panel transition hover:-translate-y-1" href={`/topics/${nextTopic.id}`}>
