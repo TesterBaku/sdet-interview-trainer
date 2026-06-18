@@ -548,13 +548,19 @@ test("progress page rejects a malformed import file", async ({ page }) => {
 
 // ── Daily Practice ──────────────────────────────────────────────────────────
 
-test("home page shows a Daily Practice card linking to /daily-practice", async ({ page }) => {
+test("home hero leads with the Daily Practice CTA and a topics link", async ({ page }) => {
   await clearAppState(page);
   await page.goto("/");
 
-  const card = page.getByRole("link", { name: /Start Daily Practice/ });
-  await expect(card).toBeVisible();
-  await expect(card).toHaveAttribute("href", "/daily-practice");
+  // Primary CTA: the daily plan is the loud, no-decision default entry point.
+  const dailyCta = page.getByRole("link", { name: /Start Daily Practice/ });
+  await expect(dailyCta).toBeVisible();
+  await expect(dailyCta).toHaveAttribute("href", "/daily-practice");
+
+  // Secondary CTA for those who'd rather choose a lane.
+  const topicsCta = page.getByRole("link", { name: "Browse training lanes", exact: true });
+  await expect(topicsCta).toBeVisible();
+  await expect(topicsCta).toHaveAttribute("href", "/topics");
 });
 
 test("daily practice renders all 5 sections with the planned mix of items", async ({ page }) => {
