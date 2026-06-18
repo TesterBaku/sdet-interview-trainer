@@ -227,7 +227,7 @@ export function MockExamClient() {
       </div>
 
       <button
-        className="w-full rounded-full bg-signal px-6 py-4 font-bold text-white transition hover:bg-[#b93e1f] focus-ring"
+        className="w-full rounded-full bg-signal px-6 py-4 font-bold text-black transition hover:bg-[#b93e1f] focus-ring"
         onClick={() => {
           setSubmitted(true);
           if (typeof window !== "undefined") window.scrollTo(0, 0);

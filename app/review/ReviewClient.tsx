@@ -161,7 +161,7 @@ function ReviewInner() {
                       {question.topicTitle}
                     </span>
                     <span
-                      className={`rounded-full px-3 py-1 text-xs font-bold uppercase tracking-[0.16em] text-white ${
+                      className={`rounded-full px-3 py-1 text-xs font-bold uppercase tracking-[0.16em] text-black ${
                         record.status === "weak" ? "bg-signal" : "bg-brass"
                       }`}
                     >

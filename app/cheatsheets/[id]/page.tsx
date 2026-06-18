@@ -38,7 +38,7 @@ export default async function CheatSheetDetailPage({ params }: { params: Promise
         {selfTest ? (
           <div className="mt-5">
             <Link
-              className="inline-flex items-center justify-center rounded-full bg-signal px-5 py-3 text-sm font-bold text-white transition hover:bg-[#b93e1f] focus-ring"
+              className="inline-flex items-center justify-center rounded-full bg-signal px-5 py-3 text-sm font-bold text-black transition hover:bg-[#b93e1f] focus-ring"
               href={selfTest.href}
             >
               {selfTest.kind === "quiz" ? `Take the ${sheet.quiz.length}-question quiz →` : "Take the Mock Exam →"}

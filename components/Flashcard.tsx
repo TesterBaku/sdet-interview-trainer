@@ -21,7 +21,7 @@ export function Flashcard({ question, currentStatus, onMark }: FlashcardProps) {
   return (
     <QuestionCard question={question}>
       <button
-        className="rounded-full bg-signal px-5 py-3 text-sm font-bold text-white transition hover:bg-[#b93e1f] focus-ring"
+        className="rounded-full bg-signal px-5 py-3 text-sm font-bold text-black transition hover:bg-[#b93e1f] focus-ring"
         onClick={() => setIsRevealed((current) => !current)}
         type="button"
       >

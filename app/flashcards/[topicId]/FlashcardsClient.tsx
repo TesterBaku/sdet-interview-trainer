@@ -74,7 +74,7 @@ export function FlashcardsClient() {
           // so cross-session records satisfy the gate intentionally.
           (getRecord(progress, question.id)?.status ?? "new") !== "new" ? (
             <Link
-              className="rounded-full bg-signal px-5 py-3 font-bold text-white shadow-panel transition hover:bg-[#b93e1f] focus-ring"
+              className="rounded-full bg-signal px-5 py-3 font-bold text-black shadow-panel transition hover:bg-[#b93e1f] focus-ring"
               href={`/topics/${topic.id}`}
             >
               Finish
@@ -82,7 +82,7 @@ export function FlashcardsClient() {
           ) : (
             <div className="flex flex-col items-end gap-1">
               <button
-                className="rounded-full bg-signal px-5 py-3 font-bold text-white shadow-panel disabled:opacity-40 focus-ring"
+                className="rounded-full bg-signal px-5 py-3 font-bold text-black shadow-panel disabled:opacity-40 focus-ring"
                 disabled
                 type="button"
               >

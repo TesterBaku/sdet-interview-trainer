@@ -7,8 +7,8 @@ type StatusButtonsProps = {
 
 const statuses: { status: QuestionStatus; label: string; className: string }[] = [
   { status: "known", label: "Known", className: "bg-emerald-700 text-white hover:bg-emerald-800" },
-  { status: "review", label: "Review", className: "bg-brass text-white hover:bg-[#9d712d]" },
-  { status: "weak", label: "Weak", className: "bg-signal text-white hover:bg-[#b93e1f]" }
+  { status: "review", label: "Review", className: "bg-brass text-black hover:bg-[#9d712d]" },
+  { status: "weak", label: "Weak", className: "bg-signal text-black hover:bg-[#b93e1f]" }
 ];
 
 export function StatusButtons({ onMark, currentStatus }: StatusButtonsProps) {

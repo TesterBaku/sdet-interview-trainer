@@ -55,7 +55,7 @@ export function CodingTaskCard({ question, currentStatus, onMark }: CodingTaskCa
       </div>
 
       <div className="mt-5 flex flex-wrap gap-3">
-        <button className="rounded-full bg-brass px-4 py-2 text-sm font-bold text-white focus-ring" onClick={() => setShowHint((value) => !value)} type="button">
+        <button className="rounded-full bg-brass px-4 py-2 text-sm font-bold text-black focus-ring" onClick={() => setShowHint((value) => !value)} type="button">
           {showHint ? "Hide hint" : "Reveal hint"}
         </button>
         <button className="rounded-full bg-ink px-4 py-2 text-sm font-bold text-paper focus-ring" onClick={() => setShowSolution((value) => !value)} type="button">
@@ -92,7 +92,7 @@ export function CodingTaskCard({ question, currentStatus, onMark }: CodingTaskCa
           spellCheck={false}
           value={draft}
         />
-        <div className="mt-3 flex flex-wrap items-center justify-between gap-2 text-xs font-bold uppercase tracking-[0.16em] text-paper/45">
+        <div className="mt-3 flex flex-wrap items-center justify-between gap-2 text-xs font-bold uppercase tracking-[0.16em] text-paper/70">
           <span>{draft.length} chars</span>
           <span>Saved in this browser</span>
         </div>
