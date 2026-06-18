@@ -1,9 +1,14 @@
 "use client";
 
 import Link from "next/link";
+import { useRef, useState } from "react";
 import { ProgressSummary } from "@/components/ProgressSummary";
 import { allQuestions, topics } from "@/lib/questionUtils";
 import { summarizeProgress, summarizeTopicProgress, useProgress } from "@/lib/progress";
+import { writeProgress } from "@/lib/storage";
+import { parseProgressImport, serializeProgress } from "@/lib/progressTransfer";
+
+type TransferStatus = { kind: "success" | "error"; message: string } | null;
 
 const codingQuestionIds = allQuestions.filter((q) => q.type === "coding").map((q) => q.id);
 const quizQuestionIds = allQuestions
@@ -19,6 +24,48 @@ export function ProgressClient() {
   const coding = summarizeProgress(progress, codingQuestionIds);
   const quiz = summarizeProgress(progress, quizQuestionIds);
   const mockInterview = summarizeProgress(progress, interviewQuestionIds);
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [status, setStatus] = useState<TransferStatus>(null);
+
+  function handleExport() {
+    const json = serializeProgress(progress, new Date().toISOString());
+    const blob = new Blob([json], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = `sdet-progress-${new Date().toISOString().slice(0, 10)}.json`;
+    document.body.appendChild(anchor);
+    anchor.click();
+    anchor.remove();
+    URL.revokeObjectURL(url);
+    setStatus({ kind: "success", message: `Exported ${progress.records.length} records.` });
+  }
+
+  async function handleImportFile(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    // Reset so selecting the same file again still fires onChange.
+    event.target.value = "";
+    if (!file) {
+      return;
+    }
+
+    const result = parseProgressImport(await file.text());
+    if (!result.ok) {
+      setStatus({ kind: "error", message: result.error });
+      return;
+    }
+
+    if (
+      progress.records.length > 0 &&
+      !window.confirm("Importing replaces the progress saved on this device. Continue?")
+    ) {
+      return;
+    }
+
+    writeProgress(result.progress);
+    setStatus({ kind: "success", message: `Imported ${result.progress.records.length} records.` });
+  }
 
   return (
     <div className="space-y-6">
@@ -74,6 +121,47 @@ export function ProgressClient() {
             );
           })}
         </div>
+      </section>
+
+      <section className="rounded-[2rem] border border-ink/10 bg-white/75 p-5 shadow-panel">
+        <h2 className="font-display text-3xl font-bold text-blueprint">Backup &amp; restore</h2>
+        <p className="mt-2 text-ink/70">
+          Your progress is saved <strong>only on this device</strong> (in this browser). Clearing your
+          browser data or switching devices loses it. Export a backup to keep it safe or move it elsewhere.
+        </p>
+        <div className="mt-4 flex flex-wrap gap-3">
+          <button
+            type="button"
+            onClick={handleExport}
+            className="rounded-full bg-blueprint px-5 py-2 text-sm font-bold text-paper transition hover:bg-blueprint/90 focus-ring"
+          >
+            Export progress
+          </button>
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            className="rounded-full border border-blueprint/30 px-5 py-2 text-sm font-bold text-blueprint transition hover:bg-blueprint/5 focus-ring"
+          >
+            Import progress
+          </button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="application/json,.json"
+            onChange={handleImportFile}
+            className="sr-only"
+            aria-label="Import progress backup file"
+          />
+        </div>
+        {status ? (
+          <p
+            role="status"
+            aria-live="polite"
+            className={`mt-3 text-sm font-bold ${status.kind === "error" ? "text-signal" : "text-blueprint"}`}
+          >
+            {status.message}
+          </p>
+        ) : null}
       </section>
     </div>
   );
