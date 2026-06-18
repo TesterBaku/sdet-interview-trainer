@@ -72,11 +72,14 @@ test("home, topics, and topic detail render the MVP navigation path", async ({ p
   await page.goto("/");
 
   await expect(page.getByRole("heading", { name: "Practice like the interview is already scheduled." })).toBeVisible();
-  await expect(page.getByRole("link", { name: "Topics" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Practice", exact: true })).toBeVisible();
   await expect(page.getByText("TOTAL")).toBeVisible();
   await expect(page.getByText("500")).toBeVisible();
 
-  await page.getByRole("link", { name: "Topics" }).click();
+  // Topics now lives one level down, inside the Practice hub.
+  await page.getByRole("link", { name: "Practice", exact: true }).click();
+  await expect(page).toHaveURL("/practice");
+  await page.getByRole("link", { name: /Open Topics/ }).click();
   await expect(page).toHaveURL("/topics");
   await expect(page.getByRole("heading", { name: "Choose a training lane" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Python Coding for QA/SDET" })).toBeVisible();
@@ -612,9 +615,20 @@ test("daily practice does not emit React hydration errors", async ({ page }) => 
   expect(hydrationErrors).toEqual([]);
 });
 
-test("navigation includes a Daily link", async ({ page }) => {
+test("navigation surfaces a Practice lane (Daily/Topics/Quizzes are folded in)", async ({ page }) => {
   await page.goto("/");
-  await expect(page.getByRole("link", { name: "Daily", exact: true })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Practice", exact: true })).toBeVisible();
+  // The old standalone Daily/Topics/Quizzes nav lanes are gone from the nav bar.
+  const nav = page.locator("nav");
+  await expect(nav.getByRole("link", { name: "Daily", exact: true })).toHaveCount(0);
+});
+
+test("Practice hub links to Daily, Topics, and Quizzes", async ({ page }) => {
+  await page.goto("/practice");
+  await expect(page.getByRole("heading", { name: "Pick how you want to practice" })).toBeVisible();
+  await expect(page.getByRole("link", { name: /Open Daily Practice/ })).toHaveAttribute("href", "/daily-practice");
+  await expect(page.getByRole("link", { name: /Open Topics/ })).toHaveAttribute("href", "/topics");
+  await expect(page.getByRole("link", { name: /Open Quizzes/ })).toHaveAttribute("href", "/quizzes");
 });
 
 // ── Progress breakdown + /review route ──────────────────────────────────────
@@ -742,9 +756,15 @@ test("review queue ignores invalid query params and falls back to defaults", asy
   await expect(page.getByRole("heading", { name: "2 questions" })).toBeVisible();
 });
 
-test("navigation includes a Review link", async ({ page }) => {
+test("Review is folded into Progress and reachable from it", async ({ page }) => {
   await page.goto("/");
-  await expect(page.getByRole("link", { name: "Review", exact: true })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Progress", exact: true })).toBeVisible();
+  // Review no longer has its own nav lane; the Progress page links into it.
+  const nav = page.locator("nav");
+  await expect(nav.getByRole("link", { name: "Review", exact: true })).toHaveCount(0);
+
+  await page.goto("/progress");
+  await expect(page.getByRole("link", { name: /Open Review/ })).toHaveAttribute("href", "/review");
 });
 
 // ── Per-topic coding tasks ───────────────────────────────────────────────────
@@ -856,10 +876,12 @@ test("coding gym cards do not overflow the viewport on mobile", async ({ page })
 
 // ── Cheat sheets + quizzes ───────────────────────────────────────────────────
 
-test("navigation includes Cheat Sheets and Quizzes links", async ({ page }) => {
+test("navigation keeps a Cheat Sheets lane; Quizzes moves into the Practice hub", async ({ page }) => {
   await page.goto("/");
   await expect(page.getByRole("link", { name: "Cheat Sheets", exact: true })).toBeVisible();
-  await expect(page.getByRole("link", { name: "Quizzes", exact: true })).toBeVisible();
+  // Quizzes is no longer its own nav lane.
+  const nav = page.locator("nav");
+  await expect(nav.getByRole("link", { name: "Quizzes", exact: true })).toHaveCount(0);
 });
 
 test("cheat sheets index lists all grouped sheets", async ({ page }) => {

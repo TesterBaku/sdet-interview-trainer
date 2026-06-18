@@ -4,23 +4,36 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-const links = [
-  { href: "/", label: "Home" },
-  { href: "/daily-practice", label: "Daily" },
-  { href: "/topics", label: "Topics" },
-  { href: "/cheatsheets", label: "Cheat Sheets" },
-  { href: "/quizzes", label: "Quizzes" },
-  { href: "/mock-exam", label: "Mock Exam" },
+type NavLink = {
+  href: string;
+  label: string;
+  // Extra route prefixes that should light up this lane (sub-modes folded into it).
+  match?: string[];
+};
+
+// Primary lanes. Home lives on the wordmark (left). Daily / Topics / Quizzes are
+// folded into the Practice hub; Review is folded into Progress.
+const links: NavLink[] = [
+  { href: "/practice", label: "Practice", match: ["/topics", "/quizzes", "/quiz", "/daily-practice", "/flashcards", "/mock-interview"] },
   { href: "/coding-gym", label: "Coding Gym" },
-  { href: "/review", label: "Review" },
-  { href: "/progress", label: "Progress" }
+  { href: "/mock-exam", label: "Mock Exam" },
+  { href: "/cheatsheets", label: "Cheat Sheets" },
+  { href: "/progress", label: "Progress", match: ["/review"] }
 ];
+
+function isLaneActive(pathname: string, link: NavLink): boolean {
+  // Match the lane's own route plus any folded-in sub-routes, on a path boundary
+  // so "/quiz" never spuriously matches "/quizzes".
+  return [link.href, ...(link.match ?? [])].some(
+    (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`)
+  );
+}
 
 function NavLinks({ pathname, onNavigate }: { pathname: string; onNavigate?: () => void }) {
   return (
     <>
       {links.map((link) => {
-        const isActive = pathname === link.href || (link.href !== "/" && pathname.startsWith(link.href));
+        const isActive = isLaneActive(pathname, link);
         return (
           <Link
             className={`rounded-full px-4 py-2 text-sm font-semibold transition focus-ring ${
