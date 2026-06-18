@@ -50,7 +50,7 @@ export function QuizQuestion({ question, isFinalQuestion, onComplete }: QuizQues
         </button>
         {isSubmitted ? (
           <button
-            className="rounded-full bg-signal px-5 py-3 text-sm font-bold text-white transition hover:bg-[#b93e1f] disabled:cursor-not-allowed disabled:opacity-45 focus-ring"
+            className="rounded-full bg-signal px-5 py-3 text-sm font-bold text-black transition hover:bg-[#b93e1f] disabled:cursor-not-allowed disabled:opacity-45 focus-ring"
             disabled={isSaved}
             onClick={() => {
               setIsSaved(true);

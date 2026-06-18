@@ -98,7 +98,7 @@ export function MockInterviewClient() {
             value={answer}
           />
         </label>
-        <button className="mt-4 rounded-full bg-signal px-5 py-3 text-sm font-bold text-white focus-ring" onClick={() => setShowModelAnswer((value) => !value)} type="button">
+        <button className="mt-4 rounded-full bg-signal px-5 py-3 text-sm font-bold text-black focus-ring" onClick={() => setShowModelAnswer((value) => !value)} type="button">
           {showModelAnswer ? "Hide model answer" : "Reveal model answer"}
         </button>
         {showModelAnswer ? (

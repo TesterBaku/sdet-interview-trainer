@@ -52,15 +52,15 @@ export function HomeClient({ cheatSheetCount }: { cheatSheetCount: number }) {
           <h2 className="mt-4 font-display text-3xl font-bold">Pick up where you left off</h2>
           <p className="mt-3 text-paper/70">Resume your latest topic or start with Python / Java coding.</p>
         </Link>
-        <Link className="rounded-[2rem] bg-signal p-6 text-white shadow-panel transition hover:-translate-y-1" href="/coding-gym">
-          <p className="text-sm font-bold uppercase tracking-[0.2em] text-white/70">Coding Gym</p>
+        <Link className="rounded-[2rem] bg-signal p-6 text-black shadow-panel transition hover:-translate-y-1" href="/coding-gym">
+          <p className="text-sm font-bold uppercase tracking-[0.2em] text-black">Coding Gym</p>
           <h2 className="mt-4 font-display text-3xl font-bold">Build coding confidence</h2>
-          <p className="mt-3 text-white/80">Practice QA-flavored Python, Java, SQL, and TypeScript tasks.</p>
+          <p className="mt-3 text-black">Practice QA-flavored Python, Java, SQL, and TypeScript tasks.</p>
         </Link>
-        <Link className="rounded-[2rem] bg-brass p-6 text-white shadow-panel transition hover:-translate-y-1" href={`/mock-interview/${nextTopic.id}`}>
-          <p className="text-sm font-bold uppercase tracking-[0.2em] text-white/70">Mock Interview</p>
+        <Link className="rounded-[2rem] bg-brass p-6 text-black shadow-panel transition hover:-translate-y-1" href={`/mock-interview/${nextTopic.id}`}>
+          <p className="text-sm font-bold uppercase tracking-[0.2em] text-black">Mock Interview</p>
           <h2 className="mt-4 font-display text-3xl font-bold">Rehearse structured answers</h2>
-          <p className="mt-3 text-white/80">Type an answer, reveal a model answer, and self-rate with a checklist.</p>
+          <p className="mt-3 text-black">Type an answer, reveal a model answer, and self-rate with a checklist.</p>
         </Link>
       </div>
 
@@ -99,7 +99,7 @@ export function HomeClient({ cheatSheetCount }: { cheatSheetCount: number }) {
               A foundations cheat sheet plus a 40-question mock exam with domain breakdown and pass/fail scoring.
             </p>
           </div>
-          <span className="self-start rounded-full bg-signal px-5 py-3 font-bold text-white sm:self-auto">Take the mock exam →</span>
+          <span className="self-start rounded-full bg-signal px-5 py-3 font-bold text-black sm:self-auto">Take the mock exam →</span>
         </div>
       </Link>
 
