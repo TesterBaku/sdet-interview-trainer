@@ -1,5 +1,11 @@
 import { expect, test } from "@playwright/test";
 import type { Page } from "@playwright/test";
+import { cheatSheets } from "@/lib/cheatsheets";
+
+// Derive expected counts from the same source of truth the pages render, so adding
+// a cheat sheet never silently breaks these tests again.
+const cheatSheetCount = cheatSheets.length;
+const quizSheetCount = cheatSheets.filter((sheet) => sheet.quiz.length > 0).length;
 
 const progressKey = "sdet-interview-trainer-progress";
 const codeDraftKey = "sdet-interview-trainer-code-answer:python-coding-001";
@@ -739,8 +745,8 @@ test("cheat sheets index lists all grouped sheets", async ({ page }) => {
   await page.goto("/cheatsheets");
 
   await expect(page.getByRole("heading", { name: "Study the core concepts" })).toBeVisible();
-  // 13 SDET sheets + 1 certification sheet each render an "Open cheat sheet" link
-  await expect(page.getByRole("link", { name: "Open cheat sheet" })).toHaveCount(14);
+  // Every cheat sheet (SDET sheets + certification sheets) renders one "Open cheat sheet" link.
+  await expect(page.getByRole("link", { name: "Open cheat sheet" })).toHaveCount(cheatSheetCount);
   // Group headers from the source hub, plus the Certifications group
   await expect(page.getByRole("heading", { name: "Test Frameworks" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Languages" })).toBeVisible();
@@ -820,7 +826,7 @@ test("quizzes index lists every sheet and shows answered progress", async ({ pag
   await page.goto("/quizzes");
 
   await expect(page.getByRole("heading", { name: "Learn through quizzes" })).toBeVisible();
-  await expect(page.getByRole("link", { name: /Start quiz/ })).toHaveCount(13);
+  await expect(page.getByRole("link", { name: /Start quiz/ })).toHaveCount(quizSheetCount);
 
   await page.getByRole("link", { name: /Start quiz/ }).first().click();
   await expect(page).toHaveURL(/\/cheatsheets\/[a-z-]+\/quiz$/);
@@ -851,7 +857,8 @@ test("quizzes index excludes the mock-exam-only cheat sheet", async ({ page }) =
   await page.goto("/quizzes");
 
   await expect(page.getByRole("heading", { name: "Learn through quizzes" })).toBeVisible();
-  await expect(page.getByRole("link", { name: /Start quiz/ })).toHaveCount(13);
+  // The mock-exam-only CCA sheet has no inline quiz, so it's excluded from the count.
+  await expect(page.getByRole("link", { name: /Start quiz/ })).toHaveCount(quizSheetCount);
   await expect(page.getByText("Claude Certified Architect")).toHaveCount(0);
 });
 
