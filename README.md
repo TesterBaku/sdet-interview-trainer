@@ -18,7 +18,7 @@ QA Automation / SDET interview practice app — flashcards, quizzes, mock interv
 
 ## Features
 
-**10 topics, 250 questions (25 per topic):**
+**10 topics, 500 questions (50 per topic):**
 Python Coding · Java Coding · SQL / PostgreSQL · Selenium · Playwright (Python & TypeScript) · API Testing · Test Automation Strategy · CI/CD · AWS
 
 **Practice modes (4):** Flashcards · Quiz · Mock Interview · Coding Gym
@@ -91,7 +91,7 @@ app/
 components/                            reusable UI primitives
 data/
   topics.json                          10 topic definitions
-  questions/*.json                     250 questions across 10 files
+  questions/*.json                     500 questions across 10 files
 lib/
   questionUtils.ts                     content access + daily plan
   progress.ts                          progress hooks + summaries
