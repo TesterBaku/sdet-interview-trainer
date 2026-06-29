@@ -7,7 +7,7 @@ A static-first, client-rendered web app with no backend.
 ```text
 Next.js (App Router)
   ↓
-Static JSON content (250 questions, 10 topics)
+Static JSON content (500 questions, 10 topics)
   ↓
 localStorage (per-question progress)
   ↓
