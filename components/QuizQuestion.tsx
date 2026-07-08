@@ -66,7 +66,7 @@ export function QuizQuestion({ question, isFinalQuestion, onComplete }: QuizQues
       {isSubmitted ? (
         <section className={`mt-5 rounded-2xl p-4 ${isCorrect ? "bg-emerald-50" : "bg-red-50"}`}>
           <h2 className="font-bold">{isCorrect ? "Correct" : `Incorrect. Correct answer: ${question.correctAnswer}`}</h2>
-          <p className="mt-2 leading-7 text-ink/75">{question.explanation}</p>
+          <p className="mt-2 break-words leading-7 text-ink/75">{question.explanation}</p>
         </section>
       ) : null}
     </QuestionCard>

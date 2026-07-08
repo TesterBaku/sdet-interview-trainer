@@ -105,12 +105,12 @@ export function MockInterviewClient() {
           <div className="mt-6 space-y-5">
             <section className="rounded-2xl bg-paper/80 p-4">
               <h2 className="font-bold">Model answer</h2>
-              <p className="mt-2 leading-7 text-ink/75">{question.interviewAnswer ?? question.shortAnswer}</p>
+              <p className="mt-2 break-words leading-7 text-ink/75">{question.interviewAnswer ?? question.shortAnswer}</p>
             </section>
             {question.realProjectExample ? (
               <section>
                 <h2 className="font-bold">Real project example</h2>
-                <p className="mt-2 leading-7 text-ink/75">{question.realProjectExample}</p>
+                <p className="mt-2 break-words leading-7 text-ink/75">{question.realProjectExample}</p>
               </section>
             ) : null}
             <section>
