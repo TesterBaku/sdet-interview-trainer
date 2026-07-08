@@ -65,7 +65,7 @@ export function Flashcard({ question, currentStatus, onMark }: FlashcardProps) {
               {question.commonMistakes?.length ? (
                 <div>
                   <h2 className="text-sm font-black uppercase tracking-[0.18em] text-ink/55">Common mistakes</h2>
-                  <ul className="mt-2 list-disc space-y-1 pl-5 text-ink/80">
+                  <ul className="mt-2 list-disc space-y-1 break-words pl-5 text-ink/80">
                     {question.commonMistakes.map((mistake) => (
                       <li key={mistake}>{mistake}</li>
                     ))}
@@ -112,7 +112,7 @@ export function Flashcard({ question, currentStatus, onMark }: FlashcardProps) {
           {question.followUps?.length ? (
             <section>
               <h2 className="text-sm font-black uppercase tracking-[0.18em] text-ink/55">Follow-ups</h2>
-              <ul className="mt-2 list-disc space-y-1 pl-5 text-ink/80">
+              <ul className="mt-2 list-disc space-y-1 break-words pl-5 text-ink/80">
                 {question.followUps.map((followUp) => (
                   <li key={followUp}>{followUp}</li>
                 ))}

@@ -106,7 +106,7 @@ export function CodingTaskCard({ question, currentStatus, onMark }: CodingTaskCa
           {question.commonMistakes?.length ? (
             <div>
               <h3 className="font-bold">Common mistakes</h3>
-              <ul className="mt-2 list-disc space-y-1 pl-5 text-ink/75">
+              <ul className="mt-2 list-disc space-y-1 break-words pl-5 text-ink/75">
                 {question.commonMistakes.map((mistake) => (
                   <li key={mistake}>{mistake}</li>
                 ))}
@@ -116,7 +116,7 @@ export function CodingTaskCard({ question, currentStatus, onMark }: CodingTaskCa
           {question.followUps?.length ? (
             <div>
               <h3 className="font-bold">Follow-ups</h3>
-              <ul className="mt-2 list-disc space-y-1 pl-5 text-ink/75">
+              <ul className="mt-2 list-disc space-y-1 break-words pl-5 text-ink/75">
                 {question.followUps.map((followUp) => (
                   <li key={followUp}>{followUp}</li>
                 ))}
