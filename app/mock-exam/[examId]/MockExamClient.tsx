@@ -182,7 +182,7 @@ export function MockExamClient() {
                   D{q.domain}: {domainLabel}
                 </span>
               </div>
-              <p className="mt-3 font-bold text-blueprint">{q.text}</p>
+              <p className="mt-3 break-words font-bold text-blueprint">{q.text}</p>
               <div className="mt-4 grid gap-2">
                 {q.options.map((opt, i) => {
                   const base = "flex items-start gap-3 rounded-xl border p-3 text-left text-sm transition";
@@ -206,14 +206,14 @@ export function MockExamClient() {
                       <span className="mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-ink/10 text-xs font-bold text-ink/70">
                         {LETTERS[i]}
                       </span>
-                      <span className="pt-0.5">{opt}</span>
+                      <span className="break-words pt-0.5">{opt}</span>
                     </button>
                   );
                 })}
               </div>
               {isAnswered ? (
                 <div
-                  className={`mt-4 rounded-xl border-l-4 p-4 text-sm leading-7 ${isCorrect ? "border-emerald-400 bg-emerald-50" : "border-signal/60 bg-red-50"}`}
+                  className={`mt-4 break-words rounded-xl border-l-4 p-4 text-sm leading-7 ${isCorrect ? "border-emerald-400 bg-emerald-50" : "border-signal/60 bg-red-50"}`}
                 >
                   <p className="mb-1 font-bold">
                     {isCorrect ? "✓ Correct" : `✗ Incorrect — correct answer: ${LETTERS[q.correct]}`}

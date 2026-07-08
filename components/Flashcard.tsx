@@ -35,7 +35,7 @@ export function Flashcard({ question, currentStatus, onMark }: FlashcardProps) {
               {question.hint ? (
                 <div className="rounded-2xl bg-brass/10 p-4">
                   <h2 className="text-sm font-black uppercase tracking-[0.18em] text-ink/55">Hint</h2>
-                  <p className="mt-2 text-ink/80">{question.hint}</p>
+                  <p className="mt-2 break-words text-ink/80">{question.hint}</p>
                 </div>
               ) : null}
               {question.expectedOutput ? (
@@ -59,13 +59,13 @@ export function Flashcard({ question, currentStatus, onMark }: FlashcardProps) {
               {question.explanation ? (
                 <div>
                   <h2 className="text-sm font-black uppercase tracking-[0.18em] text-ink/55">Explanation</h2>
-                  <p className="mt-2 leading-7 text-ink/80">{question.explanation}</p>
+                  <p className="mt-2 break-words leading-7 text-ink/80">{question.explanation}</p>
                 </div>
               ) : null}
               {question.commonMistakes?.length ? (
                 <div>
                   <h2 className="text-sm font-black uppercase tracking-[0.18em] text-ink/55">Common mistakes</h2>
-                  <ul className="mt-2 list-disc space-y-1 pl-5 text-ink/80">
+                  <ul className="mt-2 list-disc space-y-1 break-words pl-5 text-ink/80">
                     {question.commonMistakes.map((mistake) => (
                       <li key={mistake}>{mistake}</li>
                     ))}
@@ -79,40 +79,40 @@ export function Flashcard({ question, currentStatus, onMark }: FlashcardProps) {
               {question.correctAnswer ? (
                 <>
                   <h2 className="text-sm font-black uppercase tracking-[0.18em] text-ink/55">Correct answer</h2>
-                  <p className="mt-2 text-lg font-bold text-blueprint">{question.correctAnswer}</p>
+                  <p className="mt-2 break-words text-lg font-bold text-blueprint">{question.correctAnswer}</p>
                 </>
               ) : null}
-              {question.explanation ? <p className="mt-3 leading-7 text-ink/80">{question.explanation}</p> : null}
+              {question.explanation ? <p className="mt-3 break-words leading-7 text-ink/80">{question.explanation}</p> : null}
             </section>
           ) : null}
           {question.shortAnswer ? (
             <section>
               <h2 className="text-sm font-black uppercase tracking-[0.18em] text-ink/55">Short answer</h2>
-              <p className="mt-2 text-ink/80">{question.shortAnswer}</p>
+              <p className="mt-2 break-words text-ink/80">{question.shortAnswer}</p>
             </section>
           ) : null}
           {question.interviewAnswer ? (
             <section>
               <h2 className="text-sm font-black uppercase tracking-[0.18em] text-ink/55">Interview answer</h2>
-              <p className="mt-2 leading-7 text-ink/80">{question.interviewAnswer}</p>
+              <p className="mt-2 break-words leading-7 text-ink/80">{question.interviewAnswer}</p>
             </section>
           ) : null}
           {question.realProjectExample ? (
             <section className="rounded-2xl bg-paper/80 p-4">
               <h2 className="text-sm font-black uppercase tracking-[0.18em] text-ink/55">Real project example</h2>
-              <p className="mt-2 leading-7 text-ink/80">{question.realProjectExample}</p>
+              <p className="mt-2 break-words leading-7 text-ink/80">{question.realProjectExample}</p>
             </section>
           ) : null}
           {!hasInterviewAnswer && !hasQuizAnswer && !hasCodingAnswer ? (
             <section className="rounded-2xl bg-paper/80 p-4">
               <h2 className="text-sm font-black uppercase tracking-[0.18em] text-ink/55">Answer</h2>
-              <p className="mt-2 text-ink/80">No answer content has been added for this card yet.</p>
+              <p className="mt-2 break-words text-ink/80">No answer content has been added for this card yet.</p>
             </section>
           ) : null}
           {question.followUps?.length ? (
             <section>
               <h2 className="text-sm font-black uppercase tracking-[0.18em] text-ink/55">Follow-ups</h2>
-              <ul className="mt-2 list-disc space-y-1 pl-5 text-ink/80">
+              <ul className="mt-2 list-disc space-y-1 break-words pl-5 text-ink/80">
                 {question.followUps.map((followUp) => (
                   <li key={followUp}>{followUp}</li>
                 ))}

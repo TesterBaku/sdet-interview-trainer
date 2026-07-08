@@ -40,8 +40,8 @@ export function CodingTaskCard({ question, currentStatus, onMark }: CodingTaskCa
           {question.solutionLanguage}
         </span>
       </div>
-      <h2 className="mt-4 font-display text-2xl font-bold text-blueprint">{question.title}</h2>
-      <p className="mt-3 leading-7 text-ink/75">{question.problem}</p>
+      <h2 className="mt-4 break-words font-display text-2xl font-bold text-blueprint">{question.title}</h2>
+      <p className="mt-3 break-words leading-7 text-ink/75">{question.problem}</p>
 
       <div className="mt-5 grid gap-3 md:grid-cols-2">
         <div className="rounded-2xl bg-paper/80 p-4">
@@ -98,15 +98,15 @@ export function CodingTaskCard({ question, currentStatus, onMark }: CodingTaskCa
         </div>
       </section>
 
-      {showHint ? <p className="mt-4 rounded-2xl bg-brass/10 p-4 text-ink/80">{question.hint}</p> : null}
+      {showHint ? <p className="mt-4 break-words rounded-2xl bg-brass/10 p-4 text-ink/80">{question.hint}</p> : null}
       {showSolution ? (
         <div className="mt-4 space-y-4">
           <pre className="max-w-full overflow-x-auto rounded-2xl bg-ink p-4 text-sm text-paper">{question.solution}</pre>
-          <p className="leading-7 text-ink/75">{question.explanation}</p>
+          <p className="break-words leading-7 text-ink/75">{question.explanation}</p>
           {question.commonMistakes?.length ? (
             <div>
               <h3 className="font-bold">Common mistakes</h3>
-              <ul className="mt-2 list-disc space-y-1 pl-5 text-ink/75">
+              <ul className="mt-2 list-disc space-y-1 break-words pl-5 text-ink/75">
                 {question.commonMistakes.map((mistake) => (
                   <li key={mistake}>{mistake}</li>
                 ))}
@@ -116,7 +116,7 @@ export function CodingTaskCard({ question, currentStatus, onMark }: CodingTaskCa
           {question.followUps?.length ? (
             <div>
               <h3 className="font-bold">Follow-ups</h3>
-              <ul className="mt-2 list-disc space-y-1 pl-5 text-ink/75">
+              <ul className="mt-2 list-disc space-y-1 break-words pl-5 text-ink/75">
                 {question.followUps.map((followUp) => (
                   <li key={followUp}>{followUp}</li>
                 ))}
