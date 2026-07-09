@@ -95,12 +95,12 @@
       "java"
     ],
     "choices": [
-      "",
-      "",
-      "",
-      ""
+      "RestAssured.baseURI for global defaults",
+      "RestAssured.baseURI, basePath, port — plus requestSpecification, responseSpecification, filters, and reset()",
+      "Only RestAssured.timeout()",
+      "Just baseURI and nothing else"
     ],
-    "correctAnswer": "",
+    "correctAnswer": "RestAssured.baseURI, basePath, port — plus requestSpecification, responseSpecification, filters, and reset()",
     "explanation": "RestAssured.baseURI , basePath , port — global defaults for all requests. RestAssured.requestSpecification / responseSpecification — global specs. RestAssured.filters(...) — attach logging or custom filters globally. RestAssured.reset() — reset all static state (call in @AfterMethod / @AfterClass to avoid test bleed). Watch out: static config is global mutable state. In parallel runs it can cause "
   },
   {
@@ -182,12 +182,12 @@
       "java"
     ],
     "choices": [
-      "",
-      "",
-      "",
-      ""
+      "Only Basic and OAuth2",
+      "Basic, Digest, OAuth 1.0, OAuth 2.0, and custom headers",
+      "Just API key header",
+      "Only OAuth2 and JWT"
     ],
-    "correctAnswer": "",
+    "correctAnswer": "Basic, Digest, OAuth 1.0, OAuth 2.0, and custom headers",
     "explanation": "Scheme Syntax Basic (preemptive) given().auth().preemptive().basic(\"user\",\"pass\") Basic (challenged) given().auth().basic(\"user\",\"pass\") Digest given().auth().digest(\"user\",\"pass\") OAuth 1.0 given().auth().oauth(consumerKey, consumerSecret, token, secret) OAuth 2.0 / Bearer given().auth().oauth2(accessToken) API key / custom given().header(\"x-api-key\", key)"
   },
   {
@@ -237,12 +237,12 @@
       "java"
     ],
     "choices": [
-      "",
-      "",
-      "",
-      ""
+      "Use HTTP instead of HTTPS",
+      "Always ignore cert errors in production",
+      "Use relaxedHTTPSValidation() for test envs, or trustStore/keyStore for real certs",
+      "Disable SSL entirely via firewall"
     ],
-    "correctAnswer": "",
+    "correctAnswer": "Use relaxedHTTPSValidation() for test envs, or trustStore/keyStore for real certs",
     "explanation": "// Relax HTTPS validation (test/staging with self-signed certs) given().relaxedHTTPSValidation() .when().get(\"/secure\").then().statusCode(200); // Or globally RestAssured.useRelaxedHTTPSValidation(); Note: only relax SSL for non-prod test environments. For real cert validation use .trustStore(...) / .keyStore(...) ."
   },
   {
@@ -275,12 +275,12 @@
       "java"
     ],
     "choices": [
-      "",
-      "",
-      "",
-      ""
+      "@BeforeClass → @BeforeMethod → @Test → @AfterClass",
+      "@BeforeSuite → @BeforeTest → @BeforeClass → @BeforeMethod → @Test → @AfterMethod → @AfterClass → @AfterTest → @AfterSuite",
+      "@Test → @BeforeMethod → @AfterMethod only",
+      "@BeforeMethod → @BeforeClass → @Test → @AfterSuite"
     ],
-    "correctAnswer": "",
+    "correctAnswer": "@BeforeSuite → @BeforeTest → @BeforeClass → @BeforeMethod → @Test → @AfterMethod → @AfterClass → @AfterTest → @AfterSuite",
     "explanation": "Order: @BeforeSuite → @BeforeTest → @BeforeClass → @BeforeMethod → @Test → @AfterMethod → @AfterClass → @AfterTest → @AfterSuite . @BeforeClass — set up base URI, fetch auth token once per class. @BeforeMethod — reset per-test state. @Test(priority=, groups=, dependsOnMethods=, dataProvider=) . @AfterClass — cleanup created test data."
   },
   {
@@ -330,12 +330,12 @@
       "java"
     ],
     "choices": [
-      "",
-      "",
-      "",
-      ""
+      "Only rest-assured dependency is needed",
+      "rest-assured + json-schema-validator + jackson-databind + testng, with maven-surefire-plugin running testng.xml",
+      "Just add JUnit and spring-boot-starter-test",
+      "Only the HTTP client dependency"
     ],
-    "correctAnswer": "",
+    "correctAnswer": "rest-assured + json-schema-validator + jackson-databind + testng, with maven-surefire-plugin running testng.xml",
     "explanation": "<dependency> <groupId>io.rest-assured</groupId> <artifactId>rest-assured</artifactId> <scope>test</scope> </dependency> <dependency> <groupId>io.rest-assured</groupId> <artifactId>json-schema-validator</artifactId> </dependency> <!-- testng, jackson-databind, allure-testng ... --> maven-surefire-plugin — runs tests, points to testng.xml . mvn clean test runs the suite; CI (Jenkins/GitHub Actions) "
   },
   {
