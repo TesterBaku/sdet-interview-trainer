@@ -1,0 +1,449 @@
+[
+  {
+    "id": "rest-assured-001",
+    "topicId": "rest-assured",
+    "topicTitle": "REST Assured",
+    "level": "mid",
+    "type": "interview",
+    "difficulty": "easy",
+    "question": "What is Rest Assured and why use it over other approaches?",
+    "tags": [
+      "rest-assured",
+      "api",
+      "java"
+    ],
+    "shortAnswer": "Rest Assured is an open-source Java DSL for testing REST APIs. It removes the boilerplate of using raw HTTP clients (HttpClient, HttpURLConnection) by giving a fluent, readable given-when-then BDD syn",
+    "interviewAnswer": "Rest Assured is an open-source Java DSL for testing REST APIs. It removes the boilerplate of using raw HTTP clients (HttpClient, HttpURLConnection) by giving a fluent, readable given-when-then BDD syntax, built-in JSON/XML parsing (JsonPath, XmlPath), and Hamcrest matcher integration for assertions. Readable, close to plain English — good for reviews and non-Java stakeholders. First-class JSON/XML response parsing and schema validation. Plays well with TestNG/JUnit, Maven/Gradle, and CI pipelines."
+  },
+  {
+    "id": "rest-assured-002",
+    "topicId": "rest-assured",
+    "topicTitle": "REST Assured",
+    "level": "mid",
+    "type": "interview",
+    "difficulty": "hard",
+    "question": "Explain the given / when / then structure.",
+    "tags": [
+      "rest-assured",
+      "api",
+      "java"
+    ],
+    "shortAnswer": "given() — the arrange block: set up the request (headers, params, body, auth, base URI). when() — the act block: the HTTP action (get, post, put, delete). then() — the assert block: validate status co",
+    "interviewAnswer": "given() — the arrange block: set up the request (headers, params, body, auth, base URI). when() — the act block: the HTTP action (get, post, put, delete). then() — the assert block: validate status code, headers, and body. given() .baseUri(\"https://api.example.com\") .header(\"Content-Type\", \"application/json\") .queryParam(\"page\", 2) .when() .get(\"/users\") .then() .statusCode(200) .body(\"data.size()\", equalTo(6)); Tip: You don't strictly need given() for a bare GET — when().get(url).then()... is valid. Interviewers like to hear you know the BDD block is optional sugar."
+  },
+  {
+    "id": "rest-assured-003",
+    "topicId": "rest-assured",
+    "topicTitle": "REST Assured",
+    "level": "mid",
+    "type": "coding",
+    "difficulty": "easy",
+    "question": "How do you send path params, query params, and headers?",
+    "tags": [
+      "rest-assured",
+      "api",
+      "java"
+    ],
+    "title": "How do you send path params, query params, and headers?",
+    "problem": "How do you send path params, query params, and headers?",
+    "explanation": "given() .pathParam(\"userId\", 15) .queryParam(\"active\", true) .header(\"Authorization\", \"Bearer \" + token) .headers(\"Accept\", \"application/json\", \"X-Trace\", id) .when() .get(\"/users/{userId}\") .then() .statusCode(200); pathParam substitutes {userId} in the URL; queryParam appends ?active=true . Use params() for form/query pairs and formParam() for application/x-www-form-urlencoded bodies."
+  },
+  {
+    "id": "rest-assured-004",
+    "topicId": "rest-assured",
+    "topicTitle": "REST Assured",
+    "level": "mid",
+    "type": "coding",
+    "difficulty": "easy",
+    "question": "How do you send a POST with a JSON body?",
+    "tags": [
+      "rest-assured",
+      "api",
+      "java"
+    ],
+    "title": "How do you send a POST with a JSON body?",
+    "problem": "How do you send a POST with a JSON body?",
+    "explanation": "// 1) As a raw string given() .contentType(ContentType.JSON) .body(\"{ \\\"name\\\": \\\"morpheus\\\", \\\"job\\\": \\\"leader\\\" }\") .when() .post(\"/users\") .then() .statusCode(201) .body(\"name\", equalTo(\"morpheus\")); // 2) As a Map (auto-serialized to JSON) Map<String,Object> payload = new HashMap<>(); payload.put(\"name\", \"morpheus\"); payload.put(\"job\", \"leader\"); given().contentType(ContentType.JSON).body(payload) .when().post(\"/users\").then().statusCode(201);"
+  },
+  {
+    "id": "rest-assured-005",
+    "topicId": "rest-assured",
+    "topicTitle": "REST Assured",
+    "level": "mid",
+    "type": "interview",
+    "difficulty": "easy",
+    "question": "What are RequestSpecification and ResponseSpecification, and why use them?",
+    "tags": [
+      "rest-assured",
+      "api",
+      "java"
+    ],
+    "shortAnswer": "They let you define reusable request/response setup once and apply it across many tests — eliminating duplication of base URI, common headers, auth, and repeated assertions (like status 200 + JSON con",
+    "interviewAnswer": "They let you define reusable request/response setup once and apply it across many tests — eliminating duplication of base URI, common headers, auth, and repeated assertions (like status 200 + JSON content type). Great for keeping a framework DRY. RequestSpecification reqSpec = new RequestSpecBuilder() .setBaseUri(\"https://api.example.com\") .setContentType(ContentType.JSON) .addHeader(\"Authorization\", \"Bearer \" + token) .build(); ResponseSpecification resSpec = new ResponseSpecBuilder() .expectStatusCode(200) .expectContentType(ContentType.JSON) .expectResponseTime(lessThan(2000L)) .build(); given().spec(reqSpec) .when().get(\"/users/2\") .then().spec(resSpec) .body(\"data.id\", equalTo(2));"
+  },
+  {
+    "id": "rest-assured-006",
+    "topicId": "rest-assured",
+    "topicTitle": "REST Assured",
+    "level": "mid",
+    "type": "quiz",
+    "difficulty": "easy",
+    "question": "What are the static config options (RestAssured.baseURI, filters, etc.)?",
+    "tags": [
+      "rest-assured",
+      "api",
+      "java"
+    ],
+    "choices": [
+      "RestAssured.baseURI for global defaults",
+      "RestAssured.baseURI, basePath, port — plus requestSpecification, responseSpecification, filters, and reset()",
+      "Only RestAssured.timeout()",
+      "Just baseURI and nothing else"
+    ],
+    "correctAnswer": "RestAssured.baseURI, basePath, port — plus requestSpecification, responseSpecification, filters, and reset()",
+    "explanation": "RestAssured.baseURI , basePath , port — global defaults for all requests. RestAssured.requestSpecification / responseSpecification — global specs. RestAssured.filters(...) — attach logging or custom filters globally. RestAssured.reset() — reset all static state (call in @AfterMethod / @AfterClass to avoid test bleed). Watch out: static config is global mutable state. In parallel runs it can cause "
+  },
+  {
+    "id": "rest-assured-007",
+    "topicId": "rest-assured",
+    "topicTitle": "REST Assured",
+    "level": "mid",
+    "type": "interview",
+    "difficulty": "medium",
+    "question": "How does Rest Assured validate response bodies? What is Hamcrest's role?",
+    "tags": [
+      "rest-assured",
+      "api",
+      "java"
+    ],
+    "shortAnswer": "The .body(jsonPath, matcher) method takes a GPath/JsonPath expression and a Hamcrest matcher. Rest Assured evaluates the path against the parsed body and asserts it against the matcher. import static ",
+    "interviewAnswer": "The .body(jsonPath, matcher) method takes a GPath/JsonPath expression and a Hamcrest matcher. Rest Assured evaluates the path against the parsed body and asserts it against the matcher. import static org.hamcrest.Matchers.*; .then() .body(\"data.email\", equalTo(\"janet.weaver@reqres.in\")) .body(\"data.id\", greaterThan(0)) .body(\"data\", hasKey(\"first_name\")) .body(\"support.url\", containsString(\"reqres\")) .body(\"data.first_name\", notNullValue());"
+  },
+  {
+    "id": "rest-assured-008",
+    "topicId": "rest-assured",
+    "topicTitle": "REST Assured",
+    "level": "mid",
+    "type": "coding",
+    "difficulty": "medium",
+    "question": "How do you assert on arrays / collections?",
+    "tags": [
+      "rest-assured",
+      "api",
+      "java"
+    ],
+    "title": "How do you assert on arrays / collections?",
+    "problem": "How do you assert on arrays / collections?",
+    "explanation": "// JSON: { \"data\": [ {\"id\":7,...}, {\"id\":8,...} ] } .then() .body(\"data.size()\", equalTo(6)) .body(\"data.id\", hasItems(7, 8)) .body(\"data.first_name\", everyItem(notNullValue())) .body(\"data.findAll { it.id > 8 }.size()\", equalTo(4)) .body(\"data[0].email\", endsWith(\"@reqres.in\")); Rest Assured uses Groovy's GPath, so you can use findAll , find , collect , it.field , max , min , sum inside path expressions."
+  },
+  {
+    "id": "rest-assured-009",
+    "topicId": "rest-assured",
+    "topicTitle": "REST Assured",
+    "level": "mid",
+    "type": "interview",
+    "difficulty": "easy",
+    "question": "How do you do JSON schema validation?",
+    "tags": [
+      "rest-assured",
+      "api",
+      "java"
+    ],
+    "shortAnswer": "Add the json-schema-validator module, then match against a schema file on the classpath. import static io.restassured.module.jsv.JsonSchemaValidator.matchesJsonSchemaInClasspath; .then() .assertThat()",
+    "interviewAnswer": "Add the json-schema-validator module, then match against a schema file on the classpath. import static io.restassured.module.jsv.JsonSchemaValidator.matchesJsonSchemaInClasspath; .then() .assertThat() .body(matchesJsonSchemaInClasspath(\"schemas/user-schema.json\")); Why it matters: schema validation guards the API contract (field names, types, required fields) — more robust than asserting individual values that change."
+  },
+  {
+    "id": "rest-assured-010",
+    "topicId": "rest-assured",
+    "topicTitle": "REST Assured",
+    "level": "mid",
+    "type": "interview",
+    "difficulty": "easy",
+    "question": "What is serialization/deserialization in Rest Assured, and how does it work?",
+    "tags": [
+      "rest-assured",
+      "api",
+      "java"
+    ],
+    "shortAnswer": "Serialization = converting a Java object (POJO) into a JSON/XML request body. Deserialization = converting a response body back into a Java object. Rest Assured delegates this to Jackson or Gson if th",
+    "interviewAnswer": "Serialization = converting a Java object (POJO) into a JSON/XML request body. Deserialization = converting a response body back into a Java object. Rest Assured delegates this to Jackson or Gson if they're on the classpath — it auto-detects. // POJO public class User { private String name; private String job; // getters + setters (Jackson needs them) } // Serialization: POJO -> JSON request User u = new User(); u.setName(\"morpheus\"); u.setJob(\"leader\"); // Deserialization: JSON response -> POJO User created = given().contentType(ContentType.JSON).body(u) .when().post(\"/users\") .then().statusCode(201) .extract().as(User.class); assertEquals(created.getName(), \"morpheus\"); Why POJOs over raw strings? Type safety, refactor-friendly, reusable across tests, avoids brittle hand-written JSON strings. This is the expected \"mature framework\" answer."
+  },
+  {
+    "id": "rest-assured-011",
+    "topicId": "rest-assured",
+    "topicTitle": "REST Assured",
+    "level": "mid",
+    "type": "quiz",
+    "difficulty": "easy",
+    "question": "What authentication schemes does Rest Assured support?",
+    "tags": [
+      "rest-assured",
+      "api",
+      "java"
+    ],
+    "choices": [
+      "Only Basic and OAuth2",
+      "Basic, Digest, OAuth 1.0, OAuth 2.0, and custom headers",
+      "Just API key header",
+      "Only OAuth2 and JWT"
+    ],
+    "correctAnswer": "Basic, Digest, OAuth 1.0, OAuth 2.0, and custom headers",
+    "explanation": "Scheme Syntax Basic (preemptive) given().auth().preemptive().basic(\"user\",\"pass\") Basic (challenged) given().auth().basic(\"user\",\"pass\") Digest given().auth().digest(\"user\",\"pass\") OAuth 1.0 given().auth().oauth(consumerKey, consumerSecret, token, secret) OAuth 2.0 / Bearer given().auth().oauth2(accessToken) API key / custom given().header(\"x-api-key\", key)"
+  },
+  {
+    "id": "rest-assured-012",
+    "topicId": "rest-assured",
+    "topicTitle": "REST Assured",
+    "level": "mid",
+    "type": "interview",
+    "difficulty": "medium",
+    "question": "Explain preemptive vs challenged basic auth.",
+    "tags": [
+      "rest-assured",
+      "api",
+      "java"
+    ],
+    "shortAnswer": "Challenged (default basic): the client first sends without credentials, gets a 401 WWW-Authenticate , then resends with the header. Two round trips. Preemptive: the Authorization: Basic ... header is ",
+    "interviewAnswer": "Challenged (default basic): the client first sends without credentials, gets a 401 WWW-Authenticate , then resends with the header. Two round trips. Preemptive: the Authorization: Basic ... header is sent on the first request. One round trip. Most modern APIs expect this. Interview gold: mention that if you use plain .basic() against an API that doesn't return a proper 401 challenge, auth silently fails — that's a common real-world bug, and preemptive fixes it."
+  },
+  {
+    "id": "rest-assured-013",
+    "topicId": "rest-assured",
+    "topicTitle": "REST Assured",
+    "level": "senior",
+    "type": "coding",
+    "difficulty": "hard",
+    "question": "Walk through testing an OAuth2 / token-based flow end to end.",
+    "tags": [
+      "rest-assured",
+      "api",
+      "java"
+    ],
+    "title": "Walk through testing an OAuth2 / token-based flow end to end.",
+    "problem": "Walk through testing an OAuth2 / token-based flow end to end.",
+    "explanation": "The realistic pattern: hit the auth/login endpoint, extract the token, then use it as a bearer token on subsequent calls. // 1) Get token String token = given() .contentType(ContentType.JSON) .body(\"{ \\\"email\\\":\\\"eve.holt@reqres.in\\\", \\\"password\\\":\\\"pistol\\\" }\") .when() .post(\"/login\") .then() .statusCode(200) .extract().path(\"token\"); // 2) Use token on protected resource given() .auth().oauth2(token) // or .header(\"Authorization\",\"Bearer \"+token) .when() .get(\"/protected/resource\") .then() .st"
+  },
+  {
+    "id": "rest-assured-014",
+    "topicId": "rest-assured",
+    "topicTitle": "REST Assured",
+    "level": "mid",
+    "type": "quiz",
+    "difficulty": "medium",
+    "question": "How do you handle SSL / self-signed certificates?",
+    "tags": [
+      "rest-assured",
+      "api",
+      "java"
+    ],
+    "choices": [
+      "Use HTTP instead of HTTPS",
+      "Always ignore cert errors in production",
+      "Use relaxedHTTPSValidation() for test envs, or trustStore/keyStore for real certs",
+      "Disable SSL entirely via firewall"
+    ],
+    "correctAnswer": "Use relaxedHTTPSValidation() for test envs, or trustStore/keyStore for real certs",
+    "explanation": "// Relax HTTPS validation (test/staging with self-signed certs) given().relaxedHTTPSValidation() .when().get(\"/secure\").then().statusCode(200); // Or globally RestAssured.useRelaxedHTTPSValidation(); Note: only relax SSL for non-prod test environments. For real cert validation use .trustStore(...) / .keyStore(...) ."
+  },
+  {
+    "id": "rest-assured-015",
+    "topicId": "rest-assured",
+    "topicTitle": "REST Assured",
+    "level": "senior",
+    "type": "interview",
+    "difficulty": "hard",
+    "question": "How would you structure a production Rest Assured framework?",
+    "tags": [
+      "rest-assured",
+      "api",
+      "java"
+    ],
+    "shortAnswer": "src/test/java — tests grouped by resource/endpoint. base/ — a BaseTest with common setup (base URI, specs, token). pojos/ or models/ — request/response POJOs. utils/ — helpers (config reader, token ma",
+    "interviewAnswer": "src/test/java — tests grouped by resource/endpoint. base/ — a BaseTest with common setup (base URI, specs, token). pojos/ or models/ — request/response POJOs. utils/ — helpers (config reader, token manager, data generators). endpoints/ or services/ — a \"service layer\" that wraps API calls into reusable methods (like a Page Object equivalent for APIs). src/test/resources — config.properties, schemas, test data (JSON/Excel), testng.xml, log4j2.xml. reporting — Allure or ExtentReports. Key phrase interviewers want: a service/endpoint layer so tests contain assertions and business logic, not raw HTTP plumbing — same principle as Page Object Model in UI automation."
+  },
+  {
+    "id": "rest-assured-016",
+    "topicId": "rest-assured",
+    "topicTitle": "REST Assured",
+    "level": "mid",
+    "type": "quiz",
+    "difficulty": "easy",
+    "question": "Which TestNG annotations matter and in what order do they run?",
+    "tags": [
+      "rest-assured",
+      "api",
+      "java"
+    ],
+    "choices": [
+      "@BeforeClass → @BeforeMethod → @Test → @AfterClass",
+      "@BeforeSuite → @BeforeTest → @BeforeClass → @BeforeMethod → @Test → @AfterMethod → @AfterClass → @AfterTest → @AfterSuite",
+      "@Test → @BeforeMethod → @AfterMethod only",
+      "@BeforeMethod → @BeforeClass → @Test → @AfterSuite"
+    ],
+    "correctAnswer": "@BeforeSuite → @BeforeTest → @BeforeClass → @BeforeMethod → @Test → @AfterMethod → @AfterClass → @AfterTest → @AfterSuite",
+    "explanation": "Order: @BeforeSuite → @BeforeTest → @BeforeClass → @BeforeMethod → @Test → @AfterMethod → @AfterClass → @AfterTest → @AfterSuite . @BeforeClass — set up base URI, fetch auth token once per class. @BeforeMethod — reset per-test state. @Test(priority=, groups=, dependsOnMethods=, dataProvider=) . @AfterClass — cleanup created test data."
+  },
+  {
+    "id": "rest-assured-017",
+    "topicId": "rest-assured",
+    "topicTitle": "REST Assured",
+    "level": "mid",
+    "type": "coding",
+    "difficulty": "easy",
+    "question": "How do you do data-driven testing?",
+    "tags": [
+      "rest-assured",
+      "api",
+      "java"
+    ],
+    "title": "How do you do data-driven testing?",
+    "problem": "How do you do data-driven testing?",
+    "explanation": "@DataProvider(name = \"users\") public Object[][] users() { return new Object[][] { { \"morpheus\", \"leader\" }, { \"neo\", \"the one\" } }; } @Test(dataProvider = \"users\") public void createUser(String name, String job) { given().contentType(ContentType.JSON) .body(Map.of(\"name\", name, \"job\", job)) .when().post(\"/users\") .then().statusCode(201).body(\"name\", equalTo(name)); } For external data, feed the DataProvider from Excel (Apache POI), CSV, or a JSON file."
+  },
+  {
+    "id": "rest-assured-018",
+    "topicId": "rest-assured",
+    "topicTitle": "REST Assured",
+    "level": "senior",
+    "type": "interview",
+    "difficulty": "easy",
+    "question": "How do you run tests in parallel and why is thread-safety a concern?",
+    "tags": [
+      "rest-assured",
+      "api",
+      "java"
+    ],
+    "shortAnswer": "In testng.xml set parallel=\"methods\" (or classes/tests) and thread-count . The risk: Rest Assured's static config ( RestAssured.baseURI , global specs) and any shared mutable state (a static token var",
+    "interviewAnswer": "In testng.xml set parallel=\"methods\" (or classes/tests) and thread-count . The risk: Rest Assured's static config ( RestAssured.baseURI , global specs) and any shared mutable state (a static token variable) can be clobbered across threads. <suite name=\"API\" parallel=\"methods\" thread-count=\"4\"> <test name=\"UserTests\"> <classes><class name=\"tests.UserTests\"/></classes> </test> </suite> Fixes: use local RequestSpecifications instead of static state, or ThreadLocal for shared objects."
+  },
+  {
+    "id": "rest-assured-019",
+    "topicId": "rest-assured",
+    "topicTitle": "REST Assured",
+    "level": "mid",
+    "type": "quiz",
+    "difficulty": "easy",
+    "question": "What does the Maven side look like? Key dependencies & plugins.",
+    "tags": [
+      "rest-assured",
+      "api",
+      "java"
+    ],
+    "choices": [
+      "Only rest-assured dependency is needed",
+      "rest-assured + json-schema-validator + jackson-databind + testng, with maven-surefire-plugin running testng.xml",
+      "Just add JUnit and spring-boot-starter-test",
+      "Only the HTTP client dependency"
+    ],
+    "correctAnswer": "rest-assured + json-schema-validator + jackson-databind + testng, with maven-surefire-plugin running testng.xml",
+    "explanation": "<dependency> <groupId>io.rest-assured</groupId> <artifactId>rest-assured</artifactId> <scope>test</scope> </dependency> <dependency> <groupId>io.rest-assured</groupId> <artifactId>json-schema-validator</artifactId> </dependency> <!-- testng, jackson-databind, allure-testng ... --> maven-surefire-plugin — runs tests, points to testng.xml . mvn clean test runs the suite; CI (Jenkins/GitHub Actions) "
+  },
+  {
+    "id": "rest-assured-020",
+    "topicId": "rest-assured",
+    "topicTitle": "REST Assured",
+    "level": "senior",
+    "type": "scenario",
+    "difficulty": "hard",
+    "question": "Scenario: Write an end-to-end CRUD flow for a /users resource.",
+    "tags": [
+      "rest-assured",
+      "api",
+      "java"
+    ],
+    "title": "Scenario: Write an end-to-end CRUD flow for a /users resource.",
+    "problem": "Scenario: Write an end-to-end CRUD flow for a /users resource.",
+    "explanation": "@Test public void userCrudFlow() { RestAssured.baseURI = \"https://api.example.com\"; // CREATE int id = given().contentType(ContentType.JSON) .body(Map.of(\"name\", \"neo\", \"job\", \"hero\")) .when().post(\"/users\") .then().statusCode(201) .extract().path(\"id\"); // READ given().pathParam(\"id\", id) .when().get(\"/users/{id}\") .then().statusCode(200).body(\"name\", equalTo(\"neo\")); // UPDATE given().pathParam(\"id\", id).contentType(ContentType.JSON) .body(Map.of(\"job\", \"the one\")) .when().put(\"/users/{id}\") .",
+    "shortAnswer": "@Test public void userCrudFlow() { RestAssured.baseURI = \"https://api.example.com\"; // CREATE int id = given().contentType(ContentType.JSON) .body(Map.of(\"name\", \"neo\", \"job\", \"hero\")) .when().post(\"/users\") .then().statusCode(201) .extract().path(\"id\"); // READ given().pathParam(\"id\", id) .when().g",
+    "interviewAnswer": "@Test public void userCrudFlow() { RestAssured.baseURI = \"https://api.example.com\"; // CREATE int id = given().contentType(ContentType.JSON) .body(Map.of(\"name\", \"neo\", \"job\", \"hero\")) .when().post(\"/users\") .then().statusCode(201) .extract().path(\"id\"); // READ given().pathParam(\"id\", id) .when().get(\"/users/{id}\") .then().statusCode(200).body(\"name\", equalTo(\"neo\")); // UPDATE given().pathParam(\"id\", id).contentType(ContentType.JSON) .body(Map.of(\"job\", \"the one\")) .when().put(\"/users/{id}\") .then().statusCode(200).body(\"job\", equalTo(\"the one\")); // DELETE given().pathParam(\"id\", id) .when().delete(\"/users/{id}\") .then().statusCode(204); }"
+  },
+  {
+    "id": "rest-assured-021",
+    "topicId": "rest-assured",
+    "topicTitle": "REST Assured",
+    "level": "mid",
+    "type": "scenario",
+    "difficulty": "hard",
+    "question": "Scenario: Chain requests — use a value from response 1 in request 2.",
+    "tags": [
+      "rest-assured",
+      "api",
+      "java"
+    ],
+    "title": "Scenario: Chain requests — use a value from response 1 in request 2.",
+    "problem": "Scenario: Chain requests — use a value from response 1 in request 2.",
+    "explanation": "// Get first user's id, then fetch that user's details int firstId = given().when().get(\"/users?page=1\") .then().statusCode(200) .extract().path(\"data[0].id\"); given().pathParam(\"id\", firstId) .when().get(\"/users/{id}\") .then().statusCode(200) .body(\"data.id\", equalTo(firstId));",
+    "shortAnswer": "// Get first user's id, then fetch that user's details int firstId = given().when().get(\"/users?page=1\") .then().statusCode(200) .extract().path(\"data[0].id\"); given().pathParam(\"id\", firstId) .when().get(\"/users/{id}\") .then().statusCode(200) .body(\"data.id\", equalTo(firstId));",
+    "interviewAnswer": "// Get first user's id, then fetch that user's details int firstId = given().when().get(\"/users?page=1\") .then().statusCode(200) .extract().path(\"data[0].id\"); given().pathParam(\"id\", firstId) .when().get(\"/users/{id}\") .then().statusCode(200) .body(\"data.id\", equalTo(firstId));"
+  },
+  {
+    "id": "rest-assured-022",
+    "topicId": "rest-assured",
+    "topicTitle": "REST Assured",
+    "level": "mid",
+    "type": "scenario",
+    "difficulty": "hard",
+    "question": "Scenario: Validate a specific object inside a JSON array by a field value.",
+    "tags": [
+      "rest-assured",
+      "api",
+      "java"
+    ],
+    "title": "Scenario: Validate a specific object inside a JSON array by a field value.",
+    "problem": "Scenario: Validate a specific object inside a JSON array by a field value.",
+    "explanation": "// Find the user whose email is X and assert their first_name .then() .body(\"data.find { it.email == 'janet.weaver@reqres.in' }.first_name\", equalTo(\"Janet\")); // Or extract into a list and assert with Java/streams List<Map<String,?>> users = resp.jsonPath().getList(\"data\"); long count = users.stream() .filter(u -> ((Integer)u.get(\"id\")) > 8).count(); assertEquals(count, 4);",
+    "shortAnswer": "// Find the user whose email is X and assert their first_name .then() .body(\"data.find { it.email == 'janet.weaver@reqres.in' }.first_name\", equalTo(\"Janet\")); // Or extract into a list and assert with Java/streams List<Map<String,?>> users = resp.jsonPath().getList(\"data\"); long count = users.strea",
+    "interviewAnswer": "// Find the user whose email is X and assert their first_name .then() .body(\"data.find { it.email == 'janet.weaver@reqres.in' }.first_name\", equalTo(\"Janet\")); // Or extract into a list and assert with Java/streams List<Map<String,?>> users = resp.jsonPath().getList(\"data\"); long count = users.stream() .filter(u -> ((Integer)u.get(\"id\")) > 8).count(); assertEquals(count, 4);"
+  },
+  {
+    "id": "rest-assured-023",
+    "topicId": "rest-assured",
+    "topicTitle": "REST Assured",
+    "level": "mid",
+    "type": "scenario",
+    "difficulty": "hard",
+    "question": "Scenario: How do you assert response time and headers?",
+    "tags": [
+      "rest-assured",
+      "api",
+      "java"
+    ],
+    "title": "Scenario: How do you assert response time and headers?",
+    "problem": "Scenario: How do you assert response time and headers?",
+    "explanation": ".then() .time(lessThan(2000L)) // under 2s .header(\"Content-Type\", containsString(\"application/json\")) .header(\"X-Powered-By\", notNullValue()) .cookie(\"session\", notNullValue());",
+    "shortAnswer": ".then() .time(lessThan(2000L)) // under 2s .header(\"Content-Type\", containsString(\"application/json\")) .header(\"X-Powered-By\", notNullValue()) .cookie(\"session\", notNullValue());",
+    "interviewAnswer": ".then() .time(lessThan(2000L)) // under 2s .header(\"Content-Type\", containsString(\"application/json\")) .header(\"X-Powered-By\", notNullValue()) .cookie(\"session\", notNullValue());"
+  },
+  {
+    "id": "rest-assured-024",
+    "topicId": "rest-assured",
+    "topicTitle": "REST Assured",
+    "level": "mid",
+    "type": "interview",
+    "difficulty": "medium",
+    "question": "Difference between @Test priority and dependsOnMethods?",
+    "tags": [
+      "rest-assured",
+      "api",
+      "java"
+    ],
+    "shortAnswer": "priority only orders execution; dependsOnMethods creates a real dependency — if the parent fails, dependents are skipped (not failed).",
+    "interviewAnswer": "priority only orders execution; dependsOnMethods creates a real dependency — if the parent fails, dependents are skipped (not failed)."
+  },
+  {
+    "id": "rest-assured-025",
+    "topicId": "rest-assured",
+    "topicTitle": "REST Assured",
+    "level": "mid",
+    "type": "interview",
+    "difficulty": "easy",
+    "question": "PUT vs PATCH?",
+    "tags": [
+      "rest-assured",
+      "api",
+      "java"
+    ],
+    "shortAnswer": "PUT replaces the entire resource (idempotent, full payload); PATCH applies a partial update to specific fields.",
+    "interviewAnswer": "PUT replaces the entire resource (idempotent, full payload); PATCH applies a partial update to specific fields."
+  }
+]

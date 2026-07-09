@@ -1,0 +1,159 @@
+{
+  "id": "rest-assured",
+  "title": "REST Assured",
+  "group": "Test Frameworks",
+  "accent": "#4dd4ac",
+  "summary": "Core Rest Assured syntax, request/response specs, JSON path validation, POJO serialization, authentication schemes, TestNG integration, Maven setup, and coding scenarios — with rapid-fire Q&A.",
+  "tags": [
+    "Rest Assured",
+    "Java",
+    "API Testing",
+    "TestNG",
+    "Maven",
+    "JSON Path",
+    "OAuth2"
+  ],
+  "sections": [
+    {
+      "id": "core",
+      "title": "Core Rest Assured syntax",
+      "bodyHtml": "<h3>What is Rest Assured and why use it over other approaches?</h3>\n<p>Rest Assured is an open-source Java DSL for testing REST APIs. It removes the boilerplate of using raw HTTP clients (HttpClient, HttpURLConnection) by giving a fluent, readable <b>given-when-then</b> BDD syntax, built-in JSON/XML parsing (JsonPath, XmlPath), and Hamcrest matcher integration for assertions.</p>\n  <ul>\n    <li>Readable, close to plain English — good for reviews and non-Java stakeholders.</li>\n    <li>First-class JSON/XML response parsing and schema validation.</li>\n    <li>Plays well with TestNG/JUnit, Maven/Gradle, and CI pipelines.</li>\n  </ul>\n<h3>Explain the given / when / then structure.</h3>\n<ul>\n    <li><b>given()</b> — the <i>arrange</i> block: set up the request (headers, params, body, auth, base URI).</li>\n    <li><b>when()</b> — the <i>act</i> block: the HTTP action (get, post, put, delete).</li>\n    <li><b>then()</b> — the <i>assert</i> block: validate status code, headers, and body.</li>\n  </ul>\n<pre><code><span>given</span>()\n    .baseUri(<span>\"https://api.example.com\"</span>)\n    .header(<span>\"Content-Type\"</span>, <span>\"application/json\"</span>)\n    .queryParam(<span>\"page\"</span>, <span>2</span>)\n<span>.when</span>()\n    .get(<span>\"/users\"</span>)\n<span>.then</span>()\n    .statusCode(<span>200</span>)\n    .body(<span>\"data.size()\"</span>, <span>equalTo</span>(<span>6</span>));</code></pre>\n  <div class=\"tip\"><b>Tip:</b> You don't strictly need <code>given()</code> for a bare GET — <code>when().get(url).then()...</code> is valid. Interviewers like to hear you know the BDD block is optional sugar.</div>\n<h3>How do you send path params, query params, and headers?</h3>\n<pre><code><span>given</span>()\n    .pathParam(<span>\"userId\"</span>, <span>15</span>)\n    .queryParam(<span>\"active\"</span>, <span>true</span>)\n    .header(<span>\"Authorization\"</span>, <span>\"Bearer \"</span> + token)\n    .headers(<span>\"Accept\"</span>, <span>\"application/json\"</span>, <span>\"X-Trace\"</span>, id)\n<span>.when</span>()\n    .get(<span>\"/users/{userId}\"</span>)\n<span>.then</span>()\n    .statusCode(<span>200</span>);</code></pre>\n  <p><code>pathParam</code> substitutes <code>{userId}</code> in the URL; <code>queryParam</code> appends <code>?active=true</code>. Use <code>params()</code> for form/query pairs and <code>formParam()</code> for <code>application/x-www-form-urlencoded</code> bodies.</p>\n<h3>How do you send a POST with a JSON body?</h3>\n<pre><code><span>// 1) As a raw string</span>\n<span>given</span>()\n    .contentType(ContentType.JSON)\n    .body(<span>\"{ \\\"name\\\": \\\"morpheus\\\", \\\"job\\\": \\\"leader\\\" }\"</span>)\n<span>.when</span>()\n    .post(<span>\"/users\"</span>)\n<span>.then</span>()\n    .statusCode(<span>201</span>)\n    .body(<span>\"name\"</span>, <span>equalTo</span>(<span>\"morpheus\"</span>));\n\n<span>// 2) As a Map (auto-serialized to JSON)</span>\nMap&lt;String,Object&gt; payload = <span>new</span> HashMap&lt;&gt;();\npayload.put(<span>\"name\"</span>, <span>\"morpheus\"</span>);\npayload.put(<span>\"job\"</span>, <span>\"leader\"</span>);\n<span>given</span>().contentType(ContentType.JSON).body(payload)\n    .when().post(<span>\"/users\"</span>).then().statusCode(<span>201</span>);</code></pre>"
+    },
+    {
+      "id": "specs",
+      "title": "Request & Response Specifications",
+      "bodyHtml": "<h3>What are RequestSpecification and ResponseSpecification, and why use them?</h3>\n<p>They let you define reusable request/response setup once and apply it across many tests — eliminating duplication of base URI, common headers, auth, and repeated assertions (like status 200 + JSON content type). Great for keeping a framework DRY.</p>\n<pre><code>RequestSpecification reqSpec = <span>new</span> RequestSpecBuilder()\n    .setBaseUri(<span>\"https://api.example.com\"</span>)\n    .setContentType(ContentType.JSON)\n    .addHeader(<span>\"Authorization\"</span>, <span>\"Bearer \"</span> + token)\n    .build();\n\nResponseSpecification resSpec = <span>new</span> ResponseSpecBuilder()\n    .expectStatusCode(<span>200</span>)\n    .expectContentType(ContentType.JSON)\n    .expectResponseTime(lessThan(<span>2000L</span>))\n    .build();\n\n<span>given</span>().spec(reqSpec)\n    .when().get(<span>\"/users/2\"</span>)\n    .then().spec(resSpec)\n    .body(<span>\"data.id\"</span>, <span>equalTo</span>(<span>2</span>));</code></pre>\n<h3>What are the static config options (RestAssured.baseURI, filters, etc.)?</h3>\n<ul>\n    <li><code>RestAssured.baseURI</code>, <code>basePath</code>, <code>port</code> — global defaults for all requests.</li>\n    <li><code>RestAssured.requestSpecification</code> / <code>responseSpecification</code> — global specs.</li>\n    <li><code>RestAssured.filters(...)</code> — attach logging or custom filters globally.</li>\n    <li><code>RestAssured.reset()</code> — reset all static state (call in <code>@AfterMethod</code>/<code>@AfterClass</code> to avoid test bleed).</li>\n  </ul>\n  <div class=\"warn\"><b>Watch out:</b> static config is global mutable state. In parallel runs it can cause flakiness — prefer local specs or reset carefully.</div>"
+    },
+    {
+      "id": "validation",
+      "title": "Validation & JSON path",
+      "bodyHtml": "<h3>How does Rest Assured validate response bodies? What is Hamcrest's role?</h3>\n<p>The <code>.body(jsonPath, matcher)</code> method takes a GPath/JsonPath expression and a Hamcrest matcher. Rest Assured evaluates the path against the parsed body and asserts it against the matcher.</p>\n<pre><code><span>import static</span> org.hamcrest.Matchers.*;\n\n.then()\n   .body(<span>\"data.email\"</span>, equalTo(<span>\"janet.weaver@reqres.in\"</span>))\n   .body(<span>\"data.id\"</span>, greaterThan(<span>0</span>))\n   .body(<span>\"data\"</span>, hasKey(<span>\"first_name\"</span>))\n   .body(<span>\"support.url\"</span>, containsString(<span>\"reqres\"</span>))\n   .body(<span>\"data.first_name\"</span>, notNullValue());</code></pre>\n<h3>How do you assert on arrays / collections?</h3>\n<pre><code><span>// JSON: { \"data\": [ {\"id\":7,...}, {\"id\":8,...} ] }</span>\n.then()\n   .body(<span>\"data.size()\"</span>, equalTo(<span>6</span>))\n   .body(<span>\"data.id\"</span>, hasItems(<span>7</span>, <span>8</span>))\n   .body(<span>\"data.first_name\"</span>, everyItem(notNullValue()))\n   .body(<span>\"data.findAll { it.id > 8 }.size()\"</span>, equalTo(<span>4</span>))\n   .body(<span>\"data[0].email\"</span>, endsWith(<span>\"@reqres.in\"</span>));</code></pre>\n  <p>Rest Assured uses Groovy's GPath, so you can use <code>findAll</code>, <code>find</code>, <code>collect</code>, <code>it.field</code>, <code>max</code>, <code>min</code>, <code>sum</code> inside path expressions.</p>\n<h3>How do you do JSON schema validation?</h3>\n<p>Add the <code>json-schema-validator</code> module, then match against a schema file on the classpath.</p>\n<pre><code><span>import static</span> io.restassured.module.jsv.JsonSchemaValidator.matchesJsonSchemaInClasspath;\n\n.then()\n   .assertThat()\n   .body(matchesJsonSchemaInClasspath(<span>\"schemas/user-schema.json\"</span>));</code></pre>\n  <div class=\"tip\"><b>Why it matters:</b> schema validation guards the API <i>contract</i> (field names, types, required fields) — more robust than asserting individual values that change.</div>"
+    },
+    {
+      "id": "serial",
+      "title": "Serialization, Deserialization & POJOs",
+      "bodyHtml": "<h3>What is serialization/deserialization in Rest Assured, and how does it work?</h3>\n<p><b>Serialization</b> = converting a Java object (POJO) into a JSON/XML request body. <b>Deserialization</b> = converting a response body back into a Java object. Rest Assured delegates this to Jackson or Gson if they're on the classpath — it auto-detects.</p>\n<pre><code><span>// POJO</span>\n<span>public class</span> User {\n    <span>private</span> String name;\n    <span>private</span> String job;\n    <span>// getters + setters (Jackson needs them)</span>\n}\n\n<span>// Serialization: POJO -> JSON request</span>\nUser u = <span>new</span> User();\nu.setName(<span>\"morpheus\"</span>); u.setJob(<span>\"leader\"</span>);\n\n<span>// Deserialization: JSON response -> POJO</span>\nUser created = <span>given</span>().contentType(ContentType.JSON).body(u)\n    .when().post(<span>\"/users\"</span>)\n    .then().statusCode(<span>201</span>)\n    .extract().as(User.class);\n\nassertEquals(created.getName(), <span>\"morpheus\"</span>);</code></pre>\n  <div class=\"tip\"><b>Why POJOs over raw strings?</b> Type safety, refactor-friendly, reusable across tests, avoids brittle hand-written JSON strings. This is the expected \"mature framework\" answer.</div>"
+    },
+    {
+      "id": "auth",
+      "title": "Authentication & Security",
+      "bodyHtml": "<h3>What authentication schemes does Rest Assured support?</h3>\n<table>\n    <tr><th>Scheme</th><th>Syntax</th></tr>\n    <tr><td>Basic (preemptive)</td><td><code>given().auth().preemptive().basic(\"user\",\"pass\")</code></td></tr>\n    <tr><td>Basic (challenged)</td><td><code>given().auth().basic(\"user\",\"pass\")</code></td></tr>\n    <tr><td>Digest</td><td><code>given().auth().digest(\"user\",\"pass\")</code></td></tr>\n    <tr><td>OAuth 1.0</td><td><code>given().auth().oauth(consumerKey, consumerSecret, token, secret)</code></td></tr>\n    <tr><td>OAuth 2.0 / Bearer</td><td><code>given().auth().oauth2(accessToken)</code></td></tr>\n    <tr><td>API key / custom</td><td><code>given().header(\"x-api-key\", key)</code></td></tr>\n  </table>\n<h3>Explain preemptive vs challenged basic auth.</h3>\n<ul>\n    <li><b>Challenged (default basic):</b> the client first sends without credentials, gets a <code>401 WWW-Authenticate</code>, then resends with the header. Two round trips.</li>\n    <li><b>Preemptive:</b> the <code>Authorization: Basic ...</code> header is sent on the <i>first</i> request. One round trip. Most modern APIs expect this.</li>\n  </ul>\n  <div class=\"tip\"><b>Interview gold:</b> mention that if you use plain <code>.basic()</code> against an API that doesn't return a proper 401 challenge, auth silently fails — that's a common real-world bug, and preemptive fixes it.</div>\n<h3>Walk through testing an OAuth2 / token-based flow end to end.</h3>\n<p>The realistic pattern: hit the auth/login endpoint, extract the token, then use it as a bearer token on subsequent calls.</p>\n<pre><code><span>// 1) Get token</span>\nString token = <span>given</span>()\n    .contentType(ContentType.JSON)\n    .body(<span>\"{ \\\"email\\\":\\\"eve.holt@reqres.in\\\", \\\"password\\\":\\\"pistol\\\" }\"</span>)\n<span>.when</span>()\n    .post(<span>\"/login\"</span>)\n<span>.then</span>()\n    .statusCode(<span>200</span>)\n    .extract().path(<span>\"token\"</span>);\n\n<span>// 2) Use token on protected resource</span>\n<span>given</span>()\n    .auth().oauth2(token)          <span>// or .header(\"Authorization\",\"Bearer \"+token)</span>\n<span>.when</span>()\n    .get(<span>\"/protected/resource\"</span>)\n<span>.then</span>()\n    .statusCode(<span>200</span>);</code></pre>\n  <p>In a framework you'd wrap step 1 in a reusable <code>getAuthToken()</code> method, cache it, and inject it via a RequestSpecification.</p>\n<h3>How do you handle SSL / self-signed certificates?</h3>\n<pre><code><span>// Relax HTTPS validation (test/staging with self-signed certs)</span>\n<span>given</span>().relaxedHTTPSValidation()\n    .when().get(<span>\"/secure\"</span>).then().statusCode(<span>200</span>);\n\n<span>// Or globally</span>\nRestAssured.useRelaxedHTTPSValidation();</code></pre>\n  <div class=\"warn\"><b>Note:</b> only relax SSL for non-prod test environments. For real cert validation use <code>.trustStore(...)</code> / <code>.keyStore(...)</code>.</div>"
+    },
+    {
+      "id": "framework",
+      "title": "Framework, TestNG & Maven",
+      "bodyHtml": "<h3>How would you structure a production Rest Assured framework?</h3>\n<ul>\n    <li><b>src/test/java</b> — tests grouped by resource/endpoint.</li>\n    <li><b>base/</b> — a BaseTest with common setup (base URI, specs, token).</li>\n    <li><b>pojos/ or models/</b> — request/response POJOs.</li>\n    <li><b>utils/</b> — helpers (config reader, token manager, data generators).</li>\n    <li><b>endpoints/ or services/</b> — a \"service layer\" that wraps API calls into reusable methods (like a Page Object equivalent for APIs).</li>\n    <li><b>src/test/resources</b> — config.properties, schemas, test data (JSON/Excel), testng.xml, log4j2.xml.</li>\n    <li><b>reporting</b> — Allure or ExtentReports.</li>\n  </ul>\n  <div class=\"tip\"><b>Key phrase interviewers want:</b> a <b>service/endpoint layer</b> so tests contain assertions and business logic, not raw HTTP plumbing — same principle as Page Object Model in UI automation.</div>\n<h3>Which TestNG annotations matter and in what order do they run?</h3>\n<p>Order: <code>@BeforeSuite → @BeforeTest → @BeforeClass → @BeforeMethod → @Test → @AfterMethod → @AfterClass → @AfterTest → @AfterSuite</code>.</p>\n  <ul>\n    <li><code>@BeforeClass</code> — set up base URI, fetch auth token once per class.</li>\n    <li><code>@BeforeMethod</code> — reset per-test state.</li>\n    <li><code>@Test(priority=, groups=, dependsOnMethods=, dataProvider=)</code>.</li>\n    <li><code>@AfterClass</code> — cleanup created test data.</li>\n  </ul>\n<h3>How do you do data-driven testing?</h3>\n<pre><code>@DataProvider(name = <span>\"users\"</span>)\n<span>public</span> Object[][] users() {\n    <span>return new</span> Object[][] {\n        { <span>\"morpheus\"</span>, <span>\"leader\"</span> },\n        { <span>\"neo\"</span>, <span>\"the one\"</span> }\n    };\n}\n\n@Test(dataProvider = <span>\"users\"</span>)\n<span>public void</span> createUser(String name, String job) {\n    <span>given</span>().contentType(ContentType.JSON)\n        .body(Map.of(<span>\"name\"</span>, name, <span>\"job\"</span>, job))\n    .when().post(<span>\"/users\"</span>)\n    .then().statusCode(<span>201</span>).body(<span>\"name\"</span>, equalTo(name));\n}</code></pre>\n  <p>For external data, feed the DataProvider from Excel (Apache POI), CSV, or a JSON file.</p>\n<h3>How do you run tests in parallel and why is thread-safety a concern?</h3>\n<p>In <code>testng.xml</code> set <code>parallel=\"methods\"</code> (or classes/tests) and <code>thread-count</code>. The risk: Rest Assured's <b>static</b> config (<code>RestAssured.baseURI</code>, global specs) and any shared mutable state (a static token variable) can be clobbered across threads.</p>\n<pre><code>&lt;suite name=<span>\"API\"</span> parallel=<span>\"methods\"</span> thread-count=<span>\"4\"</span>&gt;\n  &lt;test name=<span>\"UserTests\"</span>&gt;\n    &lt;classes&gt;&lt;class name=<span>\"tests.UserTests\"</span>/&gt;&lt;/classes&gt;\n  &lt;/test&gt;\n&lt;/suite&gt;</code></pre>\n  <p>Fixes: use local RequestSpecifications instead of static state, or <code>ThreadLocal</code> for shared objects.</p>\n<h3>What does the Maven side look like? Key dependencies & plugins.</h3>\n<pre><code>&lt;dependency&gt;\n  &lt;groupId&gt;io.rest-assured&lt;/groupId&gt;\n  &lt;artifactId&gt;rest-assured&lt;/artifactId&gt;\n  &lt;scope&gt;test&lt;/scope&gt;\n&lt;/dependency&gt;\n&lt;dependency&gt;\n  &lt;groupId&gt;io.rest-assured&lt;/groupId&gt;\n  &lt;artifactId&gt;json-schema-validator&lt;/artifactId&gt;\n&lt;/dependency&gt;\n<span>&lt;!-- testng, jackson-databind, allure-testng ... --&gt;</span></code></pre>\n  <ul>\n    <li><b>maven-surefire-plugin</b> — runs tests, points to <code>testng.xml</code>.</li>\n    <li><code>mvn clean test</code> runs the suite; CI (Jenkins/GitHub Actions) invokes the same command.</li>\n    <li>Use Maven profiles to switch environments (dev/staging/prod) via <code>-P</code> or <code>-Denv=</code>.</li>\n  </ul>"
+    },
+    {
+      "id": "coding",
+      "title": "Coding / live scenarios",
+      "bodyHtml": "<h3>Scenario: Write an end-to-end CRUD flow for a /users resource.</h3>\n<pre><code>@Test\n<span>public void</span> userCrudFlow() {\n    RestAssured.baseURI = <span>\"https://api.example.com\"</span>;\n\n    <span>// CREATE</span>\n    <span>int</span> id = <span>given</span>().contentType(ContentType.JSON)\n        .body(Map.of(<span>\"name\"</span>, <span>\"neo\"</span>, <span>\"job\"</span>, <span>\"hero\"</span>))\n        .when().post(<span>\"/users\"</span>)\n        .then().statusCode(<span>201</span>)\n        .extract().path(<span>\"id\"</span>);\n\n    <span>// READ</span>\n    <span>given</span>().pathParam(<span>\"id\"</span>, id)\n        .when().get(<span>\"/users/{id}\"</span>)\n        .then().statusCode(<span>200</span>).body(<span>\"name\"</span>, equalTo(<span>\"neo\"</span>));\n\n    <span>// UPDATE</span>\n    <span>given</span>().pathParam(<span>\"id\"</span>, id).contentType(ContentType.JSON)\n        .body(Map.of(<span>\"job\"</span>, <span>\"the one\"</span>))\n        .when().put(<span>\"/users/{id}\"</span>)\n        .then().statusCode(<span>200</span>).body(<span>\"job\"</span>, equalTo(<span>\"the one\"</span>));\n\n    <span>// DELETE</span>\n    <span>given</span>().pathParam(<span>\"id\"</span>, id)\n        .when().delete(<span>\"/users/{id}\"</span>)\n        .then().statusCode(<span>204</span>);\n}</code></pre>\n<h3>Scenario: Chain requests — use a value from response 1 in request 2.</h3>\n<pre><code><span>// Get first user's id, then fetch that user's details</span>\n<span>int</span> firstId = <span>given</span>().when().get(<span>\"/users?page=1\"</span>)\n    .then().statusCode(<span>200</span>)\n    .extract().path(<span>\"data[0].id\"</span>);\n\n<span>given</span>().pathParam(<span>\"id\"</span>, firstId)\n    .when().get(<span>\"/users/{id}\"</span>)\n    .then().statusCode(<span>200</span>)\n    .body(<span>\"data.id\"</span>, equalTo(firstId));</code></pre>\n<h3>Scenario: Validate a specific object inside a JSON array by a field value.</h3>\n<pre><code><span>// Find the user whose email is X and assert their first_name</span>\n.then()\n   .body(<span>\"data.find { it.email == 'janet.weaver@reqres.in' }.first_name\"</span>,\n         equalTo(<span>\"Janet\"</span>));\n\n<span>// Or extract into a list and assert with Java/streams</span>\nList&lt;Map&lt;String,?&gt;&gt; users = resp.jsonPath().getList(<span>\"data\"</span>);\n<span>long</span> count = users.stream()\n    .filter(u -&gt; ((Integer)u.get(<span>\"id\"</span>)) &gt; <span>8</span>).count();\nassertEquals(count, <span>4</span>);</code></pre>\n<h3>Scenario: How do you assert response time and headers?</h3>\n<pre><code>.then()\n   .time(lessThan(<span>2000L</span>))                    <span>// under 2s</span>\n   .header(<span>\"Content-Type\"</span>, containsString(<span>\"application/json\"</span>))\n   .header(<span>\"X-Powered-By\"</span>, notNullValue())\n   .cookie(<span>\"session\"</span>, notNullValue());</code></pre>"
+    }
+  ],
+  "quiz": [
+    {
+      "id": "cs-rest-assured-001",
+      "topicId": "rest-assured",
+      "topicTitle": "REST Assured",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "easy",
+      "question": "What is Rest Assured and why use it over raw HTTP clients?",
+      "choices": [
+        "A JavaScript framework for frontend testing",
+        "A Java DSL for testing REST APIs with fluent given-when-then syntax",
+        "A Python library for API mocking",
+        "A Chrome extension for manual API exploration"
+      ],
+      "correctAnswer": "A Java DSL for testing REST APIs with fluent given-when-then syntax",
+      "explanation": "Rest Assured is an open-source Java DSL that removes HTTP client boilerplate by giving a fluent given-when-then BDD syntax, built-in JSON/XML parsing, and Hamcrest matcher integration.",
+      "tags": [
+        "rest-assured"
+      ]
+    },
+    {
+      "id": "cs-rest-assured-002",
+      "topicId": "rest-assured",
+      "topicTitle": "REST Assured",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "What is the correct order of TestNG lifecycle annotations?",
+      "choices": [
+        "@Test → @BeforeMethod → @BeforeClass → @BeforeSuite",
+        "@BeforeSuite → @BeforeTest → @BeforeClass → @BeforeMethod → @Test",
+        "@BeforeClass → @BeforeMethod → @Test → @AfterSuite",
+        "@BeforeMethod → @Test → @BeforeClass → @AfterClass"
+      ],
+      "correctAnswer": "@BeforeSuite → @BeforeTest → @BeforeClass → @BeforeMethod → @Test",
+      "explanation": "TestNG runs: @BeforeSuite → @BeforeTest → @BeforeClass → @BeforeMethod → @Test → @AfterMethod → @AfterClass → @AfterTest → @AfterSuite.",
+      "tags": [
+        "rest-assured",
+        "testng"
+      ]
+    },
+    {
+      "id": "cs-rest-assured-003",
+      "topicId": "rest-assured",
+      "topicTitle": "REST Assured",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "medium",
+      "question": "Which authentication method sends credentials on the FIRST request without waiting for a 401 challenge?",
+      "choices": [
+        "Challenged basic auth (.basic())",
+        "Preemptive basic auth (.preemptive().basic())",
+        "OAuth 2.0",
+        "Digest auth"
+      ],
+      "correctAnswer": "Preemptive basic auth (.preemptive().basic())",
+      "explanation": "Preemptive auth sends the Authorization header on the first request — one round trip instead of two. Challenged auth waits for a 401 WWW-Authenticate response first.",
+      "tags": [
+        "rest-assured",
+        "auth"
+      ]
+    },
+    {
+      "id": "cs-rest-assured-004",
+      "topicId": "rest-assured",
+      "topicTitle": "REST Assured",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "easy",
+      "question": "PUT vs PATCH — which statement is correct?",
+      "choices": [
+        "PUT is for partial updates, PATCH replaces the entire resource",
+        "Both are identical in REST",
+        "PUT replaces the entire resource, PATCH applies a partial update",
+        "PATCH is idempotent, PUT is not"
+      ],
+      "correctAnswer": "PUT replaces the entire resource, PATCH applies a partial update",
+      "explanation": "PUT replaces the entire resource (idempotent, full payload); PATCH applies a partial update to specific fields only.",
+      "tags": [
+        "rest-assured",
+        "http"
+      ]
+    },
+    {
+      "id": "cs-rest-assured-005",
+      "topicId": "rest-assured",
+      "topicTitle": "REST Assured",
+      "level": "mid",
+      "type": "quiz",
+      "difficulty": "easy",
+      "question": "Which HTTP methods are idempotent?",
+      "choices": [
+        "Only GET",
+        "GET, POST, PUT",
+        "GET, PUT, DELETE, HEAD",
+        "POST, PATCH, DELETE"
+      ],
+      "correctAnswer": "GET, PUT, DELETE, HEAD",
+      "explanation": "Idempotent means the same request repeated produces the same server state. GET, PUT, DELETE, and HEAD are idempotent; POST is not.",
+      "tags": [
+        "rest-assured",
+        "http"
+      ]
+    }
+  ]
+}

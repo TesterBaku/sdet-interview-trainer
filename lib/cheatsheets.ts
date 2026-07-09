@@ -11,6 +11,7 @@ import nodejs from "@/data/cheatsheets/nodejs.json";
 import playwright from "@/data/cheatsheets/playwright.json";
 import pyspark from "@/data/cheatsheets/pyspark.json";
 import python from "@/data/cheatsheets/python.json";
+import restAssured from "@/data/cheatsheets/rest-assured.json";
 import selenium from "@/data/cheatsheets/selenium.json";
 import sql from "@/data/cheatsheets/sql.json";
 import testng from "@/data/cheatsheets/testng.json";
@@ -22,6 +23,7 @@ import type { Question } from "@/types/Question";
 const cheatSheetData = [
   playwright,
   selenium,
+  restAssured,
   testng,
   xcuitest,
   appium,
