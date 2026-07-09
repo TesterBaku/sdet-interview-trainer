@@ -20,6 +20,7 @@ const FILES = [
   { file: "XCUITest_Framework_Story_Interview_Prep.html", id: "xcuitest", title: "XCUITest Framework Story", group: "Test Frameworks" },
   { file: "Playwright_Interview_Prep.html", id: "playwright", title: "Playwright", group: "Test Frameworks" },
   { file: "Selenium_Interview_Prep.html", id: "selenium", title: "Selenium", group: "Test Frameworks" },
+  { file: "REST-Assured-API-Testing-Interview-Prep.html", id: "rest-assured", title: "REST Assured", group: "Test Frameworks" },
   { file: "TestNG_Interview_Prep.html", id: "testng", title: "TestNG", group: "Test Frameworks" },
   { file: "API_Testing_Interview_Prep.html", id: "api-testing", title: "API Testing", group: "API & Data" },
   { file: "pyspark.html", id: "pyspark", title: "PySpark & ETL", group: "API & Data" },

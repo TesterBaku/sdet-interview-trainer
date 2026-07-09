@@ -6,6 +6,7 @@ import javaCoding from "@/data/questions/java-coding.json";
 import playwrightPython from "@/data/questions/playwright-python.json";
 import playwrightTypescript from "@/data/questions/playwright-typescript.json";
 import pythonCoding from "@/data/questions/python-coding.json";
+import restAssured from "@/data/questions/rest-assured.json";
 import selenium from "@/data/questions/selenium.json";
 import sqlPostgresql from "@/data/questions/sql-postgresql.json";
 import testAutomationStrategy from "@/data/questions/test-automation-strategy.json";
@@ -19,6 +20,7 @@ const questionSets = [
   selenium,
   playwrightPython,
   playwrightTypescript,
+  restAssured,
   apiTesting,
   testAutomationStrategy,
   cicd,
@@ -103,6 +105,7 @@ export function getDailyPlan(date: Date = new Date()): DailyPlanSection[] {
     ...getQuestionsByTopic("selenium"),
   ];
   const platformPool = [
+    ...getQuestionsByTopic("rest-assured"),
     ...getQuestionsByTopic("api-testing"),
     ...getQuestionsByTopic("cicd"),
     ...getQuestionsByTopic("aws"),

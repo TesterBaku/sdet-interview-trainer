@@ -48,6 +48,14 @@
     "difficulty": "mixed"
   },
   {
+    "id": "rest-assured",
+    "title": "REST Assured",
+    "description": "Java DSL for REST API testing — given/when/then, JSON path, POJOs, auth, TestNG, and Maven.",
+    "category": "automation",
+    "questionCount": 25,
+    "difficulty": "mixed"
+  },
+  {
     "id": "api-testing",
     "title": "API Testing",
     "description": "REST testing strategy, schemas, auth, negative coverage, and resilient API checks.",
