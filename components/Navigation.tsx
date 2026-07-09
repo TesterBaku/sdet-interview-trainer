@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { InstallAppButton } from "@/components/InstallAppButton";
 
 type NavLink = {
   href: string;
@@ -86,29 +87,34 @@ export function Navigation() {
             SDET Interview Trainer
           </Link>
 
-          {/* Desktop: full link row */}
-          <div className="hidden flex-wrap justify-end gap-2 sm:flex">
-            <NavLinks pathname={pathname} />
-          </div>
+          <div className="flex items-center gap-2">
+            {/* Install-as-app affordance — shows only when the browser supports it */}
+            <InstallAppButton />
 
-          {/* Mobile: menu toggle */}
-          <button
-            aria-controls="primary-nav"
-            aria-expanded={open}
-            aria-label={open ? "Close menu" : "Open menu"}
-            className="flex h-10 w-10 items-center justify-center rounded-full bg-white/70 text-ink transition hover:bg-white focus-ring sm:hidden"
-            onClick={() => setOpen((value) => !value)}
-            ref={toggleRef}
-            type="button"
-          >
+            {/* Desktop: full link row */}
+            <div className="hidden flex-wrap justify-end gap-2 sm:flex">
+              <NavLinks pathname={pathname} />
+            </div>
+
+            {/* Mobile: menu toggle */}
+            <button
+              aria-controls="primary-nav"
+              aria-expanded={open}
+              aria-label={open ? "Close menu" : "Open menu"}
+              className="flex h-10 w-10 items-center justify-center rounded-full bg-white/70 text-ink transition hover:bg-white focus-ring sm:hidden"
+              onClick={() => setOpen((value) => !value)}
+              ref={toggleRef}
+              type="button"
+            >
             <svg aria-hidden fill="none" height="20" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" width="20">
               {open ? (
                 <path d="M6 6l12 12M18 6L6 18" strokeLinecap="round" />
               ) : (
                 <path d="M4 7h16M4 12h16M4 17h16" strokeLinecap="round" />
               )}
-            </svg>
-          </button>
+              </svg>
+            </button>
+          </div>
         </div>
 
         {/* Mobile: collapsible link panel */}
