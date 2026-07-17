@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { InstallAppButton } from "@/components/InstallAppButton";
+import { useDismissable } from "@/lib/useDismissable";
 
 type NavLink = {
   href: string;
@@ -60,24 +61,12 @@ export function Navigation() {
 
   // While the mobile menu is open, dismiss it on Escape (returning focus to the
   // toggle) or on a tap/click outside the nav — the expected disclosure behavior.
-  useEffect(() => {
-    if (!open) return;
-    function onKeyDown(event: KeyboardEvent) {
-      if (event.key === "Escape") {
-        setOpen(false);
-        toggleRef.current?.focus();
-      }
-    }
-    function onPointerDown(event: PointerEvent) {
-      if (navRef.current && !navRef.current.contains(event.target as Node)) setOpen(false);
-    }
-    document.addEventListener("keydown", onKeyDown);
-    document.addEventListener("pointerdown", onPointerDown);
-    return () => {
-      document.removeEventListener("keydown", onKeyDown);
-      document.removeEventListener("pointerdown", onPointerDown);
-    };
-  }, [open]);
+  useDismissable({
+    open,
+    onClose: () => setOpen(false),
+    insideRefs: [navRef],
+    focusRef: toggleRef,
+  });
 
   return (
     <header className="sticky top-0 z-20 border-b border-ink/10 bg-paper/85 backdrop-blur-xl">
