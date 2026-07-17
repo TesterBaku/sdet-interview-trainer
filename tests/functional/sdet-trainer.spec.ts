@@ -74,7 +74,7 @@ test("home, topics, and topic detail render the MVP navigation path", async ({ p
   await expect(page.getByRole("heading", { name: "Practice like the interview is already scheduled." })).toBeVisible();
   await expect(page.getByRole("link", { name: "Practice", exact: true })).toBeVisible();
   await expect(page.getByText("TOTAL")).toBeVisible();
-  await expect(page.getByText("500")).toBeVisible();
+  await expect(page.getByText("525")).toBeVisible();
 
   // Topics now lives one level down, inside the Practice hub.
   await page.getByRole("link", { name: "Practice", exact: true }).click();
@@ -84,7 +84,7 @@ test("home, topics, and topic detail render the MVP navigation path", async ({ p
   await expect(page.getByRole("heading", { name: "Choose a training lane" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Python Coding for QA/SDET" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "AWS Basics for QA/SDET" })).toBeVisible();
-  await expect(page.getByRole("link", { name: "Start practice" })).toHaveCount(10);
+  await expect(page.getByRole("link", { name: "Start practice" })).toHaveCount(11);
 
   await page.getByRole("link", { name: "Start practice" }).first().click();
   await expect(page).toHaveURL("/topics/python-coding");

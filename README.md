@@ -18,8 +18,8 @@ QA Automation / SDET interview practice app — flashcards, quizzes, mock interv
 
 ## Features
 
-**10 topics, 500 questions (50 per topic):**
-Python Coding · Java Coding · SQL / PostgreSQL · Selenium · Playwright (Python & TypeScript) · API Testing · Test Automation Strategy · CI/CD · AWS
+**11 topics, 525 questions:**
+Python Coding · Java Coding · SQL / PostgreSQL · Selenium · Playwright (Python & TypeScript) · API Testing · REST Assured · Test Automation Strategy · CI/CD · AWS
 
 **Practice modes (4):** Flashcards · Quiz · Mock Interview · Coding Gym
 **Aggregator pages (4):** Daily Practice · Topics · Review Queue · Progress
@@ -34,6 +34,18 @@ Python Coding · Java Coding · SQL / PostgreSQL · Selenium · Playwright (Pyth
 | `/coding-gym` | All coding tasks; supports `?topic=<id>` to scope to one topic |
 | `/review` | Global queue of all questions marked weak or review-later, with status/type/topic filters |
 | `/progress` | Overall + per-type (coding / quiz / mock interview) + per-topic breakdowns |
+
+## Install as an app (PWA)
+
+The trainer is a Progressive Web App, so you can install it on any device and launch it from your home screen or dock like a native app. Once installed, the core screens keep working offline (a service worker pre-caches the app shell). In-app, an **Install app** button appears when your browser supports it; you can also install manually:
+
+| Platform | How to install |
+|---|---|
+| **Chrome / Edge (desktop)** | Open the [live app](https://sdet-interview-trainer.vercel.app), then click the install icon in the address bar (a monitor with a down-arrow) — or use the ⋮ menu → **Install SDET Interview Trainer**. |
+| **Android (Chrome)** | Open the app, tap the ⋮ menu → **Install app** / **Add to Home screen**. |
+| **iOS / iPadOS (Safari)** | Open the app in Safari, tap the **Share** button, then **Add to Home Screen**. (Safari doesn't show an automatic prompt, so this manual step is required.) |
+
+To uninstall, remove it like any app: on desktop use the app's ⋮ menu → **Uninstall**; on mobile long-press the home-screen icon → **Remove** / **Uninstall**.
 
 ## Local development
 
@@ -84,14 +96,14 @@ app/
   review/                              global weak/review queue
   progress/                            progress breakdown
   layout.tsx                           root layout, SEO, Analytics
-  sitemap.ts                           dynamic sitemap (46 URLs: 6 static + 10 topics × 4)
+  sitemap.ts                           dynamic sitemap (static routes + 4 per topic + cheat sheets + mock exams)
   robots.ts                            robots.txt
   manifest.ts, icon.tsx, apple-icon.tsx  PWA assets
 
 components/                            reusable UI primitives
 data/
-  topics.json                          10 topic definitions
-  questions/*.json                     500 questions across 10 files
+  topics.json                          11 topic definitions
+  questions/*.json                     525 questions across 11 files
 lib/
   questionUtils.ts                     content access + daily plan
   progress.ts                          progress hooks + summaries
