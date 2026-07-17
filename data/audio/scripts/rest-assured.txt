@@ -1,0 +1,88 @@
+REST Assured cheat sheet.
+Core Rest Assured syntax, request/response specs, JSON path validation, POJO serialization, authentication schemes, TestNG integration, Maven setup, and coding scenarios, with rapid-fire Q&A.
+
+Section: Core Rest Assured syntax.
+What is Rest Assured and why use it over other approaches?
+Rest Assured is an open-source Java DSL for testing REST APIs. It removes the boilerplate of using raw HTTP clients (HttpClient, HttpURLConnection) by giving a fluent, readable given-when-then BDD syntax, built-in JSON/XML parsing (JsonPath, XmlPath), and Hamcrest matcher integration for assertions.
+Readable, close to plain English, good for reviews and non-Java stakeholders.
+First-class JSON/XML response parsing and schema validation.
+Plays well with TestNG/JUnit, Maven/Gradle, and CI pipelines.
+Explain the given, when, then structure.
+given(), the arrange block: set up the request (headers, params, body, auth, base URI).
+when(), the act block: the HTTP action (get, post, put, delete).
+then(), the assert block: validate status code, headers, and body.
+Tip: You don't strictly need given() for a bare GET, when().get(url).then()... is valid. Interviewers like to hear you know the BDD block is optional sugar.
+How do you send path params, query params, and headers?
+pathParam substitutes {userId} in the URL; queryParam appends ?active=true. Use params() for form/query pairs and formParam() for application/x-www-form-urlencoded bodies.
+How do you send a POST with a JSON body?
+
+Section: Request & Response Specifications.
+What are RequestSpecification and ResponseSpecification, and why use them?
+They let you define reusable request/response setup once and apply it across many tests, eliminating duplication of base URI, common headers, auth, and repeated assertions (like status 200 + JSON content type). Great for keeping a framework DRY.
+What are the static config options (RestAssured.baseURI, filters, etc.)?
+RestAssured.baseURI, basePath, port, global defaults for all requests.
+RestAssured.requestSpecification, responseSpecification, global specs.
+RestAssured.filters(...), attach logging or custom filters globally.
+RestAssured.reset(), reset all static state (call in @AfterMethod/@AfterClass to avoid test bleed).
+Watch out: static config is global mutable state. In parallel runs it can cause flakiness, prefer local specs or reset carefully.
+
+Section: Validation & JSON path.
+How does Rest Assured validate response bodies? What is Hamcrest's role?
+The .body(jsonPath, matcher) method takes a GPath/JsonPath expression and a Hamcrest matcher. Rest Assured evaluates the path against the parsed body and asserts it against the matcher.
+How do you assert on arrays, collections?
+Rest Assured uses Groovy's GPath, so you can use findAll, find, collect, it.field, max, min, sum inside path expressions.
+How do you do JSON schema validation?
+Add the json-schema-validator module, then match against a schema file on the classpath.
+Why it matters: schema validation guards the API contract (field names, types, required fields), more robust than asserting individual values that change.
+
+Section: Serialization, Deserialization & POJOs.
+What is serialization/deserialization in Rest Assured, and how does it work?
+Serialization = converting a Java object (POJO) into a JSON/XML request body. Deserialization = converting a response body back into a Java object. Rest Assured delegates this to Jackson or Gson if they're on the classpath, it auto-detects.
+Why POJOs over raw strings? Type safety, refactor-friendly, reusable across tests, avoids brittle hand-written JSON strings. This is the expected "mature framework" answer.
+
+Section: Authentication & Security.
+What authentication schemes does Rest Assured support?
+Scheme, Syntax. Basic (preemptive), given().auth().preemptive().basic("user","pass"). Basic (challenged), given().auth().basic("user","pass"). Digest, given().auth().digest("user","pass"). OAuth 1.0, given().auth().oauth(consumerKey, consumerSecret, token, secret). OAuth 2.0, Bearer, given().auth().oauth2(accessToken). API key, custom, given().header("x-api-key", key).
+Explain preemptive vs challenged basic auth.
+Challenged (default basic): the client first sends without credentials, gets a 401 WWW-Authenticate, then resends with the header. Two round trips.
+Preemptive: the Authorization: Basic ... header is sent on the first request. One round trip. Most modern APIs expect this.
+Interview gold: mention that if you use plain .basic() against an API that doesn't return a proper 401 challenge, auth silently fails, that's a common real-world bug, and preemptive fixes it.
+Walk through testing an OAuth2, token-based flow end to end.
+The realistic pattern: hit the auth/login endpoint, extract the token, then use it as a bearer token on subsequent calls.
+In a framework you'd wrap step 1 in a reusable getAuthToken() method, cache it, and inject it via a RequestSpecification.
+How do you handle SSL, self-signed certificates?
+Note: only relax SSL for non-prod test environments. For real cert validation use .trustStore(...), .keyStore(...).
+
+Section: Framework, TestNG & Maven.
+How would you structure a production Rest Assured framework?
+src/test/java, tests grouped by resource/endpoint.
+base/, a BaseTest with common setup (base URI, specs, token).
+pojos/ or models/, request/response POJOs.
+utils/, helpers (config reader, token manager, data generators).
+endpoints/ or services/, a "service layer" that wraps API calls into reusable methods (like a Page Object equivalent for APIs).
+src/test/resources, config.properties, schemas, test data (JSON/Excel), testng.xml, log4j2.xml.
+reporting, Allure or ExtentReports.
+Key phrase interviewers want: a service/endpoint layer so tests contain assertions and business logic, not raw HTTP plumbing, same principle as Page Object Model in UI automation.
+Which TestNG annotations matter and in what order do they run?
+Order: @BeforeSuite to @BeforeTest to @BeforeClass to @BeforeMethod to @Test to @AfterMethod to @AfterClass to @AfterTest to @AfterSuite.
+@BeforeClass, set up base URI, fetch auth token once per class.
+@BeforeMethod, reset per-test state.
+@Test(priority=, groups=, dependsOnMethods=, dataProvider=).
+@AfterClass, cleanup created test data.
+How do you do data-driven testing?
+For external data, feed the DataProvider from Excel (Apache POI), CSV, or a JSON file.
+How do you run tests in parallel and why is thread-safety a concern?
+In testng.xml set parallel="methods" (or classes/tests) and thread-count. The risk: Rest Assured's static config (RestAssured.baseURI, global specs) and any shared mutable state (a static token variable) can be clobbered across threads.
+Fixes: use local RequestSpecifications instead of static state, or ThreadLocal for shared objects.
+What does the Maven side look like? Key dependencies & plugins.
+maven-surefire-plugin, runs tests, points to testng.xml.
+mvn clean test runs the suite; CI (Jenkins/GitHub Actions) invokes the same command.
+Use Maven profiles to switch environments (dev/staging/prod) via -P or -Denv=.
+
+Section: Coding, live scenarios.
+Scenario: Write an end-to-end CRUD flow for a /users resource.
+Scenario: Chain requests, use a value from response 1 in request 2.
+Scenario: Validate a specific object inside a JSON array by a field value.
+Scenario: How do you assert response time and headers?
+
+That's the REST Assured cheat sheet. Review the questions to lock it in.

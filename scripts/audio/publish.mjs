@@ -1,0 +1,128 @@
+// Audio pipeline · step 4 of 4 — publish.
+//
+// Uploads the built mp3 + vtt for each cheat sheet to Vercel Blob and writes the
+// COMMITTED manifest (data/audio/manifest.json) that the app reads to decide which
+// sheets have audio and where to fetch it. Hash-gated: a sheet whose audio is
+// unchanged (per the timing hash) is left as-is unless --force.
+//
+// Run:  BLOB_READ_WRITE_TOKEN=... node scripts/audio/publish.mjs [--force] [--only=<id>]
+//       node scripts/audio/publish.mjs --local   # dev: stage into public/audio, no Blob
+//
+// --local copies files into public/audio/ (gitignored) and writes a SEPARATE
+// gitignored manifest (manifest.local.json) with /audio/<id>.* URLs, so the player
+// can be developed without Blob credentials while the committed manifest.json always
+// holds production (Blob) URLs.
+
+import { readFileSync, writeFileSync, readdirSync, existsSync, mkdirSync, copyFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const ROOT = join(__dirname, "..", "..");
+const BUILD_DIR = join(ROOT, "build", "audio");
+const PUBLIC_AUDIO_DIR = join(ROOT, "public", "audio");
+const TRANSCRIPT_DIR = join(ROOT, "data", "audio", "transcripts");
+
+const args = process.argv.slice(2);
+const force = args.includes("--force");
+const local = args.includes("--local");
+const only = (args.find((a) => a.startsWith("--only=")) || "").slice("--only=".length) || null;
+
+// Blob and local staging use independent manifests so a --local run can never write
+// unreachable /audio/* URLs into the committed, production manifest.
+const MANIFEST_PATH = join(ROOT, "data", "audio", local ? "manifest.local.json" : "manifest.json");
+
+function loadManifest() {
+  return existsSync(MANIFEST_PATH) ? JSON.parse(readFileSync(MANIFEST_PATH, "utf8")) : {};
+}
+
+// Deterministic sort so the committed manifest diffs cleanly.
+function saveManifest(manifest) {
+  const sorted = Object.fromEntries(Object.keys(manifest).sort().map((k) => [k, manifest[k]]));
+  writeFileSync(MANIFEST_PATH, JSON.stringify(sorted, null, 2) + "\n", "utf8");
+}
+
+let put = null;
+if (!local) {
+  if (!process.env.BLOB_READ_WRITE_TOKEN) {
+    console.error(
+      "Missing BLOB_READ_WRITE_TOKEN. Set it (Vercel → Storage → Blob → tokens) or run with --local for dev staging."
+    );
+    process.exit(1);
+  }
+  ({ put } = await import("@vercel/blob"));
+}
+
+const ids = readdirSync(BUILD_DIR)
+  .filter((f) => f.endsWith(".mp3"))
+  .map((f) => f.replace(/\.mp3$/, ""))
+  .filter((id) => !only || id === only);
+
+if (!ids.length) {
+  console.log("No built audio found. Run synthesize.mjs (+ captions.mjs) first.");
+  process.exit(0);
+}
+
+if (local) mkdirSync(PUBLIC_AUDIO_DIR, { recursive: true });
+
+const manifest = loadManifest();
+let published = 0;
+let skipped = 0;
+
+for (const id of ids) {
+  const mp3Path = join(BUILD_DIR, `${id}.mp3`);
+  const vttPath = join(BUILD_DIR, `${id}.vtt`);
+  const timingPath = join(BUILD_DIR, `${id}.timing.json`);
+  const transcriptPath = join(TRANSCRIPT_DIR, `${id}.json`);
+
+  if (!existsSync(vttPath) || !existsSync(timingPath) || !existsSync(transcriptPath)) {
+    console.warn(`skip   ${id} (missing vtt/timing/transcript — run audio:captions)`);
+    skipped += 1;
+    continue;
+  }
+
+  const timing = JSON.parse(readFileSync(timingPath, "utf8"));
+  const transcript = JSON.parse(readFileSync(transcriptPath, "utf8"));
+  // Guard against a fresh mp3 paired with stale captions (audio:tts run without captions).
+  if (transcript.hash !== timing.hash) {
+    console.warn(`skip   ${id} (captions/transcript stale — re-run audio:captions)`);
+    skipped += 1;
+    continue;
+  }
+
+  const existing = manifest[id];
+  if (!force && existing && existing.hash === timing.hash) {
+    skipped += 1;
+    console.log(`skip   ${id} (unchanged)`);
+    continue;
+  }
+
+  let mp3Url;
+  let vttUrl;
+  if (local) {
+    copyFileSync(mp3Path, join(PUBLIC_AUDIO_DIR, `${id}.mp3`));
+    copyFileSync(vttPath, join(PUBLIC_AUDIO_DIR, `${id}.vtt`));
+    mp3Url = `/audio/${id}.mp3`;
+    vttUrl = `/audio/${id}.vtt`;
+  } else {
+    const [a, b] = await Promise.all([
+      put(`audio/${id}.mp3`, readFileSync(mp3Path), { access: "public", contentType: "audio/mpeg", addRandomSuffix: false, allowOverwrite: true }),
+      put(`audio/${id}.vtt`, readFileSync(vttPath), { access: "public", contentType: "text/vtt", addRandomSuffix: false, allowOverwrite: true }),
+    ]);
+    mp3Url = a.url;
+    vttUrl = b.url;
+  }
+
+  manifest[id] = {
+    mp3Url,
+    vttUrl,
+    durationSec: timing.durationSec,
+    voice: timing.voice,
+    hash: timing.hash,
+  };
+  published += 1;
+  console.log(`publish ${id} → ${mp3Url}`);
+}
+
+saveManifest(manifest);
+console.log(`\nDone. published=${published} skipped=${skipped} → ${local ? "manifest.local.json" : "manifest.json"}`);

@@ -1,0 +1,71 @@
+Java cheat sheet.
+A to-the-point review of the Java an SDET gets asked about: data types, modifiers, OOP, strings, collections, exceptions, generics & streams, plus the JUnit/TestNG ecosystem. Short explanations, short examples.
+
+Section: Data Types & Variables.
+Java has two kinds of types: primitives and reference types.
+Primitives hold the value directly and are copied on assignment: int, long, double, float, boolean, char, byte, short.
+Reference types (objects, arrays, String) hold a reference to data on the heap; assigning copies the reference, so both variables point at the same object.
+Each primitive has a wrapper class (int↔Integer, boolean↔Boolean) for use in generics/collections. Converting between them is autoboxing, unboxing.
+Pass-by-value: Java always passes by value. For objects the reference is copied, so a method can change the object's fields but cannot reseat the caller's variable. var (Java 10+) infers a local variable's type.
+
+Section: Modifiers & Keywords.
+Access modifiers, who can see a member:
+public, anywhere.
+private, only inside the same class.
+protected, same package + subclasses.
+(no modifier), package-private: visible only within the same package. This is the default.
+Other key modifiers:
+static, belongs to the class, not an instance.
+final, can't change: a final variable is a constant, a final method can't be overridden, a final class can't be subclassed.
+abstract, no body; a subclass must implement it.
+
+Section: OOP Pillars.
+Encapsulation, private fields + public getters/setters.
+Inheritance, extends one class; prefer composition over deep hierarchies.
+Polymorphism, overriding (runtime) vs overloading (compile-time).
+Abstraction, abstract classes and interfaces hide detail behind a contract.
+Abstract class vs Interface, when & how.
+Abstract class = a partial base with shared code/state; a class extends one of them and overrides its abstract methods. Use it for an "is-a" relationship.Interface = a contract, capability; a class implements many and provides the methods. Since Java 8 it can have default methods. Use it for a "can-do" capability.
+Overloading vs Overriding.
+Overloading = same method name, different parameters, chosen at compile time. Overriding = a subclass redefines a method with the same signature, chosen at runtime.
+
+Section: Strings & Immutability.
+String is a reference type but immutable, once created it never changes. Every "modification" returns a new String and leaves the original alone.
+Why immutable? Thread-safety, safe use as HashMap keys (a stable hashCode), and the String pool, identical literals are interned and shared.
+Building a string in a loop creates a new object each pass. Use StringBuilder (or StringBuffer when thread-safe).
+== vs equals(): == compares references (same object); equals() compares value. For Strings and objects, always use equals().
+
+Section: Collections Framework.
+Everything sits under List, Set, Map, or Queue:
+List = ordered, duplicates allowed.
+Set = no duplicates.
+Map = key/value pairs.
+Type, Notes. ArrayList, Resizable array; fast index access, the default List. LinkedList, Doubly-linked; fast add/remove at the ends. HashMap, Key to value, O(1) average, no ordering, the default Map. LinkedHashMap, HashMap that keeps insertion order. TreeMap, Keys sorted, O(log n). HashSet, Unique elements, backed by a HashMap.
+Used most in practice: ArrayList for ordered lists and HashMap for key lookups.
+equals() & hashCode().
+Hash collections (HashMap, HashSet) find an object by its hash first, then check equals. The rule: if two objects are equal they must return the same hashCode. Override both together (using the same fields) or hash lookups break, entries go missing and duplicates slip in. A record (Java 16+) generates both for you.
+
+Section: Exceptions.
+Two kinds:
+Checked, must be handled or declared with throws (for example, IOException); enforced at compile time.
+Unchecked, RuntimeExceptions like NullPointerException, IllegalArgumentException; not enforced.
+try, catch, finally, finally always runs.
+try-with-resources auto-closes anything AutoCloseable, even on exception.
+throw raises an exception; throws declares one a method may propagate.
+Good hygiene: catch the narrowest exception, never leave an empty catch, and keep the original cause when you wrap. In tests, let unexpected errors fail loudly.
+
+Section: Generics & Streams.
+Generics add compile-time type safety and remove casts: a List<String> can only hold Strings.
+Streams (Java 8+) process a collection as a pipeline: source to intermediate ops (lazy) to one terminal op. Nothing runs until the terminal op.
+Optional<T> models "maybe a value" and avoids null checks: opt.map(...).orElse(default).
+Streams vs loops: streams read well for filter/map/collect pipelines; a plain for loop is fine (and faster) for simple iteration or when you need to break early. Don't force everything into a stream.
+
+Section: Test Ecosystem.
+JUnit 5, @Test, @BeforeEach/@AfterEach, @BeforeAll/@AfterAll, @ParameterizedTest, @DisplayName, assertions, and a flexible extensions model.
+TestNG, groups, data providers, dependencies, flexible parallel config, suite XML; common in Selenium frameworks.
+Mockito, mock/stub dependencies; verify interactions.
+AssertJ, Hamcrest, fluent, readable assertions.
+Maven, Gradle, build & dependency management; Surefire/Failsafe run tests in CI.
+JUnit vs TestNG: TestNG has richer built-in suite/parallel/group features and data providers; JUnit 5 is modular, extensible, and the default in modern Java. Both are fine, know why a framework picked one.
+
+That's the Java cheat sheet. Review the questions to lock it in.

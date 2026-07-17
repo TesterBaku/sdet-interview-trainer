@@ -1,0 +1,56 @@
+Playwright cheat sheet.
+Auto-waiting, locators, the page/context/browser model, fixtures, network interception, parallelism, and how Playwright differs from Selenium, with rapid-fire Q&A.
+
+Section: What Playwright Is.
+Playwright is a modern end-to-end testing framework from Microsoft. It drives Chromium, Firefox, and WebKit through a single API, talks to browsers over the DevTools/CDP-style protocol rather than the WebDriver wire protocol, and ships official bindings for C#, JavaScript/TypeScript, Python, and Java.
+The headline advantage over Selenium: a single process talking to the browser over a persistent connection, with auto-waiting built into every action.
+Cross-browser via one API (Chromium, Firefox, WebKit).
+Auto-waiting and web-first assertions reduce flakiness.
+Built-in network interception, tracing, video, and screenshots.
+Fast parallel execution out of the box.
+
+Section: Browser, Context, Page.
+Browser.
+A single browser instance. Expensive to launch, you reuse it across tests.
+BrowserContext.
+An isolated session inside the browser, its own cookies, storage, and cache. Like a fresh incognito profile. Cheap to create, so each test gets its own context for isolation. This is how Playwright achieves clean state without relaunching the browser.
+Page.
+A single tab within a context. Most interactions happen here.
+Why it matters: reusing one Browser but giving each test its own Context is what makes Playwright both fast and fully isolated, a common interview point.
+
+Section: Locators & Auto-Waiting.
+A Locator is a lazy, re-queried handle to an element, it re-resolves the DOM every time you act on it, which avoids stale-element problems.
+Recommended, user-facing locators (in priority order):
+GetByRole, by ARIA role + accessible name; most resilient.
+GetByLabel, GetByPlaceholder, GetByText.
+GetByTestId, stable data-testid hooks.
+CSS, XPath as a fallback.
+Auto-waiting: before acting, Playwright waits for the element to be attached, visible, stable, enabled, and able to receive events, so explicit waits and sleep() are rarely needed.
+Web-first assertions (Expect(locator).ToBeVisibleAsync()) auto-retry until the condition holds or times out, no manual polling.
+
+Section: Network Interception & Mocking.
+Playwright can observe and modify network traffic, which is powerful for isolating the UI from flaky backends.
+page.RouteAsync, intercept a URL pattern and fulfil, modify, or abort the request.
+Stub an API to return fixed JSON so a UI test is deterministic.
+Wait for a specific response with page.WaitForResponseAsync.
+
+Section: Fixtures, Config & Auth Reuse.
+Storage state, log in once, save cookies/localStorage to a file, and load it into new contexts so tests skip the login UI. Big speed win.
+Config, base URL, browser projects, timeouts, retries, trace/video settings centralized (in C# via fixtures/runsettings, or the JS playwright.config).
+Projects, run the same suite across multiple browsers, viewports.
+Auth pattern: authenticate once in setup, persist storageState, and reuse it, the equivalent of seeding a logged-in session instead of clicking through login per test.
+
+Section: Parallelism & CI.
+Playwright runs tests in parallel by default using multiple worker processes; each worker gets its own browser/context, so isolation is preserved. Context-level isolation is exactly what makes safe parallelism possible.
+Workers scale to CPU cores; tune for the CI runner.
+Retries for flaky tests, configured centrally.
+Trace Viewer, record a trace on failure/first-retry; it captures DOM snapshots, network, and console for post-mortem debugging without re-running.
+Sharding splits the suite across CI machines.
+
+Section: Debugging & Tooling.
+Codegen, records your clicks into a test script with good locators.
+Trace Viewer, the main triage tool; step through a failed run frame by frame.
+UI Mode, headed + slowmo for live observation.
+Auto screenshots and video on failure.
+
+That's the Playwright cheat sheet. Review the questions to lock it in.

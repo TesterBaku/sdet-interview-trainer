@@ -1,0 +1,63 @@
+LangChain cheat sheet.
+Building LLM apps: models and prompts, the LCEL Runnable interface, output parsers, retrieval and RAG, memory, tools and agents, and LangGraph, with rapid-fire Q&A.
+
+Section: What LangChain Is.
+LangChain is a framework for building applications powered by large language models. It gives you two things: standard interfaces over many providers (so swapping OpenAI for Anthropic is a one-line change) and composition primitives to wire models, prompts, retrievers, and tools into pipelines.
+LangChain's value isn't the model, it's the glue: a common abstraction for models, prompts, parsers, and retrievers, plus a way to chain them and observe what happened.
+The codebase is split into focused packages:
+langchain-core, the base abstractions (Runnables, messages, prompts, output parsers). Lightweight, few dependencies.
+langchain, higher-level chains, agents, and retrieval strategies.
+integration packages, langchain-openai, langchain-anthropic, etc., one per provider.
+langchain-community, community-maintained integrations.
+
+Section: Models, Messages & Prompts.
+The core object is a chat model, it takes a list of messages and returns an AIMessage. Messages carry a role: SystemMessage, HumanMessage, AIMessage.
+Prompt templates turn variables into messages so prompts are reusable and testable:
+Because every provider's chat model implements the same interface, the rest of your pipeline doesn't care which LLM is behind it, that's what makes models swappable. Distinguish chat models (message in, message out) from the older text-completion LLMs (string in, string out); chat models are the default today.
+
+Section: LCEL & the Runnable Interface.
+LCEL (LangChain Expression Language) is how you compose components. Every component, prompt, model, parser, retriever, implements the Runnable interface, so they share the same methods and snap together with the pipe operator |.
+The Runnable interface gives every chain the same execution methods for free:
+invoke(), run once on a single input.
+batch(), run on many inputs concurrently.
+stream(), yield output tokens as they're generated.
+async variants, ainvoke, abatch, astream.
+Compose in parallel with RunnableParallel (run branches concurrently and collect a dict) and inject inputs with RunnablePassthrough. Build the pipeline once; get sync, async, batch, and streaming execution without extra code.
+
+Section: Output Parsers & Structured Output.
+Models return free-form text; output parsers turn that into something your code can use, as the last step of a chain.
+StrOutputParser, pull the plain string out of an AIMessage.
+JSON, Pydantic parsers, coerce the response into a typed object and validate it.
+The more robust modern approach binds a schema directly to the model:
+with_structured_output uses the provider's native tool/JSON-mode support to guarantee the shape, which is more reliable than parsing free text and re-prompting on failure. Reach for it whenever you need machine-readable results.
+
+Section: Retrieval & RAG.
+RAG (Retrieval-Augmented Generation) grounds an LLM in your own data: fetch relevant documents, put them in the prompt, then answer. The ingestion pipeline:
+Document loaders read sources (PDFs, web pages, databases) into Document objects.
+Text splitters chunk long documents so each piece fits the embedding and context limits.
+Embeddings convert each chunk into a vector capturing its meaning.
+Vector store indexes the vectors for similarity search (Chroma, FAISS, pgvector, Pinecone).
+At query time a retriever embeds the question, finds the nearest chunks, and the chain stuffs them into the prompt as context.
+The retriever is itself a Runnable, so RAG is just another LCEL pipeline: retriever to format docs to prompt to model to parser. Chunking strategy and retrieval quality usually matter more to answer quality than the model choice.
+
+Section: Memory & Conversation State.
+LLM calls are stateless, the model only knows what's in the current request. To hold a conversation you must pass prior turns back in yourself.
+Keep a message history per session and prepend it to each new prompt, often via a MessagesPlaceholder in the template.
+RunnableWithMessageHistory wraps a chain to load and save history automatically, keyed by a session id.
+For long chats, trim or summarize old turns so you stay within the context window and control token cost.
+The older ConversationBufferMemory-style classes are largely superseded. Current guidance is explicit message-history wiring or LangGraph persistence (checkpointers), which also survives restarts and supports branching.
+
+Section: Tools & Agents.
+A tool is a function the model can choose to call, a calculator, a search API, a database query. An agent is an LLM in a loop: it decides which tool to call, sees the result, and repeats until it can answer.
+The flow: bind_tools exposes the schemas to the model; the model replies with tool calls; your code runs the tools and feeds results back as ToolMessages; the loop continues.
+The LLM never executes anything itself, it only requests a call. Your code runs the tool, which is also where you enforce permissions and validation. This tool-calling loop is the foundation every agent framework builds on.
+
+Section: LangGraph & Ecosystem.
+LangGraph is LangChain's library for stateful, multi-step agent workflows modeled as a graph: nodes do work, edges decide what runs next, and a shared state object flows through. Unlike a straight LCEL chain, a graph supports cycles, branching, persistence, and human-in-the-loop pauses.
+Rule of thumb: a linear pipeline to LCEL chain; a looping, branching, stateful agent to LangGraph. It's the recommended path for production agents over the older AgentExecutor.
+Around the framework:
+LangSmith, tracing, debugging, and evaluation; see every step, token, and latency of a run.
+Streaming & callbacks, stream tokens or intermediate events to a UI; hook callbacks for logging and metrics.
+LangSmith is provider-agnostic and works even without LangChain, but pairs tightly with it, observability is what turns a demo chain into something you can debug and trust in production.
+
+That's the LangChain cheat sheet. Review the questions to lock it in.

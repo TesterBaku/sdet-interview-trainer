@@ -1,0 +1,74 @@
+Node.js cheat sheet.
+The JavaScript runtime: event loop and non-blocking I/O, CommonJS vs ES modules, async patterns, streams, EventEmitter, error handling, and scaling with cluster and worker threads, with rapid-fire Q&A.
+
+Section: Runtime & Event Loop.
+Node.js runs JavaScript outside the browser on Google's V8 engine, paired with libuv, a C library that provides the event loop and a thread pool for I/O. Node is single-threaded for your JavaScript, but I/O is offloaded so it never blocks.
+Node's model is single-threaded, non-blocking, event-driven. One thread runs your JS; libuv handles file, network, and timer work in the background and queues callbacks for the loop to run.
+The event loop processes work in phases, in order, each draining its queue:
+timers, setTimeout, setInterval callbacks.
+pending callbacks, deferred I/O callbacks.
+poll, retrieve new I/O events; execute their callbacks.
+check, setImmediate callbacks.
+close, close events (for example, a socket closing).
+Microtasks run between phases: process.nextTick fires first, then resolved Promise callbacks, both drain fully before the loop moves on. That's why a runaway nextTick can starve I/O.
+
+Section: Modules: CommonJS vs ES Modules.
+Node supports two module systems:
+Aspect, CommonJS, ES Modules. Syntax, require(), module.exports, import, export. Loading, Synchronous require, asynchronous & statically analyzable. Default in, .cjs (or no type field), .mjs (or "type": "module"). Top-level await, No, Yes.
+A package's "type" field in package.json decides how bare .js files are interpreted, "commonjs" (default) or "module". ESM can import CommonJS; CommonJS historically loaded ESM only via dynamic import(), though recent Node added synchronous require() of ES modules.
+
+Section: Async Patterns.
+Three generations of asynchronous style, each built on the last:
+Callbacks (error-first).
+The original Node convention: fn(args, (err, result) => ...), the first argument is always the error. Nesting many of them creates "callback hell".
+Promises.
+An object representing a future value, .then(), .catch(), chainable and composable. Promise.all, allSettled, race coordinate concurrency.
+async, await.
+Syntactic sugar over Promises, write asynchronous code that reads sequentially, with normal try/catch for errors. The modern default.
+Wrap a callback API into a Promise with util.promisify, or use the promise variants of core modules (fs/promises). Run independent async work concurrently with Promise.all rather than awaiting each in sequence.
+
+Section: Streams & Buffers.
+Streams process data in chunks instead of loading it all into memory, essential for large files and network data. Four types:
+Readable, source you read from (fs.createReadStream, an HTTP request).
+Writable, destination you write to (a file, an HTTP response).
+Duplex, both readable and writable (a TCP socket).
+Transform, a duplex stream that modifies data passing through (gzip, encryption).
+Connect them with pipe() or, preferably, stream.pipeline(), which propagates errors and cleans up:
+Backpressure: when a writable can't keep up, pipe/pipeline automatically pause the readable so memory stays bounded. A Buffer holds raw binary data, the chunks streams move around.
+
+Section: EventEmitter.
+Much of Node's core is built on the EventEmitter pattern, objects that emit named events and call registered listeners. Streams, HTTP servers, and sockets are all emitters.
+on(event, fn), once(event, fn), subscribe (persistent, one-shot).
+emit(event, ...args), fire synchronously to all listeners in registration order.
+off(), removeListener(), unsubscribe to avoid leaks.
+An "error" event with no listener throws and can crash the process, always attach an error listener to emitters that can fail.
+
+Section: Error Handling.
+Error handling depends on the async style:
+Sync & async/await, try/catch.
+Callbacks, check the error-first argument every time.
+Promises, .catch(); an unhandled rejection emits process.on("unhandledRejection").
+EventEmitters, listen for the "error" event.
+uncaughtException is a last resort, not a recovery tool. After one, the process is in an undefined state, log, run critical cleanup, and exit. Let a process manager (pm2, systemd, Kubernetes) restart it rather than trying to keep running.
+
+Section: Concurrency & Scaling.
+One Node process uses one CPU core for JS. To use more, or to keep the loop responsive under heavy compute, Node offers three tools, chosen by the kind of work:
+cluster.
+Forks multiple Node processes that share a listening port; the primary accepts connections and hands them to workers (round-robin by default on Linux/macOS, OS-scheduled on Windows). Scales an I/O-bound server across all cores.
+worker_threads.
+Real threads inside one process, sharing memory via SharedArrayBuffer. The right tool for CPU-bound work (parsing, image processing) that would otherwise block the event loop.
+child_process.
+spawn, exec, fork to run separate programs or Node scripts and communicate over IPC or streams.
+Rule of thumb: I/O-bound and need more throughput to cluster; CPU-bound and blocking the loop to worker_threads.
+
+Section: npm, Core Modules & Tooling.
+npm manages dependencies via package.json; package-lock.json pins exact versions for reproducible installs. Versions follow semver (MAJOR.MINOR.PATCH): ^1.2.3 allows minor/patch updates, ~1.2.3 only patch.
+Frequently used built-in (node:) modules:
+fs, path, files and cross-platform paths.
+http, https, servers and clients (plus the global fetch).
+os, process, system info, env vars (process.env), arguments.
+crypto, hashing, HMAC, encryption.
+node:test + node:assert, the built-in test runner, no dependency needed.
+Prefer dependencies for runtime needs and devDependencies for build/test tooling. Use the node: prefix on core imports to make intent explicit and avoid clashes with npm packages.
+
+That's the Node.js cheat sheet. Review the questions to lock it in.

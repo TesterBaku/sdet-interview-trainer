@@ -1,0 +1,52 @@
+Python cheat sheet.
+Data types, mutability, comprehensions, generators, decorators, OOP, exceptions, the GIL, the standard library, and the pytest ecosystem, the parts that surface in SDET interviews, with worked examples.
+
+Section: Data Types & Mutability.
+Immutable: int, float, bool, str, tuple, frozenset, bytes.
+Mutable: list, dict, set, bytearray.
+Everything is an object; a variable is a name bound to an object, not a typed box. Assignment binds names, it never copies. That's why aliasing surprises people:
+Classic gotcha: never use a mutable default argument (def f(x=[])), the default is created once at definition and shared across every call. Use None as the sentinel and create inside:def f(x=None): x = x or [].
+list vs tuple: list is mutable and dynamic; tuple is immutable and hashable (so it can be a dict key, set member). is compares identity (same object); == compares value.
+
+Section: Comprehensions & Generators.
+Comprehensions build collections in one readable expression, list, dict, and set forms:
+Generators produce values lazily with yield, holding one item in memory at a time, ideal for large or infinite streams. A generator expression just swaps brackets for parentheses:
+A list comprehension builds the whole list in memory; a generator yields items on demand, the memory difference is the interview point.
+
+Section: Functions, *args & Decorators.
+*args collects extra positional args into a tuple; **kwargs collects extra keyword args into a dict.
+Functions are first-class, assign them, pass them, return them, store them in lists/dicts.
+Closures capture enclosing-scope variables; the basis of decorators.
+Decorators wrap a function to add behavior (logging, timing, retry, caching) without changing its body. functools.wraps preserves the wrapped function's name/docstring.
+Common built-in decorators: @property, @staticmethod, @classmethod, @functools.lru_cache (memoize), and pytest's @pytest.fixture, @pytest.mark.parametrize.
+
+Section: OOP in Python.
+class, __init__ constructor, self as the explicit instance reference.
+No true private, convention: _protected, __name triggers name-mangling.
+@classmethod (gets cls, for example, factories), @staticmethod (no instance), @property (computed attribute).
+Dunder methods: __str__/__repr__, __eq__, __hash__, __len__, __enter__/__exit__ (context managers), __iter__.
+MRO & super(): Python supports multiple inheritance, resolved by the C3 linearization (method resolution order); super() follows the MRO chain.
+
+Section: Exceptions & Context Managers.
+try, except, else, finally. else runs only if no exception was raised; finally always runs. Catch specific exceptions, not a bare except:. Raise with raise ValueError("msg"); chain causes with raise X from err; custom exceptions subclass Exception.
+Context managers (with open(...) as f:) guarantee setup/cleanup via __enter__/__exit__, the Pythonic equivalent of try-with-resources. Write your own with @contextlib.contextmanager:
+
+Section: The GIL & Concurrency.
+The Global Interpreter Lock lets only one thread execute Python bytecode at a time in CPython, so threads don't give true multi-core CPU parallelism.
+threading, good for I/O-bound work (network, files, browser actions); the GIL releases during blocking I/O, so threads overlap.
+multiprocessing, separate processes, each with its own interpreter and GIL; the way to use multiple cores for CPU-bound work.
+asyncio, single-threaded cooperative concurrency (async/await) for very high-I/O workloads (thousands of sockets).
+For test automation: I/O-bound parallelism (API calls, browser actions) benefits from threads/async; pytest itself parallelizes across processes with pytest-xdist (-n auto), sidestepping the GIL entirely.
+
+Section: Standard Library & Idioms.
+The batteries-included modules that come up constantly in SDET work:
+Module, Use. collections, defaultdict, Counter, namedtuple, deque. itertools, Lazy combinatorics: chain, groupby, product. json, loads/dumps for API payloads. pathlib, Object-oriented file paths (Path("x")/"y"). os, subprocess, Env vars, running external commands. re, Regular expressions. datetime, Timestamps, durations.
+
+Section: pytest Ecosystem.
+Plain assert with rich introspection, pytest rewrites it to show both sides on failure; no special assert methods.
+Fixtures (@pytest.fixture) for setup/teardown, with scopes (function/class/module/session) and dependency injection by argument name. yield separates setup from teardown.
+@pytest.mark.parametrize for data-driven tests; pytest.raises for expected exceptions.
+Markers (@pytest.mark.smoke), conftest.py for shared fixtures, pytest-xdist for parallel runs, monkeypatch for patching.
+Playwright's pytest plugin gives a page fixture directly.
+
+That's the Python cheat sheet. Review the questions to lock it in.
