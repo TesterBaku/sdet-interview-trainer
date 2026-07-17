@@ -1,6 +1,6 @@
 "use client";
 
-import { RefObject, useEffect, useRef } from "react";
+import { RefObject, useEffect } from "react";
 
 type DismissableParams = {
   // Whether the disclosure (menu, popover, …) is currently open.
@@ -27,27 +27,21 @@ export function useDismissable({
   focusRef,
   captureEscape = false,
 }: DismissableParams) {
-  // Read callbacks/refs through a ref so the listeners don't re-subscribe on
-  // every render — the effect only depends on `open` and `captureEscape`. The
-  // ref is refreshed after each commit; handlers only fire on later user
-  // interaction, so they always see the latest values.
-  const latest = useRef({ onClose, insideRefs, focusRef });
-  useEffect(() => {
-    latest.current = { onClose, insideRefs, focusRef };
-  });
-
   useEffect(() => {
     if (!open) return;
     function onKeyDown(event: KeyboardEvent) {
       if (event.key !== "Escape") return;
       if (captureEscape) event.stopPropagation();
-      latest.current.onClose();
-      latest.current.focusRef?.current?.focus();
+      onClose();
+      focusRef?.current?.focus();
     }
     function onPointerDown(event: PointerEvent) {
       const target = event.target as Node;
-      const inside = latest.current.insideRefs.some((ref) => ref.current?.contains(target));
-      if (!inside) latest.current.onClose();
+      // Only dismiss once at least one surface is mounted (a null-ref set means
+      // there's nothing to be "outside" of yet) and the tap missed all of them.
+      const mounted = insideRefs.filter((ref) => ref.current);
+      if (mounted.length === 0) return;
+      if (!mounted.some((ref) => ref.current!.contains(target))) onClose();
     }
     document.addEventListener("keydown", onKeyDown, captureEscape);
     document.addEventListener("pointerdown", onPointerDown);
@@ -55,5 +49,5 @@ export function useDismissable({
       document.removeEventListener("keydown", onKeyDown, captureEscape);
       document.removeEventListener("pointerdown", onPointerDown);
     };
-  }, [open, captureEscape]);
+  }, [open, onClose, insideRefs, focusRef, captureEscape]);
 }
