@@ -73,6 +73,10 @@ export function InstallAppButton() {
     if (!showIosHint) return;
     function onKeyDown(event: KeyboardEvent) {
       if (event.key === "Escape") {
+        // Capture phase + stopPropagation so a single Escape dismisses only this
+        // popover, not Navigation's mobile menu when both happen to be open —
+        // otherwise both handlers fire and their focus() calls race.
+        event.stopPropagation();
         setShowIosHint(false);
         iosButtonRef.current?.focus();
       }
@@ -87,20 +91,30 @@ export function InstallAppButton() {
         setShowIosHint(false);
       }
     }
-    document.addEventListener("keydown", onKeyDown);
+    document.addEventListener("keydown", onKeyDown, true);
     document.addEventListener("pointerdown", onPointerDown);
     return () => {
-      document.removeEventListener("keydown", onKeyDown);
+      document.removeEventListener("keydown", onKeyDown, true);
       document.removeEventListener("pointerdown", onPointerDown);
     };
   }, [showIosHint]);
 
   async function handleNativeInstall() {
     if (!promptEvent) return;
-    await promptEvent.prompt();
-    await promptEvent.userChoice;
-    // A prompt can only be used once; drop it whatever the user chose.
-    setPromptEvent(null);
+    try {
+      await promptEvent.prompt();
+      const { outcome } = await promptEvent.userChoice;
+      // Only drop the deferred event once the user accepts. On dismissal keep
+      // the button so Chrome's next `beforeinstallprompt` can re-arm it and the
+      // user can retry within the session.
+      if (outcome === "accepted") {
+        setPromptEvent(null);
+      }
+    } catch {
+      // prompt() rejects if the deferred event is already stale/consumed; clear
+      // it so we stop showing a button that can no longer open a dialog.
+      setPromptEvent(null);
+    }
   }
 
   if (standalone || justInstalled) return null;
