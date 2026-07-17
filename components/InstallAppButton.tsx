@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { useDismissable } from "@/lib/useDismissable";
 
 // The `beforeinstallprompt` event isn't in the standard lib DOM types yet.
 type BeforeInstallPromptEvent = Event & {
@@ -68,36 +69,16 @@ export function InstallAppButton() {
     };
   }, []);
 
-  // Dismiss the iOS hint popover on Escape or an outside tap.
-  useEffect(() => {
-    if (!showIosHint) return;
-    function onKeyDown(event: KeyboardEvent) {
-      if (event.key === "Escape") {
-        // Capture phase + stopPropagation so a single Escape dismisses only this
-        // popover, not Navigation's mobile menu when both happen to be open —
-        // otherwise both handlers fire and their focus() calls race.
-        event.stopPropagation();
-        setShowIosHint(false);
-        iosButtonRef.current?.focus();
-      }
-    }
-    function onPointerDown(event: PointerEvent) {
-      const target = event.target as Node;
-      if (
-        hintRef.current &&
-        !hintRef.current.contains(target) &&
-        !iosButtonRef.current?.contains(target)
-      ) {
-        setShowIosHint(false);
-      }
-    }
-    document.addEventListener("keydown", onKeyDown, true);
-    document.addEventListener("pointerdown", onPointerDown);
-    return () => {
-      document.removeEventListener("keydown", onKeyDown, true);
-      document.removeEventListener("pointerdown", onPointerDown);
-    };
-  }, [showIosHint]);
+  // Dismiss the iOS hint popover on Escape or an outside tap. captureEscape so a
+  // single Escape closes only this popover, not Navigation's mobile menu when
+  // both are open — otherwise both handlers fire and their focus() calls race.
+  useDismissable({
+    open: showIosHint,
+    onClose: () => setShowIosHint(false),
+    insideRefs: [hintRef, iosButtonRef],
+    focusRef: iosButtonRef,
+    captureEscape: true,
+  });
 
   async function handleNativeInstall() {
     if (!promptEvent) return;

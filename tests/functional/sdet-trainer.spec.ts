@@ -1062,6 +1062,38 @@ test("sitemap includes cheat-sheet and quiz URLs", async ({ page }) => {
   expect(body).toContain("/cheatsheets/cca-foundations");
 });
 
+// ── Mobile nav disclosure (useDismissable) ───────────────────────────────────
+
+test("mobile menu closes on Escape and restores focus to the toggle", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/");
+
+  const toggle = page.getByRole("button", { name: "Open menu" });
+  await toggle.click();
+
+  const closeToggle = page.getByRole("button", { name: "Close menu" });
+  await expect(closeToggle).toHaveAttribute("aria-expanded", "true");
+
+  await page.keyboard.press("Escape");
+
+  await expect(page.getByRole("button", { name: "Open menu" })).toHaveAttribute("aria-expanded", "false");
+  // Escape returns focus to the toggle for keyboard/AT users.
+  await expect(page.getByRole("button", { name: "Open menu" })).toBeFocused();
+});
+
+test("mobile menu closes on an outside tap", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/");
+
+  await page.getByRole("button", { name: "Open menu" }).click();
+  await expect(page.getByRole("button", { name: "Close menu" })).toHaveAttribute("aria-expanded", "true");
+
+  // A pointerdown outside the <nav> dismisses the menu.
+  await page.getByRole("heading", { name: "Practice like the interview is already scheduled." }).click();
+
+  await expect(page.getByRole("button", { name: "Open menu" })).toHaveAttribute("aria-expanded", "false");
+});
+
 // ── Security headers ─────────────────────────────────────────────────────────
 
 test("responses include required security headers", async ({ request }) => {
