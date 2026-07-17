@@ -1,5 +1,5 @@
 C# cheat sheet.
-A to-the-point review of the C# an S D E T gets asked about: data types, modifiers, OOP, strings, collections, exceptions, async/await, and LINQ, plus the NUnit/xUnit + Playwright testing stack. Short explanations, short examples.
+A to-the-point review of the C# an SDET gets asked about: data types, modifiers, OOP, strings, collections, exceptions, async/await, and LINQ, plus the NUnit/xUnit + Playwright testing stack. Short explanations, short examples.
 
 Section: Data Types & Variables.
 Every type is either a value type or a reference type. This one distinction explains most C# behaviour questions.
@@ -46,8 +46,8 @@ The cost: concatenating in a loop creates a new object each pass (O(n²) garbage
 string vs StringBuilder: use string for fixed or few values; reach for StringBuilder the moment you concatenate inside a loop.
 
 Section: async, await.
-The single most likely C# deep-dive for a Playwright/S D E T role, since the A P I is async throughout.
-async marks a method returning Task/Task/ValueTask; await suspends without blocking the calling thread.
+The single most likely C# deep-dive for a Playwright/SDET role, since the API is async throughout.
+async marks a method returning Task/Task<T>/ValueTask; await suspends without blocking the calling thread.
 It frees the thread while I/O completes, concurrency without extra threads.
 Return Task, not void (except event handlers); async void can't be awaited and swallows exceptions.
 Avoid .Result/.Wait(), they can deadlock; await all the way up.
@@ -55,22 +55,22 @@ Task.WhenAll runs work concurrently; CancellationToken cooperatively cancels.
 Why await beats Thread: awaiting an I/O-bound task returns the thread to the pool until the OS signals completion, so thousands of concurrent requests need only a handful of threads. Threads cost ~1 MB of stack each; tasks are cheap.
 
 Section: LINQ.
-Declarative querying over any IEnumerable. Method (fluent) syntax is most common in test code:
+Declarative querying over any IEnumerable<T>. Method (fluent) syntax is most common in test code:
 Deferred execution, the query runs when enumerated (ToList, foreach, Count), not when defined; the source can change in between.
 Key operators: Where, Select, SelectMany, First/FirstOrDefault, Single, Any/All, GroupBy, OrderBy, Aggregate.
 FirstOrDefault/SingleOrDefault return default instead of throwing when empty, handy in assertions.
 Single vs First: Single asserts exactly one match (throws otherwise), use it in tests to prove uniqueness; First just takes the first of possibly many.
 
 Section: Delegates, Events, Lambdas & Generics.
-Delegates are type-safe function pointers. The built-ins cover most needs: Func (returns a value), Action (void), Predicate (returns bool). Lambdas (x => x * 2) are inline delegates and the backbone of LINQ.
+Delegates are type-safe function pointers. The built-ins cover most needs: Func<...,TResult> (returns a value), Action<...> (void), Predicate<T> (returns bool). Lambdas (x => x * 2) are inline delegates and the backbone of LINQ.
 Events are a publish/subscribe wrapper over delegates (event EventHandler Clicked;). Generics give type safety and reuse with constraints (where T : class, new()).
 Pattern matching (C# 8+).
-Modern switch expressions and type/property patterns make branching concise, common in parsing A P I responses.
+Modern switch expressions and type/property patterns make branching concise, common in parsing API responses.
 
 Section: Collections.
 Type, Notes. List, Resizable array; the workhorse; O(1) index, O(n) mid-insert. Dictionary, Hash map; O(1) average lookup; TryGetValue to avoid exceptions. HashSet, Unique elements; set operations (UnionWith, IntersectWith). Queue, Stack, FIFO, LIFO. IEnumerable, Lazy sequence; the base abstraction for LINQ. ConcurrentDictionary, Thread-safe map for parallel test state.
-Used most in practice: List for ordered items and Dictionary for key lookups cover the large majority of test code.
-IEnumerable = lazy, forward-only and the base for LINQ. Return the narrowest interface that fits (for example, IReadOnlyList).
+Used most in practice: List<T> for ordered items and Dictionary<K,V> for key lookups cover the large majority of test code.
+IEnumerable<T> = lazy, forward-only and the base for LINQ. Return the narrowest interface that fits (for example, IReadOnlyList<T>).
 
 Section: Exceptions & using.
 All exceptions derive from System.Exception. Unlike Java, C# has no checked exceptions, nothing forces you to declare or catch them.
@@ -78,14 +78,14 @@ try, the code that might fail.
 catch, handle a specific exception type (catch the narrowest first).
 finally, always runs (cleanup), whether or not an exception was thrown.
 throw; rethrows and keeps the original stack trace; throw ex; resets it, prefer throw;.
-using, IDisposable gives deterministic cleanup of resources (H T T P clients, browser contexts, files), Dispose() is called automatically at scope exit, even on exception. await using + IAsyncDisposable handles async cleanup.
+using, IDisposable gives deterministic cleanup of resources (HTTP clients, browser contexts, files), Dispose() is called automatically at scope exit, even on exception. await using + IAsyncDisposable handles async cleanup.
 GC vs IDisposable: the garbage collector frees managed memory on its own schedule; using/IDisposable is for things it won't release promptly (sockets, files, handles). Reuse one HttpClient rather than one per request, to avoid socket exhaustion.
 
 Section: Test Stack (Your Stack).
 NUnit, [Test], [SetUp]/[OneTimeSetUp], [TestCase]/[TestCaseSource] for data-driven tests, rich Assert.That constraint model.
 xUnit, [Fact]/[Theory], constructor + IDisposable for setup/teardown, parallel by default.
-Playwright for .NET, async A P I; PageTest/ContextTest base classes wire fixtures and a fresh context per test.
-RestSharp, HttpClient for A P I tests; Moq for mocking; FluentAssertions for readable asserts.
+Playwright for .NET, async API; PageTest/ContextTest base classes wire fixtures and a fresh context per test.
+RestSharp, HttpClient for API tests; Moq for mocking; FluentAssertions for readable asserts.
 NUnit vs xUnit: NUnit has more built-in attributes and a fluent constraint model; xUnit is leaner, opinionated, parallel-first, and uses the constructor + IDisposable for setup/teardown instead of attributes.
 
 That's the C# cheat sheet. Review the questions to lock it in.

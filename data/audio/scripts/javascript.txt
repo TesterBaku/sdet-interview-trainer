@@ -1,5 +1,5 @@
 JavaScript cheat sheet.
-A to-the-point review of the JavaScript an S D E T gets asked about: types & coercion, var/let/const, scope, closures, this, prototypes & classes, the event loop, promises & async/await, and array methods, plus the Jest, Playwright testing stack. Short explanations, short examples.
+A to-the-point review of the JavaScript an SDET gets asked about: types & coercion, var/let/const, scope, closures, this, prototypes & classes, the event loop, promises & async/await, and array methods, plus the Jest, Playwright testing stack. Short explanations, short examples.
 
 Section: Types & Variables.
 JavaScript is dynamically typed: variables don't have types, values do. There are 7 primitives and everything else is an object.
@@ -53,7 +53,7 @@ Promise.all runs work concurrently and fails fast; Promise.allSettled waits for 
 Don't await in a loop when calls are independent, fire them together with Promise.all.
 
 Section: Test Stack for SDETs.
-For a Playwright/S D E T role the JS testing surface is small and worth naming:
+For a Playwright/SDET role the JS testing surface is small and worth naming:
 Playwright Test, the runner you'll use most: test/expect, fixtures, auto-waiting web-first assertions, parallel projects, trace viewer.
 Jest, Vitest, unit testing: describe/it/expect, mocks & spies (jest.fn(), jest.mock()), snapshots.
 Cypress, alternative E2E framework; in-browser, good DX, retry-able assertions.

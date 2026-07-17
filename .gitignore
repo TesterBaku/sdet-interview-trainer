@@ -22,3 +22,4 @@ tasks/
 # Committed audio artifacts are the narration scripts, transcripts, and manifest.
 build/
 public/audio/
+data/audio/manifest.local.json

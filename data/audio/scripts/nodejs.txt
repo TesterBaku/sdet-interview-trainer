@@ -25,19 +25,19 @@ Promises.
 An object representing a future value, .then(), .catch(), chainable and composable. Promise.all, allSettled, race coordinate concurrency.
 async, await.
 Syntactic sugar over Promises, write asynchronous code that reads sequentially, with normal try/catch for errors. The modern default.
-Wrap a callback A P I into a Promise with util.promisify, or use the promise variants of core modules (fs/promises). Run independent async work concurrently with Promise.all rather than awaiting each in sequence.
+Wrap a callback API into a Promise with util.promisify, or use the promise variants of core modules (fs/promises). Run independent async work concurrently with Promise.all rather than awaiting each in sequence.
 
 Section: Streams & Buffers.
 Streams process data in chunks instead of loading it all into memory, essential for large files and network data. Four types:
-Readable, source you read from (fs.createReadStream, an H T T P request).
-Writable, destination you write to (a file, an H T T P response).
-Duplex, both readable and writable (a T C P socket).
+Readable, source you read from (fs.createReadStream, an HTTP request).
+Writable, destination you write to (a file, an HTTP response).
+Duplex, both readable and writable (a TCP socket).
 Transform, a duplex stream that modifies data passing through (gzip, encryption).
 Connect them with pipe() or, preferably, stream.pipeline(), which propagates errors and cleans up:
 Backpressure: when a writable can't keep up, pipe/pipeline automatically pause the readable so memory stays bounded. A Buffer holds raw binary data, the chunks streams move around.
 
 Section: EventEmitter.
-Much of Node's core is built on the EventEmitter pattern, objects that emit named events and call registered listeners. Streams, H T T P servers, and sockets are all emitters.
+Much of Node's core is built on the EventEmitter pattern, objects that emit named events and call registered listeners. Streams, HTTP servers, and sockets are all emitters.
 on(event, fn), once(event, fn), subscribe (persistent, one-shot).
 emit(event, ...args), fire synchronously to all listeners in registration order.
 off(), removeListener(), unsubscribe to avoid leaks.
@@ -61,14 +61,14 @@ child_process.
 spawn, exec, fork to run separate programs or Node scripts and communicate over IPC or streams.
 Rule of thumb: I/O-bound and need more throughput to cluster; CPU-bound and blocking the loop to worker_threads.
 
-Section: N P M, Core Modules & Tooling.
-N P M manages dependencies via package.json; package-lock.json pins exact versions for reproducible installs. Versions follow semver (MAJOR.MINOR.PATCH): ^1.2.3 allows minor/patch updates, ~1.2.3 only patch.
+Section: npm, Core Modules & Tooling.
+npm manages dependencies via package.json; package-lock.json pins exact versions for reproducible installs. Versions follow semver (MAJOR.MINOR.PATCH): ^1.2.3 allows minor/patch updates, ~1.2.3 only patch.
 Frequently used built-in (node:) modules:
 fs, path, files and cross-platform paths.
 http, https, servers and clients (plus the global fetch).
 os, process, system info, env vars (process.env), arguments.
 crypto, hashing, HMAC, encryption.
 node:test + node:assert, the built-in test runner, no dependency needed.
-Prefer dependencies for runtime needs and devDependencies for build/test tooling. Use the node: prefix on core imports to make intent explicit and avoid clashes with N P M packages.
+Prefer dependencies for runtime needs and devDependencies for build/test tooling. Use the node: prefix on core imports to make intent explicit and avoid clashes with npm packages.
 
 That's the Node.js cheat sheet. Review the questions to lock it in.

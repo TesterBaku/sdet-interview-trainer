@@ -56,7 +56,8 @@ for (const id of timings) {
   writeFileSync(
     join(TRANSCRIPT_DIR, `${id}.json`),
     JSON.stringify(
-      { id, voice: timing.voice, durationSec: timing.durationSec, cues: timing.cues },
+      // hash mirrors the timing/mp3 hash so publish can detect stale captions.
+      { id, voice: timing.voice, durationSec: timing.durationSec, hash: timing.hash, cues: timing.cues },
       null,
       2
     ) + "\n",

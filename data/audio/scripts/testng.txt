@@ -23,11 +23,11 @@ Maps to: JUnit 5 assertAll(...), NUnit Assert.Multiple, AssertJ/Playwright's sof
 Section: Data-Driven Tests.
 Two ways to feed inputs into a test:
 @DataProvider, a method returning Object[][]; TestNG runs the test once per row. Best for in-code or computed datasets.
-@Parameters, inject simple values from testng.xml (for example, a browser name or base U R L).
+@Parameters, inject simple values from testng.xml (for example, a browser name or base URL).
 Maps to: JUnit 5 @ParameterizedTest + @MethodSource/@CsvSource, NUnit [TestCase]/[TestCaseSource], pytest @pytest.mark.parametrize. TestNG's @DataProvider can also be parallel = true.
 
 Section: Groups, Priority & Dependencies.
-Groups, tag tests (@Test(groups = "smoke")) and run a subset from testng.xml or the C L I. Like JUnit 5 @Tag, NUnit [Category], pytest markers.
+Groups, tag tests (@Test(groups = "smoke")) and run a subset from testng.xml or the CLI. Like JUnit 5 @Tag, NUnit [Category], pytest markers.
 Priority, @Test(priority = 1) orders tests (default 0); lower runs first.
 Dependencies, dependsOnMethods, dependsOnGroups skip a test if its prerequisite failed, rather than reporting a misleading second failure.
 Note for interviews: heavy use of dependsOnMethods couples tests and hurts isolation/parallelism. Prefer independent tests; use dependencies only for genuine setup ordering. JUnit deliberately limits ordering for this reason.
@@ -35,7 +35,7 @@ Note for interviews: heavy use of dependsOnMethods couples tests and hurts isola
 Section: Parallel Execution & testng.xml.
 The testng.xml suite file is TestNG's control center, it selects classes/groups, injects parameters, and configures parallelism without touching code.
 parallel="methods|tests|classes|instances" with thread-count sets the concurrency model.
-Parallel tests must be thread-safe, share no mutable state; in Selenium use a ThreadLocal so each thread gets its own driver.
+Parallel tests must be thread-safe, share no mutable state; in Selenium use a ThreadLocal<WebDriver> so each thread gets its own driver.
 Maps to: JUnit 5 parallel execution (junit-platform.properties), NUnit [Parallelizable], pytest-xdist (-n auto). Built-in suite-level parallelism is one of TestNG's headline features.
 
 Section: Listeners, Retries & Reporting.

@@ -2,15 +2,17 @@
 // tests/unit/audio-text.test.mjs). No I/O here — just HTML → narration prose.
 
 export function decodeEntities(s) {
+  // Resolve &amp; LAST so a double-escaped entity (e.g. "&amp;lt;", meant to
+  // display as the literal "&lt;") is not collapsed into "<".
   return s
     .replace(/&nbsp;/g, " ")
-    .replace(/&amp;/g, "&")
     .replace(/&lt;/g, "<")
     .replace(/&gt;/g, ">")
     .replace(/&quot;/g, '"')
     .replace(/&#39;/g, "'")
     .replace(/&mdash;/g, ", ")
-    .replace(/&ndash;/g, ", ");
+    .replace(/&ndash;/g, ", ")
+    .replace(/&amp;/g, "&");
 }
 
 // Curly punctuation, dashes, arrows, and abbreviations → speech-friendly ASCII.
@@ -58,40 +60,42 @@ export function tableToSpeech(tableHtml) {
 }
 
 // Convert one section's bodyHtml into an array of narration sentences.
-// Code blocks are dropped (narrating raw code is noise); tables are linearized;
-// headings, list items, paragraphs, and callouts each become a sentence.
+// Code blocks are dropped (narrating raw code is noise); tables are linearized in
+// place; block boundaries (headings, list items, paragraphs, callouts) become real
+// newlines, which are then the only split points — no in-band sentinel that page
+// content could itself contain.
 export function bodyToSpeech(html) {
+  // Collapse source newlines to spaces so only our inserted newlines separate blocks.
+  let work = html.replace(/[\r\n]+/g, " ");
+  work = work.replace(/<pre[\s\S]*?<\/pre>/gi, " ");
+  work = work.replace(/<table[\s\S]*?<\/table>/gi, (m) => `\n${tableToSpeech(m)}\n`);
+  work = work
+    .replace(/<(?:p|div|li|h[1-6])[^>]*>/gi, "\n")
+    .replace(/<\/(?:p|div|li|h[1-6])>/gi, "\n");
+
   const out = [];
-  let work = html.replace(/<pre[\s\S]*?<\/pre>/gi, " ");
-
-  const tables = [];
-  work = work.replace(/<table[\s\S]*?<\/table>/gi, (m) => {
-    tables.push(tableToSpeech(m));
-    return ` TABLE${tables.length - 1} `;
-  });
-
-  work = work.replace(/<h[1-6][^>]*>([\s\S]*?)<\/h[1-6]>/gi, (_, t) => ` BLOCK ${stripInline(t)} BLOCK `);
-  work = work.replace(/<li[^>]*>([\s\S]*?)<\/li>/gi, (_, t) => ` BLOCK ${asSentence(stripInline(t))} BLOCK `);
-  work = work.replace(/<(?:p|div)[^>]*>([\s\S]*?)<\/(?:p|div)>/gi, (_, t) => ` BLOCK ${asSentence(stripInline(t))} BLOCK `);
-  work = work.replace(/ TABLE(\d+) /g, (_, i) => ` BLOCK ${tables[Number(i)]} BLOCK `);
-
-  for (const chunk of work.split(" BLOCK ")) {
-    const text = stripInline(chunk);
+  for (const line of work.split(/\n+/)) {
+    const text = stripInline(line);
     if (text) out.push(asSentence(text));
   }
-  return out.filter(Boolean);
+  return out;
 }
 
 // Apply pronunciation overrides. `terms` is [[from, to], …]; matched case-sensitively
-// on word boundaries (for alphanumeric-bounded terms), longest source first.
+// on word boundaries (for alphanumeric-bounded terms). A single combined pass so a
+// replacement is never re-scanned (e.g. "XCUITest"→"X C UI Test" isn't re-hit by a
+// later "UI" rule); longest source wins at any position.
 export function applyLexicon(text, terms) {
-  let out = text;
   const ordered = [...terms].sort((a, b) => b[0].length - a[0].length);
-  for (const [from, to] of ordered) {
-    const escaped = from.replace(/[.*+?^${}()|[\]\\/]/g, "\\$&");
-    const boundaryStart = /^[A-Za-z0-9]/.test(from) ? "\\b" : "";
-    const boundaryEnd = /[A-Za-z0-9]$/.test(from) ? "\\b" : "";
-    out = out.replace(new RegExp(`${boundaryStart}${escaped}${boundaryEnd}`, "g"), to);
-  }
-  return out;
+  if (!ordered.length) return text;
+  const replacements = new Map(ordered.map(([from, to]) => [from, to]));
+  const alternation = ordered
+    .map(([from]) => {
+      const escaped = from.replace(/[.*+?^${}()|[\]\\/]/g, "\\$&");
+      const boundaryStart = /^[A-Za-z0-9]/.test(from) ? "\\b" : "";
+      const boundaryEnd = /[A-Za-z0-9]$/.test(from) ? "\\b" : "";
+      return `${boundaryStart}${escaped}${boundaryEnd}`;
+    })
+    .join("|");
+  return text.replace(new RegExp(alternation, "g"), (m) => replacements.get(m) ?? m);
 }

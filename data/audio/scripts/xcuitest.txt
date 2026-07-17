@@ -1,21 +1,21 @@
-X C U I Test Framework Story cheat sheet.
+XCUITest Framework Story cheat sheet.
 A STAR-structured interview story, app context, framework architecture, parallelism, and test-run orchestration, with rapid-fire follow-ups to have loaded.
 
-Section: X C U I Test Essentials.
-X C U I Test is Apple's native U I testing framework, shipped as part of XCTest inside Xcode. You write tests in Swift (or Objective-C), and they drive a real build of the app on a simulator or device the way a user would, tapping, typing, swiping, and asserting on what's on screen. It's the first-party equivalent of Espresso on Android.
-X C U I Test is black-box and out-of-process: your tests run in a separate process from the app and interact with it through the iOS accessibility layer, which is exactly why stable accessibilityIdentifiers matter so much.
-Because it talks to the app over accessibility rather than reaching into its code, a U I test can't call app internals directly. It sees the same tree of elements VoiceOver does. Tests subclass XCTestCase and use the standard setUp(), tearDown() lifecycle and XCTAssert family for verification.
+Section: XCUITest Essentials.
+XCUITest is Apple's native UI testing framework, shipped as part of XCTest inside Xcode. You write tests in Swift (or Objective-C), and they drive a real build of the app on a simulator or device the way a user would, tapping, typing, swiping, and asserting on what's on screen. It's the first-party equivalent of Espresso on Android.
+XCUITest is black-box and out-of-process: your tests run in a separate process from the app and interact with it through the iOS accessibility layer, which is exactly why stable accessibilityIdentifiers matter so much.
+Because it talks to the app over accessibility rather than reaching into its code, a UI test can't call app internals directly. It sees the same tree of elements VoiceOver does. Tests subclass XCTestCase and use the standard setUp(), tearDown() lifecycle and XCTAssert family for verification.
 Main Components.
 XCUIApplication.
 A proxy for the app under test, the entry point for everything. You instantiate one, configure launchArguments, launchEnvironment, then control its lifecycle with launch(), activate(), and terminate(). All element queries start from this object: app.buttons, app.tables, and so on.
 XCUIElement.
-A handle to a single U I element, a button, label, text field, cell, switch. It exposes state (exists, isHittable, isEnabled, isSelected, label, value) and actions (tap(), typeText(_:), swipeUp()). It is lazy: the element is only resolved against the live U I hierarchy when you query its state or act on it, not when you declare it.
+A handle to a single UI element, a button, label, text field, cell, switch. It exposes state (exists, isHittable, isEnabled, isSelected, label, value) and actions (tap(), typeText(_:), swipeUp()). It is lazy: the element is only resolved against the live UI hierarchy when you query its state or act on it, not when you declare it.
 XCUIElementQuery.
 A query that describes zero or more matching elements. app.buttons is a query over every button; you narrow it by identifier (app.buttons["login"]), by predicate (.matching(...)), or by position (.element(boundBy: 0)). Use .count to assert how many match. Resolving a query to a single element that doesn't uniquely exist raises at access time.
 Element Types (the query families).
 Elements are grouped by XCUIElement.ElementType, surfaced as query properties on the app or any element: buttons, staticTexts, textFields, secureTextFields, images, switches, tables, collectionViews, cells, navigationBars, alerts, tabBars, otherElements. They chain to scope a search: app.tables.cells.staticTexts["Total"].
 Supporting types.
-XCUICoordinate, coordinate-based interaction for gestures the element A P I can't express (drag, precise taps). XCTAttachment, attach screenshots, data to the test report. XCTContext.runActivity, group steps for readable reports. addUIInterruptionMonitor, handle unexpected system dialogs (permissions, alerts).
+XCUICoordinate, coordinate-based interaction for gestures the element API can't express (drag, precise taps). XCTAttachment, attach screenshots, data to the test report. XCTContext.runActivity, group steps for readable reports. addUIInterruptionMonitor, handle unexpected system dialogs (permissions, alerts).
 Frequently Used Methods.
 App lifecycle.
 launch(), install & launch a fresh instance; resets state.
@@ -37,9 +37,9 @@ XCTAssertTrue, XCTAssertEqual, verification; expectation(for:evaluatedWith:) for
 A minimal test ties these together:
 
 Section: The App.
-A customer-facing iOS app, native Swift, covering account onboarding and a transactions/dashboard area. The app sat behind authentication, talked to several backend microservices, and ran against multiple environments (dev and staging). The codebase had decent unit test coverage from the developers, but there was no U I automation at all.
-Every release, the Q A team manually walked through the critical journeys, login, onboarding, the main dashboard flows, which took the better part of a day and still let U I regressions slip into production because manual coverage was inconsistent run to run.
-My mandate was to design and build an X C U I Test framework from the ground up that could automate those core journeys, run reliably in CI on every build, and scale as we added coverage.
+A customer-facing iOS app, native Swift, covering account onboarding and a transactions/dashboard area. The app sat behind authentication, talked to several backend microservices, and ran against multiple environments (dev and staging). The codebase had decent unit test coverage from the developers, but there was no UI automation at all.
+Every release, the QA team manually walked through the critical journeys, login, onboarding, the main dashboard flows, which took the better part of a day and still let UI regressions slip into production because manual coverage was inconsistent run to run.
+My mandate was to design and build an XCUITest framework from the ground up that could automate those core journeys, run reliably in CI on every build, and scale as we added coverage.
 
 Section: Design Principles I Started With.
 Before writing tests I set a few non-negotiables, because these are what separate a suite people trust from one they ignore:
@@ -51,19 +51,19 @@ A failing test must be diagnosable from CI alone, screenshots and logs attached,
 Section: Framework Structure.
 I built it in clear layers so responsibilities didn't bleed into each other.
 Page Object Layer.
-One class per screen, LoginScreen, OnboardingScreen, DashboardScreen. Each owns two things: its element queries (resolved via accessibilityIdentifier) and the meaningful actions on that screen, login(email:password:), completeOnboarding(), openTransaction(at:). Tests express intent in business language and never touch a raw XCUIElement query. The payoff: when the U I changed, I updated one Page Object, not thirty test files.
+One class per screen, LoginScreen, OnboardingScreen, DashboardScreen. Each owns two things: its element queries (resolved via accessibilityIdentifier) and the meaningful actions on that screen, login(email:password:), completeOnboarding(), openTransaction(at:). Tests express intent in business language and never touch a raw XCUIElement query. The payoff: when the UI changed, I updated one Page Object, not thirty test files.
 Base Test Class.
 Every test class inherited from a base that centralized the boilerplate, instantiating XCUIApplication, applying common launch arguments and environment, setting continueAfterFailure = false so a test stops at the first real failure instead of cascading misleading errors, and a tearDown that captured an XCTAttachment screenshot on any failure plus the app's state.
 Helpers & Extensions.
 A small shared toolkit: wrappers around waitForExistence(timeout:), predicate-based waits (XCTNSPredicateExpectation) for conditions more complex than mere existence, a centralized addUIInterruptionMonitor for system permission dialogs (notifications, location, biometrics), and custom assertions producing readable failure messages.
 Test Data & State Management.
-This is where most of the engineering effort went, and usually the part interviewers dig into. Rather than have every test click through login and setup screens, I used launchArguments and launchEnvironment to inject a known state at launch: a pre-authenticated session, a seeded account, specific feature-flag values. Test builds read those on startup and short-circuited setup. For data that genuinely had to exist on the backend, I called the A P I directly in setUp to create preconditions, captured the generated IDs, ran the test, and cleaned up in tearDown, keeping every test fully self-contained.
+This is where most of the engineering effort went, and usually the part interviewers dig into. Rather than have every test click through login and setup screens, I used launchArguments and launchEnvironment to inject a known state at launch: a pre-authenticated session, a seeded account, specific feature-flag values. Test builds read those on startup and short-circuited setup. For data that genuinely had to exist on the backend, I called the API directly in setUp to create preconditions, captured the generated IDs, ran the test, and cleaned up in tearDown, keeping every test fully self-contained.
 Configuration.
-Environment specifics, base U R Ls, test credentials, were driven through launch environment rather than hardcoded, so the identical suite ran against dev or staging just by changing what CI passed in. No code changes, no per-environment branches.
+Environment specifics, base URLs, test credentials, were driven through launch environment rather than hardcoded, so the identical suite ran against dev or staging just by changing what CI passed in. No code changes, no per-environment branches.
 
 Section: Parallelism, How I Handled It.
-Parallelism was a requirement, not an afterthought, because serial U I suites don't scale.
-Xcode runs parallel U I tests by cloning the simulator, it spins up multiple identical simulator instances and distributes work across them. The important nuance, and a common interview probe:
+Parallelism was a requirement, not an afterthought, because serial UI suites don't scale.
+Xcode runs parallel UI tests by cloning the simulator, it spins up multiple identical simulator instances and distributes work across them. The important nuance, and a common interview probe:
 Xcode parallelizes at the test-class level, not the individual test-method level, so how you group tests into classes affects how evenly load distributes.
 I balanced class sizes so no single clone became the long pole. The thing that actually enabled parallelism wasn't a flag, it was the independence work. Because tests shared no state and generated their own unique data (GUID-based emails, unique account identifiers), multiple clones could hit the backend simultaneously without colliding. If I'd had tests assuming a fixed account or a particular execution order, parallelism would have produced random failures.
 I tuned concurrency to the CI runner's capacity, more simulators means more CPU and memory, so there's a trade-off between wall-clock speed and machine resources. On our runners the sweet spot was a handful of concurrent simulators.
@@ -77,7 +77,7 @@ Build-once, test-many mattered, I used build-for-testing then test-without-build
 Reporting.
 Results came out as an .xcresult bundle, which I parsed into JUnit XML so the CI dashboard showed pass/fail trends natively, with failure screenshots linked from each failed case. Triage became a glance rather than an investigation.
 Flake policy.
-U I tests are never perfectly deterministic, so I set a retry-on-failure policy, a failed test got one or two automatic reruns before being marked red, keeping isolated flakes from failing the whole pipeline. Critically, retries were a safety net, not a fix: flaky tests were tracked separately and root-caused, so the retry count didn't quietly mask a degrading suite.
+UI tests are never perfectly deterministic, so I set a retry-on-failure policy, a failed test got one or two automatic reruns before being marked red, keeping isolated flakes from failing the whole pipeline. Critically, retries were a safety net, not a fix: flaky tests were tracked separately and root-caused, so the retry count didn't quietly mask a degrading suite.
 Test tiering.
 I split the suite into a fast smoke subset, the must-never-break flows, tagged and run on every PR as a merge gate, and the full regression suite run nightly. Developers got quick signal on every change without making every PR wait for the entire suite.
 
@@ -86,6 +86,6 @@ Regression on core journeys went from a full manual day to a suite that ran in m
 Parallelism across simulator clones cut wall-clock time substantially versus serial execution.
 Flakiness stayed in the low single digits thanks to identifier-based selectors, event-based waits, and strict test independence.
 The team trusted the suite as a release gate rather than rubber-stamping red builds.
-U I regression detection shifted left, from production back to PR time.
+UI regression detection shifted left, from production back to PR time.
 
-That's the X C U I Test Framework Story cheat sheet. Review the questions to lock it in.
+That's the XCUITest Framework Story cheat sheet. Review the questions to lock it in.

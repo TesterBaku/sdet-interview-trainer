@@ -2,9 +2,9 @@ Playwright cheat sheet.
 Auto-waiting, locators, the page/context/browser model, fixtures, network interception, parallelism, and how Playwright differs from Selenium, with rapid-fire Q&A.
 
 Section: What Playwright Is.
-Playwright is a modern end-to-end testing framework from Microsoft. It drives Chromium, Firefox, and WebKit through a single A P I, talks to browsers over the DevTools/CDP-style protocol rather than the WebDriver wire protocol, and ships official bindings for C#, JavaScript/TypeScript, Python, and Java.
+Playwright is a modern end-to-end testing framework from Microsoft. It drives Chromium, Firefox, and WebKit through a single API, talks to browsers over the DevTools/CDP-style protocol rather than the WebDriver wire protocol, and ships official bindings for C#, JavaScript/TypeScript, Python, and Java.
 The headline advantage over Selenium: a single process talking to the browser over a persistent connection, with auto-waiting built into every action.
-Cross-browser via one A P I (Chromium, Firefox, WebKit).
+Cross-browser via one API (Chromium, Firefox, WebKit).
 Auto-waiting and web-first assertions reduce flakiness.
 Built-in network interception, tracing, video, and screenshots.
 Fast parallel execution out of the box.
@@ -29,14 +29,14 @@ Auto-waiting: before acting, Playwright waits for the element to be attached, vi
 Web-first assertions (Expect(locator).ToBeVisibleAsync()) auto-retry until the condition holds or times out, no manual polling.
 
 Section: Network Interception & Mocking.
-Playwright can observe and modify network traffic, which is powerful for isolating the U I from flaky backends.
-page.RouteAsync, intercept a U R L pattern and fulfil, modify, or abort the request.
-Stub an A P I to return fixed Jason so a U I test is deterministic.
+Playwright can observe and modify network traffic, which is powerful for isolating the UI from flaky backends.
+page.RouteAsync, intercept a URL pattern and fulfil, modify, or abort the request.
+Stub an API to return fixed JSON so a UI test is deterministic.
 Wait for a specific response with page.WaitForResponseAsync.
 
 Section: Fixtures, Config & Auth Reuse.
-Storage state, log in once, save cookies/localStorage to a file, and load it into new contexts so tests skip the login U I. Big speed win.
-Config, base U R L, browser projects, timeouts, retries, trace/video settings centralized (in C# via fixtures/runsettings, or the JS playwright.config).
+Storage state, log in once, save cookies/localStorage to a file, and load it into new contexts so tests skip the login UI. Big speed win.
+Config, base URL, browser projects, timeouts, retries, trace/video settings centralized (in C# via fixtures/runsettings, or the JS playwright.config).
 Projects, run the same suite across multiple browsers, viewports.
 Auth pattern: authenticate once in setup, persist storageState, and reuse it, the equivalent of seeding a logged-in session instead of clicking through login per test.
 
@@ -50,7 +50,7 @@ Sharding splits the suite across CI machines.
 Section: Debugging & Tooling.
 Codegen, records your clicks into a test script with good locators.
 Trace Viewer, the main triage tool; step through a failed run frame by frame.
-U I Mode, headed + slowmo for live observation.
+UI Mode, headed + slowmo for live observation.
 Auto screenshots and video on failure.
 
 That's the Playwright cheat sheet. Review the questions to lock it in.

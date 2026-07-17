@@ -17,21 +17,21 @@
 import { readFileSync, writeFileSync, readdirSync, existsSync, mkdirSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { stripInline, asSentence, bodyToSpeech, applyLexicon } from "./text.mjs";
+import { stripInline, asSentence, bodyToSpeech } from "./text.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, "..", "..");
 const CHEATSHEET_DIR = join(ROOT, "data", "cheatsheets");
 const OUT_DIR = join(ROOT, "data", "audio", "scripts");
-const LEXICON_PATH = join(ROOT, "data", "audio", "lexicon.json");
 
 const args = process.argv.slice(2);
 const force = args.includes("--force");
 const onlyArg = args.find((a) => a.startsWith("--only="));
 const only = onlyArg ? onlyArg.slice("--only=".length) : null;
 
-const lexicon = JSON.parse(readFileSync(LEXICON_PATH, "utf8")).terms;
-
+// NOTE: the pronunciation lexicon is deliberately NOT applied here. Scripts keep the
+// real, human-readable words (SQL, JSON, API, XCUITest); the lexicon is applied only
+// to the TTS input in synthesize.mjs, so transcripts + captions stay readable.
 function buildScript(sheet) {
   const parts = [];
   parts.push(asSentence(`${sheet.title} cheat sheet`));
@@ -46,8 +46,7 @@ function buildScript(sheet) {
 
   parts.push(asSentence(`That's the ${sheet.title} cheat sheet. Review the questions to lock it in`));
 
-  const joined = parts.join("\n").replace(/\n{3,}/g, "\n\n").trim() + "\n";
-  return applyLexicon(joined, lexicon);
+  return parts.join("\n").replace(/\n{3,}/g, "\n\n").trim() + "\n";
 }
 
 mkdirSync(OUT_DIR, { recursive: true });

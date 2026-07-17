@@ -1,5 +1,5 @@
 Kubernetes cheat sheet.
-A to-the-point review of the Kubernetes an S D E T gets asked about: what the control plane does, Pods, Deployments, Services, Ingress, ConfigMaps & Secrets, health probes, scaling & self-healing, and how you deploy and test apps on a cluster. Builds on the Docker page, containers are the unit K8s schedules. Short explanations, short examples.
+A to-the-point review of the Kubernetes an SDET gets asked about: what the control plane does, Pods, Deployments, Services, Ingress, ConfigMaps & Secrets, health probes, scaling & self-healing, and how you deploy and test apps on a cluster. Builds on the Docker page, containers are the unit K8s schedules. Short explanations, short examples.
 
 Section: What Kubernetes Is, and Why.
 Docker runs a container on a host. Kubernetes (K8s) runs thousands across a fleet of machines, scheduling them, restarting failures, scaling on load, and rolling out new versions with zero downtime.
@@ -12,8 +12,8 @@ Mental model: Docker is the package; Kubernetes is the operations team that runs
 
 Section: Cluster Architecture.
 A cluster = a control plane (the brain) + worker nodes (where Pods run).
-Component, Role. A P I server, the front door, every command/tool talks to it. etcd, key-value store holding the whole cluster state. scheduler, decides which node a new Pod runs on. controller manager, reconciliation loops driving actual to desired state. kubelet, agent on each node that runs & reports on Pods. kube-proxy, node networking rules for Services.
-The core idea, control loops: controllers constantly compare desired state (your yammel) to actual state and act to close the gap. That loop is why K8s self-heals.
+Component, Role. API server, the front door, every command/tool talks to it. etcd, key-value store holding the whole cluster state. scheduler, decides which node a new Pod runs on. controller manager, reconciliation loops driving actual to desired state. kubelet, agent on each node that runs & reports on Pods. kube-proxy, node networking rules for Services.
+The core idea, control loops: controllers constantly compare desired state (your YAML) to actual state and act to close the gap. That loop is why K8s self-heals.
 
 Section: Pods, ReplicaSets & Deployments.
 Pod, the smallest unit: one (or a few tightly-coupled) containers sharing a network/IP and storage. Pods are ephemeral, they come and go with new IPs.
@@ -25,11 +25,11 @@ Say this: you rarely create Pods directly, you create a Deployment, and it manag
 Section: Services & Ingress.
 Pods are ephemeral with changing IPs, so you never talk to a Pod directly. A Service gives a stable virtual IP + DNS name and load-balances across the matching Pods.
 Type, Reachable from. ClusterIP (default), inside the cluster only. NodePort, a fixed port on every node. LoadBalancer, an external cloud load balancer.
-Ingress sits in front of Services as an H T T P(S) router, host/path rules, TLS termination, so many apps share one external entry point instead of one LoadBalancer each.
+Ingress sits in front of Services as an HTTP(S) router, host/path rules, TLS termination, so many apps share one external entry point instead of one LoadBalancer each.
 Selector glue: a Service finds its Pods by label selector (app: web), not by IP, which is how it keeps working as Pods are replaced.
 
 Section: ConfigMaps & Secrets.
-ConfigMap, non-sensitive config (U R Ls, feature flags) injected as env vars or mounted files. Keeps config out of the image.
+ConfigMap, non-sensitive config (URLs, feature flags) injected as env vars or mounted files. Keeps config out of the image.
 Secret, same idea for sensitive data (passwords, tokens, TLS keys); base64-encoded and access-controlled (enable encryption-at-rest, external secret stores in prod).
 Namespaces, virtual partitions of one cluster (for example, dev, staging, test) for isolation and quotas.
 Interview note: a Secret is only base64-encoded, not encrypted by default, call that out and mention RBAC, encryption-at-rest, and tools like Sealed Secrets, Vault.
@@ -42,17 +42,17 @@ Startup, guards slow-starting apps so liveness doesn't kill them prematurely.
 Liveness vs readiness, the classic question: liveness failing restarts the container; readiness failing only removes it from rotation until it recovers. Mixing them up causes restart loops.
 
 Section: Scaling & Rollouts.
-Manual scale, kube control scale deploy/web --replicas=5.
+Manual scale, kubectl scale deploy/web --replicas=5.
 HPA (Horizontal Pod Autoscaler), adds/removes replicas automatically on CPU/memory/custom metrics.
-Rolling update, the default: replace Pods gradually so there's no downtime; kube control rollout undo reverts.
+Rolling update, the default: replace Pods gradually so there's no downtime; kubectl rollout undo reverts.
 Resource requests/limits, requests guide scheduling; limits cap usage (over the memory limit to the container is OOM-killed).
 
 Section: Kubernetes for Testing & CI.
-Where an S D E T actually touches K8s:
+Where an SDET actually touches K8s:
 Ephemeral test environments, spin up a namespace (or a whole throwaway cluster) per branch/PR, deploy the app, run E2E, tear it down.
 Local clusters, kind (Kubernetes-in-Docker) or minikube to run a real cluster in CI or on your laptop.
-kube control for debugging, get, describe, logs, exec, port-forward are your triage toolkit when a test deployment misbehaves.
+kubectl for debugging, get, describe, logs, exec, port-forward are your triage toolkit when a test deployment misbehaves.
 Helm, templated, versioned manifests ("charts") so the same deploy is parameterized across dev/test/prod.
-First triage move: a Pod stuck Pending or CrashLoopBackOff? kube control describe pod, the Events section almost always names the cause (no node fits, image pull failed, failing probe).
+First triage move: a Pod stuck Pending or CrashLoopBackOff? kubectl describe pod, the Events section almost always names the cause (no node fits, image pull failed, failing probe).
 
 That's the Kubernetes cheat sheet. Review the questions to lock it in.

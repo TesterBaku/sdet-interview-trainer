@@ -1,11 +1,11 @@
 Docker cheat sheet.
-A to-the-point review of the Docker an S D E T gets asked about: images vs containers, the Dockerfile & layer caching, the container lifecycle, volumes & networking, Docker Compose, and, the part that wins the interview, using containers for reproducible, ephemeral test environments and CI. Short explanations, short examples.
+A to-the-point review of the Docker an SDET gets asked about: images vs containers, the Dockerfile & layer caching, the container lifecycle, volumes & networking, Docker Compose, and, the part that wins the interview, using containers for reproducible, ephemeral test environments and CI. Short explanations, short examples.
 
 Section: What Docker Is, Containers vs VMs.
 A container packages an app with its dependencies so it runs the same everywhere. It shares the host OS kernel and isolates only the process, filesystem, and network, so it's far lighter than a VM.
 Container, Virtual Machine. Isolates, process (shares host kernel), full OS (own kernel). Size, start, MBs, seconds, GBs, minutes. Overhead, near-native, hypervisor.
 "Works on my machine" disappears: the image is the environment, so dev, CI, and prod run byte-identical dependencies.
-For an S D E T: the pitch is reproducibility, spin up the exact same browser/driver/DB stack locally and in CI, throw it away after, and never debug environment drift again.
+For an SDET: the pitch is reproducibility, spin up the exact same browser/driver/DB stack locally and in CI, throw it away after, and never debug environment drift again.
 
 Section: Images vs Containers & Layers.
 Image, a read-only template (the blueprint). Built from a Dockerfile, tagged like myapp:1.2.
@@ -20,10 +20,10 @@ Cache order matters: copy the dependency manifest and install before copying sou
 CMD vs ENTRYPOINT, CMD sets the default command (easily overridden); ENTRYPOINT sets the fixed executable, with CMD as its default args.
 Multi-stage builds, build in a heavy image, copy only the artifact into a tiny runtime image; smaller, safer final images.
 Use a .dockerignore to keep node_modules/.git out of the build context.
-Common trap: putting COPY . . before RUN N P M ci means every source edit reinstalls all dependencies, the number 1 slow-build mistake.
+Common trap: putting COPY . . before RUN npm ci means every source edit reinstalls all dependencies, the number 1 slow-build mistake.
 
 Section: Running Containers.
-The everyday commands an S D E T should be fluent in:
+The everyday commands an SDET should be fluent in:
 Command, Does. docker run, create + start a container from an image. docker ps, ps -a, list running, all containers. docker exec -it, run a command (for example, a shell) inside a running container. docker logs, view a container's stdout/stderr. docker stop, rm, stop, delete a container. docker build -t, build an image from a Dockerfile.
 Ports: -p 8080:3000 maps host 8080 to container 3000. Without publishing a port the service isn't reachable from the host.
 
@@ -42,13 +42,13 @@ Inside a Compose network a service connects to another by its service name as th
 Classic gotcha: a container's localhost is the container itself, not the host or another container, use the service/container name (or, from inside a container to the host, host.docker.internal).
 
 Section: Docker Compose.
-Compose defines a multi-container app in one yammel file and brings it all up with a single command, perfect for a test stack (app + DB + mock server).
+Compose defines a multi-container app in one YAML file and brings it all up with a single command, perfect for a test stack (app + DB + mock server).
 docker compose up -d, down, start, tear down the whole stack.
 depends_on controls start order (not readiness, add a healthcheck for that).
 One network is created automatically, so services resolve each other by name.
 
 Section: Docker for Testing & CI.
-This is where containers earn their keep for an S D E T, disposable, identical environments on every run.
+This is where containers earn their keep for an SDET, disposable, identical environments on every run.
 Ephemeral dependencies, spin up a real Postgres/Redis/Kafka in a container for integration tests instead of mocking, then throw it away.
 Testcontainers, a library (Java/.NET/Python/Node) that starts containers from your test code and tears them down after, with dynamic ports, no leftover state.
 Selenium/Playwright in Docker, official browser images and Selenium Grid containers give consistent, headless browsers in CI.

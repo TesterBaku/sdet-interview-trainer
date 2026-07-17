@@ -10,17 +10,23 @@
 // First run downloads the ~300MB ONNX model from Hugging Face (cached after).
 // Override the binary with FFMPEG=/path/to/ffmpeg if it isn't on PATH.
 
-import { readFileSync, writeFileSync, readdirSync, existsSync, mkdirSync } from "node:fs";
+import { readFileSync, writeFileSync, readdirSync, existsSync, mkdirSync, rmSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { createHash } from "node:crypto";
 import { execFileSync } from "node:child_process";
 import { KokoroTTS } from "kokoro-js";
+import { applyLexicon } from "./text.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, "..", "..");
 const SCRIPT_DIR = join(ROOT, "data", "audio", "scripts");
 const OUT_DIR = join(ROOT, "build", "audio");
+const LEXICON_PATH = join(ROOT, "data", "audio", "lexicon.json");
+
+// Pronunciation overrides are applied ONLY to the text fed to the TTS engine — the
+// committed transcript/captions keep the real words (see cues below).
+const lexicon = JSON.parse(readFileSync(LEXICON_PATH, "utf8")).terms;
 
 const MODEL_ID = "onnx-community/Kokoro-82M-v1.0-ONNX";
 const SAMPLE_RATE = 24000;
@@ -112,7 +118,8 @@ for (const id of ids) {
 
   process.stdout.write(`render ${id} (${sentences.length} sentences) `);
   for (const sentence of sentences) {
-    const audio = await tts.generate(sentence, { voice });
+    // Speak the lexicon-adjusted text; caption with the original, readable words.
+    const audio = await tts.generate(applyLexicon(sentence, lexicon), { voice });
     const data = audio.audio; // Float32Array @ SAMPLE_RATE
     const start = cursor / SAMPLE_RATE;
     const end = (cursor + data.length) / SAMPLE_RATE;
@@ -132,6 +139,7 @@ for (const id of ids) {
   const wavPath = join(OUT_DIR, `${id}.wav`);
   writeFileSync(wavPath, floatToWav(all, SAMPLE_RATE));
   execFileSync(FFMPEG, ["-y", "-loglevel", "error", "-i", wavPath, "-b:a", "128k", mp3Path]);
+  rmSync(wavPath, { force: true }); // drop the ~10x-larger intermediate WAV
 
   const durationSec = Number((total / SAMPLE_RATE).toFixed(2));
   writeFileSync(timingPath, JSON.stringify({ id, voice, hash, durationSec, cues }, null, 2));

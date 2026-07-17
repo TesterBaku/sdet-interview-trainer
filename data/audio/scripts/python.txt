@@ -1,5 +1,5 @@
 Python cheat sheet.
-Data types, mutability, comprehensions, generators, decorators, OOP, exceptions, the GIL, the standard library, and the pytest ecosystem, the parts that surface in S D E T interviews, with worked examples.
+Data types, mutability, comprehensions, generators, decorators, OOP, exceptions, the GIL, the standard library, and the pytest ecosystem, the parts that surface in SDET interviews, with worked examples.
 
 Section: Data Types & Mutability.
 Immutable: int, float, bool, str, tuple, frozenset, bytes.
@@ -36,11 +36,11 @@ The Global Interpreter Lock lets only one thread execute Python bytecode at a ti
 threading, good for I/O-bound work (network, files, browser actions); the GIL releases during blocking I/O, so threads overlap.
 multiprocessing, separate processes, each with its own interpreter and GIL; the way to use multiple cores for CPU-bound work.
 asyncio, single-threaded cooperative concurrency (async/await) for very high-I/O workloads (thousands of sockets).
-For test automation: I/O-bound parallelism (A P I calls, browser actions) benefits from threads/async; pytest itself parallelizes across processes with pytest-xdist (-n auto), sidestepping the GIL entirely.
+For test automation: I/O-bound parallelism (API calls, browser actions) benefits from threads/async; pytest itself parallelizes across processes with pytest-xdist (-n auto), sidestepping the GIL entirely.
 
 Section: Standard Library & Idioms.
-The batteries-included modules that come up constantly in S D E T work:
-Module, Use. collections, defaultdict, Counter, namedtuple, deque. itertools, Lazy combinatorics: chain, groupby, product. json, loads/dumps for A P I payloads. pathlib, Object-oriented file paths (Path("x")/"y"). os, subprocess, Env vars, running external commands. re, Regular expressions. datetime, Timestamps, durations.
+The batteries-included modules that come up constantly in SDET work:
+Module, Use. collections, defaultdict, Counter, namedtuple, deque. itertools, Lazy combinatorics: chain, groupby, product. json, loads/dumps for API payloads. pathlib, Object-oriented file paths (Path("x")/"y"). os, subprocess, Env vars, running external commands. re, Regular expressions. datetime, Timestamps, durations.
 
 Section: pytest Ecosystem.
 Plain assert with rich introspection, pytest rewrites it to show both sides on failure; no special assert methods.

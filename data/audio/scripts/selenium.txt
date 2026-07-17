@@ -2,8 +2,8 @@ Selenium cheat sheet.
 Architecture, locators, the three wait types, stale elements, Page Object Model, frames/windows/alerts, Grid, and how Selenium contrasts with Playwright, with rapid-fire Q&A.
 
 Section: Architecture.
-Selenium WebDriver drives real browsers through a browser-specific driver (chromedriver, geckodriver). Your test code sends commands over the W3C WebDriver protocol (H T T P/Jason) to the driver, which translates them into native browser actions.
-Client to WebDriver protocol to browser driver to browser. Each command is a separate H T T P round trip, the root of much of the latency and flakiness you manage with waits.
+Selenium WebDriver drives real browsers through a browser-specific driver (chromedriver, geckodriver). Your test code sends commands over the W3C WebDriver protocol (HTTP/JSON) to the driver, which translates them into native browser actions.
+Client to WebDriver protocol to browser driver to browser. Each command is a separate HTTP round trip, the root of much of the latency and flakiness you manage with waits.
 Selenium 4 standardized on the W3C protocol and added relative locators and CDP access.
 
 Section: Locators.
@@ -35,14 +35,14 @@ Section: Frames, Windows & Alerts.
 iframes, switchTo().frame(...) before interacting; defaultContent() to return.
 Windows/tabs, getWindowHandles() + switchTo().window(handle).
 Alerts, switchTo().alert() then accept()/dismiss().
-Actions A P I for hover, drag-drop, key chords.
+Actions API for hover, drag-drop, key chords.
 
 Section: Page Object Model & Grid.
-P O M, one class per page encapsulating locators and actions, so U I changes touch one file. PageFactory (@FindBy) is the classic Selenium helper.
+POM, one class per page encapsulating locators and actions, so UI changes touch one file. PageFactory (@FindBy) is the classic Selenium helper.
 Selenium Grid, distribute tests across multiple machines/browsers via a hub-and-node (Selenium 4: router/distributor/node) model for parallel, cross-browser execution. Pairs with TestNG/JUnit parallel config.
 
 Section: Selenium vs Playwright.
-Aspect, Selenium, Playwright. Protocol, W3C WebDriver (H T T P per command), persistent CDP-style connection. Waiting, You add explicit waits, auto-wait built into actions. Network mocking, Limited (CDP), first-class. Setup, Manage driver binaries, bundled browsers. Maturity, Huge ecosystem, any language/browser, newer, faster, fewer integrations.
+Aspect, Selenium, Playwright. Protocol, W3C WebDriver (HTTP per command), persistent CDP-style connection. Waiting, You add explicit waits, auto-wait built into actions. Network mocking, Limited (CDP), first-class. Setup, Manage driver binaries, bundled browsers. Maturity, Huge ecosystem, any language/browser, newer, faster, fewer integrations.
 Selenium's strengths: maturity, language breadth, real-browser fidelity, and broad grid/cloud support. Playwright's: speed, reliability, and built-in tooling.
 
 That's the Selenium cheat sheet. Review the questions to lock it in.

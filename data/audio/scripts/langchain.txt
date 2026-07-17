@@ -27,9 +27,9 @@ Compose in parallel with RunnableParallel (run branches concurrently and collect
 Section: Output Parsers & Structured Output.
 Models return free-form text; output parsers turn that into something your code can use, as the last step of a chain.
 StrOutputParser, pull the plain string out of an AIMessage.
-Jason, Pydantic parsers, coerce the response into a typed object and validate it.
+JSON, Pydantic parsers, coerce the response into a typed object and validate it.
 The more robust modern approach binds a schema directly to the model:
-with_structured_output uses the provider's native tool/Jason-mode support to guarantee the shape, which is more reliable than parsing free text and re-prompting on failure. Reach for it whenever you need machine-readable results.
+with_structured_output uses the provider's native tool/JSON-mode support to guarantee the shape, which is more reliable than parsing free text and re-prompting on failure. Reach for it whenever you need machine-readable results.
 
 Section: Retrieval & RAG.
 RAG (Retrieval-Augmented Generation) grounds an LLM in your own data: fetch relevant documents, put them in the prompt, then answer. The ingestion pipeline:
@@ -48,7 +48,7 @@ For long chats, trim or summarize old turns so you stay within the context windo
 The older ConversationBufferMemory-style classes are largely superseded. Current guidance is explicit message-history wiring or LangGraph persistence (checkpointers), which also survives restarts and supports branching.
 
 Section: Tools & Agents.
-A tool is a function the model can choose to call, a calculator, a search A P I, a database query. An agent is an LLM in a loop: it decides which tool to call, sees the result, and repeats until it can answer.
+A tool is a function the model can choose to call, a calculator, a search API, a database query. An agent is an LLM in a loop: it decides which tool to call, sees the result, and repeats until it can answer.
 The flow: bind_tools exposes the schemas to the model; the model replies with tool calls; your code runs the tools and feeds results back as ToolMessages; the loop continues.
 The LLM never executes anything itself, it only requests a call. Your code runs the tool, which is also where you enforce permissions and validation. This tool-calling loop is the foundation every agent framework builds on.
 
@@ -57,7 +57,7 @@ LangGraph is LangChain's library for stateful, multi-step agent workflows modele
 Rule of thumb: a linear pipeline to LCEL chain; a looping, branching, stateful agent to LangGraph. It's the recommended path for production agents over the older AgentExecutor.
 Around the framework:
 LangSmith, tracing, debugging, and evaluation; see every step, token, and latency of a run.
-Streaming & callbacks, stream tokens or intermediate events to a U I; hook callbacks for logging and metrics.
+Streaming & callbacks, stream tokens or intermediate events to a UI; hook callbacks for logging and metrics.
 LangSmith is provider-agnostic and works even without LangChain, but pairs tightly with it, observability is what turns a demo chain into something you can debug and trust in production.
 
 That's the LangChain cheat sheet. Review the questions to lock it in.

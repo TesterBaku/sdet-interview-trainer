@@ -4,15 +4,15 @@ How Spark actually runs your job, the RDD/DataFrame/Dataset split, lazy evaluati
 Section: How Spark Runs a Job.
 Spark is a distributed engine: one driver plans the work and many executors run it in parallel across the cluster. Understanding this split explains almost every performance and correctness question.
 Driver, runs your main, builds the logical plan, and schedules tasks. The SparkSession lives here.
-Executors, J V M processes on worker nodes that run tasks and hold cached data in memory.
+Executors, JVM processes on worker nodes that run tasks and hold cached data in memory.
 Partition, a chunk of the data; one task processes one partition. Parallelism = number of partitions you can run at once.
 Spark is lazy: transformations only build a plan; nothing runs until an action asks for a result.
 The Catalyst optimizer rewrites that logical plan (predicate pushdown, column pruning, join reordering) and Tungsten generates efficient bytecode, which is exactly why you stay on DataFrames instead of hand-rolling RDDs.
 
 Section: RDD vs DataFrame vs Dataset.
 Three abstractions, in order of how much Spark can optimize for you:
-A P I, What it is, When. RDD, Low-level distributed collection of objects. Full control, no Catalyst optimization, no schema., Rarely, custom partitioning or unstructured data only. DataFrame, Distributed table with a schema (named, typed columns). Optimized by Catalyst. The default in PySpark., Almost always. Dataset, DataFrame + compile-time type safety. J V M only (Scala/Java)., N/A in Python, PySpark has no typed Dataset.
-Say this in an interview: in PySpark you work with DataFrames; the Dataset A P I is Scala/Java-only, so "DataFrame vs Dataset" collapses to "use DataFrames" for us.
+API, What it is, When. RDD, Low-level distributed collection of objects. Full control, no Catalyst optimization, no schema., Rarely, custom partitioning or unstructured data only. DataFrame, Distributed table with a schema (named, typed columns). Optimized by Catalyst. The default in PySpark., Almost always. Dataset, DataFrame + compile-time type safety. JVM only (Scala/Java)., N/A in Python, PySpark has no typed Dataset.
+Say this in an interview: in PySpark you work with DataFrames; the Dataset API is Scala/Java-only, so "DataFrame vs Dataset" collapses to "use DataFrames" for us.
 
 Section: Transformations & Actions.
 Every DataFrame operation is one of two kinds:
@@ -47,7 +47,7 @@ orderBy, the sequence inside the partition (for example, by date).
 The function, row_number(), rank(), lag()/lead(), or an aggregate like sum().
 Common ask: "deduplicate keeping the most recent record", row_number() over partitionBy(key).orderBy(ts.desc()), keep rn = 1.
 
-Section: Schema & Data Quality, the Q A Mindset.
+Section: Schema & Data Quality, the QA Mindset.
 This is where a Test Automation Engineer earns the role: a pipeline that runs green can still emit wrong data. You test the data, not just the code.
 Pin the schema.
 Always pass an explicit schema. inferSchema reads the file twice and silently changes types between runs, a flaky-test factory.
@@ -67,7 +67,7 @@ What Delta buys you:
 MERGE, upserts, update & delete historical rows, not just append.
 Time travel, query a past version (VERSION AS OF, TIMESTAMP AS OF); great for diffing a regression.
 Schema enforcement & evolution, reject mismatches, or opt in to mergeSchema.
-Time travel for Q A: when last night's run looks wrong, diff VERSION AS OF the previous good version against the current one to isolate exactly which rows changed.
+Time travel for QA: when last night's run looks wrong, diff VERSION AS OF the previous good version against the current one to isolate exactly which rows changed.
 
 Section: Incremental Processing & CDC.
 Goal: process only what changed since the last run instead of reprocessing everything, the difference between a 5-minute and a 5-hour job.
@@ -85,7 +85,7 @@ Section: Performance & Reliability.
 The levers you should be able to list:
 cache(), persist(), materialize a DataFrame reused many times; don't cache a one-shot.
 Partition pruning, partition by a column you filter on (for example, date) so Spark skips whole directories.
-Predicate & projection pushdown, columnar formats (Parquet) let Spark read only needed columns/row-groups; prefer them over CSV/Jason.
+Predicate & projection pushdown, columnar formats (Parquet) let Spark read only needed columns/row-groups; prefer them over CSV/JSON.
 Adaptive Query Execution (AQE), coalesces shuffle partitions, flips to broadcast joins, and splits skew at runtime.
 Avoid Python UDFs, they break Catalyst and serialize row-by-row; use built-in pyspark.sql.functions, or a pandas/Arrow UDF if you must.
 Small-files problem, coalesce before writing and compact periodically.

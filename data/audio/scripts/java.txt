@@ -1,5 +1,5 @@
 Java cheat sheet.
-A to-the-point review of the Java an S D E T gets asked about: data types, modifiers, OOP, strings, collections, exceptions, generics & streams, plus the JUnit/TestNG ecosystem. Short explanations, short examples.
+A to-the-point review of the Java an SDET gets asked about: data types, modifiers, OOP, strings, collections, exceptions, generics & streams, plus the JUnit/TestNG ecosystem. Short explanations, short examples.
 
 Section: Data Types & Variables.
 Java has two kinds of types: primitives and reference types.
@@ -55,9 +55,9 @@ throw raises an exception; throws declares one a method may propagate.
 Good hygiene: catch the narrowest exception, never leave an empty catch, and keep the original cause when you wrap. In tests, let unexpected errors fail loudly.
 
 Section: Generics & Streams.
-Generics add compile-time type safety and remove casts: a List can only hold Strings.
+Generics add compile-time type safety and remove casts: a List<String> can only hold Strings.
 Streams (Java 8+) process a collection as a pipeline: source to intermediate ops (lazy) to one terminal op. Nothing runs until the terminal op.
-Optional models "maybe a value" and avoids null checks: opt.map(...).orElse(default).
+Optional<T> models "maybe a value" and avoids null checks: opt.map(...).orElse(default).
 Streams vs loops: streams read well for filter/map/collect pipelines; a plain for loop is fine (and faster) for simple iteration or when you need to break early. Don't force everything into a stream.
 
 Section: Test Ecosystem.

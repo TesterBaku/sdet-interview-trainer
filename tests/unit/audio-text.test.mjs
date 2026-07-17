@@ -16,6 +16,11 @@ test("decodeEntities resolves the entities cheat sheets use", () => {
   assert.equal(decodeEntities("a &amp; b &lt;x&gt; &quot;q&quot; it&#39;s"), 'a & b <x> "q" it\'s');
 });
 
+test("decodeEntities resolves &amp; last so double-escaped entities survive", () => {
+  // "&amp;lt;" is meant to display as the literal "&lt;", not decode to "<".
+  assert.equal(decodeEntities("&amp;lt;"), "&lt;");
+});
+
 test("normalizeText makes glyphs speech-friendly", () => {
   assert.equal(normalizeText("host 8080 → container 3000"), "host 8080 to container 3000");
   assert.equal(normalizeText("stop / rm"), "stop, rm"); // spaced slash → comma
@@ -53,6 +58,19 @@ test("bodyToSpeech turns list items into sentences", () => {
   assert.deepEqual(out, ["First point.", "Second point."]);
 });
 
+test("bodyToSpeech keeps a table's content even when wrapped in a block element", () => {
+  const html = "<div><p>Before.</p><table><tr><td>run</td><td>start</td></tr></table><p>After.</p></div>";
+  const out = bodyToSpeech(html).join(" ");
+  assert.ok(out.includes("run, start."), "wrapped table must not be dropped");
+  assert.ok(out.includes("Before.") && out.includes("After."));
+  assert.ok(!out.includes("TABLE"), "no placeholder leakage");
+});
+
+test("bodyToSpeech does not treat a literal 'BLOCK' word as a separator", () => {
+  const out = bodyToSpeech("<p>Use the BLOCK statement here.</p>");
+  assert.deepEqual(out, ["Use the BLOCK statement here."]);
+});
+
 test("tableToSpeech linearizes rows into comma-joined sentences", () => {
   const html = "<table><tr><th>Command</th><th>Does</th></tr><tr><td>docker run</td><td>start a container</td></tr></table>";
   assert.equal(tableToSpeech(html), "Command, Does. docker run, start a container.");
@@ -63,4 +81,10 @@ test("applyLexicon replaces terms on word boundaries, longest-first", () => {
   assert.equal(applyLexicon("API and APIs and SQL", terms), "A P I and A P Is and sequel");
   // Must not mangle a word that merely contains a term.
   assert.equal(applyLexicon("rapid", terms), "rapid");
+});
+
+test("applyLexicon does not re-fire a shorter rule inside a longer rule's replacement", () => {
+  // "XCUITest" → "X C UI Test" must NOT then be hit by the "UI" → "U I" rule.
+  const terms = [["XCUITest", "X C UI Test"], ["UI", "U I"]];
+  assert.equal(applyLexicon("XCUITest rocks", terms), "X C UI Test rocks");
 });
