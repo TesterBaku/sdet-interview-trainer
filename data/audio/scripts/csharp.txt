@@ -1,0 +1,91 @@
+C# cheat sheet.
+A to-the-point review of the C# an S D E T gets asked about: data types, modifiers, OOP, strings, collections, exceptions, async/await, and LINQ, plus the NUnit/xUnit + Playwright testing stack. Short explanations, short examples.
+
+Section: Data Types & Variables.
+Every type is either a value type or a reference type. This one distinction explains most C# behaviour questions.
+Value types hold the data itself and are copied on assignment. Examples: int, long, double, decimal, bool, char, enum, struct, DateTime.
+Reference types hold a reference to data on the heap; assigning copies the reference, so both variables point to the same object. Examples: class, string, arrays, object, interfaces, delegates.
+var, the compiler infers the type; the variable is still strongly typed.
+const, compile-time constant. readonly, set once, in the constructor.
+Nullable: value types are non-null by default; int? allows null. Use ?., ??, ??= for null-safety (name ??= "anon";).
+Boxing = wrapping a value type in a heap object; unboxing reverses it. It allocates, so avoid it in hot loops.
+Common trap: passing a reference type to a method lets it mutate the object (the caller sees the change), but reassigning the parameter inside the method does not affect the caller, C# passes the reference by value.
+
+Section: Modifiers & Keywords.
+Access modifiers, who can see a member:
+public, anywhere.
+private, only inside the same class (the default for class members).
+protected, the class and its subclasses.
+internal, anywhere in the same project/assembly.
+protected internal, private protected, combinations, rarely needed.
+Other modifiers you'll be asked about:
+static, belongs to the type, not an instance.
+abstract, no body; must be overridden; the class can't be instantiated.
+virtual, has a default body but can be overridden; override replaces it; sealed stops further overriding.
+const, readonly, immutability (compile-time vs set-once).
+new, hides an inherited member.
+
+Section: OOP in C#.
+The four pillars, briefly:
+Encapsulation, keep fields private, expose them through public properties (get/set).
+Inheritance, a class extends one base class (: Base).
+Polymorphism, virtual/override so the right method runs for the actual object type.
+Abstraction, expose what, hide how, via abstract classes and interfaces.
+Abstract class vs Interface, when & how.
+Abstract class = a partial base with shared code and state; use it when types are a kind of the same thing ("is-a"). A class extends one base and overrides its abstract members.Interface = a pure contract, capability; use it when unrelated types must all do the same thing ("can-do"). A class implements many interfaces and provides every member.
+class vs struct vs record.
+class = reference type, mutable, identity equality. struct = value type, copied. record = reference type with value equality and concise immutable syntax, ideal for DTOs/test models; with makes a modified copy.
+
+Section: Strings & Immutability.
+string is a reference type but immutable, once created it never changes. Every "modification" (+, Replace, ToUpper) returns a new string and leaves the original untouched.
+Why make it immutable?
+Thread-safe by nature, no one can change a shared string underneath you.
+Safe as a dictionary, hash key, its hash never changes.
+Enables interning: identical string literals are cached and shared in a pool.
+The cost: concatenating in a loop creates a new object each pass (O(n²) garbage). Use StringBuilder when you build a string in many steps.
+string vs StringBuilder: use string for fixed or few values; reach for StringBuilder the moment you concatenate inside a loop.
+
+Section: async, await.
+The single most likely C# deep-dive for a Playwright/S D E T role, since the A P I is async throughout.
+async marks a method returning Task/Task/ValueTask; await suspends without blocking the calling thread.
+It frees the thread while I/O completes, concurrency without extra threads.
+Return Task, not void (except event handlers); async void can't be awaited and swallows exceptions.
+Avoid .Result/.Wait(), they can deadlock; await all the way up.
+Task.WhenAll runs work concurrently; CancellationToken cooperatively cancels.
+Why await beats Thread: awaiting an I/O-bound task returns the thread to the pool until the OS signals completion, so thousands of concurrent requests need only a handful of threads. Threads cost ~1 MB of stack each; tasks are cheap.
+
+Section: LINQ.
+Declarative querying over any IEnumerable. Method (fluent) syntax is most common in test code:
+Deferred execution, the query runs when enumerated (ToList, foreach, Count), not when defined; the source can change in between.
+Key operators: Where, Select, SelectMany, First/FirstOrDefault, Single, Any/All, GroupBy, OrderBy, Aggregate.
+FirstOrDefault/SingleOrDefault return default instead of throwing when empty, handy in assertions.
+Single vs First: Single asserts exactly one match (throws otherwise), use it in tests to prove uniqueness; First just takes the first of possibly many.
+
+Section: Delegates, Events, Lambdas & Generics.
+Delegates are type-safe function pointers. The built-ins cover most needs: Func (returns a value), Action (void), Predicate (returns bool). Lambdas (x => x * 2) are inline delegates and the backbone of LINQ.
+Events are a publish/subscribe wrapper over delegates (event EventHandler Clicked;). Generics give type safety and reuse with constraints (where T : class, new()).
+Pattern matching (C# 8+).
+Modern switch expressions and type/property patterns make branching concise, common in parsing A P I responses.
+
+Section: Collections.
+Type, Notes. List, Resizable array; the workhorse; O(1) index, O(n) mid-insert. Dictionary, Hash map; O(1) average lookup; TryGetValue to avoid exceptions. HashSet, Unique elements; set operations (UnionWith, IntersectWith). Queue, Stack, FIFO, LIFO. IEnumerable, Lazy sequence; the base abstraction for LINQ. ConcurrentDictionary, Thread-safe map for parallel test state.
+Used most in practice: List for ordered items and Dictionary for key lookups cover the large majority of test code.
+IEnumerable = lazy, forward-only and the base for LINQ. Return the narrowest interface that fits (for example, IReadOnlyList).
+
+Section: Exceptions & using.
+All exceptions derive from System.Exception. Unlike Java, C# has no checked exceptions, nothing forces you to declare or catch them.
+try, the code that might fail.
+catch, handle a specific exception type (catch the narrowest first).
+finally, always runs (cleanup), whether or not an exception was thrown.
+throw; rethrows and keeps the original stack trace; throw ex; resets it, prefer throw;.
+using, IDisposable gives deterministic cleanup of resources (H T T P clients, browser contexts, files), Dispose() is called automatically at scope exit, even on exception. await using + IAsyncDisposable handles async cleanup.
+GC vs IDisposable: the garbage collector frees managed memory on its own schedule; using/IDisposable is for things it won't release promptly (sockets, files, handles). Reuse one HttpClient rather than one per request, to avoid socket exhaustion.
+
+Section: Test Stack (Your Stack).
+NUnit, [Test], [SetUp]/[OneTimeSetUp], [TestCase]/[TestCaseSource] for data-driven tests, rich Assert.That constraint model.
+xUnit, [Fact]/[Theory], constructor + IDisposable for setup/teardown, parallel by default.
+Playwright for .NET, async A P I; PageTest/ContextTest base classes wire fixtures and a fresh context per test.
+RestSharp, HttpClient for A P I tests; Moq for mocking; FluentAssertions for readable asserts.
+NUnit vs xUnit: NUnit has more built-in attributes and a fluent constraint model; xUnit is leaner, opinionated, parallel-first, and uses the constructor + IDisposable for setup/teardown instead of attributes.
+
+That's the C# cheat sheet. Review the questions to lock it in.

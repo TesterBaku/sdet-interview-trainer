@@ -1,0 +1,48 @@
+Selenium cheat sheet.
+Architecture, locators, the three wait types, stale elements, Page Object Model, frames/windows/alerts, Grid, and how Selenium contrasts with Playwright, with rapid-fire Q&A.
+
+Section: Architecture.
+Selenium WebDriver drives real browsers through a browser-specific driver (chromedriver, geckodriver). Your test code sends commands over the W3C WebDriver protocol (H T T P/Jason) to the driver, which translates them into native browser actions.
+Client to WebDriver protocol to browser driver to browser. Each command is a separate H T T P round trip, the root of much of the latency and flakiness you manage with waits.
+Selenium 4 standardized on the W3C protocol and added relative locators and CDP access.
+
+Section: Locators.
+Eight strategies, in rough order of preference:
+id, fastest, most stable when present.
+name, className, tagName.
+linkText, partialLinkText.
+cssSelector, fast, flexible; generally preferred over XPath.
+xpath, most powerful (can traverse up the DOM, match text) but slower and more brittle.
+CSS vs XPath: prefer CSS for speed and readability; reach for XPath only when you need text matching or to walk to a parent/ancestor.
+
+Section: The Three Wait Types.
+The most important Selenium interview topic, the heart of flakiness control.
+Implicit Wait.
+A global setting: poll the DOM up to N seconds when finding any element. Simple but blunt, applies everywhere and can mask issues.
+Explicit Wait.
+WebDriverWait + ExpectedConditions, wait for a specific condition (element clickable, visible, present) on a specific element. The recommended approach.
+Fluent Wait.
+An explicit wait with a custom polling interval and ignored exception types, fine-grained control.
+Warning: never mix implicit and explicit waits, the combination produces unpredictable cumulative timeouts. Pick explicit. And avoid Thread.sleep() entirely.
+
+Section: StaleElementReferenceException.
+Thrown when a previously found element reference is no longer attached to the DOM, typically after the page re-rendered or navigated. Causes and fixes:
+Re-find the element right before interacting instead of caching it.
+Wait for the new element after a DOM change.
+This is exactly the problem Playwright's lazy locators avoid by re-querying automatically.
+
+Section: Frames, Windows & Alerts.
+iframes, switchTo().frame(...) before interacting; defaultContent() to return.
+Windows/tabs, getWindowHandles() + switchTo().window(handle).
+Alerts, switchTo().alert() then accept()/dismiss().
+Actions A P I for hover, drag-drop, key chords.
+
+Section: Page Object Model & Grid.
+P O M, one class per page encapsulating locators and actions, so U I changes touch one file. PageFactory (@FindBy) is the classic Selenium helper.
+Selenium Grid, distribute tests across multiple machines/browsers via a hub-and-node (Selenium 4: router/distributor/node) model for parallel, cross-browser execution. Pairs with TestNG/JUnit parallel config.
+
+Section: Selenium vs Playwright.
+Aspect, Selenium, Playwright. Protocol, W3C WebDriver (H T T P per command), persistent CDP-style connection. Waiting, You add explicit waits, auto-wait built into actions. Network mocking, Limited (CDP), first-class. Setup, Manage driver binaries, bundled browsers. Maturity, Huge ecosystem, any language/browser, newer, faster, fewer integrations.
+Selenium's strengths: maturity, language breadth, real-browser fidelity, and broad grid/cloud support. Playwright's: speed, reliability, and built-in tooling.
+
+That's the Selenium cheat sheet. Review the questions to lock it in.

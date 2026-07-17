@@ -1,0 +1,68 @@
+sequel cheat sheet.
+A to-the-point review of the sequel an S D E T gets asked about: SELECT execution order, the join types, GROUP BY vs HAVING vs WHERE, subqueries vs CTEs, window functions, indexes, NULL handling, transactions & ACID, plus how you use sequel to validate data in tests. Short explanations, short examples.
+
+Section: How a SELECT Actually Runs.
+You write SELECT first, but the database evaluates clauses in a different order, knowing this explains most "why can't I use that alias here" questions.
+#, Clause, What it does. 1, FROM, JOIN, pick & combine the source rows. 2, WHERE, filter rows (before grouping). 3, GROUP BY, collapse into groups. 4, HAVING, filter groups. 5, SELECT, pick columns, compute expressions. 6, ORDER BY, sort the result. 7, LIMIT, cut the rows returned.
+Why it matters: WHERE runs before SELECT, so a column alias defined in SELECT isn't visible in WHERE, but it is visible in ORDER BY (which runs last).
+
+Section: Joins.
+A join combines rows from two tables on a matching condition. The type decides what happens to non-matching rows.
+INNER, only rows that match on both sides.
+LEFT, all left rows; right columns are NULL where there's no match.
+RIGHT, mirror of LEFT (all right rows).
+FULL OUTER, all rows from both; NULLs where either side is missing.
+CROSS, every combination (Cartesian product); usually accidental.
+SELF, a table joined to itself (for example, employee to manager).
+Common trap: filtering the right table in WHERE turns a LEFT JOIN back into an INNER JOIN (the NULL rows get filtered out). Put that condition in the ON clause to keep them.
+
+Section: GROUP BY, HAVING & WHERE.
+Aggregate functions, COUNT, SUM, AVG, MIN, MAX, collapse many rows into one value per group.
+WHERE filters rows before grouping (can't use aggregates).
+HAVING filters groups after grouping (can use aggregates).
+Every non-aggregated SELECT column must appear in GROUP BY.
+COUNT(*) counts rows; COUNT(col) skips NULLs; COUNT(DISTINCT col) counts unique non-null values.
+
+Section: Subqueries & CTEs.
+Subquery, a query nested inside another (in WHERE, FROM, or SELECT).
+Correlated subquery, references the outer row, so it re-runs per row; powerful but can be slow.
+CTE (WITH), a named, readable temporary result; great for breaking a complex query into steps and for recursion (hierarchies).
+EXISTS is usually faster than IN for existence checks and handles NULLs more predictably.
+IN vs EXISTS with NULLs: NOT IN against a subquery that returns a NULL yields no rows at all, a notorious bug. Prefer NOT EXISTS.
+
+Section: Window Functions.
+Window functions compute across a set of related rows without collapsing them (unlike GROUP BY). The go-to for ranking, running totals, and row-to-row comparisons.
+ROW_NUMBER(), unique sequential number; RANK() leaves gaps on ties, DENSE_RANK() doesn't.
+LAG(), LEAD(), value from the previous, next row (deltas, trends).
+Aggregates as windows, SUM(...) OVER (...) for running totals.
+PARTITION BY = the group; ORDER BY = the sequence inside it.
+Classic ask: "2nd highest salary" or "latest record per key", both are ROW_NUMBER()/DENSE_RANK() over a partition, then filter the rank.
+
+Section: Indexes & Performance.
+An index is a sorted lookup structure (usually a B-tree) that lets the database find rows without scanning the whole table, the trade is slower writes and extra storage.
+Clustered index = the table's physical order (one per table, often the primary key); non-clustered = a separate structure pointing back to rows.
+Composite index on (a, b) helps filters on a or a, b, left-prefix rule, but not on b alone.
+Indexes help WHERE, JOIN, ORDER BY; they're ignored if you wrap the column in a function (WHERE YEAR(d) = 2024), that kills index use.
+Use EXPLAIN, EXPLAIN ANALYZE to see whether a query does an index seek or a full scan.
+Say this: indexes speed up reads and slow down writes, index the columns you filter/join/sort on, not every column.
+
+Section: NULL Handling.
+NULL means unknown, not zero or empty string, and it spreads through expressions, which trips people up.
+Compare with IS NULL, IS NOT NULL, never = NULL (always unknown).
+Any arithmetic with NULL is NULL (5 + NULL = NULL).
+Aggregates skip NULLs, AVG(col) ignores them, which can surprise you.
+COALESCE(a, b, ...) returns the first non-null; NULLIF(a, b) returns NULL if they're equal.
+
+Section: Transactions & ACID.
+A transaction groups statements so they succeed or fail as a unit. ACID is what makes that reliable.
+Property, Meaning. Atomicity, all statements commit, or none do (ROLLBACK). Consistency, constraints hold before and after. Isolation, concurrent transactions don't corrupt each other. Durability, once committed, it survives a crash.
+Isolation levels trade consistency for concurrency, each allowing more anomalies: Read Uncommitted (dirty reads) to Read Committed to Repeatable Read (stops non-repeatable reads) to Serializable (stops phantoms; strictest).
+
+Section: sequel for Test Automation.
+For an S D E T, sequel is a verification tool: you assert against the database, not just the U I/A P I.
+Back-end validation, after an action, query the DB to confirm the row was written with the right values.
+Data-quality checks, duplicates, orphaned rows, null required fields, row-count reconciliation between source and target.
+Test setup/teardown, seed fixtures and clean up state with sequel inside your test framework.
+DDL vs DML vs DCL/TCL, know the families: DDL (CREATE/ALTER/DROP), DML (SELECT/INSERT/UPDATE/DELETE), TCL (COMMIT/ROLLBACK).
+
+That's the sequel cheat sheet. Review the questions to lock it in.

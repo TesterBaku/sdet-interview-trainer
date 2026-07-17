@@ -1,0 +1,52 @@
+TestNG cheat sheet.
+TestNG as the representative test-runner: annotations & lifecycle, hard vs soft assertions, data-driven tests, groups, priority, dependencies, parallel execution via testng.xml, and listeners & retries, with side notes mapping each idea to JUnit 5, NUnit, and pytest. Short explanations, short examples.
+
+Section: What TestNG Is, and Why It Represents the Family.
+TestNG is a Java testing framework built for more than unit tests, its name ("Next Generation") signals the extras: flexible configuration, data-driven tests, grouping, dependencies, and built-in parallelism. It's the default runner in most Java + Selenium stacks.
+Almost every test runner shares the same skeleton: lifecycle hooks, assertions, data-driven inputs, parallelism, and reporting. Learn TestNG and you can read JUnit 5, NUnit, and pytest at a glance.
+JUnit 5 (Java), the closest cousin; same ideas, different annotation names.
+NUnit (C#), your Playwright stack's runner; near-identical concepts with C# attribute syntax.
+pytest (Python), same capabilities via fixtures and decorators instead of annotations.
+Where TestNG is richer: its testng.xml suite file and @DataProvider give finer control over grouping and parallelism than vanilla JUnit, a fair point to raise when asked "why TestNG over JUnit?".
+
+Section: Annotations & Lifecycle.
+TestNG runs methods in a fixed order driven by annotations, scoped from the whole suite down to a single method.
+Annotation, Runs. @BeforeSuite, @AfterSuite, once around the whole suite. @BeforeTest, @AfterTest, around a tag in testng.xml. @BeforeClass, @AfterClass, once per class. @BeforeMethod, @AfterMethod, before/after every @Test method. @Test, the actual test.
+Maps to: JUnit 5 @BeforeEach/@BeforeAll, NUnit [SetUp]/[OneTimeSetUp], pytest fixtures with scope="function"/"class"/"session". Same lifecycle, different spelling.
+
+Section: Hard vs Soft Assertions.
+Hard assertion (Assert.assertEquals), fails fast: the test stops at the first failed check.
+Soft assertion (SoftAssert), collects all failures and reports them together when you call assertAll(); nothing fails until then.
+Soft asserts shine when you want to validate several independent things in one test (for example, five fields on a page) and see all the broken ones in one run.
+Maps to: JUnit 5 assertAll(...), NUnit Assert.Multiple, AssertJ/Playwright's soft assertions. The hard-vs-soft distinction is a common interview question.
+
+Section: Data-Driven Tests.
+Two ways to feed inputs into a test:
+@DataProvider, a method returning Object[][]; TestNG runs the test once per row. Best for in-code or computed datasets.
+@Parameters, inject simple values from testng.xml (for example, a browser name or base U R L).
+Maps to: JUnit 5 @ParameterizedTest + @MethodSource/@CsvSource, NUnit [TestCase]/[TestCaseSource], pytest @pytest.mark.parametrize. TestNG's @DataProvider can also be parallel = true.
+
+Section: Groups, Priority & Dependencies.
+Groups, tag tests (@Test(groups = "smoke")) and run a subset from testng.xml or the C L I. Like JUnit 5 @Tag, NUnit [Category], pytest markers.
+Priority, @Test(priority = 1) orders tests (default 0); lower runs first.
+Dependencies, dependsOnMethods, dependsOnGroups skip a test if its prerequisite failed, rather than reporting a misleading second failure.
+Note for interviews: heavy use of dependsOnMethods couples tests and hurts isolation/parallelism. Prefer independent tests; use dependencies only for genuine setup ordering. JUnit deliberately limits ordering for this reason.
+
+Section: Parallel Execution & testng.xml.
+The testng.xml suite file is TestNG's control center, it selects classes/groups, injects parameters, and configures parallelism without touching code.
+parallel="methods|tests|classes|instances" with thread-count sets the concurrency model.
+Parallel tests must be thread-safe, share no mutable state; in Selenium use a ThreadLocal so each thread gets its own driver.
+Maps to: JUnit 5 parallel execution (junit-platform.properties), NUnit [Parallelizable], pytest-xdist (-n auto). Built-in suite-level parallelism is one of TestNG's headline features.
+
+Section: Listeners, Retries & Reporting.
+Listeners, hook into the test lifecycle (ITestListener, IRetryAnalyzer) to add logging, screenshots on failure, or custom reporting.
+Retry, implement IRetryAnalyzer to re-run a failed test N times (use sparingly, masks real flakiness).
+Reporting, TestNG emits HTML/XML reports; teams usually layer Allure or ExtentReports on top for richer output.
+Maps to: JUnit 5 extensions (TestWatcher), NUnit ITestAction, pytest hooks (conftest.py) + plugins. Same extension-point idea everywhere.
+
+Section: TestNG vs JUnit 5 vs NUnit vs pytest.
+The cheat sheet, same concept, four dialects:
+Concept, TestNG, JUnit 5, NUnit, pytest. test, @Test, @Test, [Test], def test_*. before each, @BeforeMethod, @BeforeEach, [SetUp], fixture (function). before all, @BeforeClass, @BeforeAll, [OneTimeSetUp], fixture (class/module). data-driven, @DataProvider, @ParameterizedTest, [TestCase], @parametrize. tag, group, groups, @Tag, [Category], markers. skip, @Test(enabled=false), @Disabled, [Ignore], @skip. parallel, testng.xml, properties file, [Parallelizable], pytest-xdist.
+One-liner: TestNG and JUnit 5 are the two Java options, pick TestNG for built-in suite-level config/parallelism and richer data providers, JUnit 5 for the modern default and tighter ecosystem integration.
+
+That's the TestNG cheat sheet. Review the questions to lock it in.

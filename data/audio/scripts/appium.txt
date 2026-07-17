@@ -1,0 +1,63 @@
+Appium cheat sheet.
+Cross-platform mobile automation: client/server architecture, platform drivers, capabilities, locator strategies, waits, gestures, native-vs-webview contexts, and Page Object Model, with rapid-fire Q&A.
+
+Section: Architecture.
+Appium automates native, hybrid, and mobile-web apps on Android and iOS from a single A P I. It is an H T T P server written in Node.js that exposes the W3C WebDriver protocol, the same protocol Selenium speaks, so your existing WebDriver client (Java, Python, JS, C#, Ruby) drives a phone the way it drives a browser.
+Client to W3C WebDriver (H T T P/Jason) to Appium server to platform driver to vendor automation framework to device/emulator. The cross-platform promise lives in one layer: your test talks to Appium, and Appium delegates to whatever the OS provides.
+The key idea is delegation. Appium itself doesn't know how to tap a button on iOS, it forwards the command to Apple's own X C U I Test framework. On Android it forwards to Google's UiAutomator2. Appium is the universal translator; the vendor frameworks do the real driving.
+
+Section: Platform Drivers & Appium 2.0.
+A driver is the plugin that bridges Appium to a specific platform's automation engine:
+UiAutomator2, the default and recommended Android driver (wraps Google's UiAutomator2).
+X C U I Test, the iOS driver (wraps Apple's X C U I Test).
+Espresso, alternative Android driver, faster and in-process, but Android-only.
+Mac2, Windows, Flutter, desktop and framework-specific drivers.
+Appium 2.0 changed the packaging model: drivers and plugins are decoupled from the core server and installed on demand, appium driver install uiautomator2. The server ships lean; you add only the drivers you need. The default base path also moved to, (Appium 1.x used /wd/hub).
+
+Section: Capabilities (Appium Options).
+A test session is configured with capabilities, key/value pairs telling Appium what to automate. Vendor-specific keys carry an appium: prefix under W3C.
+Cross-platform.
+platformName (Android, iOS), appium:automationName (UiAutomator2, X C U I Test, Espresso), appium:deviceName, appium:platformVersion, appium:udid (a specific real device), appium:app (path/U R L to the .apk/.ipa).
+Android-specific.
+appium:appPackage and appium:appActivity identify an already-installed app to launch without reinstalling.
+iOS-specific.
+appium:bundleId identifies an installed app; real devices also need signing via appium:xcodeOrgId and a provisioning team.
+app vs appPackage/bundleId: use app to install a fresh build; use appPackage/appActivity (Android) or bundleId (iOS) to launch an app already on the device.
+
+Section: Locator Strategies.
+Order of preference favors stability and cross-platform reuse:
+accessibility id, best choice: maps to Android content-desc and iOS accessibilityIdentifier, so one locator can work on both platforms.
+id, Android resource-id; fast and stable when present.
+-android uiautomator, runs a native UiSelector query on-device (powerful, fast).
+-ios predicate string and -ios class chain, native iOS queries, far faster than XPath.
+class name, element type (android.widget.Button, XCUIElementTypeButton).
+xpath, works everywhere but is the slowest and most brittle; the whole U I tree is serialized and searched on every query.
+Interview favorite: prefer accessibility id for cross-platform locators; avoid XPath on mobile because resolving it walks the entire native element tree and is dramatically slower than on the web.
+
+Section: Waits & Flakiness.
+Because Appium is WebDriver-based, the synchronization story mirrors Selenium, and is just as central to interviews.
+Implicit Wait.
+A global timeout applied to every element lookup. Blunt; can mask real timing issues.
+Explicit Wait.
+WebDriverWait + ExpectedConditions on a specific element/condition, the recommended approach.
+Never mix implicit and explicit waits (unpredictable cumulative timeouts), and avoid hard sleeps. Mobile adds its own flake sources: animations, slow app launch, network on real devices, and emulator warm-up.
+
+Section: Gestures & Mobile Commands.
+Taps, swipes, scrolls, and drags are core to mobile. The modern approach uses the W3C Actions A P I (pointer input sequences) or, more simply, driver-side mobile: commands.
+mobile: scroll, mobile: swipe, mobile: tap, mobile: longClickGesture, executed natively by the platform driver; concise and reliable.
+W3C Actions, build a PointerInput sequence (press to move to release) for custom gestures like pinch or precise drags.
+Deprecated: the old TouchAction, MultiTouchAction classes are removed in newer clients. Use W3C Actions or executeScript("mobile: ...") instead, a common "is your knowledge current?" probe.
+
+Section: Native vs WebView (Hybrid Apps).
+A hybrid app embeds web content (a WebView) inside a native shell. Appium exposes each as a context:
+NATIVE_APP, drive native widgets via UiAutomator2/X C U I Test.
+WEBVIEW_*, drive the embedded web page with Selenium-style CSS/DOM locators.
+Switch with the context A P I:
+On Android, WebView automation drives an embedded Chromedriver that must match the WebView's Chrome version (Appium can auto-download it). Mobile-web testing in a real browser is just a special case: set browserName instead of app.
+
+Section: Page Objects, Inspector & Appium vs Native.
+Page Object Model applies exactly as on the web, one screen object per screen, encapsulating locators and actions, so a U I change touches one file. Appium Inspector is the GUI that connects to a session, renders the live element tree, and helps you craft and verify locators.
+Aspect, Appium, Native (Espresso, X C U I Test). Platform reach, One codebase for Android + iOS, one platform only. Speed, Out-of-process, slower, in-process, faster and more stable. Language, Any WebDriver language, the app's language (Kotlin/Java, Swift). Setup, Server + driver + capabilities, built into the I D E toolchain.
+Appium wins on cross-platform reuse and language freedom; native frameworks win on raw speed and stability. The usual recommendation: Appium for broad black-box E2E across both platforms, native frameworks when a single-platform team wants the fastest possible feedback.
+
+That's the Appium cheat sheet. Review the questions to lock it in.

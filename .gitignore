@@ -17,3 +17,8 @@ pnpm-debug.log*
 logs_extracted/
 *.log
 tasks/
+
+# Audio pipeline working dir (wav/mp3/vtt/timings) and local dev staging.
+# Committed audio artifacts are the narration scripts, transcripts, and manifest.
+build/
+public/audio/

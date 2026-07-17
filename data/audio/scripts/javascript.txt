@@ -1,0 +1,62 @@
+JavaScript cheat sheet.
+A to-the-point review of the JavaScript an S D E T gets asked about: types & coercion, var/let/const, scope, closures, this, prototypes & classes, the event loop, promises & async/await, and array methods, plus the Jest, Playwright testing stack. Short explanations, short examples.
+
+Section: Types & Variables.
+JavaScript is dynamically typed: variables don't have types, values do. There are 7 primitives and everything else is an object.
+Primitives (immutable, copied by value): string, number, boolean, null, undefined, bigint, symbol.
+Objects (arrays, functions, plain objects) are reference types, assigning copies the reference, so both names point at the same object.
+typeof reports the type, with two classic quirks: typeof null === "object" (a historic bug) and typeof function(){} === "function".
+null vs undefined: undefined = a variable was declared but never assigned (the engine's default); null = you deliberately set "no value".
+
+Section: var, let & const.
+Keyword, Scope, Reassign?, Hoisting. var, function, yes, hoisted, init undefined. let, block, yes, hoisted but in the TDZ. const, block, no, hoisted but in the TDZ.
+Default to const; use let only when you reassign; avoid var.
+const stops reassignment, not mutation, const o = {}; o.x = 1 is fine.
+TDZ (temporal dead zone): a let/const exists but can't be read until its declaration runs, touching it early throws, unlike var which reads as undefined.
+
+Section: Scope, Hoisting & Closures.
+Hoisting: declarations are processed before code runs. function declarations are fully hoisted (callable above their definition); var is hoisted as undefined; let/const are hoisted into the TDZ.
+A closure is a function that remembers the variables from the scope where it was created, even after that scope has returned. It's the backbone of private state and the single most-asked JS concept.
+Why let fixes the loop: let creates a fresh binding per iteration, so each callback closes over its own i; var shares one binding.
+
+Section: this & Function Binding.
+this is decided by how a function is called, not where it's defined, except arrow functions.
+Method call obj.fn(), this is obj.
+Plain call fn(), this is undefined in strict mode (else the global object).
+Arrow function, has no own this; it inherits from the enclosing scope. Ideal for callbacks.
+call/apply invoke with an explicit this; bind returns a new function permanently bound.
+
+Section: Prototypes & Classes.
+JS inheritance is prototype-based: every object has a hidden link to a prototype object, and property lookups walk up that prototype chain until found or it hits null.
+class (ES6) is syntactic sugar over prototypes, cleaner syntax, same mechanism.
+Say this: classes don't add a new inheritance model, they're sugar over the prototype chain that already existed.
+
+Section: Arrays, Objects & Modern Syntax.
+Immutable iteration, map, filter, reduce, find, some/every return new values without mutating the source.
+Destructuring, pull fields out of objects/arrays in one line.
+Spread, rest (...), copy & merge, or gather arguments.
+Optional chaining ?. and nullish coalescing ?? for safe access and defaults (?? only falls back on null/undefined, unlike ||).
+?? vs ||: 0 || 5 is 5 (0 is falsy) but 0 ?? 5 is 0, use ?? when 0/""/false are valid values.
+
+Section: The Event Loop.
+JS is single-threaded. The event loop is how it does non-blocking work: synchronous code runs on the call stack; async callbacks wait in queues and run only when the stack is empty.
+Call stack, runs synchronous code now.
+Microtask queue, resolved promise callbacks (.then, await continuations). Drained fully after each task, before any macrotask.
+Macrotask queue, setTimeout, I/O, events. One per loop turn.
+Why 3 before 2: the promise callback is a microtask and runs before the next macrotask (the timer), even with a 0 ms delay.
+
+Section: Promises & async, await.
+A Promise represents a future value: pending to fulfilled | rejected. async/await is syntax over promises that reads like synchronous code.
+await pauses the async function until the promise settles, without blocking the thread.
+Wrap await in try/catch to handle rejections (the equivalent of .catch).
+Promise.all runs work concurrently and fails fast; Promise.allSettled waits for all regardless; Promise.race takes the first to settle.
+Don't await in a loop when calls are independent, fire them together with Promise.all.
+
+Section: Test Stack for SDETs.
+For a Playwright/S D E T role the JS testing surface is small and worth naming:
+Playwright Test, the runner you'll use most: test/expect, fixtures, auto-waiting web-first assertions, parallel projects, trace viewer.
+Jest, Vitest, unit testing: describe/it/expect, mocks & spies (jest.fn(), jest.mock()), snapshots.
+Cypress, alternative E2E framework; in-browser, good DX, retry-able assertions.
+TypeScript, most modern test suites are TS for type-safe page objects and fixtures.
+
+That's the JavaScript cheat sheet. Review the questions to lock it in.

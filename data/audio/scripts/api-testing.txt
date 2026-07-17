@@ -1,0 +1,76 @@
+A P I Testing cheat sheet.
+H T T P fundamentals, what to validate, test-case design, authentication, schema and contract testing, and C#, Playwright implementation, with rapid-fire Q&A.
+
+Section: Core H T T P.
+Methods & semantics.
+GET, retrieve, no body, idempotent, cacheable.
+POST, create, not idempotent (two calls = two resources).
+PUT, full replace/update, idempotent.
+PATCH, partial update, not necessarily idempotent.
+DELETE, remove, idempotent.
+Idempotency = the same request made once or many times leaves the server in the same state. Note: idempotent ≠ same response, DELETE twice returns 200 then 404, but the end state is identical.
+
+Section: Status Codes, Know These Cold.
+Code, Meaning & when. 200, OK, successful GET, general success. 201, Created, POST succeeded; often returns a Location header. 202, Accepted, request queued for async processing. 204, No Content, success with empty body (DELETE, PUT). 301/302, Permanent, temporary redirect. 304, Not Modified, caching, conditional requests. 400, Bad Request, malformed syntax, payload. 401, Unauthorized, not authenticated (who are you?). 403, Forbidden, authenticated but no permission (you can't do this). 404, Not Found. 405, Method Not Allowed. 409, Conflict, for example, duplicate creation. 422, Unprocessable Entity, semantic, validation failure. 429, Too Many Requests, rate limited. 500, Internal Server Error. 502/503/504, Bad Gateway, Service Unavailable, Gateway Timeout.
+401 vs 403 is a classic, 401 means the server doesn't know who you are; 403 means it knows you and you're still not allowed.
+
+Section: What You Actually Validate.
+For any A P I response, check beyond just the status line:
+Status code, correct for the scenario.
+Response body, correct values and correct data types.
+Schema, structure matches the contract (Jason Schema: required fields, shape, types).
+Headers, Content-Type, auth, caching, rate-limit headers.
+Response time, within the SLA.
+Side effects, did the POST actually persist? Verify with a follow-up GET.
+
+Section: Test Case Design.
+Positive.
+Valid inputs produce the expected success response and the expected persisted state.
+Negative.
+Missing required fields to 400, 422.
+Invalid data types or malformed Jason to 400.
+Missing, invalid, expired auth token to 401.
+Insufficient permissions to 403.
+Non-existent resource to 404.
+Duplicate creation to 409.
+Boundary values, empty string, max length, zero, negatives, oversized payloads.
+Other dimensions.
+Pagination, filtering, sorting parameters, rate limiting (429), concurrency, and idempotency keys.
+
+Section: Authentication.
+A P I Key, static key in a header or query param.
+Bearer token, J W T, Authorization: Bearer . A J W T is header.payload.signature; the payload carries claims (exp, sub, roles).
+oh-auth 2.0, token-exchange flow; in tests you typically grab a token via client-credentials or password grant in setup, then reuse it.
+Basic Auth, base64 user:pass, rarely used now.
+Common question: how do you handle token expiry in a suite? to Fetch the token once in a setup, fixture, cache it, and refresh when it expires rather than logging in per test.
+
+Section: Schema & Contract.
+Jason Schema validation.
+Assert the shape, required fields present, correct types, structure intact, not just individual values. More robust and maintainable than field-by-field assertions when the payload is large.
+Contract testing (Pact).
+Consumer and provider agree on a contract; it catches breaking changes between services without a full integration environment. It's consumer-driven.
+Schema validation checks the shape of one response. Contract testing verifies the agreement between two services stays intact.
+
+Section: A P I vs U I Testing.
+A P I tests are faster, more stable, and less flaky, no rendering, no waiting on elements.
+They exercise business logic and data integrity directly.
+They sit in the middle of the test pyramid, many fast unit tests at the base, a healthy A P I/integration layer in the middle, few U I/E2E tests at the top.
+They catch issues earlier and pinpoint failures more precisely than U I tests.
+
+Section: Mocking & Test Data.
+Mock, stub external dependencies (WireMock, mock servers) to isolate the service under test and control responses.
+Setup, teardown, create preconditions via A P I, clean up after; keep each test independent and idempotent.
+Environment management, base U R Ls, secrets, and tokens configured per environment (dev, staging).
+
+Section: C# Implementation.
+RestSharp.
+Playwright A P I testing.
+Strong talking point: Playwright's APIRequestContext lets you mix A P I setup with U I tests in one framework, for example, create test data via A P I, then verify it in the U I. Clean way to seed state without clicking through the app.
+Suite structure to raise.
+A base, client wrapper class for the H T T P client and auth.
+POCO models for request, response deserialization.
+[SetUp], [OneTimeSetUp] for token acquisition (NUnit), or fixtures (xUnit).
+Data-driven tests ([TestCase], [TestCaseSource]) for negative cases.
+Separate config per environment.
+
+That's the A P I Testing cheat sheet. Review the questions to lock it in.
