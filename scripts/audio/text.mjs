@@ -81,6 +81,32 @@ export function bodyToSpeech(html) {
   return out;
 }
 
+// Parse a speaker-labeled podcast dialogue into ordered turns. Blocks are separated
+// by blank lines; each turn must begin with an uppercase "SPEAKER:" label (e.g.
+// "MAYA:"). Whitespace inside a turn is collapsed to single spaces. Blocks without a
+// leading label (stray notes, headers) are ignored rather than spoken.
+export function parseDialogue(text) {
+  const turns = [];
+  for (const block of text.split(/\n\s*\n/)) {
+    const m = block.match(/^\s*([A-Z][A-Z0-9]*):\s*([\s\S]+)$/);
+    if (!m) continue;
+    const body = m[2].replace(/\s+/g, " ").trim();
+    if (body) turns.push({ speaker: m[1], text: body });
+  }
+  return turns;
+}
+
+// Split a turn's text into sentence units, so each is synthesized separately (stable
+// output) and gets its own caption cue/timing. Splits after . ! or ? that is followed
+// by whitespace — an ellipsis ("... ") is therefore also a break point, which reads as
+// a natural mid-turn pause.
+export function splitSentences(text) {
+  return text
+    .split(/(?<=[.!?])\s+/)
+    .map((s) => s.trim())
+    .filter(Boolean);
+}
+
 // Apply pronunciation overrides. `terms` is [[from, to], …]; matched case-sensitively
 // on word boundaries (for alphanumeric-bounded terms). A single combined pass so a
 // replacement is never re-scanned (e.g. "XCUITest"→"X C UI Test" isn't re-hit by a
