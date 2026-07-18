@@ -123,9 +123,11 @@ node scripts/audio/synthesize-podcast.mjs --id=api-testing --leo=am_fenrir
 #   --maya= / --leo=   override either voice (Kokoro voice ids, e.g. am_michael, am_puck)
 ```
 
-Output lands in `build/audio/<id>.mp3` (+ `.timing.json` with per-speaker cues). The first
-render of a new voice downloads its ~1 MB voice pack from Hugging Face; run online once,
-then `HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1` works.
+Output lands in `build/audio/podcast/<id>.mp3` (+ `.timing.json` with per-speaker cues) —
+a separate namespace from the single-voice `build/audio/`, so the two never collide.
+Renders are content-hash gated (voices + spoken text), so re-running skips unchanged
+episodes; pass `--force` to override. The first render of a new voice downloads its ~1 MB
+voice pack from Hugging Face; run online once, then `HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1` works.
 
 ## Planned expansion (later phases)
 

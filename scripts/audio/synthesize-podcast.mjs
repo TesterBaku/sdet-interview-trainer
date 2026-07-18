@@ -5,12 +5,21 @@
 // with short breaths. Reuses the pronunciation lexicon + ffmpeg encode from the
 // single-voice path (synthesize.mjs); the committed transcript keeps the real words.
 //
+// Output (mp3 + per-speaker timing) lands in build/audio/podcast/<name>.* — a
+// separate namespace from the single-voice pipeline's build/audio/, so the two never
+// overwrite each other and captions.mjs (which scans build/audio/ non-recursively)
+// does not pick up podcast timings.
+//
 // Run:
 //   node scripts/audio/synthesize-podcast.mjs [--id=api-testing]
-//        [--maya=af_heart] [--leo=am_michael] [--limit=N] [--suffix=name]
+//        [--maya=af_heart] [--leo=am_michael] [--limit=N] [--suffix=name] [--force]
 //
 //   --limit=N   render only the first N turns (quick voice A/B clips)
 //   --suffix=s  append ".s" to the output name (so A/B clips don't clobber)
+//   --force     re-render even if the content-hash matches an existing render
+//
+// Renders are content-hash gated on the spoken (lexicon-applied) dialogue + voices, so
+// re-running skips unchanged episodes; a script or lexicon edit re-renders.
 //
 // The first render of a given voice downloads its ~1MB voice pack from Hugging Face
 // (cached after). Run online once per new voice; HF_HUB_OFFLINE=1 works thereafter.
@@ -19,14 +28,16 @@
 import { readFileSync, writeFileSync, existsSync, mkdirSync, rmSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { createHash } from "node:crypto";
 import { execFileSync } from "node:child_process";
 import { KokoroTTS } from "kokoro-js";
 import { applyLexicon, normalizeText, parseDialogue, splitSentences } from "./text.mjs";
+import { floatToWav } from "./wav.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, "..", "..");
 const PODCAST_DIR = join(ROOT, "data", "audio", "podcast");
-const OUT_DIR = join(ROOT, "build", "audio");
+const OUT_DIR = join(ROOT, "build", "audio", "podcast");
 const LEXICON_PATH = join(ROOT, "data", "audio", "lexicon.json");
 
 const lexicon = JSON.parse(readFileSync(LEXICON_PATH, "utf8")).terms;
@@ -44,6 +55,9 @@ const getArg = (k, d) => {
 };
 const id = getArg("id", "api-testing");
 const suffix = getArg("suffix", "");
+const force = args.includes("--force");
+// Only a positive limit trims turns; a zero/negative value renders the whole episode
+// (a negative slice would otherwise silently drop turns from the END).
 const limit = Number(getArg("limit", "0")) || 0;
 
 // Speaker → Kokoro voice. Maya = warm female (grade A); Leo = male (overridable for A/B).
@@ -52,28 +66,7 @@ const VOICES = {
   LEO: getArg("leo", "am_michael"),
 };
 
-// Encode mono Float32 samples as a 16-bit PCM WAV buffer (same as synthesize.mjs).
-function floatToWav(samples, sampleRate) {
-  const buffer = Buffer.alloc(44 + samples.length * 2);
-  buffer.write("RIFF", 0);
-  buffer.writeUInt32LE(36 + samples.length * 2, 4);
-  buffer.write("WAVE", 8);
-  buffer.write("fmt ", 12);
-  buffer.writeUInt32LE(16, 16);
-  buffer.writeUInt16LE(1, 20); // PCM
-  buffer.writeUInt16LE(1, 22); // mono
-  buffer.writeUInt32LE(sampleRate, 24);
-  buffer.writeUInt32LE(sampleRate * 2, 28);
-  buffer.writeUInt16LE(2, 32);
-  buffer.writeUInt16LE(16, 34);
-  buffer.write("data", 36);
-  buffer.writeUInt32LE(samples.length * 2, 40);
-  for (let i = 0; i < samples.length; i++) {
-    const s = Math.max(-1, Math.min(1, samples[i]));
-    buffer.writeInt16LE(Math.round(s * 32767), 44 + i * 2);
-  }
-  return buffer;
-}
+const sha256 = (s) => createHash("sha256").update(s).digest("hex");
 
 mkdirSync(OUT_DIR, { recursive: true });
 
@@ -95,8 +88,26 @@ if (unknown.length) {
   process.exit(1);
 }
 
-if (limit) turns = turns.slice(0, limit);
+if (limit > 0) turns = turns.slice(0, limit);
 const outName = `${id}${suffix ? "." + suffix : ""}`;
+const mp3Path = join(OUT_DIR, `${outName}.mp3`);
+const timingPath = join(OUT_DIR, `${outName}.timing.json`);
+
+// Content-hash gate: hash the voices + the exact spoken (lexicon-applied) text of each
+// turn, so a script edit, a lexicon change, or a voice swap re-renders, but a repeat run
+// is skipped before the costly model load. Mirrors the per-sentence transform used below.
+const spokenScript = turns
+  .map((t) => `${t.speaker}: ${splitSentences(t.text).map((s) => applyLexicon(normalizeText(s), lexicon)).join(" ")}`)
+  .join("\n");
+const hash = sha256(`${JSON.stringify(VOICES)}\n${spokenScript}`);
+
+if (!force && existsSync(mp3Path) && existsSync(timingPath)) {
+  const prev = JSON.parse(readFileSync(timingPath, "utf8"));
+  if (prev.hash === hash) {
+    console.log(`skip ${outName} (unchanged; --force to re-render)`);
+    process.exit(0);
+  }
+}
 
 console.log(
   `Loading Kokoro (${MODEL_ID})… voices: ${Object.entries(VOICES).map(([k, v]) => `${k}=${v}`).join(", ")}`,
@@ -138,14 +149,10 @@ for (const c of chunks) {
 }
 
 const wavPath = join(OUT_DIR, `${outName}.wav`);
-const mp3Path = join(OUT_DIR, `${outName}.mp3`);
 writeFileSync(wavPath, floatToWav(all, SAMPLE_RATE));
 execFileSync(FFMPEG, ["-y", "-loglevel", "error", "-i", wavPath, "-b:a", "128k", mp3Path]);
 rmSync(wavPath, { force: true }); // drop the ~10x-larger intermediate WAV
 
 const durationSec = Number((total / SAMPLE_RATE).toFixed(2));
-writeFileSync(
-  join(OUT_DIR, `${outName}.timing.json`),
-  JSON.stringify({ id, voices: VOICES, durationSec, cues }, null, 2),
-);
+writeFileSync(timingPath, JSON.stringify({ id, voices: VOICES, hash, durationSec, cues }, null, 2));
 console.log(`  wrote ${outName}.mp3 (${durationSec}s, ${cues.length} cues)`);
