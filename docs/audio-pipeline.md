@@ -86,18 +86,54 @@ Blob credentials. The committed `manifest.json` always holds production (Blob) U
   python -c "from huggingface_hub import snapshot_download; snapshot_download('onnx-community/Kokoro-82M-v1.0-ONNX', allow_patterns=['config.json','tokenizer*.json','*.txt','onnx/model_quantized.onnx','voices/af_heart.bin'])"
   HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 npm run audio:tts
   ```
-- **A term is mispronounced** — add it to `data/audio/lexicon.json` and re-run
-  `audio:tts` (the lexicon affects only the audio, not the scripts/transcripts). Spell
-  acronyms as spaced letters (`"A P I"`).
+- **A term is mispronounced** — add it to `data/audio/lexicon.json` and re-run synthesis
+  (the lexicon affects only the audio, not the scripts/transcripts). Spell acronyms as
+  phonetic syllables joined by **hyphens** so Kokoro reads them as one connected word
+  (`"API" → "eigh-pee-eye"`); spaces make it read staccato. See the letter-sound guide in
+  the lexicon's `_comment` (A = `eigh`, I = `eye`, E = `ee`). Some acronyms read fine raw
+  and need no entry (e.g. `SDET`).
 - **ffmpeg not found** — set `FFMPEG=/full/path/to/ffmpeg.exe`.
 - **Kokoro voice** — pass `--voice=`; see the Kokoro model card for the voice list.
   (Python `kokoro` package is a documented fallback if the JS/ONNX build underperforms.)
+
+## Podcast episodes (two-voice, standalone) — primary format
+
+The single-narrator "read the cheat sheet aloud" output above was superseded: it only
+enumerates facts. The audio product is now **standalone two-host podcast episodes** in the
+style of NotebookLM's Audio Overview — a real conversation that teaches the topic on its
+own, screen-free, sized to cover the main interview questions (length follows the material,
+not a fixed target).
+
+- **Hosts:** `MAYA` (mentor / ex-hiring-manager) and `LEO` (the candidate's brain — asks
+  the "wait, so…" questions and restates hard points as memory hooks).
+- **Scripts** live in `data/audio/podcast/<id>.txt` — committed, human-editable, one turn
+  per block (`MAYA:` / `LEO:`), blank line between turns. They are LLM-authored (drafted,
+  then intonation-polished for TTS: flowing clauses over choppy sentences, reported speech
+  instead of quotes Kokoro can't voice-act) and remain the patchable source of truth.
+- **Synthesis:** `scripts/audio/synthesize-podcast.mjs` parses the turns
+  (`parseDialogue`), switches the Kokoro voice per speaker, renders each sentence, and
+  stitches them with short breaths (0.14 s between sentences, 0.4 s between speakers).
+  Reuses `data/audio/lexicon.json` for pronunciation.
+
+```bash
+# Render one episode (Maya = af_heart female, Leo = am_fenrir male):
+node scripts/audio/synthesize-podcast.mjs --id=api-testing --leo=am_fenrir
+#   --limit=N   render only the first N turns (quick voice/pronunciation A/B clips)
+#   --suffix=s  append ".s" to the output name so A/B clips don't clobber
+#   --maya= / --leo=   override either voice (Kokoro voice ids, e.g. am_michael, am_puck)
+```
+
+Output lands in `build/audio/podcast/<id>.mp3` (+ `.timing.json` with per-speaker cues) —
+a separate namespace from the single-voice `build/audio/`, so the two never collide.
+Renders are content-hash gated (voices + spoken text), so re-running skips unchanged
+episodes; pass `--force` to override. The first render of a new voice downloads its ~1 MB
+voice pack from Hugging Face; run online once, then `HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1` works.
 
 ## Planned expansion (later phases)
 
 - **Offline listening** — cache audio in the service worker (`public/sw.js`) behind a
   same-origin `/audio/[id]` route, plus a "Download for offline" button (leverages the PWA).
 - **Audio flashcards** — question → pause → answer, generated from `data/questions/*.json`.
-- **Commute Mode** — a playlist page queuing a topic's sheets + Q&A.
-- **Two-voice podcast** — a dialogue-script generator rendering two Kokoro voices,
-  stitched with ffmpeg, to recreate the NotebookLM feel — fully owned.
+- **Commute Mode** — a playlist page queuing a topic's episodes + Q&A.
+- **Podcast rollout** — author + render the remaining topics (pilot: `api-testing`), then
+  an in-app podcast player (audio + synced transcript) as its own PR.

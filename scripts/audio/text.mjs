@@ -81,6 +81,42 @@ export function bodyToSpeech(html) {
   return out;
 }
 
+// Parse a speaker-labeled podcast dialogue into ordered turns. A new turn starts at
+// each line beginning with an uppercase "SPEAKER:" label (e.g. "MAYA:"); every
+// subsequent non-empty line — including paragraphs separated by blank lines — is
+// appended to the current turn until the next label. Blank lines are ignored (a turn
+// may span them), and any text before the first label (stray notes/headers) is dropped.
+// This is line-driven rather than blank-line-block driven, so adjacent-label lines are
+// not merged into one turn and multi-paragraph turns are not silently truncated.
+export function parseDialogue(text) {
+  const turns = [];
+  let current = null;
+  for (const rawLine of text.split(/\r?\n/)) {
+    const line = rawLine.trim();
+    if (!line) continue;
+    const m = line.match(/^([A-Z][A-Z0-9]*):\s*(.*)$/);
+    if (m) {
+      current = { speaker: m[1], text: m[2].trim() };
+      turns.push(current);
+    } else if (current) {
+      current.text = current.text ? `${current.text} ${line}` : line;
+    }
+  }
+  return turns.filter((t) => t.text);
+}
+
+// Split a turn's text into sentence units, so each is synthesized separately (stable
+// output) and gets its own caption cue/timing. Splits after . ! or ? followed by
+// whitespace — but NOT after a single-letter-plus-dot (an initialism like "U.S." or
+// "e.g."), which would otherwise fragment mid-abbreviation. An ellipsis ("... ") is
+// still a break point, which reads as a natural mid-turn pause.
+export function splitSentences(text) {
+  return text
+    .split(/(?<=[.!?])(?<!\b[A-Za-z]\.)\s+/)
+    .map((s) => s.trim())
+    .filter(Boolean);
+}
+
 // Apply pronunciation overrides. `terms` is [[from, to], …]; matched case-sensitively
 // on word boundaries (for alphanumeric-bounded terms). A single combined pass so a
 // replacement is never re-scanned (e.g. "XCUITest"→"X C UI Test" isn't re-hit by a

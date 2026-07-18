@@ -10,6 +10,8 @@ import {
   tableToSpeech,
   bodyToSpeech,
   applyLexicon,
+  parseDialogue,
+  splitSentences,
 } from "../../scripts/audio/text.mjs";
 
 test("decodeEntities resolves the entities cheat sheets use", () => {
@@ -87,4 +89,55 @@ test("applyLexicon does not re-fire a shorter rule inside a longer rule's replac
   // "XCUITest" → "X C UI Test" must NOT then be hit by the "UI" → "U I" rule.
   const terms = [["XCUITest", "X C UI Test"], ["UI", "U I"]];
   assert.equal(applyLexicon("XCUITest rocks", terms), "X C UI Test rocks");
+});
+
+test("parseDialogue splits labeled turns and folds continuation lines into the turn", () => {
+  const script = "MAYA: Hello there.\nSecond line.\n\nLEO: Hi Maya.\n";
+  assert.deepEqual(parseDialogue(script), [
+    { speaker: "MAYA", text: "Hello there. Second line." },
+    { speaker: "LEO", text: "Hi Maya." },
+  ]);
+});
+
+test("parseDialogue splits adjacent-label lines with no blank line between them", () => {
+  // Regression: a blank-line-block parser would merge these and speak the literal "LEO:".
+  const script = "MAYA: Hi there.\nLEO: Hello back.";
+  assert.deepEqual(parseDialogue(script), [
+    { speaker: "MAYA", text: "Hi there." },
+    { speaker: "LEO", text: "Hello back." },
+  ]);
+});
+
+test("parseDialogue keeps a multi-paragraph turn (internal blank line) instead of dropping it", () => {
+  const script = "MAYA: Para one.\n\nStill Maya, para two.\n\nLEO: Reply.";
+  assert.deepEqual(parseDialogue(script), [
+    { speaker: "MAYA", text: "Para one. Still Maya, para two." },
+    { speaker: "LEO", text: "Reply." },
+  ]);
+});
+
+test("parseDialogue ignores text before the first speaker label", () => {
+  const script = "# a stray note\n\nMAYA: Only this is spoken.\n\n   \n";
+  assert.deepEqual(parseDialogue(script), [{ speaker: "MAYA", text: "Only this is spoken." }]);
+});
+
+test("splitSentences breaks on sentence enders and drops empties", () => {
+  assert.deepEqual(splitSentences("First. Second! Third?"), ["First.", "Second!", "Third?"]);
+});
+
+test("splitSentences treats an ellipsis as a natural break point", () => {
+  // Matches the approved render: "times..." becomes its own cue, giving a mid-turn pause.
+  assert.deepEqual(splitSentences("twenty more times... and it's off."), [
+    "twenty more times...",
+    "and it's off.",
+  ]);
+});
+
+test("splitSentences does not fragment inside an abbreviation/initialism", () => {
+  // The dot after "U.S." / "e.g." must not be treated as a sentence boundary.
+  assert.deepEqual(splitSentences("The U.S. market is big. It grows."), [
+    "The U.S. market is big.",
+    "It grows.",
+  ]);
+  assert.deepEqual(splitSentences("Use it, e.g. here. Done."), ["Use it, e.g. here.", "Done."]);
 });
