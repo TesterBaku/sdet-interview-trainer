@@ -1,0 +1,71 @@
+MAYA: Okay, here is one that comes up in almost every SDET loop that touches DevOps. The interviewer shows you the output of kubectl get pods, and one of your test environment pods is stuck in CrashLoopBackOff, restarting every 40 seconds or so, but when you check the application logs they look completely clean, no stack trace, no error, nothing. So they lean back and ask what your first move is. And most candidates immediately say they would restart the pod, which is exactly the answer that ends the interview early.
+
+LEO: And if restarting it was your first instinct too, well, this is the episode for you. I'm Leo, I spend my days writing automation that runs on clusters I only half understood until Maya beat Kubernetes into my head.
+
+MAYA: And I'm Maya, I've been a staff SDET for a long time and I've run a lot of these interviews myself, so today we're doing Kubernetes for test engineers, which means what it is, why it exists, the handful of objects you actually need to know, and the triage moves that make you look like you've genuinely operated a cluster and not just read a blog post.
+
+LEO: And before anyone panics, nobody expects an SDET to administer a production cluster, right, so why does this topic keep showing up?
+
+MAYA: Because modern test environments live on Kubernetes, that's really the whole story. Your app under test gets deployed to a namespace per branch, your CI spins up throwaway clusters, and when an end to end run fails, the difference between a good SDET and a great one is whether you can tell a real product bug apart from an environment problem in 5 minutes instead of 5 hours. So interviewers probe Kubernetes to find out whether you can debug the world your tests actually run in.
+
+LEO: Okay, so start me at the beginning, because the classic opener is the difference between Docker and Kubernetes, and I feel like people fumble it by treating them as rivals.
+
+MAYA: Right, and they're not rivals, they're layers. Docker builds and runs a container on a host, one package on one machine, while Kubernetes runs thousands of containers across a whole fleet of machines, deciding where each one goes, restarting the ones that die, scaling them when load spikes, and rolling out new versions without downtime. The line I'd give in an interview is that Docker is the package and Kubernetes is the operations team that runs the packages and keeps them alive.
+
+LEO: And the operations team never sleeps, which brings us to the idea everyone name-drops, desired state.
+
+MAYA: This is the single most important concept in the whole topic, so here's the analogy I want you to carry into the room. Kubernetes works like a thermostat. You don't tell a thermostat to turn the furnace on for 7 minutes, you declare that you want the room at 21 degrees, and the thermostat continuously compares the actual temperature to the desired temperature and acts to close the gap. Kubernetes is exactly that, but for software. You declare in YAML that you want 3 replicas of this image, and controllers inside the cluster run reconciliation loops, endlessly comparing actual state to desired state, and whenever reality drifts, a pod crashes, a node dies, they recreate and reschedule things until reality matches the declaration again.
+
+LEO: So when an interviewer asks how self-healing works, the answer isn't that Kubernetes notices a crash and sends an alert, the answer is that a control loop sees the gap between desired and actual state and closes it, like a thermostat kicking the furnace back on.
+
+MAYA: Exactly, and you can hang the whole architecture question off that same picture. A cluster is a control plane, the brain, plus worker nodes where your pods actually run. The API server is the front door, every kubectl command and every tool talks to it. etcd is the key value store holding the entire cluster state, basically the thermostat's memory of what you asked for. The scheduler decides which node a new pod lands on, the controller manager runs those reconciliation loops we just talked about, and out on each node the kubelet is the local agent that actually starts containers and reports back, with kube-proxy handling the networking rules.
+
+LEO: Okay, second chunk then, the objects. Because I remember being genuinely confused about why one boring web app needs a Pod and a ReplicaSet and a Deployment, it felt like bureaucracy.
+
+MAYA: It feels like bureaucracy until you see what each layer buys you, so let me give you the analogy for this whole chunk, a taxi dispatch service. A pod is a single taxi, it's the smallest deployable unit, one container or occasionally a few tightly coupled containers that share one network identity and storage, and crucially, pods are ephemeral. Taxis break down, get replaced, and every replacement comes back with a different plate, meaning a different IP address. A ReplicaSet is the dispatcher's rule that says keep 3 taxis on the road at all times, no more, no less. And a Deployment is the fleet manager sitting above that, because when you want to upgrade the whole fleet to new cars, the Deployment swaps taxis out gradually, a few at a time, and if the new model turns out to be a lemon it can roll the whole fleet back to the old one.
+
+LEO: Which answers the pod versus Deployment question directly, you almost never create pods by hand, you write a Deployment, and it manages the ReplicaSet, which manages the pods, and that layering is what gives you rolling updates, rollbacks, and self-healing for free.
+
+MAYA: That's the sentence, say it just like that. And for completeness, know the cousins exist, a StatefulSet for things like databases that need stable identity and storage, a DaemonSet when you need exactly 1 pod on every node, usually monitoring agents, and Jobs or CronJobs for run to completion and scheduled tasks. One line each is plenty.
+
+LEO: Now here's my wait, so moment. If pods keep dying and coming back with new IPs, how does my test framework ever reliably reach the app? I can't hardcode a taxi's plate number.
+
+MAYA: And that question is exactly why Services exist. You never call a taxi directly, you call the dispatch phone number, and dispatch sends whichever taxi is currently available. A Service is that phone number, a stable virtual IP and DNS name that load balances across all the healthy pods behind it. And the clever part, the glue interviewers love hearing about, is that a Service finds its pods by label selector, not by IP. Every pod wears a label, like app equals web, and the Service routes to whatever currently wears that badge, which is exactly how it keeps working while pods are constantly replaced underneath it.
+
+LEO: And the Service types question, because that one shows up as a rapid fire check.
+
+MAYA: Three tiers of reachability. ClusterIP is the default and it's internal only, pods talking to pods inside the cluster. NodePort opens a fixed port on every node so you can reach it from outside, mostly for dev and test. And LoadBalancer provisions an actual external cloud load balancer. Then Ingress sits in front of all of it as an HTTP router, doing host and path rules and TLS, so 10 apps can share one entry point, like one receptionist in the lobby directing visitors to different departments instead of every department paying for its own front door.
+
+LEO: Okay, third chunk, keeping apps configured and healthy, and I know the health part is where the famous trap lives, so build me up to it.
+
+MAYA: Config first because it's quick. A ConfigMap injects non-sensitive settings, URLs, feature flags, into your containers as environment variables or mounted files, so config stays out of the image, and a Secret does the same job for sensitive stuff like passwords and tokens. Hold that thought about Secrets though, because it's coming back in trap corner. And namespaces, since SDETs live in them, are virtual partitions of one cluster, so dev, staging, and a test namespace per pull request can share hardware without stepping on each other.
+
+LEO: And the probes.
+
+MAYA: Probes are periodic health checks the kubelet runs against each container, and the analogy here is a restaurant kitchen. The liveness probe asks whether the cook has collapsed on the floor, and if it fails, Kubernetes restarts the container, drags the cook out and puts a fresh one at the station, which is how you recover from deadlocks. The readiness probe asks a completely different question, whether the kitchen is ready to take orders right now, and if it fails, Kubernetes just flips the closed sign, it pulls that pod out of the Service's rotation without killing it, and puts it back the moment it's ready. That covers warm up time, or waiting on a database connection. There's also a startup probe that protects slow starting apps so the liveness check doesn't murder them before they finish booting.
+
+LEO: So the memory hook is, liveness failing restarts, readiness failing only removes from rotation, dead cook versus closed sign.
+
+MAYA: Which brings us straight to trap corner, and there are 2 classics here. Trap number 1 is mixing those probes up, and it's worse than a definition slip, because if you put a dependency check, say, can I reach the database, into a liveness probe, then the moment the database blips, Kubernetes starts killing perfectly healthy containers, they come back up, still can't reach the database, get killed again, and now your whole fleet is in a restart storm that the liveness probe itself is causing. Dependency and warm up checks belong in readiness, liveness should only ever detect a truly stuck process. And notice that's also the answer to our cold open, an app with clean logs that keeps getting killed every 40 seconds is the signature of a misconfigured liveness probe, and the way you prove it is kubectl describe pod, where the Events section will literally tell you the probe failed.
+
+LEO: And trap number 2 is the Secrets one you told me to hold.
+
+MAYA: Trap number 2 is the candidate who says Secrets are safe because Kubernetes encrypts them, and no, by default a Secret is only base64 encoded, which is an encoding, not encryption, anyone with access can decode it instantly. The strong answer names the fix, you control access with RBAC, you enable encryption at rest for etcd, and in serious shops you bring in an external store like Vault or Sealed Secrets. Saying encoded, not encrypted, out loud is worth real points.
+
+LEO: Okay, so let's do the in the room segment, how does this actually surface for an SDET candidate, because I doubt anyone asks me to recite the controller manager's job description.
+
+MAYA: They mostly come at it sideways through scenarios. A very common one is describing a flaky end to end suite and asking how you'd make test environments reproducible, and the answer they want is ephemeral environments, spin up a namespace or a throwaway cluster per branch with something like kind, which is Kubernetes in Docker, or minikube, deploy with Helm charts so the same templated manifests work across dev and test with different values, run the suite, tear it all down. Another is the debugging drill we opened with, and your triage order should be automatic, kubectl describe pod first because the Events section almost always names the cause, no node fits, image pull failed, probe failing, then kubectl logs for application output, then exec to poke around inside the container, and port-forward to hit a Service from your laptop and take the cluster networking out of the equation.
+
+LEO: What about scaling and rollouts, do those come up for us?
+
+MAYA: As one liners you should have loaded. Scaling is either manual, kubectl scale to 5 replicas, or automatic with the Horizontal Pod Autoscaler adjusting replica count on CPU or custom metrics. Zero downtime deploys are just the default rolling update, pods replaced gradually behind their readiness probes, and if the release is bad, kubectl rollout undo puts the previous version back, which is a great thing to mention when they ask how you'd unblock a broken test environment fast. And know requests versus limits, requests reserve resources so the scheduler can place the pod, limits cap usage, and a container that exceeds its memory limit gets OOM killed, which by the way is another classic cause of mystery restarts with clean logs.
+
+LEO: Alright, recap time, give me the 60 second version I can replay in the parking lot before the interview.
+
+MAYA: Three cards. If they ask Docker versus Kubernetes, say Docker runs a container on a host while Kubernetes orchestrates many containers across a cluster, and earn the bonus by explaining desired state, you declare it, control loops reconcile reality to match it, that's the thermostat. If they ask liveness versus readiness, say liveness failing restarts the container and readiness failing only pulls the pod from the Service rotation until it recovers, dead cook versus closed sign, and add that dependency checks in a liveness probe cause restart storms. And if they ask how you'd debug a failing pod, say describe pod and read the Events first, then logs, then exec and port-forward, and name CrashLoopBackOff and Pending as the two states where the events almost always hand you the answer.
+
+LEO: And bonus points scattered along the way, a Service finds pods by label selector, not IP, a Secret is encoded, not encrypted, and you create Deployments, never bare pods.
+
+MAYA: That's the episode. Go run a kind cluster on your laptop tonight, break a readiness probe on purpose, and watch the events tell you the story, because next time we'll build on this with more of the pipeline that gets your code onto that cluster in the first place.
+
+LEO: Practice the triage, trust the thermostat, and we'll see you in the next one.

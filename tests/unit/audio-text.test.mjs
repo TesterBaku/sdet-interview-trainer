@@ -36,6 +36,10 @@ test("normalizeText preserves tight paths (no spaces around slash)", () => {
   assert.equal(normalizeText("/var/lib/postgresql"), "/var/lib/postgresql");
 });
 
+test("normalizeText speaks snake_case identifiers as words", () => {
+  assert.equal(normalizeText("call bind_tools then with_structured_output"), "call bind tools then with structured output");
+});
+
 test("asSentence adds terminal punctuation only when missing", () => {
   assert.equal(asSentence("hello"), "hello.");
   assert.equal(asSentence("done."), "done.");
