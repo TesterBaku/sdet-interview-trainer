@@ -27,7 +27,13 @@ for (const file of scripts) {
     const unknown = [...new Set(turns.map((t) => t.speaker))].filter((s) => !SPEAKERS.has(s));
     assert.deepEqual(unknown, [], `${file}: unexpected speaker label(s) ${unknown.join(", ")}`);
 
-    assert.ok(turns.every((t) => t.text.trim().length > 0), `${file}: an empty turn slipped through`);
+    // parseDialogue drops any labelled turn whose body is empty, so a bare "MAYA:" line
+    // with no text would silently vanish. Assert the parsed turn count matches the number
+    // of speaker-label lines in the raw file, which catches exactly that.
+    const labelLines = readFileSync(join(PODCAST_DIR, file), "utf8")
+      .split(/\r?\n/)
+      .filter((l) => /^[A-Z][A-Z0-9]*:/.test(l.trim())).length;
+    assert.equal(turns.length, labelLines, `${file}: a labelled turn had an empty body and was dropped`);
 
     // The opener sets up the cold-open interview question; keep MAYA first for consistency.
     assert.equal(turns[0].speaker, "MAYA", `${file}: episodes should open on MAYA`);

@@ -30,6 +30,7 @@ export function normalizeText(s) {
     .replace(/\be\.g\.\s*,?/gi, "for example, ")
     .replace(/\bi\.e\.\s*,?/gi, "that is, ")
     .replace(/…/g, "...")
+    .replace(/_/g, " ") // snake_case identifiers (bind_tools, add_item) → spoken as words
     .replace(/[ \t\r\n]+/g, " ")
     .trim();
 }
