@@ -1,0 +1,63 @@
+MAYA: Okay, here's one that shows up in real screens all the time. You write a Python function with a default argument of an empty list, so def add_item, x equals empty list, and you call it 3 times without passing anything, and instead of 3 fresh lists you get one list that keeps growing across calls. The interviewer leans in and asks why that happens, and whether it's a bug in Python... so, is it?
+
+LEO: And if your honest answer is that Python is just being weird today, this episode is for you. I'm Leo, I write automation code for a living, and I have absolutely been burned by that exact default argument.
+
+MAYA: And I'm Maya. I've spent years as a staff SDET and I used to run hiring loops, and I can tell you that Python questions in SDET interviews are rarely about trivia, because what the interviewer actually wants to know is whether you understand the machine you're building your framework on. Today we're covering Python for SDETs, which means mutability and the copy questions, generators, decorators, the GIL, and how all of it lands in pytest.
+
+LEO: So before we solve your list mystery, why does this stuff matter so much for test roles specifically? I can click elements and call APIs without knowing what a dunder method is.
+
+MAYA: You can, right up until your framework grows past a few hundred tests, because at that point you're not writing scripts anymore, you're maintaining a piece of software, and the failures get subtle. A shared mutable default quietly leaks state between tests, a badly scoped fixture makes run 2 depend on run 1, and a misunderstanding of the GIL makes someone parallelize a suite in a way that gains nothing. Interviewers ask these questions because every one of them maps to a real production incident in a test framework.
+
+LEO: Okay, so let's start where the cold open started, with variables and mutability.
+
+MAYA: Right, and the mental model to install is this. In Python, a variable is not a box that holds a value, it's a name tag, like a luggage tag you clip onto a suitcase. When you write a equals a list of 1, 2, 3, you created one suitcase and clipped the tag a onto it, and when you then write b equals a, you did not buy a second suitcase, you just clipped a second tag onto the same bag. So when b appends 4, and you look at a, you see 4 in there too, because both names point at one object.
+
+LEO: Which explains every haunted debugging session where a list changed and I swore I never touched it. So assignment never copies, it just adds another tag to the same suitcase.
+
+MAYA: Exactly, assignment binds names, it never copies, and that's also the key to the interview pair of is versus double equals. The is operator asks whether 2 tags are on the same physical suitcase, identity, the same object in memory, while double equals asks whether 2 suitcases have identical contents, value equality. And this is why immutability matters, because Python splits its types into immutable ones like int, string, tuple, and frozenset, and mutable ones like list, dict, and set, and a tuple, being immutable, is hashable, which means it can be a dictionary key or live in a set, while a list can't.
+
+LEO: So if they ask list versus tuple, the memory hook is that the list is the open suitcase you can keep stuffing, and the tuple is the sealed, shrink-wrapped one, and because it's sealed you're allowed to use it as a dict key.
+
+MAYA: That's the answer, and copies follow the same logic. A shallow copy, like slicing the whole list or calling copy dot copy, buys you a new outer suitcase but the smaller bags packed inside are still the same shared ones, so mutating a nested list still bleeds through, whereas copy dot deepcopy repacks everything recursively so nothing is shared. And now the cold open solves itself, because default argument values are evaluated exactly once, when the def statement runs, not on every call, which means that empty list is one single suitcase created at definition time, and every call that doesn't pass its own list gets a tag to that same shared object, so it grows forever.
+
+LEO: And the fix is to make the default None and create the fresh list inside the function body, because the body runs every call, while the default line runs once. Honestly that's a great one-liner for the interview, defaults evaluate once at definition, so never put something mutable there.
+
+MAYA: Say it exactly like that and you've passed that question. Alright, chunk 2, generators, because the phrasing you'll hear is what the difference is between a list comprehension and a generator.
+
+LEO: And comprehensions themselves come up first, right, the one-line way to build a list, a dict, or a set from a loop with an optional filter, like squares of the even numbers in a range.
+
+MAYA: Right, they're beloved because they're readable and declarative, but the memory story is the interview point. A list comprehension is like cooking every meal for a 1000-person banquet before anyone sits down, the whole thing exists in memory at once, plates everywhere. A generator is a conveyor belt sushi kitchen, it makes one plate when a customer reaches for it, then pauses until the next reach. You build one with the yield keyword inside a function, or by writing a comprehension with parentheses instead of square brackets, and each time the consumer asks for the next item, the function runs to the next yield, hands over one value, and freezes in place holding one item's worth of memory.
+
+LEO: So for SDET work, that's the log parser case, because if I need the total length of every line in a 2 gigabyte log, reading the file lazily line by line through a generator keeps memory flat, while building a full list of lines would eat RAM for no reason.
+
+MAYA: That's the exact example to give, and the trade-off to mention is that a generator is single-pass, once the belt has gone by you can't rewind it, so if you need to iterate twice or index into the middle, materialize a list. Which brings us to chunk 3, decorators, and this is the one candidates fear most and shouldn't.
+
+LEO: Because the syntax looks like magic, that little at sign floating above a function.
+
+MAYA: But the concept is just a phone case. Your phone still makes calls, nothing inside changed, but the case adds protection around every interaction. A decorator is a callable that takes your function, wraps it in a new function that does something before or after calling the original, and gives the wrapped version back under the same name, so you add behavior, logging, timing, retries, caching, without editing the function's body. This works because Python functions are first-class objects, you can pass them around like any value, and the wrapper is a closure, it remembers the function it captured.
+
+LEO: And the SDET use case writes itself, because a retry decorator that re-runs a flaky network call 3 times before giving up is the classic. So the flow is, outer function takes the function, defines a wrapper that loops attempts around calling it with star args and double-star kwargs, and returns the wrapper.
+
+MAYA: With 2 polish points that separate senior answers from junior ones. First, mention functools dot wraps on the wrapper, because without it the decorated function loses its name and docstring, which wrecks debugging and test reports. Second, connect it to tools you already use, because pytest fixtures, parametrize, property, and lru underscore cache are all decorators, so you've been using the pattern all along.
+
+LEO: Okay, trap corner time, and I know which trap you've picked, because I can feel it coming.
+
+MAYA: The GIL, the Global Interpreter Lock, and here's how the trap plays out. The interviewer asks how you'd speed up a slow test suite, and the candidate confidently says they'd spin up 10 threads so the work runs on 10 cores in parallel, and that answer is wrong in a very specific way, because in CPython the GIL allows only one thread to execute Python bytecode at any given moment. Think of it as a meeting room with a single talking stick, you can invite 10 brilliant people, but only whoever holds the stick may speak, so for pure CPU work, 10 threads just take turns and you gain nothing.
+
+LEO: But wait, so why does threading exist at all, and why do people see real speedups threading their API tests?
+
+MAYA: Because the stick gets handed over whenever a thread blocks on I O. While a thread is waiting on a network response, a file read, or a browser action, it releases the GIL and another thread runs, so I O-bound work, which is most test automation, overlaps beautifully under threads, or under asyncio if you want thousands of concurrent operations on a single thread with async and await. The dodge in the interview is to split the world in 2 before answering, saying that for I O-bound work you'd reach for threads or asyncio since the GIL releases during blocking I O, and for CPU-bound work you'd use multiprocessing, separate processes each with their own interpreter and their own GIL, which is real multi-core parallelism.
+
+LEO: And the beautiful kicker for an SDET interview is that pytest-xdist, the standard way to parallelize a suite with dash n auto, runs workers as separate processes, so it sidesteps the GIL entirely, and dropping that fact shows you've actually shipped parallel test runs.
+
+MAYA: Which is a perfect bridge to how all this surfaces in the room, because Python questions for SDETs almost always funnel toward pytest at the end. Expect them to ask how fixtures work, and the answer is that a function marked with the fixture decorator provides setup, then yield hands control to the test, then everything after the yield is teardown, and the test receives the fixture simply by naming it as an argument, dependency injection by name, with scopes, function, class, module, or session, controlling how often it's rebuilt.
+
+LEO: Plus the supporting cast, parametrize to run one test body over a table of inputs and expected values, pytest dot raises as a with block to assert an expected exception, markers like smoke for slicing the suite, conftest for sharing fixtures across files, and monkeypatch for swapping out env vars or attributes during a test.
+
+MAYA: And expect the practical follow-ups, like why a session-scoped fixture holding mutable state is dangerous, which loops us all the way back to the suitcase, because shared mutable objects across tests are the same bug as the shared default argument, just wearing a fixture costume. Interviewers love watching a candidate connect those 2 dots unprompted.
+
+LEO: Alright, 60-second recap, let me play it back. If they ask why a mutable default argument misbehaves, say defaults are evaluated once at definition time, so every call shares one object, and the fix is defaulting to None and creating the fresh object inside the body. If they ask list comprehension versus generator, say the comprehension builds the entire collection in memory while the generator yields one item at a time on demand, so for big files and streams the generator keeps memory flat. And if they ask about the GIL, split the world first, threads or asyncio for I O-bound work because the lock releases while waiting, multiprocessing for CPU-bound work, and pytest-xdist already parallelizes with processes.
+
+MAYA: That's the whole episode in 3 breaths, and if you can also wrap a retry decorator on a whiteboard with functools dot wraps in place, you're walking into that Python round with everything the interviewer hopes to hear. Go build a tiny fixture, break it on purpose with shared state, and fix it, because nothing beats having felt the bug yourself.
+
+LEO: The suitcase, the sushi belt, and the talking stick... my brain is fully furnished. Next time we'll keep working through the SDET stack, so keep practicing, and we'll see you in the next episode.

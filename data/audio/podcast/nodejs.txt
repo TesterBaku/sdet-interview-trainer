@@ -1,0 +1,63 @@
+MAYA: Okay, here is one that shows up in almost every Node.js interview, usually in the first 5 minutes. If Node.js is single-threaded, how does it handle 10,000 concurrent requests without falling over? And the follow-up that actually separates candidates, which is, if it's single-threaded, what happens when one of those requests needs to crunch a huge JSON file?
+
+LEO: And if your honest answer is that it just... handles it somehow, magic, event loop, hand wave, then this is the episode for you. I'm Leo.
+
+MAYA: And I'm Maya. I've hired a lot of SDETs, and Node.js questions come up constantly, because so much of our tooling lives there, Playwright, Cypress, WebdriverIO, half the API test frameworks you'll ever touch, they all run on Node. So when an interviewer asks about the event loop, they're not being academic, they're checking whether you understand the machine your tests run on, because flaky async tests are usually event loop misunderstandings wearing a disguise.
+
+LEO: Right, and it's also a filter question, because everyone has heard that Node is single-threaded and non-blocking, but very few people can explain how both of those things can be true at the same time. It sounds like a contradiction.
+
+MAYA: It does, so let's dissolve it. Node.js runs your JavaScript on Google's V8 engine, and it pairs V8 with a C library called libuv, which provides two things, the event loop, and a thread pool for I/O work. And here's the sentence I want you to be able to say in an interview, Node is single-threaded for your JavaScript, but I/O is offloaded to libuv and the operating system, so the main thread never waits.
+
+LEO: Okay, give me the physical version of that, because I know you have one.
+
+MAYA: Picture a restaurant with exactly one waiter, but a full kitchen staff in the back. The waiter is your JavaScript thread. He takes an order from table 1, hands the ticket to the kitchen, and here's the key part, he does not stand there watching the food cook. He immediately moves to table 2, takes that order, hands it back, moves to table 3, and so on. When a dish is ready, the kitchen puts it on the pass with the table number attached, and the waiter delivers it on his next loop through the room. One waiter, dozens of tables, nobody blocked, because the slow work happens in the back.
+
+LEO: So the kitchen is libuv, the ticket on the pass is the callback waiting in a queue, and the waiter walking his loop through the room is, literally, the event loop.
+
+MAYA: Exactly, and that walking route has a fixed order, which interviewers love to probe. The loop moves through phases, first timers, where setTimeout and setInterval callbacks run, then pending callbacks for deferred I/O, then the poll phase, where it picks up new I/O events and runs their callbacks, then the check phase, which is where setImmediate callbacks fire, and finally close events, like a socket shutting down. Each phase drains its queue before the loop moves on.
+
+LEO: And I've heard there's something sneaky that runs between the phases too.
+
+MAYA: There is, and this is a senior-level detail that makes you stand out. Between phases, Node drains the microtask queue, and it does that in a strict order, process next tick callbacks first, then resolved Promise callbacks, and both of those drain completely before the loop continues to the next phase. Which means if you write code that keeps scheduling next tick callbacks in a loop, the waiter never leaves the kitchen doorway, he's stuck handling an endless stream of urgent notes, and no table ever gets served. A runaway next tick can literally starve all your I/O.
+
+LEO: Okay, memory hook time. The event loop is the waiter's route through the restaurant, timers, then I/O, then setImmediate, then close events, and microtasks are the urgent sticky notes he must clear before taking another step, next tick notes first, then Promise notes.
+
+MAYA: That's it. Now let's talk about how you actually write code in this world, because the async style has evolved through 3 generations, and interviewers often ask you to walk through them. First came error-first callbacks, the old Node convention where every callback receives the error as its first argument, and you check it every single time. Nest enough of those and you get the famous callback hell, code drifting sideways off the screen. Then came Promises, an object that represents a future value, chainable with then and catch, and composable with tools like Promise all. And finally async await, which is just syntactic sugar over Promises, letting you write asynchronous code that reads top to bottom and handle failures with a normal try catch.
+
+LEO: And there's a performance trap hiding in async await, right, because it reads sequentially, people write it sequentially.
+
+MAYA: Yes, and this one shows up in code review questions constantly. If you await 3 independent API calls one after another, you've quietly made them run in sequence, 3 seconds instead of 1. The fix is to start all 3, then await Promise all on the group, so independent work runs concurrently. And if you're stuck with an old callback-style API, util promisify wraps it into a Promise, or you just use the promise variants of core modules, like fs promises.
+
+LEO: Alright, second big concept, streams, because every time I see a Node question about processing a 2 gigabyte log file, streams are the expected answer.
+
+MAYA: They are, and the analogy here is drinking from a garden hose instead of trying to swallow the swimming pool. A stream processes data in chunks as they arrive, so memory stays flat no matter how big the source is. There are 4 types, Readable, a source you read from, like a file read stream or an incoming HTTP request, Writable, a destination like a file or an HTTP response, Duplex, which is both at once, like a TCP socket, and Transform, a duplex stream that changes data flowing through it, like gzip compression or encryption. The chunks themselves travel as Buffers, which are just containers for raw binary data.
+
+LEO: And you connect them with pipe, source pipes into gzip pipes into destination.
+
+MAYA: You can, but here's the professional detail, prefer stream pipeline over chaining raw pipe calls, because pipeline propagates errors from any stage and destroys all the streams on failure, while a chain of pipes will happily swallow a downstream error and leak resources. And both of them give you backpressure for free, which is my favorite part of the analogy, if the drain at the end of the hose clogs, the system automatically pinches the tap at the source, the readable pauses until the writable catches up, so memory stays bounded instead of ballooning.
+
+LEO: Backpressure, the hose pinches itself so the bucket never overflows. Got it. Now, before we hit the trap corner, I want the scaling story, because this connects back to your cold open, what happens when one request needs to crunch that huge JSON file on a single thread.
+
+MAYA: Right, because that's the honest weakness of the model, our one waiter is amazing at delegating kitchen work, but if you ask him to personally grind flour for 10 minutes, the entire restaurant freezes, every table just sits there. That's a CPU-bound task blocking the event loop. Node gives you 3 tools, and the interview skill is matching the tool to the kind of work. For CPU-bound work, heavy parsing, image processing, crypto number crunching, you use worker threads, which are real threads inside one process, they can even share memory through a SharedArrayBuffer, and they take the computation off the main thread so the loop stays responsive. That's hiring a dedicated prep cook in the back room. For an I/O-bound server that needs more throughput, you use the cluster module, which forks multiple Node processes that share one listening port, that's opening more copies of the restaurant, each with its own waiter, one per CPU core. And child process, with spawn, exec, or fork, is for running entirely separate programs and talking to them over streams or IPC.
+
+LEO: So the rule of thumb is, I/O-bound and need throughput, reach for cluster, CPU-bound and blocking the loop, reach for worker threads.
+
+MAYA: Say it exactly like that and you've answered a very common question cleanly. Which brings us to trap corner, because the classic wrong answer here is the mirror image, the candidate gets asked about a heavy computation blocking the loop and confidently says they'd use cluster to fix it. But cluster just gives you more single-threaded processes, so your heavy request still freezes whichever worker it lands on, you've just made the freeze less frequent, not gone. Cluster scales load, worker threads unblock compute.
+
+LEO: What are the other traps you saw as a hiring manager, the answers that made you wince?
+
+MAYA: Two big ones. First, on error handling, candidates who treat uncaught exception as a recovery tool, saying they'd catch it globally and keep the server running. After an uncaught exception, the process is in an undefined state, so the correct answer is to log it, run critical cleanup, and exit, then let a supervisor like pm2, systemd, or Kubernetes restart the process fresh. Crash fast, restart clean. And second, EventEmitters, which power half of Node's core, streams, servers, sockets, they're all emitters. If an emitter fires an error event and nobody is listening, Node throws it, and it can take down your whole process, so any emitter that can fail needs an error listener attached. In test automation that matters a lot, because an unhandled error event in your framework kills the entire run, not just one test.
+
+LEO: And error handling in general depends on the style you're in, right, try catch for sync code and async await, checking the error-first argument in callbacks, dot catch on raw Promises, and error listeners on emitters. Miss the one that matches your style and the failure escapes.
+
+MAYA: Exactly, and an unhandled Promise rejection surfaces through the process level unhandled rejection event, which is your safety net for logging, not your error strategy. Now, how this surfaces in the room. It usually starts broad, explain the event loop, or, how does Node handle concurrency, and the interviewer is listening for the words single-threaded, non-blocking, event-driven, plus some mention of libuv doing the background work. Then they drill into whatever you mention, so don't name-drop next tick unless you can explain microtask ordering. There's often a rapid-fire round too, things like the difference between CommonJS and ES modules, where the answer is that CommonJS is synchronous require and module exports, while ES modules use static import export and support top-level await, with the type field in package json deciding how plain js files are treated. Or a semver question, where caret 1.2.3 allows minor and patch updates up to but not including 2.0.0, tilde allows only patch updates, and package lock json pins the exact versions for reproducible installs.
+
+LEO: And for SDETs specifically, I'd expect them to connect it to testing, like why an await you forgot makes a test pass falsely, or why blocking the loop makes timeouts fire late.
+
+MAYA: Which is exactly the kind of connection that turns a memorized answer into a hire. Alright, 60-second recap, 3 takeaways. If they ask how single-threaded Node handles thousands of concurrent operations, say that JavaScript runs on one thread but libuv offloads I/O to a background thread pool and the OS, queuing callbacks for the event loop, one waiter, full kitchen. If they ask what to do about CPU-heavy work blocking the loop, say worker threads for CPU-bound compute, cluster for scaling I/O-bound throughput across cores, and never confuse the two. And if they ask about global error handling, say uncaught exception means log, clean up, and exit, letting a process manager restart you, and that emitters always need an error listener, because a listenerless error event throws.
+
+LEO: One waiter, a prep cook for the heavy stuff, and a hose that pinches itself. I can hold onto that.
+
+MAYA: That's the goal. Go review the event loop phases once more before your interview, timers, poll, check, close, with microtasks between every step, and then quiz yourself on streams and semver in the app. We'll see you in the next episode.
+
+LEO: Happy studying, and may your event loop never block.
