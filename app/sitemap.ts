@@ -14,6 +14,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${base}/daily-practice`, lastModified: now, changeFrequency: "daily", priority: 0.9 },
     { url: `${base}/coding-gym`, lastModified: now, changeFrequency: "monthly", priority: 0.8 },
     { url: `${base}/cheatsheets`, lastModified: now, changeFrequency: "weekly", priority: 0.9 },
+    { url: `${base}/commute`, lastModified: now, changeFrequency: "weekly", priority: 0.7 },
     { url: `${base}/quizzes`, lastModified: now, changeFrequency: "weekly", priority: 0.9 },
     { url: `${base}/mock-exam`, lastModified: now, changeFrequency: "weekly", priority: 0.8 },
     { url: `${base}/review`, lastModified: now, changeFrequency: "never", priority: 0.5 },

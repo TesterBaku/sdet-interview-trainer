@@ -19,13 +19,14 @@ import { fileURLToPath } from "node:url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, "..", "..");
-const BUILD_DIR = join(ROOT, "build", "audio");
-const PUBLIC_AUDIO_DIR = join(ROOT, "public", "audio");
-const TRANSCRIPT_DIR = join(ROOT, "data", "audio", "transcripts");
-
 const args = process.argv.slice(2);
 const force = args.includes("--force");
 const local = args.includes("--local");
+// --podcast publishes the two-voice episodes from build/audio/podcast/.
+const podcast = args.includes("--podcast");
+const BUILD_DIR = join(ROOT, "build", "audio", ...(podcast ? ["podcast"] : []));
+const PUBLIC_AUDIO_DIR = join(ROOT, "public", "audio");
+const TRANSCRIPT_DIR = join(ROOT, "data", "audio", "transcripts");
 const only = (args.find((a) => a.startsWith("--only=")) || "").slice("--only=".length) || null;
 
 // Blob and local staging use independent manifests so a --local run can never write
@@ -117,7 +118,8 @@ for (const id of ids) {
     mp3Url,
     vttUrl,
     durationSec: timing.durationSec,
-    voice: timing.voice,
+    // two-voice episodes carry `voices` (a speaker→voice map); single-voice carry `voice`.
+    voice: timing.voice ?? (timing.voices ? Object.values(timing.voices).join(" + ") : null),
     hash: timing.hash,
   };
   published += 1;

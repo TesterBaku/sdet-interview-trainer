@@ -33,6 +33,14 @@ const lanes = [
     className: "border-signal/30 bg-signal/10",
     eyebrowClass: "text-signal",
   },
+  {
+    href: "/commute",
+    eyebrow: "On the go",
+    title: "Commute Mode",
+    body: "Two-host podcast episodes that teach each topic out loud — hands-free, screen-free, one per cheat sheet.",
+    className: "border-ink/15 bg-ink/5",
+    eyebrowClass: "text-ink/60",
+  },
 ];
 
 export default function PracticePage() {
@@ -46,7 +54,7 @@ export default function PracticePage() {
         </p>
       </header>
 
-      <div className="grid gap-5 lg:grid-cols-3">
+      <div className="grid gap-5 sm:grid-cols-2">
         {lanes.map((lane) => (
           <Link
             key={lane.href}

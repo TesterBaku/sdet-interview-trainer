@@ -1,9 +1,11 @@
 import Link from "next/link";
 import { cheatSheetSelfTest } from "@/lib/cheatsheets";
+import { formatAudioMinutes, getCheatSheetAudio } from "@/lib/audio";
 import type { CheatSheet } from "@/types/CheatSheet";
 
 export function CheatSheetCard({ sheet }: { sheet: CheatSheet }) {
   const selfTest = cheatSheetSelfTest(sheet);
+  const audio = getCheatSheetAudio(sheet.id);
   return (
     <article className="group relative flex h-full flex-col overflow-hidden rounded-[2rem] border border-ink/10 bg-white/75 p-5 pl-6 shadow-panel transition hover:-translate-y-1 hover:bg-white">
       <span aria-hidden className="absolute inset-y-0 left-0 w-1.5" style={{ backgroundColor: sheet.accent }} />
@@ -14,7 +16,14 @@ export function CheatSheetCard({ sheet }: { sheet: CheatSheet }) {
         >
           {sheet.group}
         </span>
-        <span className="text-sm font-bold text-ink/60">{sheet.sections.length} sections</span>
+        <div className="flex flex-col items-end gap-1">
+          <span className="text-sm font-bold text-ink/60">{sheet.sections.length} sections</span>
+          {audio ? (
+            <span className="inline-flex items-center gap-1 rounded-full bg-ink/5 px-2 py-0.5 text-[11px] font-bold text-ink/60">
+              <span aria-hidden>🎧</span> {formatAudioMinutes(audio.durationSec)}
+            </span>
+          ) : null}
+        </div>
       </div>
       <h2 className="mt-4 font-display text-2xl font-bold text-blueprint">{sheet.title}</h2>
       <p className="mt-3 flex-1 text-sm leading-6 text-ink/70 line-clamp-4">{sheet.summary}</p>

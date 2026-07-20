@@ -1,0 +1,936 @@
+{
+  "id": "selenium",
+  "voice": null,
+  "voices": {
+    "MAYA": "af_heart",
+    "LEO": "am_fenrir"
+  },
+  "durationSec": 1093.11,
+  "hash": "ef40971dbfac317ca37651bd68568ba6688b6d187cf4f302dbca2a964bd4938a",
+  "cues": [
+    {
+      "speaker": "MAYA",
+      "text": "Okay, here's one that comes up in almost every Selenium interview I've ever run.",
+      "start": 0,
+      "end": 5.175
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Your test finds a button, the page refreshes, and then when you try to click that button, Selenium throws a StaleElementReferenceException, even though you can see the button sitting right there on the screen.",
+      "start": 5.315,
+      "end": 17.79
+    },
+    {
+      "speaker": "MAYA",
+      "text": "So the candidate says, that's a Selenium bug, the element exists, I'm looking at it.",
+      "start": 17.93,
+      "end": 23.455
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Is it a bug?",
+      "start": 23.595,
+      "end": 25.17
+    },
+    {
+      "speaker": "LEO",
+      "text": "And if you just nodded along with that, this episode is for you.",
+      "start": 25.71,
+      "end": 29.81
+    },
+    {
+      "speaker": "LEO",
+      "text": "I'm Leo.",
+      "start": 29.95,
+      "end": 31.35
+    },
+    {
+      "speaker": "MAYA",
+      "text": "And I'm Maya, and today we're covering the tool that still anchors most SDET interviews, which is Selenium WebDriver.",
+      "start": 31.89,
+      "end": 39.715
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Architecture, locators, the three wait types, stale elements, Page Object Model, and how it stacks up against Playwright.",
+      "start": 39.855,
+      "end": 48.105
+    },
+    {
+      "speaker": "LEO",
+      "text": "And that stale element question is a good place to start, because it only makes sense once you understand how Selenium actually talks to the browser.",
+      "start": 48.645,
+      "end": 58.07
+    },
+    {
+      "speaker": "LEO",
+      "text": "So let's start there.",
+      "start": 58.21,
+      "end": 59.835
+    },
+    {
+      "speaker": "LEO",
+      "text": "When my test says click this button, what actually happens?",
+      "start": 59.975,
+      "end": 63.725
+    },
+    {
+      "speaker": "MAYA",
+      "text": "So the thing to understand is that your test code never touches the browser directly.",
+      "start": 64.265,
+      "end": 69.79
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Your code speaks the W3C WebDriver protocol, which is basically HTTP with JSON, and it sends each command to a browser-specific driver, so chromedriver for Chrome, geckodriver for Firefox.",
+      "start": 69.93,
+      "end": 84.73
+    },
+    {
+      "speaker": "MAYA",
+      "text": "That driver is the translator, it receives your command over HTTP and turns it into native actions inside the real browser.",
+      "start": 84.87,
+      "end": 93.845
+    },
+    {
+      "speaker": "LEO",
+      "text": "So the chain is my client code, then the WebDriver protocol over HTTP, then the driver, then the browser.",
+      "start": 94.385,
+      "end": 102.61
+    },
+    {
+      "speaker": "LEO",
+      "text": "Four links.",
+      "start": 102.75,
+      "end": 104.1
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Exactly, and here's the analogy I always use.",
+      "start": 104.64,
+      "end": 108.24
+    },
+    {
+      "speaker": "MAYA",
+      "text": "It's like ordering room service by phone.",
+      "start": 108.38,
+      "end": 111.155
+    },
+    {
+      "speaker": "MAYA",
+      "text": "You don't walk into the kitchen and cook, you call down, someone takes the order, relays it to the kitchen, and the food comes back up.",
+      "start": 111.295,
+      "end": 119.12
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Every single command, find this element, click it, read its text, is a separate phone call.",
+      "start": 119.26,
+      "end": 125.135
+    },
+    {
+      "speaker": "MAYA",
+      "text": "A separate HTTP round trip.",
+      "start": 125.275,
+      "end": 127.8
+    },
+    {
+      "speaker": "LEO",
+      "text": "Wait, so every command is its own round trip?",
+      "start": 128.34,
+      "end": 131.44
+    },
+    {
+      "speaker": "LEO",
+      "text": "That sounds slow.",
+      "start": 131.58,
+      "end": 133.155
+    },
+    {
+      "speaker": "MAYA",
+      "text": "It is comparatively slow, and more importantly, it's the root of most Selenium flakiness.",
+      "start": 133.695,
+      "end": 139.87
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Because between your phone calls, the kitchen keeps moving.",
+      "start": 140.01,
+      "end": 143.71
+    },
+    {
+      "speaker": "MAYA",
+      "text": "The page keeps rendering, JavaScript keeps firing, and Selenium has no persistent connection watching it happen.",
+      "start": 143.85,
+      "end": 151.425
+    },
+    {
+      "speaker": "MAYA",
+      "text": "You ask, is the button there, you get an answer, and by the time you call back to click it, the world may have changed.",
+      "start": 151.565,
+      "end": 158.465
+    },
+    {
+      "speaker": "MAYA",
+      "text": "That gap between calls is where flaky tests are born, and it's why waits matter so much, which we'll get to.",
+      "start": 158.605,
+      "end": 165.38
+    },
+    {
+      "speaker": "LEO",
+      "text": "Okay, and one more architecture fact interviewers like, right?",
+      "start": 165.92,
+      "end": 170.095
+    },
+    {
+      "speaker": "LEO",
+      "text": "Something about Selenium 4.",
+      "start": 170.235,
+      "end": 172.335
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Yes, worth dropping in the room.",
+      "start": 172.875,
+      "end": 175.325
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Selenium 4 standardized fully on the W3C protocol, so no more JSON wire protocol translation layer, and it added relative locators and access to the Chrome DevTools Protocol, CDP, for things like basic network interception.",
+      "start": 175.465,
+      "end": 192.44
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Mentioning that signals you've actually kept up.",
+      "start": 192.58,
+      "end": 195.755
+    },
+    {
+      "speaker": "LEO",
+      "text": "Alright, so we've placed the order with the kitchen.",
+      "start": 196.295,
+      "end": 199.22
+    },
+    {
+      "speaker": "LEO",
+      "text": "Now we have to describe what we want, which means locators.",
+      "start": 199.36,
+      "end": 203.31
+    },
+    {
+      "speaker": "LEO",
+      "text": "There are eight strategies, but nobody wants me to recite a list, so what's the real question here?",
+      "start": 203.45,
+      "end": 209.3
+    },
+    {
+      "speaker": "MAYA",
+      "text": "The real question is always CSS versus XPath, but let's frame the whole family first.",
+      "start": 209.84,
+      "end": 216.415
+    },
+    {
+      "speaker": "MAYA",
+      "text": "You've got id, name, className, tagName, linkText and partialLinkText, and then the two power tools, CSS selectors and XPath.",
+      "start": 216.555,
+      "end": 226.155
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Think of them like postal addresses.",
+      "start": 226.295,
+      "end": 228.945
+    },
+    {
+      "speaker": "MAYA",
+      "text": "An id is a street address with a house number, direct, fast, unambiguous, and if an id exists and it's stable, you use it, full stop.",
+      "start": 229.085,
+      "end": 238.335
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Class name is more like saying the blue house on this street, fine until someone paints three more houses blue.",
+      "start": 238.475,
+      "end": 245.275
+    },
+    {
+      "speaker": "LEO",
+      "text": "And CSS versus XPath is what, two different map apps?",
+      "start": 245.815,
+      "end": 250.165
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Sort of.",
+      "start": 250.705,
+      "end": 252.03
+    },
+    {
+      "speaker": "MAYA",
+      "text": "CSS selectors are fast, readable, and they're what browsers themselves use for styling, so the engine is heavily optimized.",
+      "start": 252.17,
+      "end": 260.82
+    },
+    {
+      "speaker": "MAYA",
+      "text": "XPath is the more powerful language, it can match on visible text and, critically, it can walk upward in the DOM, from a child to its parent or ancestor, which CSS simply cannot do.",
+      "start": 260.96,
+      "end": 273.91
+    },
+    {
+      "speaker": "MAYA",
+      "text": "But that power costs you, XPath is slower and tends to be more brittle, especially those long absolute paths people copy out of dev tools.",
+      "start": 274.05,
+      "end": 283.4
+    },
+    {
+      "speaker": "LEO",
+      "text": "So my answer in an interview is, I default to id when it's there, CSS for everything else, and I reach for XPath only when I genuinely need text matching or to travel up to a parent.",
+      "start": 283.94,
+      "end": 296.365
+    },
+    {
+      "speaker": "LEO",
+      "text": "XPath isn't wrong, it's just the tool of last resort.",
+      "start": 296.505,
+      "end": 300.205
+    },
+    {
+      "speaker": "MAYA",
+      "text": "That's exactly the shape of a senior answer, a preference order with reasons, not a religion.",
+      "start": 300.745,
+      "end": 306.895
+    },
+    {
+      "speaker": "MAYA",
+      "text": "And now, the topic that decides the interview more than any other...",
+      "start": 307.035,
+      "end": 311.11
+    },
+    {
+      "speaker": "MAYA",
+      "text": "waits.",
+      "start": 311.25,
+      "end": 312.6
+    },
+    {
+      "speaker": "MAYA",
+      "text": "If you only master one section of Selenium, make it this one.",
+      "start": 312.74,
+      "end": 316.815
+    },
+    {
+      "speaker": "LEO",
+      "text": "Because this is the flakiness question in disguise.",
+      "start": 317.355,
+      "end": 320.83
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Right, remember the room service problem, the kitchen keeps working between calls.",
+      "start": 321.37,
+      "end": 326.495
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Waits are how you deal with a page that isn't ready yet.",
+      "start": 326.635,
+      "end": 330.26
+    },
+    {
+      "speaker": "MAYA",
+      "text": "There are three types.",
+      "start": 330.4,
+      "end": 332.175
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Implicit wait is a single global setting, it tells Selenium, whenever you look up any element and it's not there, keep polling the DOM for up to, say, 10 seconds before failing.",
+      "start": 332.315,
+      "end": 344.39
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Explicit wait is targeted, you use WebDriverWait with ExpectedConditions to say, wait until this specific condition is true for this specific element, wait until the submit button is clickable, wait until the spinner is invisible.",
+      "start": 344.53,
+      "end": 359.73
+    },
+    {
+      "speaker": "MAYA",
+      "text": "And fluent wait is really an explicit wait with extra dials, you control the polling interval and which exceptions to ignore while polling.",
+      "start": 359.87,
+      "end": 368.745
+    },
+    {
+      "speaker": "LEO",
+      "text": "Let me try an analogy back at you.",
+      "start": 369.285,
+      "end": 371.86
+    },
+    {
+      "speaker": "LEO",
+      "text": "Implicit wait is like telling my whole household, if anyone knocks on any door, wait up to 10 seconds before deciding nobody's home.",
+      "start": 372,
+      "end": 380.85
+    },
+    {
+      "speaker": "LEO",
+      "text": "Explicit wait is me standing at one specific door because I know my friend is coming, and I'm waiting for the specific sign that she's arrived.",
+      "start": 380.99,
+      "end": 390.39
+    },
+    {
+      "speaker": "LEO",
+      "text": "And fluent wait is me deciding I'll check the peephole every 2 seconds and ignore the sound of the neighbor's dog while I do it.",
+      "start": 390.53,
+      "end": 398.38
+    },
+    {
+      "speaker": "MAYA",
+      "text": "That's genuinely good, steal that for your interview.",
+      "start": 398.92,
+      "end": 402.32
+    },
+    {
+      "speaker": "MAYA",
+      "text": "And the guidance is clear, prefer explicit waits.",
+      "start": 402.46,
+      "end": 405.96
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Implicit is blunt, it applies to everything, it can mask real problems, and it only cares about presence in the DOM, not whether something is visible or clickable.",
+      "start": 406.1,
+      "end": 416.8
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Explicit waits react to actual conditions.",
+      "start": 416.94,
+      "end": 420.215
+    },
+    {
+      "speaker": "LEO",
+      "text": "Okay, trap corner time, because I know there are two classic wrong answers hiding in here.",
+      "start": 420.755,
+      "end": 426.705
+    },
+    {
+      "speaker": "MAYA",
+      "text": "There are, and the first one is the mixing trap.",
+      "start": 427.245,
+      "end": 430.395
+    },
+    {
+      "speaker": "MAYA",
+      "text": "A candidate says, I set an implicit wait of 10 seconds as a safety net, and I also use explicit waits for the tricky elements, best of both worlds.",
+      "start": 430.535,
+      "end": 440.41
+    },
+    {
+      "speaker": "MAYA",
+      "text": "That sounds reasonable and it is wrong.",
+      "start": 440.55,
+      "end": 443.35
+    },
+    {
+      "speaker": "MAYA",
+      "text": "The Selenium docs themselves warn against it, because when you mix implicit and explicit waits the two polling mechanisms interact and you get unpredictable, cumulative timeouts.",
+      "start": 443.49,
+      "end": 455.19
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Your 10 second explicit wait can quietly become something much longer, and worse, it varies.",
+      "start": 455.33,
+      "end": 461.68
+    },
+    {
+      "speaker": "MAYA",
+      "text": "So the rule is, pick explicit, set implicit to zero, never run both.",
+      "start": 461.82,
+      "end": 466.62
+    },
+    {
+      "speaker": "LEO",
+      "text": "And the second trap is the sleepy one.",
+      "start": 467.16,
+      "end": 469.735
+    },
+    {
+      "speaker": "LEO",
+      "text": "Somebody asks how you handle a slow page, and the candidate says they just add a 5 second pause with Thread dot sleep.",
+      "start": 469.875,
+      "end": 477.975
+    },
+    {
+      "speaker": "MAYA",
+      "text": "That answer has ended interviews.",
+      "start": 478.515,
+      "end": 481.065
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Thread dot sleep is a blind fixed wait, and it fails in both directions.",
+      "start": 481.205,
+      "end": 486.38
+    },
+    {
+      "speaker": "MAYA",
+      "text": "If the page loads in 1 second, you just burned 4 seconds for nothing, multiply that across 1,000 tests in CI and you've added real money and real minutes.",
+      "start": 486.52,
+      "end": 497.695
+    },
+    {
+      "speaker": "MAYA",
+      "text": "And if the page takes 6 seconds that day, your test fails anyway.",
+      "start": 497.835,
+      "end": 502.235
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Too long is slow, too short is flaky, and it's always one of the two.",
+      "start": 502.375,
+      "end": 506.95
+    },
+    {
+      "speaker": "MAYA",
+      "text": "An explicit wait is the opposite, it proceeds the moment the condition is true and only fails when the condition genuinely never happened.",
+      "start": 507.09,
+      "end": 516.09
+    },
+    {
+      "speaker": "LEO",
+      "text": "So restated once more because it matters, sleep waits for the clock, explicit waits wait for reality.",
+      "start": 516.63,
+      "end": 523.605
+    },
+    {
+      "speaker": "LEO",
+      "text": "You want your tests synchronized to reality.",
+      "start": 523.745,
+      "end": 526.52
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Which brings us back to our cold open, the StaleElementReferenceException.",
+      "start": 527.06,
+      "end": 532.01
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Here's what's actually happening.",
+      "start": 532.15,
+      "end": 534.4
+    },
+    {
+      "speaker": "MAYA",
+      "text": "When Selenium finds an element, it hands you a reference to a specific node in the DOM at that moment, and I think of it like a claim ticket at a coat check.",
+      "start": 534.54,
+      "end": 544.69
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Then the page re-renders, maybe a JavaScript framework rebuilt that section, maybe you navigated.",
+      "start": 544.83,
+      "end": 551.355
+    },
+    {
+      "speaker": "MAYA",
+      "text": "The button you see on screen is a brand new DOM node that merely looks identical, and your ticket points at a coat that got thrown out.",
+      "start": 551.495,
+      "end": 560.37
+    },
+    {
+      "speaker": "MAYA",
+      "text": "When you try to use the stale ticket, Selenium throws.",
+      "start": 560.51,
+      "end": 564.11
+    },
+    {
+      "speaker": "LEO",
+      "text": "So it's not a Selenium bug, it's my bug, because I cached a reference and assumed the DOM would hold still.",
+      "start": 564.65,
+      "end": 571.95
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Exactly, and the fix follows directly.",
+      "start": 572.49,
+      "end": 575.515
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Don't hoard element references, re-find the element right before you interact with it, and after any action you know triggers a re-render, wait for the fresh element with an explicit wait.",
+      "start": 575.655,
+      "end": 587.255
+    },
+    {
+      "speaker": "MAYA",
+      "text": "And here's a nice compare-and-contrast for bonus points, this is precisely the problem Playwright designed away.",
+      "start": 587.395,
+      "end": 594.645
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Playwright locators are lazy, they store the recipe for finding the element, not the element itself, and they re-query the DOM on every action automatically.",
+      "start": 594.785,
+      "end": 605.235
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Selenium hands you the coat, Playwright hands you the coat check ticket and re-fetches every time.",
+      "start": 605.375,
+      "end": 611.75
+    },
+    {
+      "speaker": "LEO",
+      "text": "Alright, next chunk, the context switching stuff, frames, windows, alerts.",
+      "start": 612.29,
+      "end": 617.29
+    },
+    {
+      "speaker": "LEO",
+      "text": "This feels like the mechanical part of the interview.",
+      "start": 617.43,
+      "end": 620.83
+    },
+    {
+      "speaker": "MAYA",
+      "text": "It is mechanical but it filters out people who've never automated a real app, so let's do it quickly.",
+      "start": 621.37,
+      "end": 627.92
+    },
+    {
+      "speaker": "MAYA",
+      "text": "An iframe is a page embedded inside your page, and Selenium can only see one document at a time, so you have to call switchTo dot frame before touching anything inside it, and switchTo dot defaultContent to climb back out.",
+      "start": 628.06,
+      "end": 642.585
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Candidates who've never done this burn 20 minutes wondering why a perfectly good locator finds nothing, and the answer is that they're searching the wrong document.",
+      "start": 642.725,
+      "end": 652.5
+    },
+    {
+      "speaker": "LEO",
+      "text": "And new windows and tabs are the same idea at a bigger scale.",
+      "start": 653.04,
+      "end": 657.265
+    },
+    {
+      "speaker": "LEO",
+      "text": "Each window has a handle, so I call getWindowHandles to list them, then switchTo dot window with the handle I want.",
+      "start": 657.405,
+      "end": 664.98
+    },
+    {
+      "speaker": "LEO",
+      "text": "It's like a TV remote, the shows are all playing, but the remote only controls the channel you've switched to.",
+      "start": 665.12,
+      "end": 672.245
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Right, and JavaScript alerts are their own little context too, switchTo dot alert, then accept or dismiss.",
+      "start": 672.785,
+      "end": 679.985
+    },
+    {
+      "speaker": "MAYA",
+      "text": "And while we're in this neighborhood, know that the Actions API exists for the fancier gestures, hovering, drag and drop, keyboard chords.",
+      "start": 680.125,
+      "end": 689.175
+    },
+    {
+      "speaker": "MAYA",
+      "text": "You rarely get grilled deeply on it, but you should know its name and when you'd reach for it.",
+      "start": 689.315,
+      "end": 694.69
+    },
+    {
+      "speaker": "LEO",
+      "text": "Okay, let's talk design, because at some point every interviewer asks how I'd structure a framework, and the expected phrase is Page Object Model.",
+      "start": 695.23,
+      "end": 705.13
+    },
+    {
+      "speaker": "MAYA",
+      "text": "It is, but the phrase alone is worth nothing, what matters is the why.",
+      "start": 705.67,
+      "end": 710.42
+    },
+    {
+      "speaker": "MAYA",
+      "text": "POM says, create one class per page of your application, and that class encapsulates two things, the locators for that page and the actions you can perform on it.",
+      "start": 710.56,
+      "end": 721.81
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Your tests then read like intentions, log in as this user, add this item to the cart, and they never mention a selector.",
+      "start": 721.95,
+      "end": 730.05
+    },
+    {
+      "speaker": "LEO",
+      "text": "And the payoff is blast radius.",
+      "start": 730.59,
+      "end": 733.015
+    },
+    {
+      "speaker": "LEO",
+      "text": "When the login page gets redesigned and every locator changes, I edit one class, not 200 test files.",
+      "start": 733.155,
+      "end": 740.955
+    },
+    {
+      "speaker": "LEO",
+      "text": "It's the difference between every appliance in the building having its own wiring versus everything running through one labeled electrical panel.",
+      "start": 741.095,
+      "end": 750.395
+    },
+    {
+      "speaker": "MAYA",
+      "text": "That's the whole pitch, maintainability through a single point of change.",
+      "start": 750.935,
+      "end": 755.41
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Mention PageFactory as the classic Selenium helper, the FindBy annotation style of declaring locators, and if you want to sound current, note that plenty of teams now skip PageFactory and just use plain By locators inside page classes, partly because of, guess what, stale element quirks.",
+      "start": 755.55,
+      "end": 774.975
+    },
+    {
+      "speaker": "MAYA",
+      "text": "And the same design conversation usually extends to scale, which means Selenium Grid.",
+      "start": 775.115,
+      "end": 781.015
+    },
+    {
+      "speaker": "LEO",
+      "text": "Grid being the answer to, my suite takes 3 hours, help.",
+      "start": 781.555,
+      "end": 785.38
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Grid lets you distribute tests across many machines and browsers at once.",
+      "start": 785.92,
+      "end": 791.02
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Classic model was a hub that receives your tests and nodes that run them, Selenium 4 splits the hub into components, a router and a distributor in front of the nodes, but the interview-level idea is unchanged, one entry point farming work out to many browsers.",
+      "start": 791.16,
+      "end": 807.835
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Pair it with your runner's parallel configuration, TestNG or JUnit, and a 3 hour suite becomes 20 minutes, plus you get cross-browser and cross-OS coverage from the same tests.",
+      "start": 807.975,
+      "end": 820.675
+    },
+    {
+      "speaker": "LEO",
+      "text": "Which leaves the modern showdown question, why are we still using Selenium when Playwright exists.",
+      "start": 821.215,
+      "end": 827.84
+    },
+    {
+      "speaker": "LEO",
+      "text": "I feel like this one's really a judgment test.",
+      "start": 827.98,
+      "end": 830.955
+    },
+    {
+      "speaker": "MAYA",
+      "text": "It absolutely is, they're checking whether you think in trade-offs or in fanboy slogans.",
+      "start": 831.495,
+      "end": 837.195
+    },
+    {
+      "speaker": "MAYA",
+      "text": "So here's the honest comparison.",
+      "start": 837.335,
+      "end": 839.735
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Architecture first, Selenium speaks HTTP request by request through a driver, Playwright holds one persistent CDP-style connection, which makes it faster and less flaky by construction.",
+      "start": 839.875,
+      "end": 853.5
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Waiting, in Selenium you manage explicit waits yourself, Playwright auto-waits inside every action.",
+      "start": 853.64,
+      "end": 860.54
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Network mocking is first-class in Playwright, limited in Selenium even with CDP access.",
+      "start": 860.68,
+      "end": 867.23
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Setup, Selenium means managing driver binaries, Playwright bundles its browsers.",
+      "start": 867.37,
+      "end": 873.07
+    },
+    {
+      "speaker": "LEO",
+      "text": "So far that sounds like Playwright wins everything, so where's Selenium's case?",
+      "start": 873.61,
+      "end": 878.86
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Maturity and breadth.",
+      "start": 879.4,
+      "end": 881.25
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Selenium supports basically every language and every browser, it has a 20 year ecosystem, enormous community, real browser fidelity, and the widest grid and cloud vendor support in existence, every commercial device farm speaks WebDriver.",
+      "start": 881.39,
+      "end": 897.665
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Playwright is newer, faster, better tooling, fewer integrations.",
+      "start": 897.805,
+      "end": 902.255
+    },
+    {
+      "speaker": "MAYA",
+      "text": "So the answer that gets you hired sounds like this, for a new greenfield web project I'd likely evaluate Playwright first for speed and stability, but for a large existing suite, a Java or C-sharp shop, or heavy cross-browser cloud requirements, Selenium remains the pragmatic choice.",
+      "start": 902.395,
+      "end": 920.92
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Context decides, not fashion.",
+      "start": 921.06,
+      "end": 923.685
+    },
+    {
+      "speaker": "LEO",
+      "text": "Alright, in the room.",
+      "start": 924.225,
+      "end": 925.825
+    },
+    {
+      "speaker": "LEO",
+      "text": "When Selenium comes up in a real interview, what does it actually look like?",
+      "start": 925.965,
+      "end": 931.115
+    },
+    {
+      "speaker": "MAYA",
+      "text": "It's rarely one big question, it's a chain, and each answer baits the next hook.",
+      "start": 931.655,
+      "end": 937.105
+    },
+    {
+      "speaker": "MAYA",
+      "text": "They ask how Selenium works, you mention the driver and HTTP, they follow with, so what problems does that architecture cause, and now you're expected to arrive at waits and flakiness on your own.",
+      "start": 937.245,
+      "end": 950.095
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Or they hand you a scenario, this test passes locally and fails in CI every third run, walk me through your debugging.",
+      "start": 950.235,
+      "end": 958.185
+    },
+    {
+      "speaker": "MAYA",
+      "text": "What they're listening for is whether you connect symptoms to the architecture, slow CI machines plus per-command round trips plus a missing explicit wait equals intermittent failure.",
+      "start": 958.325,
+      "end": 969.675
+    },
+    {
+      "speaker": "LEO",
+      "text": "So the meta-skill is telling the causal story, the protocol explains the latency, the latency explains the flakiness, the waits are the cure, and POM keeps the cure maintainable.",
+      "start": 970.215,
+      "end": 982.64
+    },
+    {
+      "speaker": "LEO",
+      "text": "It's one narrative, not 7 flashcards.",
+      "start": 982.78,
+      "end": 985.63
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Beautifully put, and that narrative is what separates someone who memorized answers from someone who's been paged at 2 a.m. over a flaky suite.",
+      "start": 986.17,
+      "end": 995.545
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Okay, 60 second recap, give me the takeaways.",
+      "start": 995.685,
+      "end": 999.46
+    },
+    {
+      "speaker": "LEO",
+      "text": "If they ask how Selenium communicates with the browser, say the test code sends W3C WebDriver commands over HTTP to a browser-specific driver like chromedriver, which performs native actions, and every command is its own round trip, which is where the latency and flakiness come from.",
+      "start": 1000,
+      "end": 1018.975
+    },
+    {
+      "speaker": "MAYA",
+      "text": "If they ask implicit versus explicit wait, say implicit is a global DOM poll for all lookups, explicit is WebDriverWait with a condition on a specific element, prefer explicit, never mix them because timeouts become unpredictable, and never use Thread dot sleep because a fixed blind wait is slow when it's too long and flaky when it's too short.",
+      "start": 1019.515,
+      "end": 1042.09
+    },
+    {
+      "speaker": "LEO",
+      "text": "And if they ask about StaleElementReferenceException, say the cached reference detached from the DOM after a re-render or navigation, so re-find the element right before interacting, and mention that Playwright's lazy locators avoid the whole class of problem by re-querying automatically.",
+      "start": 1042.63,
+      "end": 1061.055
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Nail those 3 and you've covered the questions that open, anchor, and close most Selenium rounds.",
+      "start": 1061.595,
+      "end": 1068.22
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Locators, frames, POM, and Grid fill in the rest, and you've got all of them now.",
+      "start": 1068.36,
+      "end": 1074.11
+    },
+    {
+      "speaker": "LEO",
+      "text": "My coat check ticket and I are going to go re-find some elements.",
+      "start": 1074.65,
+      "end": 1079.175
+    },
+    {
+      "speaker": "LEO",
+      "text": "Next time we keep the study streak going with another topic off the interview stack.",
+      "start": 1079.315,
+      "end": 1084.565
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Same 2 hosts, same room, more traps to dodge.",
+      "start": 1085.105,
+      "end": 1088.655
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Thanks for studying with us, and we'll see you in the next one.",
+      "start": 1088.795,
+      "end": 1092.57
+    }
+  ]
+}

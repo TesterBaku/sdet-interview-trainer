@@ -1,0 +1,576 @@
+{
+  "id": "nodejs",
+  "voice": null,
+  "voices": {
+    "MAYA": "af_heart",
+    "LEO": "am_fenrir"
+  },
+  "durationSec": 825.84,
+  "hash": "f7a8d76c87f7047cfb7a0b99c1165c8ca43573f73b49e1e54aaabaa228ce1df4",
+  "cues": [
+    {
+      "speaker": "MAYA",
+      "text": "Okay, here is one that shows up in almost every Node.js interview, usually in the first 5 minutes.",
+      "start": 0,
+      "end": 6.825
+    },
+    {
+      "speaker": "MAYA",
+      "text": "If Node.js is single-threaded, how does it handle 10,000 concurrent requests without falling over?",
+      "start": 6.965,
+      "end": 13.865
+    },
+    {
+      "speaker": "MAYA",
+      "text": "And the follow-up that actually separates candidates, which is, if it's single-threaded, what happens when one of those requests needs to crunch a huge JSON file?",
+      "start": 14.005,
+      "end": 24.33
+    },
+    {
+      "speaker": "LEO",
+      "text": "And if your honest answer is that it just...",
+      "start": 24.87,
+      "end": 27.57
+    },
+    {
+      "speaker": "LEO",
+      "text": "handles it somehow, magic, event loop, hand wave, then this is the episode for you.",
+      "start": 27.71,
+      "end": 33.785
+    },
+    {
+      "speaker": "LEO",
+      "text": "I'm Leo.",
+      "start": 33.925,
+      "end": 35.325
+    },
+    {
+      "speaker": "MAYA",
+      "text": "And I'm Maya.",
+      "start": 35.865,
+      "end": 37.465
+    },
+    {
+      "speaker": "MAYA",
+      "text": "I've hired a lot of SDETs, and Node.js questions come up constantly, because so much of our tooling lives there, Playwright, Cypress, WebdriverIO, half the API test frameworks you'll ever touch, they all run on Node.",
+      "start": 37.605,
+      "end": 52.03
+    },
+    {
+      "speaker": "MAYA",
+      "text": "So when an interviewer asks about the event loop, they're not being academic, they're checking whether you understand the machine your tests run on, because flaky async tests are usually event loop misunderstandings wearing a disguise.",
+      "start": 52.17,
+      "end": 66.245
+    },
+    {
+      "speaker": "LEO",
+      "text": "Right, and it's also a filter question, because everyone has heard that Node is single-threaded and non-blocking, but very few people can explain how both of those things can be true at the same time.",
+      "start": 66.785,
+      "end": 79.11
+    },
+    {
+      "speaker": "LEO",
+      "text": "It sounds like a contradiction.",
+      "start": 79.25,
+      "end": 81.425
+    },
+    {
+      "speaker": "MAYA",
+      "text": "It does, so let's dissolve it.",
+      "start": 81.965,
+      "end": 84.29
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Node.js runs your JavaScript on Google's V8 engine, and it pairs V8 with a C library called libuv, which provides two things, the event loop, and a thread pool for I/O work.",
+      "start": 84.43,
+      "end": 97.255
+    },
+    {
+      "speaker": "MAYA",
+      "text": "And here's the sentence I want you to be able to say in an interview, Node is single-threaded for your JavaScript, but I/O is offloaded to libuv and the operating system, so the main thread never waits.",
+      "start": 97.395,
+      "end": 110.57
+    },
+    {
+      "speaker": "LEO",
+      "text": "Okay, give me the physical version of that, because I know you have one.",
+      "start": 111.11,
+      "end": 115.71
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Picture a restaurant with exactly one waiter, but a full kitchen staff in the back.",
+      "start": 116.25,
+      "end": 121.425
+    },
+    {
+      "speaker": "MAYA",
+      "text": "The waiter is your JavaScript thread.",
+      "start": 121.565,
+      "end": 124.265
+    },
+    {
+      "speaker": "MAYA",
+      "text": "He takes an order from table 1, hands the ticket to the kitchen, and here's the key part, he does not stand there watching the food cook.",
+      "start": 124.405,
+      "end": 132.805
+    },
+    {
+      "speaker": "MAYA",
+      "text": "He immediately moves to table 2, takes that order, hands it back, moves to table 3, and so on.",
+      "start": 132.945,
+      "end": 139.77
+    },
+    {
+      "speaker": "MAYA",
+      "text": "When a dish is ready, the kitchen puts it on the pass with the table number attached, and the waiter delivers it on his next loop through the room.",
+      "start": 139.91,
+      "end": 148.21
+    },
+    {
+      "speaker": "MAYA",
+      "text": "One waiter, dozens of tables, nobody blocked, because the slow work happens in the back.",
+      "start": 148.35,
+      "end": 154.275
+    },
+    {
+      "speaker": "LEO",
+      "text": "So the kitchen is libuv, the ticket on the pass is the callback waiting in a queue, and the waiter walking his loop through the room is, literally, the event loop.",
+      "start": 154.815,
+      "end": 164.64
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Exactly, and that walking route has a fixed order, which interviewers love to probe.",
+      "start": 165.18,
+      "end": 170.455
+    },
+    {
+      "speaker": "MAYA",
+      "text": "The loop moves through phases, first timers, where setTimeout and setInterval callbacks run, then pending callbacks for deferred I/O, then the poll phase, where it picks up new I/O events and runs their callbacks, then the check phase, which is where setImmediate callbacks fire, and finally close events, like a socket shutting down.",
+      "start": 170.595,
+      "end": 191.395
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Each phase drains its queue before the loop moves on.",
+      "start": 191.535,
+      "end": 194.96
+    },
+    {
+      "speaker": "LEO",
+      "text": "And I've heard there's something sneaky that runs between the phases too.",
+      "start": 195.5,
+      "end": 200.05
+    },
+    {
+      "speaker": "MAYA",
+      "text": "There is, and this is a senior-level detail that makes you stand out.",
+      "start": 200.59,
+      "end": 205.19
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Between phases, Node drains the microtask queue, and it does that in a strict order, process next tick callbacks first, then resolved Promise callbacks, and both of those drain completely before the loop continues to the next phase.",
+      "start": 205.33,
+      "end": 219.905
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Which means if you write code that keeps scheduling next tick callbacks in a loop, the waiter never leaves the kitchen doorway, he's stuck handling an endless stream of urgent notes, and no table ever gets served.",
+      "start": 220.045,
+      "end": 232.745
+    },
+    {
+      "speaker": "MAYA",
+      "text": "A runaway next tick can literally starve all your I/O.",
+      "start": 232.885,
+      "end": 237.01
+    },
+    {
+      "speaker": "LEO",
+      "text": "Okay, memory hook time.",
+      "start": 237.55,
+      "end": 239.575
+    },
+    {
+      "speaker": "LEO",
+      "text": "The event loop is the waiter's route through the restaurant, timers, then I/O, then setImmediate, then close events, and microtasks are the urgent sticky notes he must clear before taking another step, next tick notes first, then Promise notes.",
+      "start": 239.715,
+      "end": 255.015
+    },
+    {
+      "speaker": "MAYA",
+      "text": "That's it.",
+      "start": 255.555,
+      "end": 257.03
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Now let's talk about how you actually write code in this world, because the async style has evolved through 3 generations, and interviewers often ask you to walk through them.",
+      "start": 257.17,
+      "end": 267.77
+    },
+    {
+      "speaker": "MAYA",
+      "text": "First came error-first callbacks, the old Node convention where every callback receives the error as its first argument, and you check it every single time.",
+      "start": 267.91,
+      "end": 277.685
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Nest enough of those and you get the famous callback hell, code drifting sideways off the screen.",
+      "start": 277.825,
+      "end": 283.8
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Then came Promises, an object that represents a future value, chainable with then and catch, and composable with tools like Promise all.",
+      "start": 283.94,
+      "end": 292.99
+    },
+    {
+      "speaker": "MAYA",
+      "text": "And finally async await, which is just syntactic sugar over Promises, letting you write asynchronous code that reads top to bottom and handle failures with a normal try catch.",
+      "start": 293.13,
+      "end": 304.855
+    },
+    {
+      "speaker": "LEO",
+      "text": "And there's a performance trap hiding in async await, right, because it reads sequentially, people write it sequentially.",
+      "start": 305.395,
+      "end": 312.745
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Yes, and this one shows up in code review questions constantly.",
+      "start": 313.285,
+      "end": 317.71
+    },
+    {
+      "speaker": "MAYA",
+      "text": "If you await 3 independent API calls one after another, you've quietly made them run in sequence, 3 seconds instead of 1.",
+      "start": 317.85,
+      "end": 326.4
+    },
+    {
+      "speaker": "MAYA",
+      "text": "The fix is to start all 3, then await Promise all on the group, so independent work runs concurrently.",
+      "start": 326.54,
+      "end": 333.665
+    },
+    {
+      "speaker": "MAYA",
+      "text": "And if you're stuck with an old callback-style API, util promisify wraps it into a Promise, or you just use the promise variants of core modules, like fs promises.",
+      "start": 333.805,
+      "end": 345.23
+    },
+    {
+      "speaker": "LEO",
+      "text": "Alright, second big concept, streams, because every time I see a Node question about processing a 2 gigabyte log file, streams are the expected answer.",
+      "start": 345.77,
+      "end": 356.245
+    },
+    {
+      "speaker": "MAYA",
+      "text": "They are, and the analogy here is drinking from a garden hose instead of trying to swallow the swimming pool.",
+      "start": 356.785,
+      "end": 363.385
+    },
+    {
+      "speaker": "MAYA",
+      "text": "A stream processes data in chunks as they arrive, so memory stays flat no matter how big the source is.",
+      "start": 363.525,
+      "end": 370.325
+    },
+    {
+      "speaker": "MAYA",
+      "text": "There are 4 types, Readable, a source you read from, like a file read stream or an incoming HTTP request, Writable, a destination like a file or an HTTP response, Duplex, which is both at once, like a TCP socket, and Transform, a duplex stream that changes data flowing through it, like gzip compression or encryption.",
+      "start": 370.465,
+      "end": 392.89
+    },
+    {
+      "speaker": "MAYA",
+      "text": "The chunks themselves travel as Buffers, which are just containers for raw binary data.",
+      "start": 393.03,
+      "end": 398.58
+    },
+    {
+      "speaker": "LEO",
+      "text": "And you connect them with pipe, source pipes into gzip pipes into destination.",
+      "start": 399.12,
+      "end": 404.195
+    },
+    {
+      "speaker": "MAYA",
+      "text": "You can, but here's the professional detail, prefer stream pipeline over chaining raw pipe calls, because pipeline propagates errors from any stage and destroys all the streams on failure, while a chain of pipes will happily swallow a downstream error and leak resources.",
+      "start": 404.735,
+      "end": 421.935
+    },
+    {
+      "speaker": "MAYA",
+      "text": "And both of them give you backpressure for free, which is my favorite part of the analogy, if the drain at the end of the hose clogs, the system automatically pinches the tap at the source, the readable pauses until the writable catches up, so memory stays bounded instead of ballooning.",
+      "start": 422.075,
+      "end": 439.85
+    },
+    {
+      "speaker": "LEO",
+      "text": "Backpressure, the hose pinches itself so the bucket never overflows.",
+      "start": 440.39,
+      "end": 445.015
+    },
+    {
+      "speaker": "LEO",
+      "text": "Got it.",
+      "start": 445.155,
+      "end": 446.33
+    },
+    {
+      "speaker": "LEO",
+      "text": "Now, before we hit the trap corner, I want the scaling story, because this connects back to your cold open, what happens when one request needs to crunch that huge JSON file on a single thread.",
+      "start": 446.47,
+      "end": 458.745
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Right, because that's the honest weakness of the model, our one waiter is amazing at delegating kitchen work, but if you ask him to personally grind flour for 10 minutes, the entire restaurant freezes, every table just sits there.",
+      "start": 459.285,
+      "end": 473.36
+    },
+    {
+      "speaker": "MAYA",
+      "text": "That's a CPU-bound task blocking the event loop.",
+      "start": 473.5,
+      "end": 476.925
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Node gives you 3 tools, and the interview skill is matching the tool to the kind of work.",
+      "start": 477.065,
+      "end": 482.615
+    },
+    {
+      "speaker": "MAYA",
+      "text": "For CPU-bound work, heavy parsing, image processing, crypto number crunching, you use worker threads, which are real threads inside one process, they can even share memory through a SharedArrayBuffer, and they take the computation off the main thread so the loop stays responsive.",
+      "start": 482.755,
+      "end": 501.255
+    },
+    {
+      "speaker": "MAYA",
+      "text": "That's hiring a dedicated prep cook in the back room.",
+      "start": 501.395,
+      "end": 504.895
+    },
+    {
+      "speaker": "MAYA",
+      "text": "For an I/O-bound server that needs more throughput, you use the cluster module, which forks multiple Node processes that share one listening port, that's opening more copies of the restaurant, each with its own waiter, one per CPU core.",
+      "start": 505.035,
+      "end": 520.885
+    },
+    {
+      "speaker": "MAYA",
+      "text": "And child process, with spawn, exec, or fork, is for running entirely separate programs and talking to them over streams or IPC.",
+      "start": 521.025,
+      "end": 530.575
+    },
+    {
+      "speaker": "LEO",
+      "text": "So the rule of thumb is, I/O-bound and need throughput, reach for cluster, CPU-bound and blocking the loop, reach for worker threads.",
+      "start": 531.115,
+      "end": 540.365
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Say it exactly like that and you've answered a very common question cleanly.",
+      "start": 540.905,
+      "end": 545.705
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Which brings us to trap corner, because the classic wrong answer here is the mirror image, the candidate gets asked about a heavy computation blocking the loop and confidently says they'd use cluster to fix it.",
+      "start": 545.845,
+      "end": 558.72
+    },
+    {
+      "speaker": "MAYA",
+      "text": "But cluster just gives you more single-threaded processes, so your heavy request still freezes whichever worker it lands on, you've just made the freeze less frequent, not gone.",
+      "start": 558.86,
+      "end": 569.385
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Cluster scales load, worker threads unblock compute.",
+      "start": 569.525,
+      "end": 573.475
+    },
+    {
+      "speaker": "LEO",
+      "text": "What are the other traps you saw as a hiring manager, the answers that made you wince?",
+      "start": 574.015,
+      "end": 579.665
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Two big ones.",
+      "start": 580.205,
+      "end": 581.805
+    },
+    {
+      "speaker": "MAYA",
+      "text": "First, on error handling, candidates who treat uncaught exception as a recovery tool, saying they'd catch it globally and keep the server running.",
+      "start": 581.945,
+      "end": 591.045
+    },
+    {
+      "speaker": "MAYA",
+      "text": "After an uncaught exception, the process is in an undefined state, so the correct answer is to log it, run critical cleanup, and exit, then let a supervisor like pm2, systemd, or Kubernetes restart the process fresh.",
+      "start": 591.185,
+      "end": 606.81
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Crash fast, restart clean.",
+      "start": 606.95,
+      "end": 609.325
+    },
+    {
+      "speaker": "MAYA",
+      "text": "And second, EventEmitters, which power half of Node's core, streams, servers, sockets, they're all emitters.",
+      "start": 609.465,
+      "end": 616.19
+    },
+    {
+      "speaker": "MAYA",
+      "text": "If an emitter fires an error event and nobody is listening, Node throws it, and it can take down your whole process, so any emitter that can fail needs an error listener attached.",
+      "start": 616.33,
+      "end": 627.33
+    },
+    {
+      "speaker": "MAYA",
+      "text": "In test automation that matters a lot, because an unhandled error event in your framework kills the entire run, not just one test.",
+      "start": 627.47,
+      "end": 636.345
+    },
+    {
+      "speaker": "LEO",
+      "text": "And error handling in general depends on the style you're in, right, try catch for sync code and async await, checking the error-first argument in callbacks, dot catch on raw Promises, and error listeners on emitters.",
+      "start": 636.885,
+      "end": 650.535
+    },
+    {
+      "speaker": "LEO",
+      "text": "Miss the one that matches your style and the failure escapes.",
+      "start": 650.675,
+      "end": 654.4
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Exactly, and an unhandled Promise rejection surfaces through the process level unhandled rejection event, which is your safety net for logging, not your error strategy.",
+      "start": 654.94,
+      "end": 666.015
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Now, how this surfaces in the room.",
+      "start": 666.155,
+      "end": 668.805
+    },
+    {
+      "speaker": "MAYA",
+      "text": "It usually starts broad, explain the event loop, or, how does Node handle concurrency, and the interviewer is listening for the words single-threaded, non-blocking, event-driven, plus some mention of libuv doing the background work.",
+      "start": 668.945,
+      "end": 683.42
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Then they drill into whatever you mention, so don't name-drop next tick unless you can explain microtask ordering.",
+      "start": 683.56,
+      "end": 690.785
+    },
+    {
+      "speaker": "MAYA",
+      "text": "There's often a rapid-fire round too, things like the difference between CommonJS and ES modules, where the answer is that CommonJS is synchronous require and module exports, while ES modules use static import export and support top-level await, with the type field in package json deciding how plain js files are treated.",
+      "start": 690.925,
+      "end": 713.05
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Or a semver question, where caret 1.2.3 allows minor and patch updates up to but not including 2.0.0, tilde allows only patch updates, and package lock json pins the exact versions for reproducible installs.",
+      "start": 713.19,
+      "end": 730.515
+    },
+    {
+      "speaker": "LEO",
+      "text": "And for SDETs specifically, I'd expect them to connect it to testing, like why an await you forgot makes a test pass falsely, or why blocking the loop makes timeouts fire late.",
+      "start": 731.055,
+      "end": 742.68
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Which is exactly the kind of connection that turns a memorized answer into a hire.",
+      "start": 743.22,
+      "end": 748.645
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Alright, 60-second recap, 3 takeaways.",
+      "start": 748.785,
+      "end": 752.31
+    },
+    {
+      "speaker": "MAYA",
+      "text": "If they ask how single-threaded Node handles thousands of concurrent operations, say that JavaScript runs on one thread but libuv offloads I/O to a background thread pool and the OS, queuing callbacks for the event loop, one waiter, full kitchen.",
+      "start": 752.45,
+      "end": 769.075
+    },
+    {
+      "speaker": "MAYA",
+      "text": "If they ask what to do about CPU-heavy work blocking the loop, say worker threads for CPU-bound compute, cluster for scaling I/O-bound throughput across cores, and never confuse the two.",
+      "start": 769.215,
+      "end": 782.215
+    },
+    {
+      "speaker": "MAYA",
+      "text": "And if they ask about global error handling, say uncaught exception means log, clean up, and exit, letting a process manager restart you, and that emitters always need an error listener, because a listenerless error event throws.",
+      "start": 782.355,
+      "end": 796.705
+    },
+    {
+      "speaker": "LEO",
+      "text": "One waiter, a prep cook for the heavy stuff, and a hose that pinches itself.",
+      "start": 797.245,
+      "end": 802.095
+    },
+    {
+      "speaker": "LEO",
+      "text": "I can hold onto that.",
+      "start": 802.235,
+      "end": 804.035
+    },
+    {
+      "speaker": "MAYA",
+      "text": "That's the goal.",
+      "start": 804.575,
+      "end": 806.2
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Go review the event loop phases once more before your interview, timers, poll, check, close, with microtasks between every step, and then quiz yourself on streams and semver in the app.",
+      "start": 806.34,
+      "end": 818.715
+    },
+    {
+      "speaker": "MAYA",
+      "text": "We'll see you in the next episode.",
+      "start": 818.855,
+      "end": 821.355
+    },
+    {
+      "speaker": "LEO",
+      "text": "Happy studying, and may your event loop never block.",
+      "start": 821.895,
+      "end": 825.295
+    }
+  ]
+}

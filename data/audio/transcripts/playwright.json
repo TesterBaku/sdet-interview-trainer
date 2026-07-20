@@ -1,0 +1,426 @@
+{
+  "id": "playwright",
+  "voice": null,
+  "voices": {
+    "MAYA": "af_heart",
+    "LEO": "am_fenrir"
+  },
+  "durationSec": 815.86,
+  "hash": "4697690aca56b440cf55277a6ae98e80b2d725715bcaf6c53bc0274610a5cae6",
+  "cues": [
+    {
+      "speaker": "MAYA",
+      "text": "Okay, here's one that shows up in almost every Playwright interview.",
+      "start": 0,
+      "end": 4.3
+    },
+    {
+      "speaker": "MAYA",
+      "text": "The interviewer says your suite has 300 UI tests, every test needs a clean logged-out state, and the run has to finish in under 10 minutes, so how do you get full isolation between tests without launching 300 browsers...",
+      "start": 4.44,
+      "end": 19.09
+    },
+    {
+      "speaker": "MAYA",
+      "text": "and if your first instinct was to just open a new browser per test and eat the cost, well, this episode is for you.",
+      "start": 19.23,
+      "end": 26.955
+    },
+    {
+      "speaker": "LEO",
+      "text": "Yeah, I'll admit that used to be my instinct too, because in the Selenium world a fresh browser was basically the only way to guarantee clean state, so you paid the startup tax and you suffered.",
+      "start": 27.495,
+      "end": 40.02
+    },
+    {
+      "speaker": "LEO",
+      "text": "I'm Leo, by the way, I'm the automation engineer who asks the questions you're too polite to ask in the actual interview.",
+      "start": 40.16,
+      "end": 48.035
+    },
+    {
+      "speaker": "MAYA",
+      "text": "And I'm Maya, staff SDET, former hiring manager, and today we're doing Playwright, which is probably the hottest framework question in SDET interviews right now, because so many teams are either on it or migrating to it.",
+      "start": 48.575,
+      "end": 62.85
+    },
+    {
+      "speaker": "LEO",
+      "text": "So before we answer your cold open, give people the 30-second version of what Playwright even is, because interviewers do ask for that framing.",
+      "start": 63.39,
+      "end": 73.14
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Sure, so Playwright is a modern end-to-end testing framework from Microsoft, it drives Chromium, Firefox, and WebKit through one single API, and it ships official bindings for C#, JavaScript and TypeScript, Python, and Java.",
+      "start": 73.68,
+      "end": 90.155
+    },
+    {
+      "speaker": "MAYA",
+      "text": "But the part interviewers actually want to hear is how it talks to the browser, because instead of the WebDriver wire protocol that Selenium uses, Playwright speaks a DevTools style protocol, CDP style, over one persistent connection, which means one process holding an open line to the browser instead of shipping individual commands back and forth over HTTP.",
+      "start": 90.295,
+      "end": 113.795
+    },
+    {
+      "speaker": "LEO",
+      "text": "And that architectural choice is why it can do things like auto-waiting and network interception natively, right, because it's sitting inside the browser's nervous system rather than knocking on the front door for every command.",
+      "start": 114.335,
+      "end": 128.035
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Exactly, and that's why this topic matters in interviews, because Playwright questions are never really trivia questions, they're architecture questions wearing a trench coat.",
+      "start": 128.575,
+      "end": 139.35
+    },
+    {
+      "speaker": "MAYA",
+      "text": "When someone asks why Playwright is less flaky than Selenium, they're checking whether you understand what actually causes flakiness, and when they ask about contexts, they're checking whether you understand test isolation, which is a universal skill.",
+      "start": 139.49,
+      "end": 154.915
+    },
+    {
+      "speaker": "LEO",
+      "text": "Okay, so let's answer the cold open, 300 tests, clean state, no 300 browsers.",
+      "start": 155.455,
+      "end": 162.23
+    },
+    {
+      "speaker": "LEO",
+      "text": "This is the browser, context, page model, right?",
+      "start": 162.37,
+      "end": 165.795
+    },
+    {
+      "speaker": "MAYA",
+      "text": "It is, and here's the analogy I want stuck in your head, which is a hotel.",
+      "start": 166.335,
+      "end": 171.135
+    },
+    {
+      "speaker": "MAYA",
+      "text": "The Browser is the hotel building itself, expensive to construct, so you build it once and you reuse it for the whole run.",
+      "start": 171.275,
+      "end": 179.2
+    },
+    {
+      "speaker": "MAYA",
+      "text": "The BrowserContext is a hotel room, and here's the key part, every guest gets a freshly cleaned room with its own keycard, its own minibar, its own everything, and cleaning a room is cheap and fast compared to building a new hotel.",
+      "start": 179.34,
+      "end": 194.265
+    },
+    {
+      "speaker": "MAYA",
+      "text": "And the Page is just a window in that room, the actual tab where you look out at the web and interact with it.",
+      "start": 194.405,
+      "end": 201.005
+    },
+    {
+      "speaker": "LEO",
+      "text": "So the context has its own cookies, its own local storage, its own cache, completely walled off from every other context, even though they all live inside the same browser process.",
+      "start": 201.545,
+      "end": 213.82
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Right, it's essentially a fresh incognito profile that costs almost nothing to create, and that's the whole answer to the interview question.",
+      "start": 214.36,
+      "end": 223.285
+    },
+    {
+      "speaker": "MAYA",
+      "text": "You launch one Browser, or one per worker, and then each test gets its own brand new Context, so you get perfect isolation, no leaked cookies, no shared login state, no test contaminating another, and you get it at the price of a room cleaning instead of a hotel construction project.",
+      "start": 223.425,
+      "end": 241.9
+    },
+    {
+      "speaker": "LEO",
+      "text": "So the memory hook is, build the hotel once, clean the room every time, and the tab is just the window.",
+      "start": 242.44,
+      "end": 249.015
+    },
+    {
+      "speaker": "LEO",
+      "text": "And if I say in an interview that one Browser is reused while each test gets its own Context, I've basically nailed the isolation question.",
+      "start": 249.155,
+      "end": 258.905
+    },
+    {
+      "speaker": "MAYA",
+      "text": "You have, and you can add the kicker, which is that this exact design is what makes safe parallelism possible, because Playwright runs multiple worker processes by default, each worker gets its own browser and its own contexts, nothing is shared, so tests can run at the same time without stepping on each other, and on CI you can even shard the suite across multiple machines.",
+      "start": 259.445,
+      "end": 282.495
+    },
+    {
+      "speaker": "LEO",
+      "text": "Okay, chunk two, locators and auto-waiting, which I think is where most flakiness questions live.",
+      "start": 283.035,
+      "end": 289.86
+    },
+    {
+      "speaker": "LEO",
+      "text": "What's actually different about a Playwright Locator compared to grabbing an element in Selenium?",
+      "start": 290,
+      "end": 295.9
+    },
+    {
+      "speaker": "MAYA",
+      "text": "So the big idea is that a Locator is lazy, it's not a reference to a specific DOM node you grabbed at some moment in time, it's more like a set of directions that get followed fresh every single time you act.",
+      "start": 296.44,
+      "end": 310.19
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Think of it like telling a taxi driver to take you to the tallest building downtown, rather than handing them a photograph of a building from last year.",
+      "start": 310.33,
+      "end": 319.355
+    },
+    {
+      "speaker": "MAYA",
+      "text": "If the city rebuilds, the directions still work, because they're re-evaluated at the moment of the trip, and that's why Playwright basically doesn't have the stale element problem, the locator re-queries the DOM on every action.",
+      "start": 319.495,
+      "end": 333.57
+    },
+    {
+      "speaker": "LEO",
+      "text": "And that connects to which locators you should prefer, because I know there's a priority order interviewers like to hear.",
+      "start": 334.11,
+      "end": 341.51
+    },
+    {
+      "speaker": "MAYA",
+      "text": "There is, and the order is user-facing first.",
+      "start": 342.05,
+      "end": 345.375
+    },
+    {
+      "speaker": "MAYA",
+      "text": "GetByRole is at the top, which finds elements by their ARIA role and accessible name, so a button named Sign in, and it's the most resilient because it matches how real users and assistive technology perceive the page, not how the markup happens to be structured this sprint.",
+      "start": 345.515,
+      "end": 362.715
+    },
+    {
+      "speaker": "MAYA",
+      "text": "After that you have GetByLabel, GetByPlaceholder, and GetByText, then GetByTestId for stable data-testid hooks that the team controls, and only then CSS or XPath as a fallback, because those are coupled to markup that changes constantly.",
+      "start": 362.855,
+      "end": 380.005
+    },
+    {
+      "speaker": "LEO",
+      "text": "So if the interviewer asks why GetByRole beats a CSS selector, the answer isn't that it's faster, it's that it survives redesigns because it targets meaning instead of structure, and as a bonus it nudges the team toward accessible UI.",
+      "start": 380.545,
+      "end": 396.32
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Perfectly said, and then auto-waiting is the second half of this chunk.",
+      "start": 396.86,
+      "end": 401.285
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Before Playwright performs any action, it automatically waits for the element to be attached to the DOM, visible, stable meaning it stopped animating, enabled, and actually able to receive events, and only then does it click.",
+      "start": 401.425,
+      "end": 416.05
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Same taxi analogy if you like, the driver doesn't drop you at the address while the building is still under construction, they wait until the door is open and reachable.",
+      "start": 416.19,
+      "end": 426.615
+    },
+    {
+      "speaker": "MAYA",
+      "text": "And the twin feature is web-first assertions, so when you write expect locator to be visible, that assertion retries automatically until it passes or times out, no manual polling loop, no fixed delays.",
+      "start": 426.755,
+      "end": 440.13
+    },
+    {
+      "speaker": "LEO",
+      "text": "Which brings us very naturally to trap corner, because I know exactly what the classic wrong answer is here.",
+      "start": 440.67,
+      "end": 447.745
+    },
+    {
+      "speaker": "LEO",
+      "text": "The interviewer describes a flaky test, something clicks too early or asserts too early, and the candidate proudly says they'd add a 2 second sleep to let the page settle.",
+      "start": 447.885,
+      "end": 458.785
+    },
+    {
+      "speaker": "MAYA",
+      "text": "And that answer is a red flag in the shape of a solution, because a hard sleep is wrong in both directions at once, it's too long on fast days, so your suite burns minutes doing nothing, and it's too short on slow days, so the test still fails, just less often, which is actually worse because now it's intermittent.",
+      "start": 459.325,
+      "end": 478.8
+    },
+    {
+      "speaker": "MAYA",
+      "text": "The dodge is to say that in Playwright you almost never wait for time, you wait for conditions, so you lean on auto-waiting for actions, you lean on web-first assertions for checks, and if you genuinely need to synchronize on something like a slow API call, you wait for the specific thing, for example page dot WaitForResponse for that endpoint, not for a number of seconds.",
+      "start": 478.94,
+      "end": 501.59
+    },
+    {
+      "speaker": "LEO",
+      "text": "There's a second trap hiding nearby too, right, which is the candidate who says Playwright is basically just Selenium but faster.",
+      "start": 502.13,
+      "end": 510.38
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Yes, and that undersells the real difference, so the strong answer is that Selenium speaks the WebDriver protocol, where each command is a separate round trip and you assemble your own waits, your own mocking, your own tooling, while Playwright is a single API over a persistent CDP style connection with auto-wait, network interception, tracing, screenshots, and video all built in.",
+      "start": 510.92,
+      "end": 534.595
+    },
+    {
+      "speaker": "MAYA",
+      "text": "It's not a faster horse, it's a different vehicle.",
+      "start": 534.735,
+      "end": 538.035
+    },
+    {
+      "speaker": "LEO",
+      "text": "Okay, chunk three then, because you just mentioned network interception, and I feel like this is the one that separates mid-level from senior answers.",
+      "start": 538.575,
+      "end": 548.1
+    },
+    {
+      "speaker": "LEO",
+      "text": "How does mocking work and why do I care?",
+      "start": 548.24,
+      "end": 551.065
+    },
+    {
+      "speaker": "MAYA",
+      "text": "So the scenario is that your UI test keeps failing, not because the UI is broken, but because the backend behind it is slow or flaky or returns different data every day, and the senior move is to cut the backend out of the picture.",
+      "start": 551.605,
+      "end": 567.005
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Playwright lets you do that with page dot Route, where you intercept any request matching a URL pattern and then fulfil it with your own response, modify it, or abort it entirely.",
+      "start": 567.145,
+      "end": 578.97
+    },
+    {
+      "speaker": "MAYA",
+      "text": "The analogy here is a stunt double on a movie set, because when a scene is too dangerous or too unpredictable, you swap in a professional who delivers exactly the same move, take after take, identically.",
+      "start": 579.11,
+      "end": 592.385
+    },
+    {
+      "speaker": "MAYA",
+      "text": "So you route the call to slash api slash users and fulfil it with a fixed JSON payload, maybe an empty list to test your empty state, and now the test is deterministic, it tests the UI and only the UI.",
+      "start": 592.525,
+      "end": 606.65
+    },
+    {
+      "speaker": "LEO",
+      "text": "And the same isolation mindset shows up in how you handle login, which I know is a favorite speed question, because logging in through the UI before every single test is brutally slow.",
+      "start": 607.19,
+      "end": 619.765
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Right, and the pattern is called storage state, so you authenticate exactly once in a setup step, you save the cookies and local storage to a file, and then every new context loads that file at creation, which means every test starts already logged in, no login screen, no typing credentials 300 times.",
+      "start": 620.305,
+      "end": 640.28
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Back in our hotel, it's like the front desk pre-programming every room keycard before the guests arrive, one setup, and everyone walks straight in.",
+      "start": 640.42,
+      "end": 649.57
+    },
+    {
+      "speaker": "LEO",
+      "text": "And when something does fail on CI, the debugging answer is the Trace Viewer, which honestly felt like magic the first time I used it.",
+      "start": 650.11,
+      "end": 659.035
+    },
+    {
+      "speaker": "MAYA",
+      "text": "It really is the flagship debugging story, so you configure tracing to record on failure or on first retry, and when a test fails you open the trace and you get DOM snapshots for every step, the network calls, the console output, essentially a flight recorder for the test, and you scrub through the failure frame by frame without ever re-running it.",
+      "start": 659.575,
+      "end": 681.125
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Mention that alongside codegen, which records your clicks into a script with good locators, and retries configured centrally for known flaky areas, and you sound like someone who's actually operated a suite in CI.",
+      "start": 681.265,
+      "end": 695.215
+    },
+    {
+      "speaker": "LEO",
+      "text": "Okay, in the room, how does this actually get asked?",
+      "start": 695.755,
+      "end": 698.98
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Usually in one of 3 shapes.",
+      "start": 699.52,
+      "end": 701.92
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Shape one is the comparison question, Playwright versus Selenium, where they want protocol, auto-wait, and built-in tooling, not vibes.",
+      "start": 702.06,
+      "end": 711.11
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Shape two is the design question, something like how you'd structure a fast, isolated suite, and that's your cue for one browser per worker, one context per test, storage state for auth, parallel workers, and sharding on CI.",
+      "start": 711.25,
+      "end": 726.325
+    },
+    {
+      "speaker": "MAYA",
+      "text": "And shape three is the war story question, where they describe a flaky test and watch whether you reach for a sleep or for conditions, mocking, and the Trace Viewer, and honestly that third one is where offers are won and lost.",
+      "start": 726.465,
+      "end": 740.84
+    },
+    {
+      "speaker": "LEO",
+      "text": "Alright, 60-second recap, let me play it back.",
+      "start": 741.38,
+      "end": 744.805
+    },
+    {
+      "speaker": "LEO",
+      "text": "If they ask how Playwright avoids flakiness, say auto-waiting, every action waits for the element to be attached, visible, stable, and enabled, plus web-first assertions that retry until they pass, and never a hard sleep.",
+      "start": 744.945,
+      "end": 759.47
+    },
+    {
+      "speaker": "LEO",
+      "text": "If they ask about browser versus context versus page, say the Browser is the reused instance, the Context is a cheap isolated session with its own cookies and storage, one per test, and the Page is just a tab, hotel, room, window.",
+      "start": 759.61,
+      "end": 776.01
+    },
+    {
+      "speaker": "LEO",
+      "text": "And if they ask Playwright versus Selenium, say one API over a persistent CDP style connection with auto-wait, network mocking, and tracing built in, versus a wire protocol where you assemble all of that yourself.",
+      "start": 776.15,
+      "end": 791.05
+    },
+    {
+      "speaker": "MAYA",
+      "text": "That's the whole episode in 3 sentences, and if you can also sketch the storage state login pattern and describe walking through a Trace Viewer session, you're ahead of most candidates walking into that room.",
+      "start": 791.59,
+      "end": 804.065
+    },
+    {
+      "speaker": "LEO",
+      "text": "Go build the hotel once, clean the room every time, and we'll see you in the next episode, where there's plenty more to study before the big day.",
+      "start": 804.605,
+      "end": 813.305
+    },
+    {
+      "speaker": "MAYA",
+      "text": "See you there.",
+      "start": 813.845,
+      "end": 815.32
+    }
+  ]
+}

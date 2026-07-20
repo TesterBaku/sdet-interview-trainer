@@ -1,0 +1,516 @@
+{
+  "id": "java",
+  "voice": null,
+  "voices": {
+    "MAYA": "af_heart",
+    "LEO": "am_fenrir"
+  },
+  "durationSec": 888.76,
+  "hash": "8435e32855f51ddf501a4b0e9d8b4f362f424c2018f84c2dd1ab1923f321fd2b",
+  "cues": [
+    {
+      "speaker": "MAYA",
+      "text": "Okay, here's one that ends more SDET interviews than any Selenium question ever will.",
+      "start": 0,
+      "end": 6.175
+    },
+    {
+      "speaker": "MAYA",
+      "text": "You pass a User object into a method, the method changes the user's name, and the change sticks after the method returns, so the interviewer asks you whether that proves Java is pass-by-reference.",
+      "start": 6.315,
+      "end": 18.415
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Most candidates confidently say yes, and most candidates are wrong.",
+      "start": 18.555,
+      "end": 23.155
+    },
+    {
+      "speaker": "LEO",
+      "text": "And if you were about to say yes too, well, this is the episode for you.",
+      "start": 23.695,
+      "end": 28.37
+    },
+    {
+      "speaker": "LEO",
+      "text": "I'm Leo, I write automation frameworks for a living, and I still remember getting burned on exactly that question.",
+      "start": 28.51,
+      "end": 36.135
+    },
+    {
+      "speaker": "MAYA",
+      "text": "And I'm Maya, I've spent years as a staff SDET and a few more on the other side of the table as a hiring manager, and today we're doing core Java for SDETs, because here's the uncomfortable truth...",
+      "start": 36.675,
+      "end": 49.05
+    },
+    {
+      "speaker": "MAYA",
+      "text": "you can know Selenium and REST Assured cold, but if you wobble on primitives versus references, or you compare Strings with double equals, the interviewer quietly downgrades you from engineer to tool user.",
+      "start": 49.19,
+      "end": 62.365
+    },
+    {
+      "speaker": "MAYA",
+      "text": "The Java round is where they decide whether you can actually build a framework or just drive one.",
+      "start": 62.505,
+      "end": 68.755
+    },
+    {
+      "speaker": "LEO",
+      "text": "Right, because every framework question is secretly a Java question, and your page objects, your API clients, your data providers, they're all just Java classes wearing a costume.",
+      "start": 69.295,
+      "end": 81.095
+    },
+    {
+      "speaker": "LEO",
+      "text": "So where do we start?",
+      "start": 81.235,
+      "end": 82.885
+    },
+    {
+      "speaker": "MAYA",
+      "text": "We start with memory, because almost everything confusing in Java traces back to one distinction, primitives versus reference types.",
+      "start": 83.425,
+      "end": 92
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Here's the picture I want in your head.",
+      "start": 92.14,
+      "end": 94.565
+    },
+    {
+      "speaker": "MAYA",
+      "text": "A primitive, like an int or a boolean or a double, is a sticky note with the value written directly on it, so when you assign it to another variable, Java photocopies the sticky note, and now you have two independent pieces of paper.",
+      "start": 94.705,
+      "end": 109.38
+    },
+    {
+      "speaker": "MAYA",
+      "text": "If I write int a equals 1, then int b equals a, then change b to 9, the variable a is still 1, because b got a photocopy, not a connection.",
+      "start": 109.52,
+      "end": 119.295
+    },
+    {
+      "speaker": "LEO",
+      "text": "Okay, and reference types are different how?",
+      "start": 119.835,
+      "end": 122.76
+    },
+    {
+      "speaker": "MAYA",
+      "text": "A reference type, meaning objects, arrays, Strings, doesn't hold the thing itself, it holds the address of the thing, like a card with a street address written on it while the actual house lives on the heap.",
+      "start": 123.3,
+      "end": 135.9
+    },
+    {
+      "speaker": "MAYA",
+      "text": "When you assign one object variable to another, Java photocopies the address card, not the house, so both variables now point at the same house, and if you walk in through either door and repaint the kitchen, everyone sees the new kitchen.",
+      "start": 136.04,
+      "end": 150.64
+    },
+    {
+      "speaker": "LEO",
+      "text": "Which explains the array example that trips people up, right, where you copy an array into a second variable, change element zero through the copy, and the original array changes too, because there was only ever one array, and both variables were just holding directions to it.",
+      "start": 151.18,
+      "end": 167.505
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Exactly, and now the interview trap question resolves itself.",
+      "start": 168.045,
+      "end": 172.395
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Java is always, always pass-by-value, no exceptions, but here's the subtle part, for objects the value being copied is the reference itself.",
+      "start": 172.535,
+      "end": 182.21
+    },
+    {
+      "speaker": "MAYA",
+      "text": "So when you pass a User into a method, the method gets a photocopy of the address card, which means it can drive to the house and change the fields, and those changes stick, but if the method tries to reseat that variable, pointing its copy of the card at a brand new User, the caller's variable never notices, because the caller still holds the original card.",
+      "start": 182.35,
+      "end": 203.6
+    },
+    {
+      "speaker": "LEO",
+      "text": "So the memory hook is, you can repaint my house but you can't move me to a new one.",
+      "start": 204.14,
+      "end": 209.565
+    },
+    {
+      "speaker": "LEO",
+      "text": "Mutating the object works through the copied reference, reassigning the parameter does nothing outside the method.",
+      "start": 209.705,
+      "end": 217.055
+    },
+    {
+      "speaker": "MAYA",
+      "text": "That's the line, and if you deliver it that cleanly in an interview, with the house analogy or without it, you've just separated yourself from half the candidate pool.",
+      "start": 217.595,
+      "end": 227.195
+    },
+    {
+      "speaker": "MAYA",
+      "text": "And while we're in this neighborhood, know your wrapper classes too, every primitive has an object twin, int has Integer, boolean has Boolean, and you need them because generics and collections can only hold objects, so a List of Integer, never a List of int, and Java converts between them automatically, which is called autoboxing and unboxing.",
+      "start": 227.335,
+      "end": 248.96
+    },
+    {
+      "speaker": "LEO",
+      "text": "Okay, chunk two, and I know where this is going, because no Java interview on earth skips Strings.",
+      "start": 249.5,
+      "end": 256.15
+    },
+    {
+      "speaker": "MAYA",
+      "text": "None, because Strings hide two classic questions in one topic.",
+      "start": 256.69,
+      "end": 261.015
+    },
+    {
+      "speaker": "MAYA",
+      "text": "First fact, String is a reference type but it's immutable, meaning once a String object is created it can never change, ever.",
+      "start": 261.155,
+      "end": 269.23
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Every operation that looks like a modification, toUpperCase, replace, substring, actually manufactures a brand new String and hands it back, leaving the original untouched.",
+      "start": 269.37,
+      "end": 280.82
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Think of every String as a stone tablet, you can't edit a stone tablet, you can only carve a new one, so if you call toUpperCase on a String and never assign the result to anything, you carved a beautiful new tablet and dropped it straight in the trash, and your original variable still says hello in lowercase.",
+      "start": 280.96,
+      "end": 298.935
+    },
+    {
+      "speaker": "LEO",
+      "text": "Which is a real bug I have genuinely shipped, calling trim on a locator string and wondering why nothing changed, because I forgot to reassign the result.",
+      "start": 299.475,
+      "end": 309.825
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Everyone's done it once.",
+      "start": 310.365,
+      "end": 312.34
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Now, why did Java's designers make Strings immutable, because interviewers love asking for the why, not just the what.",
+      "start": 312.48,
+      "end": 320.355
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Three reasons worth naming.",
+      "start": 320.495,
+      "end": 322.695
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Immutable objects are automatically thread-safe, nothing can change under you mid-flight.",
+      "start": 322.835,
+      "end": 328.535
+    },
+    {
+      "speaker": "MAYA",
+      "text": "They make safe HashMap keys, because the hash code can never shift after the key goes in.",
+      "start": 328.675,
+      "end": 334.425
+    },
+    {
+      "speaker": "MAYA",
+      "text": "And they enable the String pool, where identical literals get stored once and shared, so two variables both assigned the literal hi actually point at the same pooled tablet.",
+      "start": 334.565,
+      "end": 345.415
+    },
+    {
+      "speaker": "LEO",
+      "text": "Wait, so...",
+      "start": 345.955,
+      "end": 347.38
+    },
+    {
+      "speaker": "LEO",
+      "text": "that's why double equals sometimes works on Strings, isn't it.",
+      "start": 347.52,
+      "end": 351.645
+    },
+    {
+      "speaker": "LEO",
+      "text": "Two literals compare as identical with double equals because they literally are the same object in the pool, but the moment somebody creates a String with the new keyword, or a value arrives from a file or an API response, it's a different object, and double equals starts returning false even when the text matches.",
+      "start": 351.785,
+      "end": 370.76
+    },
+    {
+      "speaker": "MAYA",
+      "text": "And that's the deadly part, sometimes works, because a bug that fails every time gets caught in five minutes, but a comparison that passes with literals in your unit test and fails with real API data in the pipeline, that one eats an afternoon.",
+      "start": 371.3,
+      "end": 387.15
+    },
+    {
+      "speaker": "MAYA",
+      "text": "So burn in the rule, double equals asks whether two variables point at the same object, the equals method asks whether the contents match, and for Strings and objects you always, always use equals.",
+      "start": 387.29,
+      "end": 399.915
+    },
+    {
+      "speaker": "MAYA",
+      "text": "One more String beat before we move on, if you're building a big String in a loop, every concatenation carves a whole new tablet, which gets wasteful fast, so use StringBuilder, which is more like a whiteboard you keep appending to, and call toString once at the end for a single final allocation.",
+      "start": 400.055,
+      "end": 418.43
+    },
+    {
+      "speaker": "LEO",
+      "text": "Chunk three, collections, which honestly is the stuff I use every single day in test code, parsing API responses into Lists and Maps.",
+      "start": 418.97,
+      "end": 429.02
+    },
+    {
+      "speaker": "MAYA",
+      "text": "And the framework is simpler than people fear, because everything hangs off four ideas.",
+      "start": 429.56,
+      "end": 435.135
+    },
+    {
+      "speaker": "MAYA",
+      "text": "A List is ordered and allows duplicates, a Set refuses duplicates, a Map stores key value pairs, and a Queue handles first-in-first-out work.",
+      "start": 435.275,
+      "end": 445.025
+    },
+    {
+      "speaker": "MAYA",
+      "text": "For daily SDET life, two implementations cover 90 percent of it, ArrayList as your default List, because it's a resizable array with fast access by index, and HashMap as your default Map, with average constant-time lookup and no ordering guarantees.",
+      "start": 445.165,
+      "end": 462.29
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Then you keep a couple of specialists in your back pocket, LinkedList when you're constantly adding and removing at the ends, LinkedHashMap when you need a HashMap that remembers insertion order, and TreeMap when you need keys kept sorted, at log n cost.",
+      "start": 462.43,
+      "end": 477.655
+    },
+    {
+      "speaker": "LEO",
+      "text": "And there's a follow-up lurking here that interviewers save for the end, the equals and hashCode question, which I'll admit felt like trivia until someone explained what actually breaks.",
+      "start": 478.195,
+      "end": 489.52
+    },
+    {
+      "speaker": "MAYA",
+      "text": "So here's the physical picture.",
+      "start": 490.06,
+      "end": 492.41
+    },
+    {
+      "speaker": "MAYA",
+      "text": "A HashMap is a coat check.",
+      "start": 492.55,
+      "end": 494.725
+    },
+    {
+      "speaker": "MAYA",
+      "text": "When you hand over your coat, the attendant doesn't remember your face, they compute a ticket number from your object, that's the hashCode, and the coat goes on that numbered rack, and only when there are several coats on the same rack do they compare more carefully, that's equals.",
+      "start": 494.865,
+      "end": 510.69
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Now imagine you override equals so two objects count as the same coat, but you never override hashCode, so those equal objects generate different ticket numbers.",
+      "start": 510.83,
+      "end": 521.68
+    },
+    {
+      "speaker": "MAYA",
+      "text": "You come back for your coat, the attendant computes a ticket that sends them to the wrong rack, and your coat has effectively vanished, even though it's hanging right there in the room.",
+      "start": 521.82,
+      "end": 532.195
+    },
+    {
+      "speaker": "MAYA",
+      "text": "In code that means HashMap lookups return null for keys you definitely inserted, and HashSets happily accept duplicates they were supposed to reject.",
+      "start": 532.335,
+      "end": 542.36
+    },
+    {
+      "speaker": "LEO",
+      "text": "So the contract is, if two objects are equal they must produce the same hashCode, always override the two together, using the same fields, or your hash collections quietly lie to you.",
+      "start": 542.9,
+      "end": 554.8
+    },
+    {
+      "speaker": "LEO",
+      "text": "And modern Java gives you an escape hatch, right, because a record generates equals and hashCode for you.",
+      "start": 554.94,
+      "end": 562.04
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Records are the clean answer, and mentioning them signals you're current.",
+      "start": 562.58,
+      "end": 566.98
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Okay, trap corner, because a couple of wrong answers come up so often they deserve their own segment.",
+      "start": 567.12,
+      "end": 573.645
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Trap number 1 we already defused, someone in the interview will suggest that since a method can modify an object, Java must be pass-by-reference for objects, and it sounds airtight, but the dodge is precise vocabulary, Java always passes by value, and for objects that value is a copy of the reference, so you can mutate the object but never reseat the caller's variable.",
+      "start": 573.785,
+      "end": 597.31
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Trap number 2 is the double equals String comparison that happens to pass because of the pool, and the dodge is simply never write it, equals for content, full stop.",
+      "start": 597.45,
+      "end": 608.125
+    },
+    {
+      "speaker": "MAYA",
+      "text": "And trap number 3 is exception swallowing, which is an SDET-specific sin, a test wraps something in try catch, the catch block is empty or just prints a line, and now a real product failure produces a green test run.",
+      "start": 608.265,
+      "end": 622.965
+    },
+    {
+      "speaker": "LEO",
+      "text": "Which is basically the worst possible outcome in our job, a test suite that lies.",
+      "start": 623.505,
+      "end": 629.23
+    },
+    {
+      "speaker": "LEO",
+      "text": "So the hygiene rules are, catch the narrowest exception you can, never leave a catch block empty, keep the original cause when you wrap an exception, and in test code, mostly let unexpected errors fail loudly, because a loud red build is the product working as designed.",
+      "start": 629.37,
+      "end": 646.32
+    },
+    {
+      "speaker": "MAYA",
+      "text": "And know the vocabulary around it, checked exceptions like IOException must be handled or declared with the throws keyword and the compiler enforces it, unchecked exceptions, the RuntimeException family like NullPointerException, don't carry that requirement, and try-with-resources is the modern pattern that automatically closes files and readers and drivers even when things blow up.",
+      "start": 646.86,
+      "end": 671.76
+    },
+    {
+      "speaker": "LEO",
+      "text": "Alright, take us into the room, Maya, because knowing this and surviving 45 minutes of it are different skills.",
+      "start": 672.3,
+      "end": 679.225
+    },
+    {
+      "speaker": "LEO",
+      "text": "How does the Java portion actually unfold?",
+      "start": 679.365,
+      "end": 682.54
+    },
+    {
+      "speaker": "MAYA",
+      "text": "It usually runs as a rapid ladder, and each rung has a crisp answer.",
+      "start": 683.08,
+      "end": 687.805
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Abstract class versus interface, say that an abstract class is shared code and state, you extend exactly one, it's an is-a relationship, while an interface is a contract or capability, you implement as many as you like, it's a can-do relationship, and since Java 8 interfaces can carry default methods.",
+      "start": 687.945,
+      "end": 708.02
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Overloading versus overriding, overloading is the same method name with different parameters, resolved at compile time, overriding is a subclass redefining the same signature, resolved at runtime, and that runtime dispatch is the heart of polymorphism.",
+      "start": 708.16,
+      "end": 725.685
+    },
+    {
+      "speaker": "MAYA",
+      "text": "If streams come up, describe a stream as a lazy pipeline over a collection, source, then intermediate operations like filter and map, then one terminal operation like collect or count, and nothing executes until that terminal operation fires, and earn a bonus point by adding that a plain for loop is still fine, sometimes faster, for simple iteration.",
+      "start": 725.825,
+      "end": 748.225
+    },
+    {
+      "speaker": "LEO",
+      "text": "And they'll usually close on the ecosystem, right, since we're SDETs and not backend devs.",
+      "start": 748.765,
+      "end": 754.79
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Almost always, so have one sentence per tool.",
+      "start": 755.33,
+      "end": 758.78
+    },
+    {
+      "speaker": "MAYA",
+      "text": "JUnit 5 is the modern modular default with parameterized tests and an extension model, TestNG brings richer built-in groups, data providers, and parallel configuration, which is why so many Selenium frameworks standardized on it, Mockito mocks dependencies so you can test in isolation, AssertJ gives you fluent readable assertions, and Maven or Gradle manages dependencies and runs the whole suite in CI.",
+      "start": 758.92,
+      "end": 785.97
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Nobody expects a lecture, they expect evidence that you've lived in this toolbox, and if they ask JUnit versus TestNG, the winning move is explaining why a team might choose each, not declaring one the loser.",
+      "start": 786.11,
+      "end": 800.16
+    },
+    {
+      "speaker": "LEO",
+      "text": "Okay, 60-second recap, let me play it back as the cheat sheet.",
+      "start": 800.7,
+      "end": 805.15
+    },
+    {
+      "speaker": "LEO",
+      "text": "If they ask whether Java is pass-by-value or pass-by-reference, say always pass-by-value, for objects the reference gets copied, so a method can repaint the house but can't move you to a new one.",
+      "start": 805.29,
+      "end": 818.24
+    },
+    {
+      "speaker": "LEO",
+      "text": "If they ask about String comparison or immutability, say double equals compares references and equals compares content, so always use equals, and Strings are immutable for thread-safety, safe HashMap keys, and the String pool, with StringBuilder for heavy concatenation.",
+      "start": 818.38,
+      "end": 835.405
+    },
+    {
+      "speaker": "LEO",
+      "text": "And if they ask why equals and hashCode travel together, tell them the coat check story, hash collections locate by ticket number first, so equal objects must share a hashCode or your lookups go to the wrong rack and entries vanish.",
+      "start": 835.545,
+      "end": 850.37
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Nail those 3 and the whole Java round tilts your way, because they're the questions where confidence is easiest to fake and easiest to puncture.",
+      "start": 850.91,
+      "end": 860.36
+    },
+    {
+      "speaker": "MAYA",
+      "text": "From here, drill the quiz on the Java cheat sheet until the answers are reflex, and then come back for the next episode, where we take this foundation and point it at collections-heavy coding katas, the little exercises interviewers use to watch you actually write this stuff live.",
+      "start": 860.5,
+      "end": 877.55
+    },
+    {
+      "speaker": "LEO",
+      "text": "Stone tablets, address cards, and coat checks...",
+      "start": 878.09,
+      "end": 881.315
+    },
+    {
+      "speaker": "LEO",
+      "text": "honestly, Java makes a lot more sense as a warehouse full of furniture.",
+      "start": 881.455,
+      "end": 886.305
+    },
+    {
+      "speaker": "LEO",
+      "text": "See you in the next one.",
+      "start": 886.445,
+      "end": 888.22
+    }
+  ]
+}

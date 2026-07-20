@@ -13,7 +13,9 @@
     "audio:tts": "node scripts/audio/synthesize.mjs",
     "audio:captions": "node scripts/audio/captions.mjs",
     "audio:publish": "node scripts/audio/publish.mjs",
-    "audio:build": "npm run audio:scripts && npm run audio:tts && npm run audio:captions"
+    "audio:build": "npm run audio:scripts && npm run audio:tts && npm run audio:captions",
+    "audio:podcast:captions": "node scripts/audio/captions.mjs --podcast",
+    "audio:podcast:publish": "node scripts/audio/publish.mjs --podcast"
   },
   "dependencies": {
     "@vercel/analytics": "^2.0.1",

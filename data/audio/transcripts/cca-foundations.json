@@ -1,0 +1,570 @@
+{
+  "id": "cca-foundations",
+  "voice": null,
+  "voices": {
+    "MAYA": "af_heart",
+    "LEO": "am_fenrir"
+  },
+  "durationSec": 834.79,
+  "hash": "144dd905587db05c7c941b4939fb34972dc55d8b709544db5063f8f5a9e9be69",
+  "cues": [
+    {
+      "speaker": "MAYA",
+      "text": "Okay, here's one straight from the certification question bank.",
+      "start": 0,
+      "end": 4.075
+    },
+    {
+      "speaker": "MAYA",
+      "text": "You have a 50,000 token system prompt, all your product docs, and you turn on prompt caching to save money, so the first request writes the cache, and then your second request comes in 6 minutes later.",
+      "start": 4.215,
+      "end": 17.19
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Question, what do you pay on that second request, the discounted cache read rate, or something else?",
+      "start": 17.33,
+      "end": 23.505
+    },
+    {
+      "speaker": "MAYA",
+      "text": "And if you confidently said the discounted rate, well, this is the episode for you.",
+      "start": 23.645,
+      "end": 29.07
+    },
+    {
+      "speaker": "LEO",
+      "text": "And I did confidently say the discounted rate, so yeah, this is the episode for me.",
+      "start": 29.61,
+      "end": 35.41
+    },
+    {
+      "speaker": "LEO",
+      "text": "I'm Leo, I'm the one studying for this thing.",
+      "start": 35.55,
+      "end": 38.525
+    },
+    {
+      "speaker": "MAYA",
+      "text": "And I'm Maya.",
+      "start": 39.065,
+      "end": 40.665
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Today we're covering the foundations for Anthropic's Claude certification, which means working with Claude and Claude Code, agentic patterns, prompt engineering, context management, model selection, and MCP.",
+      "start": 40.805,
+      "end": 55.03
+    },
+    {
+      "speaker": "MAYA",
+      "text": "And the answer to the cold open is that you pay full write price again, because the prompt cache is ephemeral with a 5 minute time to live, so at 6 minutes your cache is gone, and a cache miss gets charged at the full write rate, which is actually 1.25 times the base input price.",
+      "start": 55.17,
+      "end": 73.07
+    },
+    {
+      "speaker": "MAYA",
+      "text": "That one number, 5 minutes, decides the whole question.",
+      "start": 73.21,
+      "end": 77.06
+    },
+    {
+      "speaker": "LEO",
+      "text": "Which is brutal, because the whole point of caching was saving money, and now I'm paying a premium.",
+      "start": 77.6,
+      "end": 83.775
+    },
+    {
+      "speaker": "LEO",
+      "text": "So before we go deeper, why does this exam matter beyond the certificate itself?",
+      "start": 83.915,
+      "end": 89.515
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Because these are exactly the questions hiring managers ask when a team is adopting Claude in production.",
+      "start": 90.055,
+      "end": 96.98
+    },
+    {
+      "speaker": "MAYA",
+      "text": "I've sat on those panels, and the people who get hired aren't the ones who memorized every parameter, they're the ones who can reason about cost, reliability, and safety, which is what every question on this exam is secretly testing.",
+      "start": 97.12,
+      "end": 111.795
+    },
+    {
+      "speaker": "MAYA",
+      "text": "The format, by the way, is 60 questions in 120 minutes, proctored, and you can't use Claude or the docs during it, so the numbers we cover today genuinely have to live in your head.",
+      "start": 111.935,
+      "end": 123.91
+    },
+    {
+      "speaker": "LEO",
+      "text": "Alright, so where do we start?",
+      "start": 124.45,
+      "end": 126.525
+    },
+    {
+      "speaker": "MAYA",
+      "text": "We start with models and money, because half the scenario questions boil down to routing work to the right model.",
+      "start": 127.065,
+      "end": 134.29
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Think of it like staffing a professional kitchen.",
+      "start": 134.43,
+      "end": 137.48
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Opus is your head chef, the most capable and the most expensive, so you bring it in for complex reasoning and architecture decisions.",
+      "start": 137.62,
+      "end": 146.17
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Sonnet is your experienced line cook, the balanced default for production work, good quality at a sensible price.",
+      "start": 146.31,
+      "end": 153.535
+    },
+    {
+      "speaker": "MAYA",
+      "text": "And Haiku is your prep station, fast, cheap, high volume, perfect for classification, triage, and simple extraction.",
+      "start": 153.675,
+      "end": 161.875
+    },
+    {
+      "speaker": "MAYA",
+      "text": "All three currently give you a 200,000 token context window, so the difference isn't how much they can hold, it's how deeply they think and what each token costs.",
+      "start": 162.015,
+      "end": 172.59
+    },
+    {
+      "speaker": "LEO",
+      "text": "So the exam pattern is, if the question describes a simple, high-volume subtask, the answer is route it to Haiku, and if it describes hard multi-step reasoning, the answer is Opus.",
+      "start": 173.13,
+      "end": 185.405
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Exactly, and the classic architecture answer is to mix them, an orchestrator on a stronger model delegating simple subtasks to Haiku.",
+      "start": 185.945,
+      "end": 195.095
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Two more kitchen rules while we're here.",
+      "start": 195.235,
+      "end": 197.685
+    },
+    {
+      "speaker": "MAYA",
+      "text": "First, when you call the Messages API, max_tokens is required, there is no default, and if you omit it the request errors, which shows up as a sneaky multiple choice option.",
+      "start": 197.825,
+      "end": 209.75
+    },
+    {
+      "speaker": "MAYA",
+      "text": "And second, back to caching, which is really the mise en place of this kitchen.",
+      "start": 209.89,
+      "end": 215.04
+    },
+    {
+      "speaker": "MAYA",
+      "text": "You prep your expensive static context once, your big system prompt, your retrieved documents, your persona, and you mark it with a cache control block of type ephemeral.",
+      "start": 215.18,
+      "end": 226.055
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Writing that prep costs 1.25 times normal input price, but every read within the freshness window costs one tenth of the base price, a 90 percent discount.",
+      "start": 226.195,
+      "end": 238.02
+    },
+    {
+      "speaker": "MAYA",
+      "text": "The freshness window is 5 minutes, you get at most 4 cache breakpoints per request, and there's a minimum size to bother caching at all, 1,024 tokens on Haiku and 2,048 on Sonnet and Opus.",
+      "start": 238.16,
+      "end": 252.56
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Like prepped ingredients, if nobody uses them before they go stale, you eat the cost.",
+      "start": 252.7,
+      "end": 258.325
+    },
+    {
+      "speaker": "LEO",
+      "text": "Okay, memory hook locked in, cache is mise en place, 5 minute freshness, quarter more to prep, 90 percent off to reuse, 4 stations max.",
+      "start": 258.865,
+      "end": 269.015
+    },
+    {
+      "speaker": "LEO",
+      "text": "And there's a cousin of this for cost, right, the Batch API?",
+      "start": 269.155,
+      "end": 272.98
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Right, and the distinction matters.",
+      "start": 273.52,
+      "end": 275.995
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Caching saves money on repeated context in real time, while the Batch API saves money on work that doesn't need to be real time at all, a flat 50 percent discount in exchange for results landing anytime within 24 hours.",
+      "start": 276.135,
+      "end": 291.885
+    },
+    {
+      "speaker": "MAYA",
+      "text": "So if the question mentions overnight evals or offline enrichment, the answer is batch, and if it mentions a chatbot answering users right now, batch is the trap answer, because nobody waits a day for a chat reply.",
+      "start": 292.025,
+      "end": 306.1
+    },
+    {
+      "speaker": "LEO",
+      "text": "Got it.",
+      "start": 306.64,
+      "end": 307.815
+    },
+    {
+      "speaker": "LEO",
+      "text": "Chunk 2, tools and MCP?",
+      "start": 307.955,
+      "end": 310.305
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Chunk 2.",
+      "start": 310.845,
+      "end": 312.395
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Here's the analogy that carries the whole section, MCP is the USB-C port for AI.",
+      "start": 312.535,
+      "end": 319.16
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Before USB-C, every device had its own proprietary charger, and before MCP, every integration between a model and an external system was a custom one-off connector.",
+      "start": 319.3,
+      "end": 331.55
+    },
+    {
+      "speaker": "MAYA",
+      "text": "MCP standardizes the plug, so any client that speaks the protocol can connect to any server that speaks it.",
+      "start": 331.69,
+      "end": 338.99
+    },
+    {
+      "speaker": "MAYA",
+      "text": "And the exam loves the three things a server can expose through that port.",
+      "start": 339.13,
+      "end": 343.93
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Tools, which are executable functions the model can call, resources, which are read-only data the model can access, and prompts, which are reusable templates with arguments.",
+      "start": 344.07,
+      "end": 355.37
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Tools act, resources inform, prompts scaffold.",
+      "start": 355.51,
+      "end": 359.11
+    },
+    {
+      "speaker": "LEO",
+      "text": "And the transport question, because I keep seeing that one.",
+      "start": 359.65,
+      "end": 363.325
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Two options, and the split is local versus remote.",
+      "start": 363.865,
+      "end": 367.59
+    },
+    {
+      "speaker": "MAYA",
+      "text": "A local server runs as a subprocess talking over standard input and output, that's stdio, while a remote server talks over HTTP with server-sent events, that's SSE, and remote servers should authenticate with OAuth 2.0.",
+      "start": 367.73,
+      "end": 384.205
+    },
+    {
+      "speaker": "MAYA",
+      "text": "There's also a clever primitive called sampling, where the server asks the client to make a model call on its behalf, which means an MCP server can leverage the host's model without owning its own API key, and the client stays in control of which requests it honors, keeping a human in the loop.",
+      "start": 384.345,
+      "end": 403.12
+    },
+    {
+      "speaker": "LEO",
+      "text": "Wait, so sampling reverses the flow, the server becomes the one asking for intelligence instead of providing data.",
+      "start": 403.66,
+      "end": 411.235
+    },
+    {
+      "speaker": "LEO",
+      "text": "That's a nice hook, the plug asking the wall for power.",
+      "start": 411.375,
+      "end": 414.9
+    },
+    {
+      "speaker": "MAYA",
+      "text": "That's a good way to hold it.",
+      "start": 415.44,
+      "end": 417.465
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Now, underneath MCP is plain tool use, and there's one insight here that answers several exam questions at once.",
+      "start": 417.605,
+      "end": 425.805
+    },
+    {
+      "speaker": "MAYA",
+      "text": "When you need reliable structured output from Claude, do not just ask it in prose to output JSON, instead define a tool with an input schema, mark every field you need as required, and let the tool call itself be your structured output, because the schema is enforced rather than hoped for.",
+      "start": 425.945,
+      "end": 444.32
+    },
+    {
+      "speaker": "MAYA",
+      "text": "The cycle goes, the model stops with the stop reason tool_use and hands you a block with an id, a name, and the input, you run the tool, and you send back a tool result carrying that same id so the model can match answer to question.",
+      "start": 444.46,
+      "end": 459.76
+    },
+    {
+      "speaker": "MAYA",
+      "text": "And if you need to steer, tool_choice has 4 settings, auto lets the model decide, any forces at least one tool call, naming a specific tool forces that one, and none forbids tools entirely.",
+      "start": 459.9,
+      "end": 472.85
+    },
+    {
+      "speaker": "LEO",
+      "text": "Okay, chunk 3, Claude Code itself, because the certification has a whole domain on it.",
+      "start": 473.39,
+      "end": 479.54
+    },
+    {
+      "speaker": "MAYA",
+      "text": "It does, and here the analogy is delegating to a contractor.",
+      "start": 480.08,
+      "end": 484.18
+    },
+    {
+      "speaker": "MAYA",
+      "text": "When Claude Code spawns a subagent through the Task tool, picture sending a contractor to work in a separate building with only the written brief you handed them.",
+      "start": 484.32,
+      "end": 494.07
+    },
+    {
+      "speaker": "MAYA",
+      "text": "They do not overhear your conversations, they do not inherit the parent conversation's context, they work in isolation and mail you back a text report.",
+      "start": 494.21,
+      "end": 504.085
+    },
+    {
+      "speaker": "MAYA",
+      "text": "So the classic scenario question, why doesn't my subagent know what we discussed earlier, has one answer, because subagent context is separate by design, and anything it needs must be in the prompt you gave it.",
+      "start": 504.225,
+      "end": 517.625
+    },
+    {
+      "speaker": "MAYA",
+      "text": "That isolation is a feature, it keeps the main context window clean, which is the whole point of the orchestrator and subagent pattern, a main agent managing state while specialists do focused work.",
+      "start": 517.765,
+      "end": 530.865
+    },
+    {
+      "speaker": "MAYA",
+      "text": "The exam also expects the other patterns, parallel agents fanning out independent subtasks and merging results, pipelines where one agent's output feeds the next, and evaluator-optimizer, where one agent generates and another critiques in a loop until the work passes.",
+      "start": 531.005,
+      "end": 548.555
+    },
+    {
+      "speaker": "LEO",
+      "text": "And configuration, the CLAUDE.md files and hooks?",
+      "start": 549.095,
+      "end": 552.52
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Memory first.",
+      "start": 553.06,
+      "end": 554.81
+    },
+    {
+      "speaker": "MAYA",
+      "text": "CLAUDE.md files form a hierarchy, a global one in your home directory's dot claude folder applying to every project, a project-level one for project-specific rules, and one at the repo root for architecture overview, and Claude Code reads them as persistent instructions.",
+      "start": 554.95,
+      "end": 572.85
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Then hooks, which are scripts that fire on lifecycle events, and here is the single most tested fact in this domain.",
+      "start": 572.99,
+      "end": 580.465
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Only the PreToolUse hook can block an action, and it blocks by exiting with code 2, at which point Claude sees the script's output as the reason it was stopped.",
+      "start": 580.605,
+      "end": 590.955
+    },
+    {
+      "speaker": "MAYA",
+      "text": "PostToolUse fires after the tool already ran, so it can observe and log but never prevent, and the same goes for the notification, stop, and pre-compaction hooks.",
+      "start": 591.095,
+      "end": 602.17
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Exit code 0 means proceed, and any other nonzero code is just logged as an error while execution continues.",
+      "start": 602.31,
+      "end": 610.46
+    },
+    {
+      "speaker": "LEO",
+      "text": "So the contractor analogy extends, PreToolUse is the security desk at the front door that can turn you away, and PostToolUse is the camera in the hallway that only records what already happened.",
+      "start": 611,
+      "end": 623.75
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Perfect.",
+      "start": 624.29,
+      "end": 625.74
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Which brings us to trap corner, and I'll give you the big three.",
+      "start": 625.88,
+      "end": 629.705
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Trap number one is the persistent cache.",
+      "start": 629.845,
+      "end": 632.77
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Someone on the exam will offer you an answer implying the prompt cache lasts for hours or across sessions, and it does not, 5 minutes, ephemeral is the only type, and a miss bills at full write price.",
+      "start": 632.91,
+      "end": 646.235
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Trap number two is what I call JSON by politeness, where the tempting answer says to instruct Claude to respond only with valid JSON, and the correct answer is always the tool with an input schema, because enforcement beats politeness.",
+      "start": 646.375,
+      "end": 661.65
+    },
+    {
+      "speaker": "MAYA",
+      "text": "And trap number three is the mind-reading subagent, any option suggesting a subagent or an MCP server automatically shares the parent's conversation history, which is false in both cases, context must be passed explicitly, and on the MCP side permissions should be explicitly scoped too, least privilege, with confirmation required before destructive actions.",
+      "start": 661.79,
+      "end": 685.665
+    },
+    {
+      "speaker": "LEO",
+      "text": "And how does this actually surface in the room, on the exam or across the interview table?",
+      "start": 686.205,
+      "end": 692.005
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Almost never as pure recall.",
+      "start": 692.545,
+      "end": 695.02
+    },
+    {
+      "speaker": "MAYA",
+      "text": "You'll get a scenario, a company spending too much on a classification workload, and the answer is routing to Haiku or moving to batch.",
+      "start": 695.16,
+      "end": 703.685
+    },
+    {
+      "speaker": "MAYA",
+      "text": "A team whose agent loops forever on a flaky API, and the answer involves a max retry count defined up front, distinguishing retryable errors like timeouts from fatal ones like bad auth, and falling back to a simpler model instead of crashing.",
+      "start": 703.825,
+      "end": 720.55
+    },
+    {
+      "speaker": "MAYA",
+      "text": "A prompt injection scenario, where the answer is wrapping untrusted user content in XML tags and telling Claude in the system prompt that whatever appears inside those tags is data, not instructions, never concatenating user text straight into your instructions.",
+      "start": 720.69,
+      "end": 738.265
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Interviewers do the same thing conversationally, they describe a broken setup and watch whether you diagnose it with these exact levers.",
+      "start": 738.405,
+      "end": 747.03
+    },
+    {
+      "speaker": "LEO",
+      "text": "Alright, recap time, give me the 60 second version.",
+      "start": 747.57,
+      "end": 751.145
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Three takeaways.",
+      "start": 751.685,
+      "end": 753.435
+    },
+    {
+      "speaker": "MAYA",
+      "text": "If they ask about prompt caching, say 5 minute ephemeral time to live, 1.25 times to write, one tenth to read, at most 4 breakpoints, and misses cost full write price.",
+      "start": 753.575,
+      "end": 765.95
+    },
+    {
+      "speaker": "MAYA",
+      "text": "If they ask how to get reliable structured output, say tool use with an input schema and required fields, never a prose request for JSON.",
+      "start": 766.09,
+      "end": 775.44
+    },
+    {
+      "speaker": "MAYA",
+      "text": "And if they ask about Claude Code control and delegation, say subagents run in isolated context that does not inherit the parent conversation, and only the PreToolUse hook can block a tool call, by exiting with code 2.",
+      "start": 775.58,
+      "end": 790.78
+    },
+    {
+      "speaker": "LEO",
+      "text": "And my kitchen sticks with me, Opus the head chef for hard reasoning, Haiku the prep station for cheap volume, Sonnet running the line in between, with mise en place that goes stale in 5 minutes.",
+      "start": 791.32,
+      "end": 803.845
+    },
+    {
+      "speaker": "LEO",
+      "text": "Plus MCP as the USB-C port with its three primitives, tools act, resources inform, prompts scaffold.",
+      "start": 803.985,
+      "end": 812.535
+    },
+    {
+      "speaker": "MAYA",
+      "text": "That's the foundation.",
+      "start": 813.075,
+      "end": 814.925
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Next time we'll go deeper on the individual domains, more agentic patterns, more context management, and a proper mock exam walkthrough, so keep this episode in your review loop.",
+      "start": 815.065,
+      "end": 826.69
+    },
+    {
+      "speaker": "LEO",
+      "text": "Route the simple stuff to Haiku, save your Opus tokens for the hard problems, and we'll see you in the next one.",
+      "start": 827.23,
+      "end": 834.255
+    }
+  ]
+}
