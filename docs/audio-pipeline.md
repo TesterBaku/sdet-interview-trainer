@@ -155,11 +155,16 @@ The app surfaces these via `getInterviewAudio(id)` — a "Mock interview" player
 podcast player on each cheat-sheet page, plus a Mock Interview lane in Commute Mode. Guarded
 by `tests/unit/interview-scripts.test.mjs` (script format) and functional tests (players/lane).
 
+## Shipped
+
+- **Podcast rollout** — all 18 cheat-sheet topics authored, rendered, and published to Blob.
+- **In-app player** — a **Listen** player (audio + synced transcript) on each cheat-sheet page.
+- **Commute Mode** (`/commute`) — a screen-free playlist that queues the episodes back to back.
+- **Mock-interview Q&A** — a two-voice interviewer/candidate round per topic, published to
+  Blob and surfaced beside the podcast player plus as a Mock Interview lane in Commute Mode.
+
 ## Planned expansion (later phases)
 
 - **Offline listening** — cache audio in the service worker (`public/sw.js`) behind a
   same-origin `/audio/[id]` route, plus a "Download for offline" button (leverages the PWA).
 - **Audio flashcards** — question → pause → answer, generated from `data/questions/*.json`.
-- **Commute Mode** — a playlist page queuing a topic's episodes + Q&A.
-- **Podcast rollout** — author + render the remaining topics (pilot: `api-testing`), then
-  an in-app podcast player (audio + synced transcript) as its own PR.
