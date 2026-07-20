@@ -22,6 +22,11 @@ type AudioPlayerProps = {
   cues?: TranscriptCue[];
   accent?: string;
   autoPlay?: boolean;
+  // Accessible-name prefix + visible descriptor + icon, so a page can host more than one
+  // player (e.g. a podcast episode and a mock-interview round) with distinct labels.
+  label?: string;
+  subtitle?: string;
+  icon?: string;
   // Resume from the saved position on mount. Off for the Commute playlist, where each
   // episode should start from the beginning as it's queued.
   resume?: boolean;
@@ -40,6 +45,9 @@ export function AudioPlayer({
   cues = [],
   accent = "#17324d",
   autoPlay = false,
+  label = "Listen",
+  subtitle = "Two-host episode",
+  icon = "🎧",
   resume = true,
   onEnded,
 }: AudioPlayerProps) {
@@ -126,7 +134,7 @@ export function AudioPlayer({
     "inline-flex items-center justify-center rounded-full border border-ink/15 bg-white/80 px-3 py-2 text-sm font-bold text-ink transition hover:bg-white focus-ring";
 
   return (
-    <section className="rounded-2xl border border-ink/10 bg-white/80 p-4 shadow-panel sm:p-5" aria-label={`Listen: ${title}`}>
+    <section className="rounded-2xl border border-ink/10 bg-white/80 p-4 shadow-panel sm:p-5" aria-label={`${label}: ${title}`}>
       <audio
         ref={audioRef}
         src={src}
@@ -149,10 +157,10 @@ export function AudioPlayer({
         </button>
         <div className="min-w-0 flex-1">
           <p className="flex items-center gap-2 text-sm font-bold text-blueprint">
-            <span aria-hidden>🎧</span>
+            <span aria-hidden>{icon}</span>
             <span className="truncate">{title}</span>
           </p>
-          <p className="text-xs font-semibold text-ink/55">Two-host episode · {formatClock(duration)}</p>
+          <p className="text-xs font-semibold text-ink/55">{subtitle} · {formatClock(duration)}</p>
         </div>
       </div>
 

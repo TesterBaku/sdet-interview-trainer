@@ -30,16 +30,28 @@ if (!process.env.BLOB_READ_WRITE_TOKEN && existsSync(join(ROOT, ".env"))) {
 const args = process.argv.slice(2);
 const force = args.includes("--force");
 const local = args.includes("--local");
-// --podcast publishes the two-voice episodes from build/audio/podcast/.
-const podcast = args.includes("--podcast");
-const BUILD_DIR = join(ROOT, "build", "audio", ...(podcast ? ["podcast"] : []));
-const PUBLIC_AUDIO_DIR = join(ROOT, "public", "audio");
-const TRANSCRIPT_DIR = join(ROOT, "data", "audio", "transcripts");
+// Kind selects the build namespace, Blob path prefix, and manifest file. Interview uses a
+// SEPARATE manifest + Blob prefix + transcript subdir + staging subdir because it shares
+// cheat-sheet ids with the podcast — same id, different audio — so a shared manifest/path
+// would clobber. podcast/single keep the original layout unchanged.
+//   --podcast    build/audio/podcast/   → audio/<id>       → manifest.json
+//   --interview  build/audio/interview/ → audio/interview/<id> → manifest.interview.json
+//   (default)    build/audio/           → audio/<id>       → manifest.json
+const kind = args.includes("--interview") ? "interview" : args.includes("--podcast") ? "podcast" : "single";
+const BUILD_SUBDIR = { single: [], podcast: ["podcast"], interview: ["interview"] }[kind];
+const TRANSCRIPT_SUBDIR = { single: [], podcast: [], interview: ["interview"] }[kind];
+const PUBLIC_SUBDIR = kind === "interview" ? ["interview"] : [];
+const BLOB_PREFIX = kind === "interview" ? "audio/interview" : "audio";
+const manifestBase = kind === "interview" ? "manifest.interview" : "manifest";
+
+const BUILD_DIR = join(ROOT, "build", "audio", ...BUILD_SUBDIR);
+const PUBLIC_AUDIO_DIR = join(ROOT, "public", "audio", ...PUBLIC_SUBDIR);
+const TRANSCRIPT_DIR = join(ROOT, "data", "audio", "transcripts", ...TRANSCRIPT_SUBDIR);
 const only = (args.find((a) => a.startsWith("--only=")) || "").slice("--only=".length) || null;
 
 // Blob and local staging use independent manifests so a --local run can never write
 // unreachable /audio/* URLs into the committed, production manifest.
-const MANIFEST_PATH = join(ROOT, "data", "audio", local ? "manifest.local.json" : "manifest.json");
+const MANIFEST_PATH = join(ROOT, "data", "audio", local ? `${manifestBase}.local.json` : `${manifestBase}.json`);
 
 function loadManifest() {
   return existsSync(MANIFEST_PATH) ? JSON.parse(readFileSync(MANIFEST_PATH, "utf8")) : {};
@@ -60,6 +72,13 @@ if (!local) {
     process.exit(1);
   }
   ({ put } = await import("@vercel/blob"));
+}
+
+// The build dir for a namespace only exists after its first synth run; guard so a publish
+// before any render prints the friendly hint instead of an unhandled ENOENT from readdirSync.
+if (!existsSync(BUILD_DIR)) {
+  console.log("No built audio found. Run synthesize.mjs (+ captions.mjs) first.");
+  process.exit(0);
 }
 
 const ids = readdirSync(BUILD_DIR)
@@ -111,12 +130,12 @@ for (const id of ids) {
   if (local) {
     copyFileSync(mp3Path, join(PUBLIC_AUDIO_DIR, `${id}.mp3`));
     copyFileSync(vttPath, join(PUBLIC_AUDIO_DIR, `${id}.vtt`));
-    mp3Url = `/audio/${id}.mp3`;
-    vttUrl = `/audio/${id}.vtt`;
+    mp3Url = `/${BLOB_PREFIX}/${id}.mp3`;
+    vttUrl = `/${BLOB_PREFIX}/${id}.vtt`;
   } else {
     const [a, b] = await Promise.all([
-      put(`audio/${id}.mp3`, readFileSync(mp3Path), { access: "public", contentType: "audio/mpeg", addRandomSuffix: false, allowOverwrite: true }),
-      put(`audio/${id}.vtt`, readFileSync(vttPath), { access: "public", contentType: "text/vtt", addRandomSuffix: false, allowOverwrite: true }),
+      put(`${BLOB_PREFIX}/${id}.mp3`, readFileSync(mp3Path), { access: "public", contentType: "audio/mpeg", addRandomSuffix: false, allowOverwrite: true }),
+      put(`${BLOB_PREFIX}/${id}.vtt`, readFileSync(vttPath), { access: "public", contentType: "text/vtt", addRandomSuffix: false, allowOverwrite: true }),
     ]);
     mp3Url = a.url;
     vttUrl = b.url;
@@ -135,4 +154,4 @@ for (const id of ids) {
 }
 
 saveManifest(manifest);
-console.log(`\nDone. published=${published} skipped=${skipped} → ${local ? "manifest.local.json" : "manifest.json"}`);
+console.log(`\nDone. published=${published} skipped=${skipped} → ${local ? `${manifestBase}.local.json` : `${manifestBase}.json`}`);

@@ -1,0 +1,438 @@
+{
+  "id": "nodejs",
+  "voice": null,
+  "voices": {
+    "INTERVIEWER": "am_fenrir",
+    "CANDIDATE": "af_heart"
+  },
+  "durationSec": 617.01,
+  "hash": "bcaeac115c24d5016244492ad65cde1a7893429b199fd5589e540f9dfcd1de4b",
+  "cues": [
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Welcome in, thanks for making the time today.",
+      "start": 0,
+      "end": 3
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Let's run a quick Node round, the kind of rapid technical screen you'd get for an SDET role where the test framework or the services under test run on Node.",
+      "start": 3.14,
+      "end": 13.29
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "I'll ask a question, you give me your best answer, and I may push a little deeper here and there.",
+      "start": 13.43,
+      "end": 19.13
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Nothing tricky, just the fundamentals done well.",
+      "start": 19.27,
+      "end": 22.395
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Ready when you are.",
+      "start": 22.535,
+      "end": 24.11
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Sounds great, let's do it.",
+      "start": 24.65,
+      "end": 26.75
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Let's start with the classic.",
+      "start": 27.29,
+      "end": 29.24
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Node is famously single-threaded, so how does it handle thousands of concurrent I/O operations without blocking?",
+      "start": 29.38,
+      "end": 37.43
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The direct answer is that only your JavaScript runs on a single thread, while the actual I/O is offloaded to libuv, the C library that gives Node its event loop and a background thread pool.",
+      "start": 37.97,
+      "end": 50.545
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The reason that works is the model itself, single-threaded, non-blocking, and event-driven, so when you kick off a file read or a network call, Node hands that work to libuv or the operating system, keeps running your code, and when the operation finishes, the callback gets queued for the event loop to pick up.",
+      "start": 50.685,
+      "end": 69.31
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Node itself runs on the V8 engine for the JavaScript, and libuv handles files, network, and timers in the background.",
+      "start": 69.45,
+      "end": 77.775
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "A concrete example, an HTTP server can juggle thousands of open connections on one thread because none of them ever block it.",
+      "start": 77.915,
+      "end": 86.69
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The trap is assuming single-threaded means one thing at a time, that's only true for your own JavaScript, not for the I/O underneath.",
+      "start": 86.83,
+      "end": 95.805
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Good, and you mentioned the event loop, so let's go there.",
+      "start": 96.345,
+      "end": 99.97
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Walk me through how the loop is structured, and where microtasks fit in.",
+      "start": 100.11,
+      "end": 104.635
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The event loop runs in phases, in a fixed order, and each phase drains its own queue.",
+      "start": 105.175,
+      "end": 110.675
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "First timers, where setTimeout and setInterval callbacks fire, then pending callbacks for deferred I/O, then poll, which retrieves new I/O events and runs their callbacks, then check, which is where setImmediate lives, and finally close callbacks, like a socket closing.",
+      "start": 110.815,
+      "end": 129.24
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The part interviewers really care about is what happens between phases, because that's where microtasks run.",
+      "start": 129.38,
+      "end": 136.155
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Process next tick fires first, then resolved Promise callbacks, and both queues drain completely before the loop moves on to the next phase.",
+      "start": 136.295,
+      "end": 145.445
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "That ordering matters in practice.",
+      "start": 145.585,
+      "end": 148.035
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The trap to call out is a runaway next tick, if you keep scheduling next tick callbacks recursively, the loop never gets back to the poll phase, and you literally starve your I/O. So next tick is powerful, but it jumps the queue ahead of everything, and you have to respect that.",
+      "start": 148.175,
+      "end": 164.95
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Nicely laid out.",
+      "start": 165.49,
+      "end": 167.165
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Now something you hit the moment you set up a test project, CommonJS versus ES modules.",
+      "start": 167.305,
+      "end": 174.18
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "What's the actual difference, and how does Node decide which one a file is?",
+      "start": 174.32,
+      "end": 179.145
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "CommonJS is the original system, require and module dot exports, and it loads synchronously.",
+      "start": 179.685,
+      "end": 186.71
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "ES modules use import and export, they're statically analyzable, they load asynchronously, and they support top-level await, which CommonJS doesn't. The deciding factor for a bare dot j s file is the type field in package json, if it says module, plain files are treated as ES modules, otherwise they default to CommonJS, and you can always force it per file with the dot m j s or dot c j s extensions.",
+      "start": 186.85,
+      "end": 214.125
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Why it matters for an SDET is very practical, half the debugging pain in a new test framework is a module mismatch, some tool published as ESM being pulled into a CommonJS config.",
+      "start": 214.265,
+      "end": 227.09
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The interop rule to remember is that ESM can import CommonJS fine, but CommonJS historically could only load an ES module through dynamic import, though recent Node versions added a synchronous require for ES modules.",
+      "start": 227.23,
+      "end": 243.43
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Knowing that saves you from a very confusing error message.",
+      "start": 243.57,
+      "end": 247.495
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "That's exactly the practical angle I wanted.",
+      "start": 248.035,
+      "end": 251.21
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Next up, async patterns.",
+      "start": 251.35,
+      "end": 253.4
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Give me the evolution, callbacks to Promises to async await, and how you'd actually use them well.",
+      "start": 253.54,
+      "end": 259.965
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "There are three generations, each built on the last.",
+      "start": 260.505,
+      "end": 263.98
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The original convention is the error-first callback, where the function takes a callback whose first argument is always the error, and nesting a lot of those gives you callback hell.",
+      "start": 264.12,
+      "end": 275.17
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Promises fixed that, an object representing a future value that you chain with then and catch, and they compose, so Promise all, all settled, and race let you coordinate concurrent work.",
+      "start": 275.31,
+      "end": 287.36
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Then async await is syntactic sugar over Promises, you write asynchronous code that reads sequentially and use a normal try catch for errors, and that's the modern default.",
+      "start": 287.5,
+      "end": 298.825
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The why is readability and error handling, flat sequential-looking code is far easier to reason about in a test suite.",
+      "start": 298.965,
+      "end": 306.715
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Two practical tips I'd add, wrap old callback APIs with util promisify or just use the promise variants of core modules like f s promises, and here's the trap, if you have independent async work, run it concurrently with Promise all instead of awaiting each call in sequence, because sequential awaits silently serialize things that could run in parallel.",
+      "start": 306.855,
+      "end": 329.655
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Good catch on the sequential await trap, that one shows up in slow test suites all the time.",
+      "start": 330.195,
+      "end": 336.47
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Let's talk streams.",
+      "start": 336.61,
+      "end": 338.36
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "What are they, and why would you reach for stream pipeline instead of chaining pipe calls?",
+      "start": 338.5,
+      "end": 343.825
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "A stream processes data in chunks instead of loading everything into memory, which is essential for large files and network data.",
+      "start": 344.365,
+      "end": 353.115
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "There are four types, readable, which is a source like a file read stream or an incoming HTTP request, writable, a destination like a file or an HTTP response, duplex, which is both, like a TCP socket, and transform, a duplex stream that modifies data passing through, gzip or encryption being the classic examples.",
+      "start": 353.255,
+      "end": 375.73
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Underneath, the chunks being moved around are Buffers, raw binary data.",
+      "start": 375.87,
+      "end": 380.77
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Now, to the pipeline question, the direct answer is error handling and cleanup.",
+      "start": 380.91,
+      "end": 386.085
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Chained pipe calls don't propagate errors across stages, so a failure mid-chain can leak resources, while stream pipeline forwards errors from any stage and destroys all the streams properly on failure.",
+      "start": 386.225,
+      "end": 399.425
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Both preserve backpressure, meaning when the writable can't keep up, the readable gets paused automatically so memory stays bounded.",
+      "start": 399.565,
+      "end": 407.915
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "A real scenario, gzipping a huge log file, read stream into a gzip transform into a write stream, pipeline handles the whole chain in one await.",
+      "start": 408.055,
+      "end": 418.555
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Solid.",
+      "start": 419.095,
+      "end": 420.295
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Now error handling more broadly, because Node has several async styles, each with its own failure mode.",
+      "start": 420.435,
+      "end": 427.66
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "How do you handle errors across them, and what's your take on uncaught exception handlers?",
+      "start": 427.8,
+      "end": 433.45
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The rule is that the handling strategy follows the async style.",
+      "start": 433.99,
+      "end": 438.34
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Synchronous code and async await use try catch, callbacks mean checking that error-first argument every single time, Promises use catch, and if you miss one, the process emits an unhandled rejection event you can hook.",
+      "start": 438.48,
+      "end": 453.055
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Then there's the EventEmitter family, streams, HTTP servers, sockets, they're all emitters, and the trap there is famous, an error event with no listener attached doesn't get ignored, it's thrown and can crash the whole process, so any emitter that can fail needs an error listener.",
+      "start": 453.195,
+      "end": 471.345
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "On uncaught exception, my position is that it's a last resort, never a recovery tool.",
+      "start": 471.485,
+      "end": 477.435
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "After one fires, the process is in an undefined state, so the right move is to log, run only the critical cleanup, and exit, then let a process manager like p m two, systemd, or Kubernetes restart the process cleanly.",
+      "start": 477.575,
+      "end": 493.125
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Catching it and carrying on as if nothing happened is how you end up serving requests from a corrupted state.",
+      "start": 493.265,
+      "end": 500.515
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "That's the mature answer, exit and let the supervisor restart.",
+      "start": 501.055,
+      "end": 505.28
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Last one.",
+      "start": 505.42,
+      "end": 506.795
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Your Node process is pegging one core, or the event loop is getting blocked by heavy computation.",
+      "start": 506.935,
+      "end": 513.61
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "What are your options for scaling, and how do you choose?",
+      "start": 513.75,
+      "end": 517.175
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The direct answer is that the choice follows the kind of work.",
+      "start": 517.715,
+      "end": 521.54
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "If the service is I/O-bound and you just need more throughput, use the cluster module, it forks multiple Node processes that share one listening port, the primary accepts connections and hands them to workers, round-robin by default on Linux and macOS, and that spreads an I/O-heavy server across all your cores.",
+      "start": 521.68,
+      "end": 542.78
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "If the problem is CPU-bound work blocking the event loop, parsing huge files, image processing, that kind of thing, cluster doesn't help a single heavy computation, you want worker threads, real threads inside one process that can even share memory through a SharedArrayBuffer, so the main loop stays responsive.",
+      "start": 542.92,
+      "end": 563.195
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "And the third tool is child process, spawn, exec, or fork, for running separate programs or Node scripts and talking to them over IPC or streams.",
+      "start": 563.335,
+      "end": 573.835
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The trap is reaching for cluster to fix a blocked loop, forking more processes just gives you more processes that each block the same way, the rule of thumb is I/O-bound means cluster, CPU-bound means worker threads.",
+      "start": 573.975,
+      "end": 588.325
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Strong answers, that's the round.",
+      "start": 588.865,
+      "end": 591.04
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "What I liked here, and what listeners should take away, is the structure, a direct answer first, then the why, and then a concrete example or a trap called out, the runaway next tick, the sequential await, the unhandled error event.",
+      "start": 591.18,
+      "end": 605.28
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "That pattern is what makes an answer sound senior.",
+      "start": 605.42,
+      "end": 608.62
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Practice these until they flow, and I'll see you in the next round.",
+      "start": 608.76,
+      "end": 612.91
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Thanks, this was fun, see you in the next one.",
+      "start": 613.45,
+      "end": 616.475
+    }
+  ]
+}

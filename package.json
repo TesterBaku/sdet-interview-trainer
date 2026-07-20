@@ -2,6 +2,9 @@
   "name": "sdet-interview-trainer",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": ">=20.12.0"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -15,7 +18,9 @@
     "audio:publish": "node scripts/audio/publish.mjs",
     "audio:build": "npm run audio:scripts && npm run audio:tts && npm run audio:captions",
     "audio:podcast:captions": "node scripts/audio/captions.mjs --podcast",
-    "audio:podcast:publish": "node scripts/audio/publish.mjs --podcast"
+    "audio:podcast:publish": "node scripts/audio/publish.mjs --podcast",
+    "audio:interview:captions": "node scripts/audio/captions.mjs --interview",
+    "audio:interview:publish": "node scripts/audio/publish.mjs --interview"
   },
   "dependencies": {
     "@vercel/analytics": "^2.0.1",

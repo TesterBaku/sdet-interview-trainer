@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test";
 import type { Page } from "@playwright/test";
 import { cheatSheets } from "@/lib/cheatsheets";
-import { getAllCheatSheetAudio } from "@/lib/audio";
+import { getAllCheatSheetAudio, getAllInterviewAudio } from "@/lib/audio";
 
 // Derive expected counts from the same source of truth the pages render, so adding
 // a cheat sheet never silently breaks these tests again.
@@ -12,6 +12,10 @@ const quizSheetCount = cheatSheets.filter((sheet) => sheet.quiz.length > 0).leng
 const publishedAudio = getAllCheatSheetAudio();
 const audioCount = publishedAudio.length;
 const firstAudioId = publishedAudio[0]?.id ?? cheatSheets[0].id;
+// Mock-interview rounds ship on their own manifest, so derive their count separately.
+const publishedInterview = getAllInterviewAudio();
+const interviewCount = publishedInterview.length;
+const firstInterviewId = publishedInterview[0]?.id ?? cheatSheets[0].id;
 
 const progressKey = "sdet-interview-trainer-progress";
 const codeDraftKey = "sdet-interview-trainer-code-answer:python-coding-001";
@@ -680,6 +684,24 @@ test("cheat-sheet index shows a headphone badge for episodes with audio", async 
   test.skip(audioCount === 0, "no audio manifest staged");
   await page.goto("/cheatsheets");
   await expect(page.getByText("🎧").first()).toBeVisible();
+});
+
+test("cheat-sheet page shows a distinct Mock interview player when a round is published", async ({ page }) => {
+  test.skip(interviewCount === 0, "no interview manifest staged (run audio:interview:captions + publish --local)");
+  await page.goto(`/cheatsheets/${firstInterviewId}`);
+  const player = page.getByRole("region", { name: /^Mock interview:/ });
+  await expect(player).toBeVisible();
+  await expect(player.getByRole("button", { name: "Play", exact: true })).toBeVisible();
+});
+
+test("commute exposes a Mock Interview lane when interview rounds are published", async ({ page }) => {
+  test.skip(interviewCount === 0 || audioCount === 0, "need both lanes staged for the format switch");
+  await page.goto("/commute");
+  const tab = page.getByRole("tab", { name: /Mock Interview/ });
+  await expect(tab).toBeVisible();
+  await tab.click();
+  const items = page.getByRole("list", { name: "Episode playlist" }).getByRole("listitem");
+  await expect(items).toHaveCount(interviewCount);
 });
 
 // ── Progress breakdown + /review route ──────────────────────────────────────

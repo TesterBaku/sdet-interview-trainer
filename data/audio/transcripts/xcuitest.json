@@ -5,8 +5,8 @@
     "MAYA": "af_heart",
     "LEO": "am_fenrir"
   },
-  "durationSec": 843.56,
-  "hash": "0a91d61d1693e6eed94367a0f8ac541bbf18ddcb0d107191f2899854b0056593",
+  "durationSec": 844.18,
+  "hash": "8c3a13ca06ab2233bdadb98c47e845aa6de7a513f2ca87130acffd669af3334b",
   "cues": [
     {
       "speaker": "MAYA",
@@ -60,487 +60,487 @@
       "speaker": "LEO",
       "text": "So before the architecture, sell me on why this topic matters, because plenty of people just say they know Appium and move on.",
       "start": 62.795,
-      "end": 70.745
+      "end": 71.145
     },
     {
       "speaker": "MAYA",
       "text": "Because if the team ships a native iOS app, XCUITest is the first-party answer, the same way Espresso is on Android.",
-      "start": 71.285,
-      "end": 80.185
+      "start": 71.685,
+      "end": 80.585
     },
     {
       "speaker": "MAYA",
       "text": "It ships as part of XCTest inside Xcode, you write tests in Swift or Objective-C, and they drive a real build of the app on a simulator or a device exactly the way a user would, tapping, typing, swiping, and asserting on what's actually on screen.",
-      "start": 80.325,
-      "end": 97.625
+      "start": 80.725,
+      "end": 98.025
     },
     {
       "speaker": "MAYA",
       "text": "Interviewers love it because it's not just an API to memorize, it forces you to talk about test design, flakiness, state management, and CI, all in one topic.",
-      "start": 97.765,
-      "end": 109.09
+      "start": 98.165,
+      "end": 109.49
     },
     {
       "speaker": "LEO",
       "text": "Alright, so let's start with what it actually is, because I've heard people call it black-box and out-of-process, and I want to make sure I can explain that instead of just reciting it.",
-      "start": 109.63,
-      "end": 120.78
+      "start": 110.03,
+      "end": 121.18
     },
     {
       "speaker": "MAYA",
       "text": "This is concept number 1, and here's the picture I always give.",
-      "start": 121.32,
-      "end": 125.645
+      "start": 121.72,
+      "end": 126.045
     },
     {
       "speaker": "MAYA",
       "text": "Your test is like a customer at a bank teller window.",
-      "start": 125.785,
-      "end": 129.535
+      "start": 126.185,
+      "end": 129.935
     },
     {
       "speaker": "MAYA",
       "text": "The app is everything behind the counter, all the vaults, the ledgers, the internal machinery, and your test never gets to walk behind that counter.",
-      "start": 129.675,
-      "end": 138.875
+      "start": 130.075,
+      "end": 139.275
     },
     {
       "speaker": "MAYA",
       "text": "It runs in a completely separate process from the app, and the only way it can interact is through the window slot, which in iOS terms is the accessibility layer.",
-      "start": 139.015,
-      "end": 149.815
+      "start": 139.415,
+      "end": 150.215
     },
     {
       "speaker": "MAYA",
       "text": "Your test sees the exact same tree of elements that VoiceOver sees, nothing more.",
-      "start": 149.955,
-      "end": 155.48
+      "start": 150.355,
+      "end": 155.88
     },
     {
       "speaker": "LEO",
       "text": "Which means I literally cannot reach into the app's code and call some internal method, because I'm on the wrong side of the glass.",
-      "start": 156.02,
-      "end": 164.695
+      "start": 156.42,
+      "end": 165.095
     },
     {
       "speaker": "MAYA",
       "text": "Exactly, and that constraint explains almost everything else about the framework.",
-      "start": 165.235,
-      "end": 170.21
+      "start": 165.635,
+      "end": 170.61
     },
     {
       "speaker": "MAYA",
       "text": "It's why stable accessibility identifiers matter so much, because that slot in the glass is your only channel, so the things you pass through it need reliable names.",
-      "start": 170.35,
-      "end": 181
+      "start": 170.75,
+      "end": 181.4
     },
     {
       "speaker": "MAYA",
       "text": "Structurally, your tests subclass XCTestCase, you get the standard setUp and tearDown lifecycle, and you verify things with the XCTAssert family, so anyone who knows XCTest unit testing already knows the skeleton.",
-      "start": 181.14,
-      "end": 196.465
+      "start": 181.54,
+      "end": 196.865
     },
     {
       "speaker": "LEO",
       "text": "Okay, walk me through the main objects, because interviewers do ask you to name them.",
-      "start": 197.005,
-      "end": 202.355
+      "start": 197.405,
+      "end": 202.755
     },
     {
       "speaker": "MAYA",
       "text": "There are 3 you must know.",
-      "start": 202.895,
-      "end": 204.97
+      "start": 203.295,
+      "end": 205.37
     },
     {
       "speaker": "MAYA",
       "text": "XCUIApplication is your proxy for the app under test, the entry point for everything, so you instantiate it, configure launch arguments and launch environment, and control the lifecycle with launch, activate, and terminate, where launch starts a fresh instance of the app and resets its in-memory state, and activate just brings an already running app back to the foreground.",
-      "start": 205.11,
-      "end": 228.01
+      "start": 205.51,
+      "end": 228.41
     },
     {
       "speaker": "MAYA",
       "text": "XCUIElement is a handle to a single control, a button, a text field, a cell, and it exposes state like exists, isHittable, and isEnabled, plus actions like tap and typeText.",
-      "start": 228.15,
-      "end": 240.95
+      "start": 228.55,
+      "end": 241.35
     },
     {
       "speaker": "MAYA",
       "text": "And XCUIElementQuery describes zero or more matching elements, so when you write app dot buttons, that's a query over every button, which you then narrow by identifier, by predicate, or by position with element bound by an index.",
-      "start": 241.09,
-      "end": 256.715
+      "start": 241.49,
+      "end": 257.115
     },
     {
       "speaker": "LEO",
       "text": "And there's that word people trip on, that elements are lazy.",
-      "start": 257.255,
-      "end": 261.33
+      "start": 257.655,
+      "end": 261.73
     },
     {
       "speaker": "LEO",
       "text": "What does lazy actually buy me?",
-      "start": 261.47,
-      "end": 263.895
+      "start": 261.87,
+      "end": 264.295
     },
     {
       "speaker": "MAYA",
       "text": "It means declaring an element does nothing at all, the framework only resolves it against the live UI hierarchy at the moment you check its state or act on it.",
-      "start": 264.435,
-      "end": 274.785
+      "start": 264.835,
+      "end": 275.185
     },
     {
       "speaker": "MAYA",
       "text": "Think of it like writing down a phone number, nothing happens until you actually dial.",
-      "start": 274.925,
-      "end": 280.4
+      "start": 275.325,
+      "end": 280.8
     },
     {
       "speaker": "MAYA",
       "text": "That's mostly a feature, because you can define all your elements up front in a page object and they stay fresh, but it has a sharp edge, which is that if your query matches 2 elements when you finally use it, it blows up at access time, not at declaration time, and the interviewer wants to hear you know when that failure actually happens.",
-      "start": 280.54,
-      "end": 300.915
+      "start": 280.94,
+      "end": 301.315
     },
     {
       "speaker": "LEO",
       "text": "Got it.",
-      "start": 301.455,
-      "end": 302.63
+      "start": 301.855,
+      "end": 303.03
     },
     {
       "speaker": "LEO",
       "text": "So concept 2 has to be the thing everyone fails on, which is stability.",
-      "start": 302.77,
-      "end": 307.92
+      "start": 303.17,
+      "end": 308.32
     },
     {
       "speaker": "LEO",
       "text": "Why do these suites flake, and what's the grown-up answer?",
-      "start": 308.06,
-      "end": 311.51
+      "start": 308.46,
+      "end": 311.91
     },
     {
       "speaker": "MAYA",
       "text": "The grown-up answer has two halves, selectors and synchronization.",
-      "start": 312.05,
-      "end": 316.35
+      "start": 312.45,
+      "end": 316.75
     },
     {
       "speaker": "MAYA",
       "text": "On selectors, here's the analogy I want in your head, a visible label is a name tag and an accessibility identifier is a serial number.",
-      "start": 316.49,
-      "end": 325.865
+      "start": 316.89,
+      "end": 326.265
     },
     {
       "speaker": "MAYA",
       "text": "The name tag changes when marketing rewrites the button copy, or when the app gets localized into German, and suddenly your test can't find anything.",
-      "start": 326.005,
-      "end": 335.88
+      "start": 326.405,
+      "end": 336.28
     },
     {
       "speaker": "MAYA",
       "text": "The serial number is engraved, it's invisible to users, it never changes with wording, and that's exactly what accessibilityIdentifier is, a stable handle the developers set specifically so automation and assistive tech can find things.",
-      "start": 336.02,
-      "end": 351.795
+      "start": 336.42,
+      "end": 352.195
     },
     {
       "speaker": "LEO",
       "text": "So the rule I'd state in the room is that I never key selectors off visible text or the view hierarchy, everything targets identifiers, and if the identifiers don't exist yet, part of my job is working with developers to add them.",
-      "start": 352.335,
-      "end": 367.16
+      "start": 352.735,
+      "end": 367.56
     },
     {
       "speaker": "MAYA",
       "text": "That last clause is what separates a senior answer from a junior one, because it shows you treat testability as a collaboration, not a given.",
-      "start": 367.7,
-      "end": 376.6
+      "start": 368.1,
+      "end": 377
     },
     {
       "speaker": "MAYA",
       "text": "Now the second half, synchronization, and this brings back our cold open.",
-      "start": 376.74,
-      "end": 381.79
+      "start": 377.14,
+      "end": 382.19
     },
     {
       "speaker": "MAYA",
       "text": "The sleep fix is a kitchen timer, you're guessing how long the toast takes and standing there whether it's done or not.",
-      "start": 381.93,
-      "end": 388.78
+      "start": 382.33,
+      "end": 389.18
     },
     {
       "speaker": "MAYA",
       "text": "What you want is to react to the toast actually popping up, and in XCUITest that's waitForExistence with a timeout, which returns a Bool the moment the element appears, or predicate-based expectations for conditions more complex than mere existence, like waiting for a label's value to change.",
-      "start": 388.92,
-      "end": 408.12
+      "start": 389.32,
+      "end": 408.52
     },
     {
       "speaker": "LEO",
       "text": "So the memory hook is, sleeps are timers, waits are toasters.",
-      "start": 408.66,
-      "end": 412.61
+      "start": 409.06,
+      "end": 413.01
     },
     {
       "speaker": "LEO",
       "text": "A sleep is always wrong twice, it's too long when the app is fast, so your suite crawls, and it's too short on the one slow CI run, so it flakes anyway.",
-      "start": 412.75,
-      "end": 422.675
+      "start": 413.15,
+      "end": 423.075
     },
     {
       "speaker": "MAYA",
       "text": "That's the whole argument in one sentence.",
-      "start": 423.215,
-      "end": 426.065
+      "start": 423.615,
+      "end": 426.465
     },
     {
       "speaker": "MAYA",
       "text": "And there's a third stability pillar interviewers probe hard, which is state management.",
-      "start": 426.205,
-      "end": 431.505
+      "start": 426.605,
+      "end": 431.905
     },
     {
       "speaker": "MAYA",
       "text": "The naive suite logs in through the UI at the start of every single test, which is slow and multiplies your flake surface.",
-      "start": 431.645,
-      "end": 439.87
+      "start": 432.045,
+      "end": 440.27
     },
     {
       "speaker": "MAYA",
       "text": "The better pattern is injecting known state at launch through launch arguments and launch environment, so the test build reads a flag and starts pre-authenticated, with a seeded account and specific feature flags already set.",
-      "start": 440.01,
-      "end": 454.01
+      "start": 440.41,
+      "end": 454.41
     },
     {
       "speaker": "MAYA",
       "text": "And for data that genuinely has to exist on the backend, you call the API directly in setUp to create it, capture the IDs, run the test, and clean up in tearDown, so every test stays fully self-contained.",
-      "start": 454.15,
-      "end": 468.5
+      "start": 454.55,
+      "end": 468.9
     },
     {
       "speaker": "LEO",
       "text": "Self-contained being the key word, because that sets up concept 3, right, parallelism?",
-      "start": 469.04,
-      "end": 474.74
+      "start": 469.44,
+      "end": 475.14
     },
     {
       "speaker": "MAYA",
       "text": "Right, and here's the physical picture, supermarket checkout lanes.",
-      "start": 475.28,
-      "end": 479.63
+      "start": 475.68,
+      "end": 480.03
     },
     {
       "speaker": "MAYA",
       "text": "When you enable parallel testing, Xcode clones the simulator, spinning up multiple identical instances like opening extra lanes, and it distributes work across them.",
-      "start": 479.77,
-      "end": 491.045
+      "start": 480.17,
+      "end": 491.445
     },
     {
       "speaker": "MAYA",
       "text": "But here's the nuance that shows up as an interview probe, Xcode parallelizes at the test class level, not the individual test method level.",
-      "start": 491.185,
-      "end": 500.16
+      "start": 491.585,
+      "end": 500.56
     },
     {
       "speaker": "MAYA",
       "text": "So the unit going through a lane is a whole shopping cart, an entire class, never individual items.",
-      "start": 500.3,
-      "end": 507.225
+      "start": 500.7,
+      "end": 507.625
     },
     {
       "speaker": "MAYA",
       "text": "If one class has 40 tests and the others have 5, that one packed cart becomes the long pole and your extra lanes sit idle, which means you deliberately balance class sizes to spread the load.",
-      "start": 507.365,
-      "end": 520.065
+      "start": 507.765,
+      "end": 520.465
     },
     {
       "speaker": "LEO",
       "text": "Wait, so if someone asks why my 8 simulators aren't making things 8 times faster, the answer might just be that my classes are lopsided.",
-      "start": 520.605,
-      "end": 530.405
+      "start": 521.005,
+      "end": 530.805
     },
     {
       "speaker": "MAYA",
       "text": "That's very often it, and the deeper point is that the thing enabling parallelism was never a build flag, it was the independence work.",
-      "start": 530.945,
-      "end": 539.62
+      "start": 531.345,
+      "end": 540.02
     },
     {
       "speaker": "MAYA",
       "text": "Because tests share no state and generate their own unique data, unique emails, unique account identifiers, multiple clones can hit the backend at once without colliding.",
-      "start": 539.76,
-      "end": 551.01
+      "start": 540.16,
+      "end": 551.41
     },
     {
       "speaker": "MAYA",
       "text": "If your tests assume a fixed shared account or a particular execution order, turning on parallelism just converts hidden coupling into random failures.",
-      "start": 551.15,
-      "end": 560.85
+      "start": 551.55,
+      "end": 561.25
     },
     {
       "speaker": "MAYA",
       "text": "And you tune concurrency to the machine, because every simulator costs CPU and memory, so on most CI runners the sweet spot is a handful of clones, not the maximum.",
-      "start": 560.99,
-      "end": 572.415
+      "start": 561.39,
+      "end": 572.815
     },
     {
       "speaker": "LEO",
       "text": "Let's do the CI side quickly, because the follow-up is always how this runs in the pipeline.",
-      "start": 572.955,
-      "end": 579.33
+      "start": 573.355,
+      "end": 579.73
     },
     {
       "speaker": "MAYA",
       "text": "Locally, engineers run xcodebuild test against a scheme, and narrow to a single flow with the only-testing flag for fast feedback.",
-      "start": 579.87,
-      "end": 589.22
+      "start": 580.27,
+      "end": 589.62
     },
     {
       "speaker": "MAYA",
       "text": "In CI, the phrase to say out loud is build once, test many, meaning you use build-for-testing to compile a single artifact, then test-without-building to run it across shards, instead of paying the compile cost on every run.",
-      "start": 589.36,
-      "end": 604.51
+      "start": 589.76,
+      "end": 604.91
     },
     {
       "speaker": "MAYA",
       "text": "Results come out as an xcresult bundle, which you parse into JUnit XML so the dashboard shows trends, with failure screenshots attached through XCTAttachment so a red test is diagnosable from CI alone.",
-      "start": 604.65,
-      "end": 619.2
+      "start": 605.05,
+      "end": 619.6
     },
     {
       "speaker": "MAYA",
       "text": "Then you tier the suite, a small smoke subset of the must-never-break flows gates every pull request, and the full regression suite runs nightly.",
-      "start": 619.34,
-      "end": 628.515
+      "start": 619.74,
+      "end": 628.915
     },
     {
       "speaker": "LEO",
       "text": "And retries?",
-      "start": 629.055,
-      "end": 630.555
+      "start": 629.455,
+      "end": 630.955
     },
     {
       "speaker": "LEO",
       "text": "Because that feels like another trap door.",
-      "start": 630.695,
-      "end": 633.37
+      "start": 631.095,
+      "end": 633.77
     },
     {
       "speaker": "MAYA",
       "text": "It is, so state it carefully, a failed test gets 1 or 2 automatic reruns before going red, but retries are a safety net, not a fix, so anything that needed a retry gets tracked and root-caused, otherwise the retry count quietly masks a degrading suite.",
-      "start": 633.91,
-      "end": 651.36
+      "start": 634.31,
+      "end": 651.76
     },
     {
       "speaker": "MAYA",
       "text": "Which brings us to trap corner, and there are 2 classic wrong answers here.",
-      "start": 651.9,
-      "end": 656.5
+      "start": 652.3,
+      "end": 656.9
     },
     {
       "speaker": "MAYA",
       "text": "The first is our cold open, defending the sleep, and the dodge is to name the real fix, event-based waits, and then name the deeper cause, because chronic timing flakiness usually hides a selector or state problem underneath.",
-      "start": 656.64,
-      "end": 671.115
+      "start": 657.04,
+      "end": 671.515
     },
     {
       "speaker": "MAYA",
       "text": "The second trap is the parallelism one, where candidates confidently say Xcode distributes individual test methods across simulators, and the interviewer just quietly notes that you've never actually watched a parallel run, because the clone model works on classes, and your grouping strategy is the design decision.",
-      "start": 671.255,
-      "end": 690.93
+      "start": 671.655,
+      "end": 691.33
     },
     {
       "speaker": "LEO",
       "text": "In the room, how does this actually surface?",
-      "start": 691.47,
-      "end": 694.195
+      "start": 691.87,
+      "end": 694.595
     },
     {
       "speaker": "LEO",
       "text": "Because nobody hands you a laptop and asks you to write a swipe gesture from memory.",
-      "start": 694.335,
-      "end": 699.785
+      "start": 694.735,
+      "end": 700.185
     },
     {
       "speaker": "MAYA",
       "text": "It's almost always a story prompt, they say tell me about a UI framework you built, and then they drill.",
-      "start": 700.325,
-      "end": 707.05
+      "start": 700.725,
+      "end": 707.45
     },
     {
       "speaker": "MAYA",
       "text": "So structure it, here was the app with no UI automation and a full manual day of regression per release, here were my principles, no test depends on another, no text-based selectors, no sleeps, every failure diagnosable from CI.",
-      "start": 707.19,
-      "end": 723.29
+      "start": 707.59,
+      "end": 723.69
     },
     {
       "speaker": "MAYA",
       "text": "Then the layers, page objects owning queries and business-level actions so a UI change touches 1 class instead of 30 test files, a base test class centralizing launch config and setting continueAfterFailure to false so 1 real failure doesn't cascade into misleading noise, helpers for waits and the interruption monitor that handles surprise permission dialogs, and state seeding through launch arguments plus API calls.",
-      "start": 723.43,
-      "end": 750.38
+      "start": 723.83,
+      "end": 750.78
     },
     {
       "speaker": "MAYA",
       "text": "Then close with outcomes, regression went from a day to minutes, flakiness in the low single digits, and the team trusting the suite as a release gate.",
-      "start": 750.52,
-      "end": 760.02
+      "start": 750.92,
+      "end": 760.42
     },
     {
       "speaker": "LEO",
       "text": "Alright, recap time, give me the 60 second version.",
-      "start": 760.56,
-      "end": 764.135
+      "start": 760.96,
+      "end": 764.535
     },
     {
       "speaker": "MAYA",
       "text": "Three takeaways.",
-      "start": 764.675,
-      "end": 766.425
+      "start": 765.075,
+      "end": 766.825
     },
     {
       "speaker": "MAYA",
       "text": "If they ask what XCUITest fundamentally is, say it's Apple's native UI framework built on XCTest, black-box and out-of-process, driving the app through the accessibility layer like a teller window, which is exactly why stable accessibility identifiers are non-negotiable.",
-      "start": 766.565,
-      "end": 785.265
+      "start": 766.965,
+      "end": 785.665
     },
     {
       "speaker": "MAYA",
       "text": "If they ask about flakiness, say selectors keyed to visible text plus timing guesses are the usual culprits, and the fix is engraved serial numbers, meaning identifiers, plus toaster-style waits with waitForExistence, never kitchen-timer sleeps.",
-      "start": 785.405,
-      "end": 801.83
+      "start": 785.805,
+      "end": 802.23
     },
     {
       "speaker": "MAYA",
       "text": "And if they ask about parallelism, say Xcode clones simulators and distributes at the class level, so balanced classes and truly independent tests with unique data are what make the lanes actually move.",
-      "start": 801.97,
-      "end": 815.32
+      "start": 802.37,
+      "end": 815.72
     },
     {
       "speaker": "LEO",
       "text": "Teller window, serial numbers, toasters, and checkout lanes...",
-      "start": 815.86,
-      "end": 819.91
+      "start": 816.26,
+      "end": 820.31
     },
     {
       "speaker": "LEO",
       "text": "honestly that's most of an iOS automation interview in 4 pictures.",
-      "start": 820.05,
-      "end": 825.1
+      "start": 820.45,
+      "end": 825.5
     },
     {
       "speaker": "MAYA",
       "text": "That's the idea.",
-      "start": 825.64,
-      "end": 827.315
+      "start": 826.04,
+      "end": 827.715
     },
     {
       "speaker": "MAYA",
       "text": "Next time you're prepping, put this side by side with Espresso and Appium, because the cross-platform comparison question is coming for you eventually, and until then, keep practicing like the interview is tomorrow.",
-      "start": 827.455,
-      "end": 840.705
+      "start": 827.855,
+      "end": 841.33
     },
     {
       "speaker": "LEO",
       "text": "See you in the next one.",
-      "start": 841.245,
-      "end": 843.02
+      "start": 841.87,
+      "end": 843.645
     }
   ]
 }

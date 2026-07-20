@@ -1,0 +1,336 @@
+{
+  "id": "xcuitest",
+  "voice": null,
+  "voices": {
+    "INTERVIEWER": "am_fenrir",
+    "CANDIDATE": "af_heart"
+  },
+  "durationSec": 503.71,
+  "hash": "566e2aa5d36d31aab378b1e8ccd197c1f0e5b284db4006bd7a70df191b98aa39",
+  "cues": [
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Welcome in, thanks for making the time today.",
+      "start": 0,
+      "end": 3
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Let's run a quick XCUITest round, the kind of rapid technical screen you'd get for an SDET role working on iOS automation.",
+      "start": 3.14,
+      "end": 12.69
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "I'll ask a question, you give me your best answer, and I may push a little deeper here and there.",
+      "start": 12.83,
+      "end": 18.53
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Nothing tricky, just the fundamentals done well.",
+      "start": 18.67,
+      "end": 21.795
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Ready when you are.",
+      "start": 21.935,
+      "end": 23.51
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Sounds great, let's do it.",
+      "start": 24.05,
+      "end": 26.15
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Let's start at the top.",
+      "start": 26.69,
+      "end": 28.39
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "What is XCUITest, and what's the key architectural thing about it that shapes how you write tests?",
+      "start": 28.53,
+      "end": 35.155
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "XCUITest is Apple's native UI testing framework, shipped as part of XCTest inside Xcode, and you write the tests in Swift or Objective-C against a real build of the app running on a simulator or device, the way a user would drive it.",
+      "start": 35.695,
+      "end": 52.62
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The key architectural point is that it's black-box and out-of-process, meaning the tests run in a separate process from the app and talk to it through the iOS accessibility layer, so a test sees the same tree of elements that VoiceOver sees and can't reach into the app's code directly.",
+      "start": 52.76,
+      "end": 71.01
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "That's why it matters so much in practice, because everything you can find and interact with flows through accessibility, which is exactly why stable accessibility identifiers become the backbone of a reliable suite.",
+      "start": 71.15,
+      "end": 85
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The trap is treating it like an in-process framework and expecting to call app internals, which you simply can't do.",
+      "start": 85.14,
+      "end": 92.315
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Good, and you brought up finding elements, so let's go there.",
+      "start": 92.855,
+      "end": 96.58
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Walk me through how element lookup actually works, the difference between an element and a query, and how you keep selectors stable.",
+      "start": 96.72,
+      "end": 104.82
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Everything starts from XCUIApplication, which is your proxy for the app under test, and from there you build queries.",
+      "start": 105.36,
+      "end": 113.01
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "An XCUIElementQuery describes zero or more matching elements, so app dot buttons is a query over every button, and you narrow it by identifier, by predicate, or by position with element bound by an index.",
+      "start": 113.15,
+      "end": 127.8
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "An XCUIElement is a handle to one specific element, and the crucial nuance is that it's lazy, it only resolves against the live UI hierarchy when you read its state or act on it, not when you declare it.",
+      "start": 127.94,
+      "end": 141.39
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "If a query resolves to more than one match when you treat it as a single element, it raises at access time, which trips people up.",
+      "start": 141.53,
+      "end": 150.055
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "For stability, my rule was that no selector keys off visible text or the view hierarchy, everything targets a stable accessibility identifier, so a copy change or a layout refactor doesn't break thirty tests.",
+      "start": 150.195,
+      "end": 164.62
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Nice, the laziness point is one a lot of people miss.",
+      "start": 165.16,
+      "end": 168.86
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Next one, UI tests are notorious for flakiness.",
+      "start": 169,
+      "end": 172.675
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "How do you handle synchronization and waiting in XCUITest?",
+      "start": 172.815,
+      "end": 177.165
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "My non-negotiable is no sleep calls anywhere, all synchronization is event-based.",
+      "start": 177.705,
+      "end": 183.255
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The workhorse is waitForExistence with a timeout, which polls for the element and returns a boolean you assert on, so instead of guessing that a screen loads in three seconds you wait for the dashboard title to exist and fail cleanly if it never does.",
+      "start": 183.395,
+      "end": 198.795
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "For conditions more complex than mere existence, I use predicate-based expectations, for example waiting until an element becomes hittable or its value changes, through XCTNSPredicateExpectation.",
+      "start": 198.935,
+      "end": 213.335
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The why is simple, fixed sleeps are always wrong in one direction, either too short on a slow CI runner, which gives you flakes, or too long everywhere, which bloats the suite.",
+      "start": 213.475,
+      "end": 224.55
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "And there's a related trap, unexpected system dialogs like permission prompts, which I handle with a centralized UI interruption monitor so a notifications alert doesn't randomly kill an unrelated test.",
+      "start": 224.69,
+      "end": 238.165
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "In my framework flakiness stayed in the low single digits largely because of those two disciplines.",
+      "start": 238.305,
+      "end": 244.955
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Solid.",
+      "start": 245.495,
+      "end": 246.695
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Now the part I always dig into, test data and state.",
+      "start": 246.835,
+      "end": 250.51
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "How do you get each test into a known starting state without clicking through half the app?",
+      "start": 250.65,
+      "end": 256.075
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Two mechanisms, and this is genuinely where most of my engineering effort went.",
+      "start": 256.615,
+      "end": 262.04
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "First, launch arguments and launch environment on XCUIApplication, the test build reads those at startup and short-circuits setup, so I could inject a pre-authenticated session, a seeded account, or specific feature flag values without ever touching the login screen in tests that aren't about login.",
+      "start": 262.18,
+      "end": 281.505
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Second, for data that genuinely has to exist on the backend, I call the API directly in setUp to create the preconditions, capture the generated identifiers, run the test, and clean up in tearDown, so every test is fully self-contained.",
+      "start": 281.645,
+      "end": 297.97
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The why is speed and independence, tapping through onboarding in every test is slow and couples everything to one flow.",
+      "start": 298.11,
+      "end": 306.11
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The classic trap is a shared fixture account that every test reuses, because the moment two tests run at once or one leaves dirty state behind, you get failures that are impossible to reproduce.",
+      "start": 306.25,
+      "end": 319.125
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "You just set up my next question perfectly, because independence is what parallelism lives on.",
+      "start": 319.665,
+      "end": 326.19
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "How does parallel execution actually work in XCUITest, and what's the nuance people get wrong?",
+      "start": 326.33,
+      "end": 333.38
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Xcode parallelizes by cloning the simulator, it spins up multiple identical simulator instances and distributes the work across them.",
+      "start": 333.92,
+      "end": 343.595
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The nuance, and the common interview probe, is that it parallelizes at the test class level, not the individual test method level, so how you group tests into classes directly affects how evenly the load spreads, and I deliberately balanced class sizes so no single clone became the long pole of the run.",
+      "start": 343.735,
+      "end": 362.635
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "But the honest answer is that the thing that enables parallelism isn't a build flag, it's the independence work, no test depending on another, every test generating its own unique data like GUID-based emails and account identifiers, so several clones can hit the backend at once without colliding.",
+      "start": 362.775,
+      "end": 382.025
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The trap is turning parallelism on over tests that assume a fixed account or a particular order, which produces random failures that look like flakiness but are really shared state.",
+      "start": 382.165,
+      "end": 393.765
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "And you tune concurrency to the runner, more simulators costs CPU and memory, so there's a real sweet spot.",
+      "start": 393.905,
+      "end": 401.355
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Good, I like that you separated the mechanism from the enabler.",
+      "start": 401.895,
+      "end": 406.12
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Last one, take me through how you orchestrate the suite in CI, from build to reporting.",
+      "start": 406.26,
+      "end": 412.285
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The pipeline drives everything through xcodebuild against a scheme, with a defined simulator destination, parallel testing enabled, and a cap on concurrent simulator destinations.",
+      "start": 412.825,
+      "end": 424.6
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The key optimization is build-once, test-many, I use build-for-testing and then test-without-building so we compile a single time and reuse that artifact across shards instead of rebuilding per run, which saves real minutes.",
+      "start": 424.74,
+      "end": 440.015
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "For structure, I tier the suite, a fast smoke subset of the must-never-break flows runs on every pull request as a merge gate, and the full regression suite runs nightly, so developers get quick signal without every PR waiting on everything.",
+      "start": 440.155,
+      "end": 455.83
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Results come out as an xcresult bundle that I parse into JUnit XML so the dashboard shows trends, with failure screenshots attached via XCTAttachment so a red test is diagnosable from CI alone.",
+      "start": 455.97,
+      "end": 470.87
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "And on flakes, I allow one or two automatic retries as a safety net, but flaky tests get tracked and root-caused separately, otherwise retries quietly mask a degrading suite.",
+      "start": 471.01,
+      "end": 482.66
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Strong answers, that's the round.",
+      "start": 483.2,
+      "end": 485.375
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "What I liked here, and what listeners should take away, is the structure, a direct answer first, then the why, and then a concrete example or a trap called out.",
+      "start": 485.515,
+      "end": 495.54
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "That pattern is what makes an answer sound senior.",
+      "start": 495.68,
+      "end": 498.88
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Practice these until they flow, and I'll see you in the next round.",
+      "start": 499.02,
+      "end": 503.17
+    }
+  ]
+}

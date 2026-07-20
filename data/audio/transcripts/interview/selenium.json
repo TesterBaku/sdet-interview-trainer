@@ -1,0 +1,384 @@
+{
+  "id": "selenium",
+  "voice": null,
+  "voices": {
+    "INTERVIEWER": "am_fenrir",
+    "CANDIDATE": "af_heart"
+  },
+  "durationSec": 583.33,
+  "hash": "6d5c1d87bd90cf5147fe453e3c43fad47cff99e5dd015b4a755f9febb88c368f",
+  "cues": [
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Welcome in, thanks for making the time today.",
+      "start": 0,
+      "end": 3
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Let's run a quick Selenium round, the kind of rapid technical screen you'd get for an SDET role.",
+      "start": 3.14,
+      "end": 9.44
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "I'll ask a question, you give me your best answer, and I may push a little deeper here and there.",
+      "start": 9.58,
+      "end": 15.28
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Nothing tricky, just the fundamentals done well.",
+      "start": 15.42,
+      "end": 18.545
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Ready when you are.",
+      "start": 18.685,
+      "end": 20.26
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Sounds great, let's do it.",
+      "start": 20.8,
+      "end": 22.9
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Let's start under the hood.",
+      "start": 23.44,
+      "end": 25.215
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "When your test code clicks a button, how does Selenium actually talk to the browser?",
+      "start": 25.355,
+      "end": 30.88
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Selenium WebDriver drives a real browser through a browser-specific driver, so chromedriver for Chrome or geckodriver for Firefox, and my test code sends commands to that driver over the W3C WebDriver protocol, which is basically HTTP with JSON payloads.",
+      "start": 31.42,
+      "end": 50.37
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The driver translates each command into native browser actions.",
+      "start": 50.51,
+      "end": 55.06
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The reason this matters is that every single command is a separate HTTP round trip, client to driver to browser and back, and that round-trip model is the root of a lot of the latency and flakiness we end up managing with waits.",
+      "start": 55.2,
+      "end": 70.25
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "A concrete example, when a click triggers a re-render and my very next command goes looking for an element, there's a real time gap between those two requests where the page can change underneath me.",
+      "start": 70.39,
+      "end": 82.415
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Selenium 4 standardized fully on the W3C protocol and also added things like relative locators and access to the Chrome DevTools Protocol.",
+      "start": 82.555,
+      "end": 93.555
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Good, and that round-trip point sets up my next question nicely.",
+      "start": 94.095,
+      "end": 98.47
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Selenium gives you implicit, explicit, and fluent waits.",
+      "start": 98.61,
+      "end": 102.46
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Which do you actually use, and why?",
+      "start": 102.6,
+      "end": 104.975
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "I use explicit waits almost exclusively, so WebDriverWait with ExpectedConditions, because they wait for a specific condition on a specific element, like the submit button becoming clickable or a spinner becoming invisible.",
+      "start": 105.515,
+      "end": 120.44
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "An implicit wait is a global setting that polls the DOM on every element lookup, which sounds convenient but it's blunt, it applies everywhere and can quietly mask real timing problems.",
+      "start": 120.58,
+      "end": 132.98
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "A fluent wait is just an explicit wait with a custom polling interval and a list of exceptions to ignore, and I reach for it when I need that finer control, say polling a slow grid every two seconds while ignoring stale element exceptions.",
+      "start": 133.12,
+      "end": 148.42
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The trap I always call out is mixing implicit and explicit waits, the two timers interact unpredictably and you get cumulative timeouts far longer than you intended, so I pick explicit and set the implicit wait to zero.",
+      "start": 148.56,
+      "end": 163.285
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "And Thread dot sleep never goes in, it's a blind fixed wait that's slow when it's too long and flaky when it's too short.",
+      "start": 163.425,
+      "end": 170.625
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "That's exactly the anti-pattern people miss.",
+      "start": 171.165,
+      "end": 174.265
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Now, locators.",
+      "start": 174.405,
+      "end": 176.03
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "How do you choose between CSS selectors and XPath, and what makes a locator stable?",
+      "start": 176.17,
+      "end": 182.445
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "My default order is an id when it's unique and stable, because it's the fastest and least affected by DOM changes, then CSS selectors, and XPath only when I genuinely need its extra power.",
+      "start": 182.985,
+      "end": 196.66
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "CSS is faster and more readable, while XPath can do things CSS can't, like matching on text content or walking up to a parent or ancestor, but it's slower and more brittle, especially positional XPath that breaks the moment the layout shifts.",
+      "start": 196.8,
+      "end": 213.65
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The deeper why is stability, I anchor to attributes that carry meaning across releases, and where I can I work with the front-end team to add test id attributes to interactive elements.",
+      "start": 213.79,
+      "end": 225.99
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "On one dashboard we had auto-generated ids like btn underscore one two three four five that changed every build, so we added a data test id for the export button, swapped the locators over, and the flakiness on that page dropped to zero.",
+      "start": 226.13,
+      "end": 242.805
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Good, stable locators solve half the battle.",
+      "start": 243.345,
+      "end": 246.37
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Here's a scenario, your test intermittently throws a StaleElementReferenceException.",
+      "start": 246.51,
+      "end": 252.235
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "What's going on and how do you fix it?",
+      "start": 252.375,
+      "end": 255
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "A stale element exception means I found an element earlier, cached the reference, and by the time I interact with it that node is no longer attached to the DOM, usually because the page re-rendered or navigated.",
+      "start": 255.54,
+      "end": 269.54
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The fix is not to retry blindly, first I figure out why the DOM is changing, then I re-find the element right before interacting instead of holding onto a cached reference, and I wait for the post-render state before touching anything.",
+      "start": 269.68,
+      "end": 284.755
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "A real example, we had a React grid that refreshed after applying a filter, and the test clicked a row it had located before the refresh.",
+      "start": 284.895,
+      "end": 293.745
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "We fixed it by waiting for the loading indicator to become invisible, then locating the row again, and it never flaked after that.",
+      "start": 293.885,
+      "end": 302.035
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Worth noting this is exactly the problem Playwright's lazy locators sidestep, because they re-query the DOM automatically on every action, whereas in Selenium that discipline is on me.",
+      "start": 302.175,
+      "end": 314.5
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Nice, and you anticipated a later question with that Playwright comment.",
+      "start": 315.04,
+      "end": 319.815
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Let's talk structure, why do teams use the Page Object Model, and how do you make a suite like that run in parallel?",
+      "start": 319.955,
+      "end": 327.43
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Page Object Model means one class per page that encapsulates the locators and the actions on that page, so when the UI changes, the fix touches one file instead of fifty tests, and the tests themselves read like a user journey.",
+      "start": 327.97,
+      "end": 343.645
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Selenium ships PageFactory with the FindBy annotation as the classic helper, and a pattern I like is having navigation methods return the next page object, so the flow is typed and self-documenting.",
+      "start": 343.785,
+      "end": 357.06
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "For parallel execution, the critical rule is that WebDriver is not thread-safe, so I never use a static shared driver, I use a ThreadLocal factory that gives each test thread its own driver instance, paired with TestNG's parallel configuration.",
+      "start": 357.2,
+      "end": 373.85
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Then Selenium Grid distributes those sessions across machines and browsers, hub and node classically, or router, distributor, and node in Selenium 4.",
+      "start": 373.99,
+      "end": 384.49
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The trap is a static driver field, it works fine right up until you turn parallelism on, and then everything collides.",
+      "start": 384.63,
+      "end": 392.38
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Strong answer, that static driver trap catches a lot of teams.",
+      "start": 392.92,
+      "end": 397.145
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Building on that, your suite runs in CI and some tests pass locally but flake there.",
+      "start": 397.285,
+      "end": 403.135
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "How do you drive flakiness down systematically?",
+      "start": 403.275,
+      "end": 406.45
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "First I treat flakiness as a bug with a specific root cause, not weather, so instead of just raising timeouts I compare screenshots and WebDriver logs between passing and failing runs to see exactly what state differed.",
+      "start": 406.99,
+      "end": 421.44
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The usual suspects in CI are headless rendering differences, a smaller viewport, slower machines exposing timing gaps, and browser or driver version mismatches, so I reproduce in a container that matches the CI image.",
+      "start": 421.58,
+      "end": 437.055
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Prevention-wise, every interaction gets a condition-based explicit wait, tests own their data and share no state, and locators are stable ids or test ids.",
+      "start": 437.195,
+      "end": 448.62
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "One case, a dropdown clicked fine locally but failed in CI as not interactable, and it turned out the CI viewport was smaller and the element sat below the fold, a scroll into view before the click fixed it permanently.",
+      "start": 448.76,
+      "end": 463.185
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "On a six hundred test suite we also quarantined flaky tests so they ran without blocking the pipeline while we root-caused them, and the flake rate fell from fifteen percent to under two.",
+      "start": 463.325,
+      "end": 475.1
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Good, root cause over bigger timeouts, that's the senior move.",
+      "start": 475.64,
+      "end": 479.465
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Last one, you mentioned Playwright earlier, so give me the honest comparison.",
+      "start": 479.605,
+      "end": 484.53
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "When would you pick Selenium and when would you pick Playwright?",
+      "start": 484.67,
+      "end": 488.245
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The core difference is architectural, Selenium sends each command as an HTTP request through the WebDriver protocol to a separate driver binary, while Playwright holds a persistent connection to the browser in the style of the DevTools protocol, which makes it faster and lets it auto-wait, its actions automatically wait for elements to be ready, whereas in Selenium the explicit waits are my job.",
+      "start": 488.785,
+      "end": 513.835
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Playwright also has first-class network mocking and ships with bundled browsers, while Selenium's network interception is limited to CDP access and you manage driver binaries yourself.",
+      "start": 513.975,
+      "end": 527.05
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "So why still Selenium, maturity and breadth, it supports basically any language and any browser, drives real browsers with high fidelity, and has huge grid and cloud ecosystem support, which matters for a large organization with an established stack.",
+      "start": 527.19,
+      "end": 543.615
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "For a greenfield TypeScript project I'd seriously consider Playwright for speed and built-in reliability, but for a big cross-browser matrix on existing infrastructure, Selenium remains the safer bet, and the trap is treating this as religion instead of a trade-off you argue from requirements.",
+      "start": 543.755,
+      "end": 562.28
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Strong answers, that's the round.",
+      "start": 562.82,
+      "end": 564.995
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "What I liked here, and what listeners should take away, is the structure, a direct answer first, then the why, and then a concrete example or a trap called out.",
+      "start": 565.135,
+      "end": 575.16
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "That pattern is what makes an answer sound senior.",
+      "start": 575.3,
+      "end": 578.5
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Practice these until they flow, and I'll see you in the next round.",
+      "start": 578.64,
+      "end": 582.79
+    }
+  ]
+}

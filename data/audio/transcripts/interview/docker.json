@@ -1,0 +1,420 @@
+{
+  "id": "docker",
+  "voice": null,
+  "voices": {
+    "INTERVIEWER": "am_fenrir",
+    "CANDIDATE": "af_heart"
+  },
+  "durationSec": 584.6,
+  "hash": "0c68838840b40e88f76fe028e36531a9f859dc8d1c7081ff3d07be2170736f49",
+  "cues": [
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Welcome in, glad you could make it.",
+      "start": 0,
+      "end": 2.35
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Today we're running a quick Docker round, the kind of rapid technical screen you'd hit in an SDET interview.",
+      "start": 2.49,
+      "end": 9.44
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "I'll fire off a question, you give me your best answer, and now and then I'll push a little deeper.",
+      "start": 9.58,
+      "end": 15.455
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Nothing exotic, just the fundamentals done well.",
+      "start": 15.595,
+      "end": 18.895
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Ready when you are.",
+      "start": 19.035,
+      "end": 20.61
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Sounds good, let's get into it.",
+      "start": 21.15,
+      "end": 23.525
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Let's start at the top.",
+      "start": 24.065,
+      "end": 25.765
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "What actually is a container, and how is it different from a virtual machine?",
+      "start": 25.905,
+      "end": 30.805
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "A container packages an application together with all of its dependencies so it runs the same way everywhere, and the key difference from a virtual machine is that a container shares the host operating system's kernel.",
+      "start": 31.345,
+      "end": 44.795
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "It only isolates the process, the filesystem, and the network, while a VM virtualizes an entire operating system with its own kernel.",
+      "start": 44.935,
+      "end": 54.835
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "That's why containers are megabytes and start in seconds, where VMs are gigabytes and take minutes to boot, with near-native overhead instead of a hypervisor sitting in the middle.",
+      "start": 54.975,
+      "end": 66.2
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "For me as an SDET the real pitch is reproducibility, because the image is the environment, so dev, CI, and prod all run byte-identical dependencies and the whole works-on-my-machine class of bugs just disappears.",
+      "start": 66.34,
+      "end": 81.515
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "A concrete example is spinning up the exact same browser, driver, and database stack locally and in CI, using it, and throwing it away, so I never have to debug environment drift again.",
+      "start": 81.655,
+      "end": 94.455
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Good, you got to the kernel sharing quickly, that's the crux.",
+      "start": 94.995,
+      "end": 98.545
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Now a related distinction people fumble, what's the difference between an image and a container?",
+      "start": 98.685,
+      "end": 104.86
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The image is a read-only template and the container is a running instance of it, so the analogy I use is that the image is the class and the container is the object, one image, many containers.",
+      "start": 105.4,
+      "end": 118.6
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The image gets built from a Dockerfile, tagged with something like a name and version, and lives in a registry like Docker Hub or ECR that you push to and pull from.",
+      "start": 118.74,
+      "end": 129.69
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "When you run it, Docker adds a thin writable layer on top, and that writable layer is what makes the container.",
+      "start": 129.83,
+      "end": 136.93
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The why behind this design is that an image is actually a stack of layers, one per build instruction, and those layers are cached and shared between images, which keeps builds fast and storage efficient.",
+      "start": 137.07,
+      "end": 149.97
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The trap to call out is that anything written into that writable layer is ephemeral, so if you delete the container, the data goes with it, which matters the moment you're running a database in one.",
+      "start": 150.11,
+      "end": 161.885
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Nice, and you set up my next question perfectly with those layers.",
+      "start": 162.425,
+      "end": 166.825
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Tell me about the Dockerfile, and specifically why the order of instructions matters so much.",
+      "start": 166.965,
+      "end": 172.89
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Order matters because every instruction in a Dockerfile creates a layer, and Docker caches those layers, so the ordering is the main lever you have on build speed.",
+      "start": 173.43,
+      "end": 183.38
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The rule is to copy the dependency manifest first, something like the package files, run the install, and only then copy the rest of the source code.",
+      "start": 183.52,
+      "end": 193.345
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "That way an ordinary code change only invalidates the cheap source layer, while the slow dependency install stays cached.",
+      "start": 193.485,
+      "end": 201.66
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The classic mistake, and honestly the number one slow-build mistake I see, is putting the copy-everything step before the install, which means every single source edit reinstalls all dependencies from scratch.",
+      "start": 201.8,
+      "end": 215.475
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "A couple of related habits, I use a dockerignore file so things like node modules and the git folder stay out of the build context, and for production images I'd reach for a multi-stage build, where you compile in a heavy image and copy just the artifact into a tiny runtime image, so the final image is smaller and safer.",
+      "start": 215.615,
+      "end": 236.715
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "That's exactly the trap I was fishing for.",
+      "start": 237.255,
+      "end": 239.98
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Let's talk about data.",
+      "start": 240.12,
+      "end": 241.97
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Containers are ephemeral, so how do you persist data, and how do you think about that for testing?",
+      "start": 242.11,
+      "end": 248.185
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The direct answer is volumes, because the container's writable layer is deleted along with the container, so anything that needs to outlive it has to live outside that lifecycle.",
+      "start": 248.725,
+      "end": 259.9
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "There are three flavors.",
+      "start": 260.04,
+      "end": 261.99
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "A named volume is Docker-managed storage, and that's the right choice for a database's data directory.",
+      "start": 262.13,
+      "end": 268.855
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "A bind mount maps a host directory into the container, which is great for live-reloading source code while you develop.",
+      "start": 268.995,
+      "end": 276.595
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "And tmpfs is in-memory only, fast, and wiped when the container stops.",
+      "start": 276.735,
+      "end": 282.51
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "For testing I actually flip this into a strategy, I bind-mount the test code in so I can iterate quickly without rebuilding, but I deliberately keep the test data ephemeral, for example a database on tmpfs, so every run starts from a clean, known state.",
+      "start": 282.65,
+      "end": 299.25
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The trap is doing the opposite, persisting test data on a volume, because then state leaks between runs and you get flaky, order-dependent tests.",
+      "start": 299.39,
+      "end": 308.79
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "I like that you separated code from data there.",
+      "start": 309.33,
+      "end": 312.555
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Next one trips a lot of people up.",
+      "start": 312.695,
+      "end": 315.245
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Two containers need to talk to each other, how does that work, and what's the classic mistake?",
+      "start": 315.385,
+      "end": 320.885
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "On a shared user-defined bridge network, which is also what Compose creates for you automatically, containers reach each other by name through Docker's built-in DNS.",
+      "start": 321.425,
+      "end": 332.7
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "So the app connects to the database using the service name as the hostname, something like postgres on port fifty-four thirty-two, not localhost.",
+      "start": 332.84,
+      "end": 342.24
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "And that's exactly the classic mistake, because inside a container localhost means the container itself, not the host machine and not the neighboring container, so a connection string pointing at localhost fails even though everything is technically running.",
+      "start": 342.38,
+      "end": 358.58
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "If I genuinely need to reach the host from inside a container, there's a special hostname, host dot docker dot internal, for that.",
+      "start": 358.72,
+      "end": 367.22
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The other piece worth mentioning is port publishing, the dash p flag maps a host port to a container port, for example host eighty-eighty to container three thousand, and without publishing a port the service simply isn't reachable from the host at all.",
+      "start": 367.36,
+      "end": 383.085
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Good, the localhost gotcha catches even experienced people.",
+      "start": 383.625,
+      "end": 387.9
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "So build on that, what is Docker Compose, and does depends underscore on guarantee your database is ready?",
+      "start": 388.04,
+      "end": 394.965
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Compose lets you define a whole multi-container application in one YAML file and bring it up or tear it down with a single command, which is perfect for a test stack, say the app plus a Postgres plus a mock server.",
+      "start": 395.505,
+      "end": 409.43
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "It creates one network automatically so all the services resolve each other by service name, and you can wire configuration through environment variables, like pointing the app's database URL at the db service.",
+      "start": 409.57,
+      "end": 423.52
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "And no, depends underscore on does not guarantee readiness, that's the trap.",
+      "start": 423.66,
+      "end": 428.735
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "It only controls start order, meaning the database container has started, not that Postgres inside it is actually accepting connections.",
+      "start": 428.875,
+      "end": 437.725
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "So tests can still fail on the first second or two of a fresh stack.",
+      "start": 437.865,
+      "end": 442.215
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The fix is to add a healthcheck so Compose waits until the dependency is genuinely ready, or build retry logic into the app or the test setup.",
+      "start": 442.355,
+      "end": 452.13
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "A nice touch for test stacks is putting the database's data directory on tmpfs, so every run gets a clean, ephemeral database.",
+      "start": 452.27,
+      "end": 461.845
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Solid, the start-order versus readiness distinction is one I always probe.",
+      "start": 462.385,
+      "end": 467.71
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Last one, and it's the money question for this role.",
+      "start": 467.85,
+      "end": 471.1
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "How do containers actually help you as an SDET, in testing and CI?",
+      "start": 471.24,
+      "end": 476.39
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The one-line answer is disposable, identical environments on every run.",
+      "start": 476.93,
+      "end": 482.305
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Concretely, instead of mocking a database or a queue, I spin up a real Postgres or Redis or Kafka in a container for integration tests and throw it away afterward, so I'm testing against the real thing with zero leftover state.",
+      "start": 482.445,
+      "end": 497.67
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The tool I'd name is Testcontainers, a library available for Java, Python, Node, and .NET that starts containers from inside your test code, hands you dynamic connection details like the generated JDBC URL, and tears everything down when the tests finish.",
+      "start": 497.81,
+      "end": 516.385
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "It gives you real dependencies with the isolation of unit tests, no shared staging database, no flaky cross-test contamination.",
+      "start": 516.525,
+      "end": 525.675
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "For UI work, the official browser images and Selenium Grid containers give you consistent headless browsers in CI, and CI systems like GitHub Actions run the jobs themselves inside containers, so the whole build environment is version-pinned and reproducible.",
+      "start": 525.815,
+      "end": 544.09
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The trap this kills is the shared long-lived test environment, where one team's leftover data breaks another team's run.",
+      "start": 544.23,
+      "end": 552.18
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Strong answers, that's the round.",
+      "start": 552.72,
+      "end": 554.895
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "What I liked here, and what listeners should take away, is the structure, a direct answer first, then the why, and then a concrete example or a trap called out.",
+      "start": 555.035,
+      "end": 565.06
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "The kernel sharing, the layer cache, the localhost gotcha, the readiness versus start-order distinction, each answer landed the fact and then showed the scar tissue behind it.",
+      "start": 565.2,
+      "end": 576.425
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "That pattern is what makes an answer sound senior.",
+      "start": 576.565,
+      "end": 579.765
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Practice these until they flow, and I'll see you in the next round.",
+      "start": 579.905,
+      "end": 584.055
+    }
+  ]
+}

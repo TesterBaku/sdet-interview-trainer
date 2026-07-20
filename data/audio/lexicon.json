@@ -10,6 +10,8 @@
     ["YAML", "yammel"],
     ["JSON", "Jason"],
     ["XCUITest", "ex-see-you-eye test"],
+    ["Appium", "app-ee-um"],
+    ["appium", "app-ee-um"],
     ["npm", "en pee em"],
     ["npx", "en pee ex"],
     ["APIs", "eigh-pee-eyes"],

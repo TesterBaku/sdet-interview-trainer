@@ -1,0 +1,128 @@
+{
+  "api-testing": {
+    "mp3Url": "https://tcvgyxolu5eyurv6.public.blob.vercel-storage.com/audio/interview/api-testing.mp3",
+    "vttUrl": "https://tcvgyxolu5eyurv6.public.blob.vercel-storage.com/audio/interview/api-testing.vtt",
+    "durationSec": 478.21,
+    "voice": "am_fenrir + af_heart",
+    "hash": "b9119de9c9e9721b18433271721a883b9ab6d9f0b6398787a0a46b077e5b9512"
+  },
+  "appium": {
+    "mp3Url": "https://tcvgyxolu5eyurv6.public.blob.vercel-storage.com/audio/interview/appium.mp3",
+    "vttUrl": "https://tcvgyxolu5eyurv6.public.blob.vercel-storage.com/audio/interview/appium.vtt",
+    "durationSec": 598.78,
+    "voice": "am_fenrir + af_heart",
+    "hash": "585c55e42ace8d9b402fe0b84bd56529dd74352179547f266fc4b9395938ccd6"
+  },
+  "cca-foundations": {
+    "mp3Url": "https://tcvgyxolu5eyurv6.public.blob.vercel-storage.com/audio/interview/cca-foundations.mp3",
+    "vttUrl": "https://tcvgyxolu5eyurv6.public.blob.vercel-storage.com/audio/interview/cca-foundations.vtt",
+    "durationSec": 600.36,
+    "voice": "am_fenrir + af_heart",
+    "hash": "4c6039a06ef6f6f8b73e80ba53922a365d52fab49cd0f15778a737da19f9abf9"
+  },
+  "csharp": {
+    "mp3Url": "https://tcvgyxolu5eyurv6.public.blob.vercel-storage.com/audio/interview/csharp.mp3",
+    "vttUrl": "https://tcvgyxolu5eyurv6.public.blob.vercel-storage.com/audio/interview/csharp.vtt",
+    "durationSec": 663.26,
+    "voice": "am_fenrir + af_heart",
+    "hash": "b40d1bef429d1351f38bdc296e79c1b2bbda255a5a75de558dda6fa0bf241c3d"
+  },
+  "docker": {
+    "mp3Url": "https://tcvgyxolu5eyurv6.public.blob.vercel-storage.com/audio/interview/docker.mp3",
+    "vttUrl": "https://tcvgyxolu5eyurv6.public.blob.vercel-storage.com/audio/interview/docker.vtt",
+    "durationSec": 584.6,
+    "voice": "am_fenrir + af_heart",
+    "hash": "0c68838840b40e88f76fe028e36531a9f859dc8d1c7081ff3d07be2170736f49"
+  },
+  "java": {
+    "mp3Url": "https://tcvgyxolu5eyurv6.public.blob.vercel-storage.com/audio/interview/java.mp3",
+    "vttUrl": "https://tcvgyxolu5eyurv6.public.blob.vercel-storage.com/audio/interview/java.vtt",
+    "durationSec": 582.7,
+    "voice": "am_fenrir + af_heart",
+    "hash": "2b24a9c5019fb19b0cf0159042f5504450d7c3e56f17bdb316c92ec2bb97eda7"
+  },
+  "javascript": {
+    "mp3Url": "https://tcvgyxolu5eyurv6.public.blob.vercel-storage.com/audio/interview/javascript.mp3",
+    "vttUrl": "https://tcvgyxolu5eyurv6.public.blob.vercel-storage.com/audio/interview/javascript.vtt",
+    "durationSec": 591.13,
+    "voice": "am_fenrir + af_heart",
+    "hash": "e500ecab69a6988429bf42c7623bebbd768205d6dd6bc45edecb5b1d7e1f23f1"
+  },
+  "kubernetes": {
+    "mp3Url": "https://tcvgyxolu5eyurv6.public.blob.vercel-storage.com/audio/interview/kubernetes.mp3",
+    "vttUrl": "https://tcvgyxolu5eyurv6.public.blob.vercel-storage.com/audio/interview/kubernetes.vtt",
+    "durationSec": 551.34,
+    "voice": "am_fenrir + af_heart",
+    "hash": "1b17f528882bd20bd1c92ccd3230718e1213825a2c5fefcc4fe18a4b9fc39129"
+  },
+  "langchain": {
+    "mp3Url": "https://tcvgyxolu5eyurv6.public.blob.vercel-storage.com/audio/interview/langchain.mp3",
+    "vttUrl": "https://tcvgyxolu5eyurv6.public.blob.vercel-storage.com/audio/interview/langchain.vtt",
+    "durationSec": 601.01,
+    "voice": "am_fenrir + af_heart",
+    "hash": "6a5956722e8381a995a499bb196f8b405f68a864c2885517855f2a3ac42629ce"
+  },
+  "nodejs": {
+    "mp3Url": "https://tcvgyxolu5eyurv6.public.blob.vercel-storage.com/audio/interview/nodejs.mp3",
+    "vttUrl": "https://tcvgyxolu5eyurv6.public.blob.vercel-storage.com/audio/interview/nodejs.vtt",
+    "durationSec": 617.01,
+    "voice": "am_fenrir + af_heart",
+    "hash": "bcaeac115c24d5016244492ad65cde1a7893429b199fd5589e540f9dfcd1de4b"
+  },
+  "playwright": {
+    "mp3Url": "https://tcvgyxolu5eyurv6.public.blob.vercel-storage.com/audio/interview/playwright.mp3",
+    "vttUrl": "https://tcvgyxolu5eyurv6.public.blob.vercel-storage.com/audio/interview/playwright.vtt",
+    "durationSec": 524.24,
+    "voice": "am_fenrir + af_heart",
+    "hash": "b85dc7b756be3c0ce59700ae6bfafa9c17a2cc6b92d9ba627f30b5ab2ee4730d"
+  },
+  "pyspark": {
+    "mp3Url": "https://tcvgyxolu5eyurv6.public.blob.vercel-storage.com/audio/interview/pyspark.mp3",
+    "vttUrl": "https://tcvgyxolu5eyurv6.public.blob.vercel-storage.com/audio/interview/pyspark.vtt",
+    "durationSec": 557.47,
+    "voice": "am_fenrir + af_heart",
+    "hash": "7220c7bf30cbda3fd49416251110de3afd7ff6d442f036729ca264e7f01e1e5a"
+  },
+  "python": {
+    "mp3Url": "https://tcvgyxolu5eyurv6.public.blob.vercel-storage.com/audio/interview/python.mp3",
+    "vttUrl": "https://tcvgyxolu5eyurv6.public.blob.vercel-storage.com/audio/interview/python.vtt",
+    "durationSec": 471.92,
+    "voice": "am_fenrir + af_heart",
+    "hash": "d65cf40a32ac29e2ba0320395b8d6e3b449a2a473943d23a4fa29156d21d3c45"
+  },
+  "rest-assured": {
+    "mp3Url": "https://tcvgyxolu5eyurv6.public.blob.vercel-storage.com/audio/interview/rest-assured.mp3",
+    "vttUrl": "https://tcvgyxolu5eyurv6.public.blob.vercel-storage.com/audio/interview/rest-assured.vtt",
+    "durationSec": 609.49,
+    "voice": "am_fenrir + af_heart",
+    "hash": "15d7099a46116253d2abf3ad18e5c31fdddfc1ea77670b6ce3bebd868e1ebc2f"
+  },
+  "selenium": {
+    "mp3Url": "https://tcvgyxolu5eyurv6.public.blob.vercel-storage.com/audio/interview/selenium.mp3",
+    "vttUrl": "https://tcvgyxolu5eyurv6.public.blob.vercel-storage.com/audio/interview/selenium.vtt",
+    "durationSec": 583.33,
+    "voice": "am_fenrir + af_heart",
+    "hash": "6d5c1d87bd90cf5147fe453e3c43fad47cff99e5dd015b4a755f9febb88c368f"
+  },
+  "sql": {
+    "mp3Url": "https://tcvgyxolu5eyurv6.public.blob.vercel-storage.com/audio/interview/sql.mp3",
+    "vttUrl": "https://tcvgyxolu5eyurv6.public.blob.vercel-storage.com/audio/interview/sql.vtt",
+    "durationSec": 552.34,
+    "voice": "am_fenrir + af_heart",
+    "hash": "8bff4c8ff3030d570f5c19d16c6fab9d4e54c89a9b663413ceec4e0aa2e0a336"
+  },
+  "testng": {
+    "mp3Url": "https://tcvgyxolu5eyurv6.public.blob.vercel-storage.com/audio/interview/testng.mp3",
+    "vttUrl": "https://tcvgyxolu5eyurv6.public.blob.vercel-storage.com/audio/interview/testng.vtt",
+    "durationSec": 557.52,
+    "voice": "am_fenrir + af_heart",
+    "hash": "a842b3fd9ece567cc3ed1c982c4f4d9a6cc801d099d5886219b3b4edf93f1f45"
+  },
+  "xcuitest": {
+    "mp3Url": "https://tcvgyxolu5eyurv6.public.blob.vercel-storage.com/audio/interview/xcuitest.mp3",
+    "vttUrl": "https://tcvgyxolu5eyurv6.public.blob.vercel-storage.com/audio/interview/xcuitest.vtt",
+    "durationSec": 503.71,
+    "voice": "am_fenrir + af_heart",
+    "hash": "566e2aa5d36d31aab378b1e8ccd197c1f0e5b284db4006bd7a70df191b98aa39"
+  }
+}

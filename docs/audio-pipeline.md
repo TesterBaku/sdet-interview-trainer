@@ -129,16 +129,44 @@ Renders are content-hash gated (voices + spoken text), so re-running skips uncha
 episodes; pass `--force` to override. The first render of a new voice downloads its ~1 MB
 voice pack from Hugging Face; run online once, then `HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1` works.
 
+## Mock-interview rounds (two-voice Q&A) — the `interview` kind
+
+A second two-voice format: an **interviewer asks, a candidate models a strong answer**. Same
+synth, captions, and publish scripts as the podcast, selected with `--kind=interview` (and the
+`--interview` flag on captions/publish). It reuses the podcast's two voices but swaps their
+roles — **Interviewer = `am_fenrir` (male), Candidate = `af_heart` (female)** — so the Q&A
+framing is inverted from the podcast's female-mentor / male-learner pairing (same timbres;
+the formats are set apart by structure + role, not a distinct extra voice).
+
+- **Scripts** live in `data/audio/interview/<id>.txt` — committed, human-editable, one turn
+  per block (`INTERVIEWER:` / `CANDIDATE:`), keyed by cheat-sheet id. Each is a curated round
+  (5–7 questions) where every answer follows direct-answer → why → concrete example/trap.
+- **Everything is namespaced** so it never collides with the podcast (which shares the same
+  ids): renders → `build/audio/interview/`, transcripts → `data/audio/transcripts/interview/`,
+  Blob → `audio/interview/<id>`, manifest → `data/audio/manifest.interview.json`.
+
+```bash
+# Render one round, then captions + publish (token via .env or inline):
+node scripts/audio/synthesize-podcast.mjs --kind=interview --id=api-testing
+npm run audio:interview:captions        # → transcripts/interview/ + build vtt
+npm run audio:interview:publish         # → Blob audio/interview/ + manifest.interview.json
+#   node scripts/audio/publish.mjs --interview --local   # dev staging, no Blob
+```
+
+The app surfaces these via `getInterviewAudio(id)` — a "Mock interview" player beside the
+podcast player on each cheat-sheet page, plus a Mock Interview lane in Commute Mode. Guarded
+by `tests/unit/interview-scripts.test.mjs` (script format) and functional tests (players/lane).
+
 ## Shipped
 
 - **Podcast rollout** — all 18 cheat-sheet topics authored, rendered, and published to Blob.
 - **In-app player** — a **Listen** player (audio + synced transcript) on each cheat-sheet page.
 - **Commute Mode** (`/commute`) — a screen-free playlist that queues the episodes back to back.
+- **Mock-interview Q&A** — a two-voice interviewer/candidate round per topic, published to
+  Blob and surfaced beside the podcast player plus as a Mock Interview lane in Commute Mode.
 
 ## Planned expansion (later phases)
 
 - **Offline listening** — cache audio in the service worker (`public/sw.js`) behind a
   same-origin `/audio/[id]` route, plus a "Download for offline" button (leverages the PWA).
 - **Audio flashcards** — question → pause → answer, generated from `data/questions/*.json`.
-- **Interview Q&A audio** — a two-voice mock-interview round per topic (interviewer asks,
-  candidate models a strong answer), sharing the two-voice synth via `--kind=interview`.

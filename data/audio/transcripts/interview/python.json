@@ -1,0 +1,348 @@
+{
+  "id": "python",
+  "voice": null,
+  "voices": {
+    "INTERVIEWER": "am_fenrir",
+    "CANDIDATE": "af_heart"
+  },
+  "durationSec": 471.92,
+  "hash": "d65cf40a32ac29e2ba0320395b8d6e3b449a2a473943d23a4fa29156d21d3c45",
+  "cues": [
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Welcome in, glad you could make it today.",
+      "start": 0,
+      "end": 2.7
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Let's run a quick Python round, the kind of rapid technical screen you'd face for an SDET role.",
+      "start": 2.84,
+      "end": 9.19
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "I'll ask a question, you give me your best answer, and I may dig a little deeper where it gets interesting.",
+      "start": 9.33,
+      "end": 15.48
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Nothing exotic, just the fundamentals that actually come up.",
+      "start": 15.62,
+      "end": 19.695
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Ready when you are.",
+      "start": 19.835,
+      "end": 21.41
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Sounds good, let's get into it.",
+      "start": 21.95,
+      "end": 24.325
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Let's start with the classic.",
+      "start": 24.865,
+      "end": 26.815
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "What's the difference between a list and a tuple, and what does mutability really mean in Python?",
+      "start": 26.955,
+      "end": 33.105
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The direct answer is that a list is mutable and dynamic, while a tuple is immutable and hashable, which means a tuple can be a dict key or live in a set and a list can't. The deeper point is that in Python a variable is just a name bound to an object, not a typed box, and assignment binds names, it never copies.",
+      "start": 33.645,
+      "end": 54.12
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "So if I write b equals a where a is a list, and then append to b, a changes too, because they're the same object.",
+      "start": 54.26,
+      "end": 61.735
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "That aliasing bites people constantly in test code.",
+      "start": 61.875,
+      "end": 65.6
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "If I need independence I take a shallow copy with a slice, or copy dot deepcopy when there are nested structures, since a shallow copy still shares the nested objects.",
+      "start": 65.74,
+      "end": 76.64
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "And related to that, the is operator checks identity, the same object in memory, while double equals checks value equality, and mixing those two up is a classic trap.",
+      "start": 76.78,
+      "end": 87.755
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Nice, you got the aliasing point in there.",
+      "start": 88.295,
+      "end": 91.02
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Since you mentioned mutability biting people, tell me about the mutable default argument trap.",
+      "start": 91.16,
+      "end": 97.31
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The trap is defining a function with something like a list as a default value.",
+      "start": 97.85,
+      "end": 103.05
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The direct answer is that default arguments are evaluated once, at definition time, not on every call, so that one list object is shared across every call that uses the default.",
+      "start": 103.19,
+      "end": 114.99
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The why is that the function object holds the default, and if it's mutable, every call mutates the same thing.",
+      "start": 115.13,
+      "end": 122.255
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Where this really hurts in testing is a helper like append result that collects values into a default list, because results quietly accumulate across tests and you get cross test pollution, where a test passes alone but fails in the suite.",
+      "start": 122.395,
+      "end": 137.395
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The fix is to use None as the sentinel default and create a fresh list inside the function body.",
+      "start": 137.535,
+      "end": 144.01
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "It's a two line change, but interviewers ask it because it separates people who've actually debugged Python from people who've only read about it.",
+      "start": 144.15,
+      "end": 153.075
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Good, that cross test pollution angle is exactly why we ask.",
+      "start": 153.615,
+      "end": 157.79
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Next up, what's a generator, and when would you reach for one over a list comprehension?",
+      "start": 157.93,
+      "end": 163.555
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "A generator is a lazy iterator built with yield that produces values on demand, holding one item in memory at a time, while a list comprehension builds the entire list in memory up front.",
+      "start": 164.095,
+      "end": 176.87
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "That memory difference is the whole point.",
+      "start": 177.01,
+      "end": 179.86
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "For small collections I'll happily use a comprehension because it's readable, but for large or unbounded streams, like reading a huge log file line by line, a generator keeps memory flat no matter how big the input gets.",
+      "start": 180,
+      "end": 194.55
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "A concrete SDET example is a generator that walks a paginated API, fetching a page, yielding each record, and only requesting the next page when the current one is exhausted, stopping when a page comes back shorter than the page size.",
+      "start": 194.69,
+      "end": 210.465
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The caller can stop consuming as soon as it finds the record it wants, so you never fetch pages you don't need.",
+      "start": 210.605,
+      "end": 217.355
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The trap in that pattern is breaking before yielding the last partial page, which silently drops the final records.",
+      "start": 217.495,
+      "end": 224.895
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "I like that you tied it to pagination.",
+      "start": 225.435,
+      "end": 228.16
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Let's talk decorators, what are they and where have you actually used one?",
+      "start": 228.3,
+      "end": 232.975
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "A decorator is a callable that wraps a function to add behavior, things like logging, timing, or retry, without touching the function's body.",
+      "start": 233.515,
+      "end": 243.115
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "It works because functions in Python are first class objects, you can pass them around and return them, and a closure captures the wrapped function inside the wrapper.",
+      "start": 243.255,
+      "end": 253.655
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The place I've genuinely used one is a retry decorator for flaky test utilities, where the outer function takes the max attempts and the exception types, returns a decorator, and the wrapper loops, calling the real function and re-raising the last exception only after all attempts fail.",
+      "start": 253.795,
+      "end": 271.695
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Two traps worth calling out.",
+      "start": 271.835,
+      "end": 273.985
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "First, always apply functools dot wraps to the wrapper, otherwise the decorated function loses its name and docstring and introspection breaks, which matters to test frameworks.",
+      "start": 274.125,
+      "end": 285.725
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Second, only catch the specific exceptions you intend to retry, because a bare catch all will happily retry a genuine assertion failure and hide a real bug.",
+      "start": 285.865,
+      "end": 296.24
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Strong answer, and the point about retrying assertion failures is one people miss.",
+      "start": 296.78,
+      "end": 302.23
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Now the one everybody dreads, explain the GIL and what it means for running things in parallel.",
+      "start": 302.37,
+      "end": 308.77
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The GIL, the Global Interpreter Lock, means only one thread executes Python bytecode at a time in CPython, so threads don't give you true multi core parallelism for CPU bound work.",
+      "start": 309.31,
+      "end": 322.01
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The reason it still matters which tool you pick is that the GIL is released during blocking I O, so threads overlap just fine on network calls, file reads, and browser actions, which is most of what test automation does.",
+      "start": 322.15,
+      "end": 336.8
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "So my rule is threads or asyncio for I O bound concurrency, and multiprocessing for CPU bound work, since each process gets its own interpreter and its own GIL and can use a separate core.",
+      "start": 336.94,
+      "end": 350.39
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The practical example for an SDET is parallelizing a test suite, and there pytest xdist is the answer, because it runs tests across separate worker processes with dash n auto, which sidesteps the GIL entirely.",
+      "start": 350.53,
+      "end": 365.13
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The trap is assuming threading will speed up CPU heavy work, it won't, you just add lock contention.",
+      "start": 365.27,
+      "end": 372.295
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Good, and you landed on xdist which is the real world answer.",
+      "start": 372.835,
+      "end": 377.16
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Last one, walk me through pytest fixtures, how they work and how you use scopes.",
+      "start": 377.3,
+      "end": 382.425
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "A fixture is a function decorated with pytest dot fixture that provides setup, and pytest injects it into a test by matching the argument name, which is dependency injection without any wiring.",
+      "start": 382.965,
+      "end": 396.14
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "If the fixture uses yield, everything before the yield is setup, everything after is teardown, and teardown runs even when the test fails.",
+      "start": 396.28,
+      "end": 405.43
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Scope controls the lifetime, function scope creates and tears down per test, then class, module, and session share progressively wider, so expensive things like a browser launch or an API client get module or session scope while anything that must stay clean per test stays function scoped.",
+      "start": 405.57,
+      "end": 424.645
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "A real example is a create order fixture that calls the API to create an order, yields the order id to the test, and cancels it in teardown, so every test starts fresh regardless of execution order or parallelism.",
+      "start": 424.785,
+      "end": 439.96
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Shared fixtures live in conftest.",
+      "start": 440.1,
+      "end": 442.55
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The trap is calling the fixture function directly instead of declaring it as a parameter, which bypasses pytest entirely.",
+      "start": 442.69,
+      "end": 450.865
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Strong answers, that's the round.",
+      "start": 451.405,
+      "end": 453.58
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "What I liked here, and what listeners should take away, is the structure, a direct answer first, then the why, and then a concrete example or a trap called out.",
+      "start": 453.72,
+      "end": 463.745
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "That pattern is what makes an answer sound senior.",
+      "start": 463.885,
+      "end": 467.085
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Practice these until they flow, and I'll see you in the next round.",
+      "start": 467.225,
+      "end": 471.375
+    }
+  ]
+}

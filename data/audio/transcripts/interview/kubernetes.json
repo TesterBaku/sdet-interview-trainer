@@ -1,0 +1,366 @@
+{
+  "id": "kubernetes",
+  "voice": null,
+  "voices": {
+    "INTERVIEWER": "am_fenrir",
+    "CANDIDATE": "af_heart"
+  },
+  "durationSec": 551.34,
+  "hash": "1b17f528882bd20bd1c92ccd3230718e1213825a2c5fefcc4fe18a4b9fc39129",
+  "cues": [
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Welcome in, thanks for making the time today.",
+      "start": 0,
+      "end": 3
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Let's run a quick Kubernetes round, the kind of rapid technical screen you'd get for an SDET role.",
+      "start": 3.14,
+      "end": 9.69
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "I'll ask a question, you give me your best answer, and I may push a little deeper here and there.",
+      "start": 9.83,
+      "end": 15.53
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Nothing tricky, just the fundamentals done well.",
+      "start": 15.67,
+      "end": 18.795
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Ready when you are.",
+      "start": 18.935,
+      "end": 20.51
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Sounds great, let's do it.",
+      "start": 21.05,
+      "end": 23.15
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Let's start at the top.",
+      "start": 23.69,
+      "end": 25.39
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "You already know Docker, so tell me, what does Kubernetes actually add on top of Docker, and why would a team need it?",
+      "start": 25.53,
+      "end": 33.105
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The direct answer is that Docker runs a container on a host, while Kubernetes orchestrates many containers across a whole fleet of machines, handling scheduling, self-healing, scaling, and rollouts.",
+      "start": 33.645,
+      "end": 46.395
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The reason that matters is the model it uses, you declare desired state, say three replicas of this image, and Kubernetes continuously reconciles reality to match that declaration.",
+      "start": 46.535,
+      "end": 58.685
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "So if a Pod crashes it gets recreated, if a node dies its Pods get rescheduled somewhere else, and if load spikes you can add replicas by hand or automatically.",
+      "start": 58.825,
+      "end": 69.95
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "My mental model is that Docker is the package and Kubernetes is the operations team that runs those packages and keeps them alive.",
+      "start": 70.09,
+      "end": 79.165
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "A concrete example, when we ship a new version, Kubernetes rolls it out gradually with zero downtime, and if it turns out bad we revert instantly, which is something plain Docker on a host simply doesn't give you.",
+      "start": 79.305,
+      "end": 92.73
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Good, and I like that you led with the desired state idea.",
+      "start": 93.27,
+      "end": 97.295
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "So on workloads then, what's the difference between a Pod and a Deployment, and which one do you actually write?",
+      "start": 97.435,
+      "end": 104.06
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "A Pod is the smallest deployable unit, one container or a few tightly coupled ones sharing a network, an IP, and storage, and the key property is that Pods are ephemeral, they come and go with new IPs.",
+      "start": 104.6,
+      "end": 118.6
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "A Deployment sits above that, it manages a ReplicaSet that keeps N identical Pods running, and it gives you rolling updates and rollbacks.",
+      "start": 118.74,
+      "end": 127.865
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The why is exactly that ephemerality, if I created bare Pods and one died, nothing would bring it back, whereas a Deployment's controller notices the gap between desired and actual state and recreates it.",
+      "start": 128.005,
+      "end": 141.505
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "So in practice you almost never create Pods directly, for a stateless app you write a Deployment with, say, replicas set to three and a label like app web, and it manages the Pods and their replacement for you.",
+      "start": 141.645,
+      "end": 155.245
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The trap is treating a Pod as something permanent, it isn't, and designing around that assumption breaks fast.",
+      "start": 155.385,
+      "end": 162.435
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Right, and that ephemerality leads nicely into networking.",
+      "start": 162.975,
+      "end": 166.925
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "If Pods keep changing IPs, how does anything ever talk to them reliably?",
+      "start": 167.065,
+      "end": 172.49
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "That's what a Service is for.",
+      "start": 173.03,
+      "end": 175.155
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Since Pods are ephemeral with changing IPs, you never talk to a Pod directly, instead a Service gives you a stable virtual IP and DNS name and load-balances across the matching Pods.",
+      "start": 175.295,
+      "end": 188.645
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The clever part, the why, is that the Service finds its Pods by label selector, not by IP, so as Pods get replaced during a deploy or a crash, the Service keeps working without anyone updating addresses.",
+      "start": 188.785,
+      "end": 202.16
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "For exposure levels, ClusterIP is the default and is reachable only inside the cluster, NodePort opens a fixed port on every node, and LoadBalancer provisions an external cloud load balancer.",
+      "start": 202.3,
+      "end": 215.925
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "And in front of Services you often put an Ingress, which is an HTTP router doing host and path rules plus TLS termination, so many apps share one external entry point instead of paying for a load balancer each.",
+      "start": 216.065,
+      "end": 230.94
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "A common trap is exposing everything as LoadBalancer when Ingress is the cleaner answer.",
+      "start": 231.08,
+      "end": 237.355
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Solid.",
+      "start": 237.895,
+      "end": 239.095
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Now here's the classic one, and people mix this up all the time, liveness versus readiness probes, what's the difference?",
+      "start": 239.235,
+      "end": 246.86
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The direct answer, a liveness probe asks whether the container is alive, and if it fails Kubernetes restarts the container, while a readiness probe asks whether it can serve traffic, and if it fails the Pod is only pulled out of the Service's load balancer, it is not killed.",
+      "start": 247.4,
+      "end": 264.45
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The reason both exist is that they catch different failure modes, liveness catches things like deadlocks where the process is stuck and only a restart helps, readiness catches warm-up time or waiting on a dependency, situations where the app will recover on its own and just shouldn't get traffic yet.",
+      "start": 264.59,
+      "end": 282.765
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "A concrete setup would be a readiness probe doing an HTTP get on a healthz endpoint with an initial delay of a few seconds.",
+      "start": 282.905,
+      "end": 291.355
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The trap you called out is real, if you mix them up, say you put a dependency check in liveness, a slow database sends your app into a restart loop instead of just sitting out of rotation.",
+      "start": 291.495,
+      "end": 303.27
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Exactly, that restart loop is a war story for a lot of teams.",
+      "start": 303.81,
+      "end": 308.31
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Let's talk configuration, how do you get config and credentials into your app, and what's the catch with Secrets?",
+      "start": 308.45,
+      "end": 315.45
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "You use a ConfigMap for non-sensitive configuration, things like URLs and feature flags, and a Secret for sensitive data like passwords, tokens, and TLS keys, and both get injected as environment variables or mounted as files.",
+      "start": 315.99,
+      "end": 332.815
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The why is separation of config from the image, the same image runs in dev, staging, and test namespaces with different settings, so you're testing the exact artifact you'll ship.",
+      "start": 332.955,
+      "end": 344.705
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "In a manifest that looks like an env var whose value comes from a configMapKeyRef or a secretKeyRef.",
+      "start": 344.845,
+      "end": 352.095
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The catch, and this is the interview trap worth calling out yourself, is that a Secret is only base64-encoded by default, not encrypted, so anyone who can read the object can decode it.",
+      "start": 352.235,
+      "end": 364.91
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "In production you'd add RBAC to control access, enable encryption at rest, or use an external secret store like Sealed Secrets or Vault rather than trusting base64 to protect anything.",
+      "start": 365.05,
+      "end": 378.475
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Good, you beat me to the base64 point.",
+      "start": 379.015,
+      "end": 382.115
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Now walk me through shipping a new version, how do you get zero downtime, and what keeps one Pod from eating the node?",
+      "start": 382.255,
+      "end": 389.48
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The default strategy is a rolling update, Kubernetes replaces Pods gradually, so with kubectl set image on the deployment it brings up new Pods, waits for them to pass readiness so they only receive traffic when they're ready, and retires the old ones, meaning there's never a moment with nothing serving.",
+      "start": 390.02,
+      "end": 409.47
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "You can watch it with kubectl rollout status, and if the new version is bad, kubectl rollout undo reverts to the previous version instantly, which is the safety net that makes frequent deploys sane.",
+      "start": 409.61,
+      "end": 422.76
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "On the resource side, requests and limits are the guardrails, requests tell the scheduler how much CPU and memory to reserve when placing the Pod, and limits cap actual usage.",
+      "start": 422.9,
+      "end": 434.8
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The trap to know is that a container going over its memory limit gets OOM-killed, so if you see containers dying with no application error in the logs, a too-tight memory limit is one of the first things I'd check.",
+      "start": 434.94,
+      "end": 448.815
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Nice, and that OOM point sets up my last question.",
+      "start": 449.355,
+      "end": 453.18
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "As an SDET, where do you actually touch Kubernetes day to day, and what's your first move when a test deployment misbehaves?",
+      "start": 453.32,
+      "end": 461.245
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The biggest win for me is ephemeral test environments, you spin up a namespace or even a throwaway cluster per branch or pull request, deploy the app, run the end to end suite, and tear it all down, and locally or in CI you can run a real cluster with kind or minikube.",
+      "start": 461.785,
+      "end": 479.76
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Helm helps here too, templated versioned charts mean the same deploy is parameterized across dev, test, and prod instead of drifting apart.",
+      "start": 479.9,
+      "end": 489.525
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "When something misbehaves, my triage toolkit is kubectl, get pods to see what's running, describe pod to read the events, logs to see app output, and exec or port-forward to poke at the service directly.",
+      "start": 489.665,
+      "end": 503.265
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The first move specifically, if a Pod is stuck in Pending or CrashLoopBackOff, is kubectl describe pod, because the events section almost always names the cause, no node fits, the image pull failed, or a probe is failing.",
+      "start": 503.405,
+      "end": 519.005
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Starting there saves you from guessing.",
+      "start": 519.145,
+      "end": 521.545
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Strong answers, that's the round.",
+      "start": 522.085,
+      "end": 524.26
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "What I liked here, and what listeners should take away, is the structure, a direct answer first, then the why, and then a concrete example or a trap called out.",
+      "start": 524.4,
+      "end": 534.425
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "You did that on every question, the base64 Secret catch, the readiness restart loop, the OOM kill with clean logs.",
+      "start": 534.565,
+      "end": 543.165
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "That pattern is what makes an answer sound senior.",
+      "start": 543.305,
+      "end": 546.505
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Practice these until they flow, and I'll see you in the next round.",
+      "start": 546.645,
+      "end": 550.795
+    }
+  ]
+}

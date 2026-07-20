@@ -1,0 +1,456 @@
+{
+  "id": "javascript",
+  "voice": null,
+  "voices": {
+    "INTERVIEWER": "am_fenrir",
+    "CANDIDATE": "af_heart"
+  },
+  "durationSec": 591.13,
+  "hash": "e500ecab69a6988429bf42c7623bebbd768205d6dd6bc45edecb5b1d7e1f23f1",
+  "cues": [
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Welcome in, glad you could make it today.",
+      "start": 0,
+      "end": 2.7
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Let's run a quick JavaScript round, the kind of rapid technical screen you'd get for an SDET role, since so much of modern test automation, Playwright especially, lives in this language.",
+      "start": 2.84,
+      "end": 15.09
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "I'll ask a question, you give me your best answer, and I may push a little deeper here and there.",
+      "start": 15.23,
+      "end": 20.93
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Nothing exotic, just the fundamentals done well.",
+      "start": 21.07,
+      "end": 24.37
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Ready when you are.",
+      "start": 24.51,
+      "end": 26.085
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Sounds great, let's do it.",
+      "start": 26.625,
+      "end": 28.725
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Let's start at the bottom of the stack.",
+      "start": 29.265,
+      "end": 31.54
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Walk me through how JavaScript handles types, and in particular the difference between primitives and objects when you assign them.",
+      "start": 31.68,
+      "end": 39.68
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The direct answer is that JavaScript is dynamically typed, so values have types, not variables, and there are seven primitives, things like string, number, boolean, null, undefined, bigint, and symbol, while everything else is an object.",
+      "start": 40.22,
+      "end": 55.695
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The key difference is how they copy.",
+      "start": 55.835,
+      "end": 58.435
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Primitives are copied by value, so if I assign a number from one variable to another and change the copy, the original stays untouched.",
+      "start": 58.575,
+      "end": 67.525
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Objects, including arrays and functions, are reference types, so assignment copies the reference and both names point at the same underlying object.",
+      "start": 67.665,
+      "end": 77.74
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "That matters in test code because if I copy an array of test data and mutate the copy, I've silently mutated the original too, which is a classic source of flaky tests.",
+      "start": 77.88,
+      "end": 89.155
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "And one trap worth naming, typeof null reports object, which is a historic bug in the language, and NaN is never equal to itself, so you check it with Number.isNaN.",
+      "start": 89.295,
+      "end": 100.57
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Good, and you got the null quirk in there before I could ask.",
+      "start": 101.11,
+      "end": 104.71
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Related question then, what's the actual difference between null and undefined, and while we're on variables, why do people say to avoid var?",
+      "start": 104.85,
+      "end": 113.8
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Undefined means a variable was declared but never assigned, it's the engine's default, while null is a value you deliberately set to say there is intentionally no value here.",
+      "start": 114.34,
+      "end": 125.965
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "So undefined usually signals something was forgotten, and null signals a conscious decision.",
+      "start": 126.105,
+      "end": 132.18
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "On var, the answer is scoping and hoisting.",
+      "start": 132.32,
+      "end": 135.42
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Var is function scoped and gets hoisted with an initial value of undefined, so you can read it before its declaration and get undefined instead of an error, which hides bugs.",
+      "start": 135.56,
+      "end": 146.935
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Let and const are block scoped, and although they're also hoisted, they sit in the temporal dead zone until the declaration runs, so touching them early throws immediately, which is what you want.",
+      "start": 147.075,
+      "end": 159.1
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "My default is const everywhere, let only when I genuinely reassign, and var never.",
+      "start": 159.24,
+      "end": 165.065
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "One trap people miss is that const stops reassignment, not mutation, so a const config object can still have its properties changed.",
+      "start": 165.205,
+      "end": 174.405
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Nicely laid out.",
+      "start": 174.945,
+      "end": 176.62
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Now the one that shows up in almost every JavaScript screen, what is a closure, and can you tie it to that famous loop bug with setTimeout?",
+      "start": 176.76,
+      "end": 186.06
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "A closure is a function that remembers the variables from the scope where it was created, even after that scope has returned.",
+      "start": 186.6,
+      "end": 194.525
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The why is that this is how JavaScript gives you private state without classes, the inner function keeps a live link to its outer variables.",
+      "start": 194.665,
+      "end": 203.515
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The classic example is a counter function that declares a local variable and returns an arrow function that increments it, and every call to that returned function keeps counting because the closure holds onto that variable after the outer function finished.",
+      "start": 203.655,
+      "end": 219.655
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The famous loop bug follows directly from this.",
+      "start": 219.795,
+      "end": 223.17
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "If you write a for loop with var and schedule a setTimeout inside it, every callback closes over the same single binding, because var is function scoped, so a loop to three prints three, three, three.",
+      "start": 223.31,
+      "end": 235.86
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Switch var to let and each iteration gets a fresh binding, so each callback closes over its own value and you get zero, one, two.",
+      "start": 236,
+      "end": 244.8
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "That's the fix and the explanation in one.",
+      "start": 244.94,
+      "end": 247.915
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "That's exactly the pairing I was fishing for.",
+      "start": 248.455,
+      "end": 251.255
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Let's talk about this, the keyword.",
+      "start": 251.395,
+      "end": 253.57
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "How is it determined, and why do arrow functions matter so much for callbacks?",
+      "start": 253.71,
+      "end": 258.91
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The rule is that this is decided by how a function is called, not where it's defined.",
+      "start": 259.45,
+      "end": 264.875
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Call it as a method, like obj dot fn, and this is that object.",
+      "start": 265.015,
+      "end": 269.79
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Call it as a plain function and this is undefined in strict mode, or the global object otherwise.",
+      "start": 269.93,
+      "end": 276.63
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The big exception is arrow functions, which have no this of their own and simply inherit it from the enclosing scope, which is exactly why they're ideal for callbacks.",
+      "start": 276.77,
+      "end": 287.145
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The concrete scenario is an object method that schedules a setTimeout.",
+      "start": 287.285,
+      "end": 292.21
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "If the callback is an arrow function, this still refers to the object, so reading this dot name works.",
+      "start": 292.35,
+      "end": 298.9
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "If you'd used a regular function there, or if you pull the method off the object into a loose variable and call it plainly, the binding is lost.",
+      "start": 299.04,
+      "end": 307.84
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "And when you do need explicit control, call and apply invoke with a chosen this, and bind returns a new function permanently bound to it.",
+      "start": 307.98,
+      "end": 317.055
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Solid.",
+      "start": 317.595,
+      "end": 318.795
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Here's the one I use to separate people who've memorized answers from people who understand the runtime.",
+      "start": 318.935,
+      "end": 325.76
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "JavaScript is single threaded, so explain the event loop, and tell me what this prints, a console log of one, a setTimeout with zero delay logging two, a resolved promise then logging three, and a final console log of four.",
+      "start": 325.9,
+      "end": 340.9
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "It prints one, four, three, two, and the event loop explains why.",
+      "start": 341.44,
+      "end": 345.915
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Synchronous code runs first on the call stack, so one and four come out immediately.",
+      "start": 346.055,
+      "end": 351.38
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The async callbacks wait in queues and only run once the stack is empty, but there are two queues with different priorities.",
+      "start": 351.52,
+      "end": 359.295
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Promise callbacks, including the continuations after await, go into the microtask queue, and that queue gets drained completely after each task, before anything else.",
+      "start": 359.435,
+      "end": 370.085
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Things like setTimeout, I O, and events go into the macrotask queue, and the loop takes only one of those per turn.",
+      "start": 370.225,
+      "end": 377.775
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "So the resolved promise logging three is a microtask and beats the timer logging two, even though the timer had a zero millisecond delay, because zero delay only means as soon as possible, after all pending microtasks.",
+      "start": 377.915,
+      "end": 392.94
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "For an SDET this is why a chain of promise callbacks can starve a timer, and why understanding ordering matters when you're debugging async test code.",
+      "start": 393.08,
+      "end": 402.355
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Right, microtasks beat the timer every time.",
+      "start": 402.895,
+      "end": 406.095
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Let's build on that with promises themselves.",
+      "start": 406.235,
+      "end": 409.135
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "How do async and await relate to promises, how do you handle failures, and when would you reach for Promise all versus allSettled?",
+      "start": 409.275,
+      "end": 417.65
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "A promise represents a future value that moves from pending to either fulfilled or rejected, and async await is just syntax over promises that lets the code read like synchronous code.",
+      "start": 418.19,
+      "end": 430.74
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Await pauses the async function until the promise settles, but crucially it does not block the thread, the event loop keeps running other work.",
+      "start": 430.88,
+      "end": 439.305
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "For failures, you wrap the await in a try catch, which is the equivalent of a dot catch, so in a data loader I'd await the fetch, throw if the response is not ok, and handle or rethrow in the catch block.",
+      "start": 439.445,
+      "end": 452.77
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "On the combinators, Promise all runs work concurrently and fails fast, rejecting the moment any one promise rejects, while allSettled waits for every promise and reports each outcome, which is better when I want all the results, pass or fail, like hitting several endpoints in a setup step.",
+      "start": 452.91,
+      "end": 471.51
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The trap to call out is awaiting independent calls one by one in a loop, that serializes them, fire them together with Promise all instead.",
+      "start": 471.65,
+      "end": 480.75
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Good distinction on fail fast versus report everything.",
+      "start": 481.29,
+      "end": 485.24
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Last one, a quick modern syntax check.",
+      "start": 485.38,
+      "end": 488.055
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "What's the difference between the nullish coalescing operator and the logical or operator for defaults, and while you're at it, what's the catch with copying objects using spread?",
+      "start": 488.195,
+      "end": 499.47
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The logical or operator falls back on any falsy value, so zero, an empty string, and false all trigger the default, while the nullish coalescing operator only falls back on null and undefined.",
+      "start": 500.01,
+      "end": 513.385
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The why is that falsy and absent are not the same thing.",
+      "start": 513.525,
+      "end": 517.2
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The concrete trap is something like a retries setting of zero, with the or operator, zero or five gives you five, silently overriding a value the user deliberately set, while zero with nullish coalescing stays zero.",
+      "start": 517.34,
+      "end": 531.74
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "So I use nullish coalescing whenever zero, empty string, or false are legitimate values, and I pair it with optional chaining for safe access into nested objects that might not exist.",
+      "start": 531.88,
+      "end": 544.78
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "On spread, the catch is that it's a shallow copy, it copies one level only, so nested objects are still shared between the copy and the original, and mutating a nested field changes both.",
+      "start": 544.92,
+      "end": 557.32
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "When I truly need an independent copy, I reach for structuredClone or a recursive clone.",
+      "start": 557.46,
+      "end": 563.585
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Strong answers, that's the round.",
+      "start": 564.125,
+      "end": 566.3
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "What I liked here, and what listeners should take away, is the structure, a direct answer first, then the why, and then a concrete example or a trap called out, whether that was the var loop bug, the lost this binding, or the zero that gets clobbered by a logical or default.",
+      "start": 566.44,
+      "end": 582.965
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "That pattern is what makes an answer sound senior.",
+      "start": 583.105,
+      "end": 586.305
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Practice these until they flow, and I'll see you in the next round.",
+      "start": 586.445,
+      "end": 590.595
+    }
+  ]
+}

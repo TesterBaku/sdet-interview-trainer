@@ -1,0 +1,426 @@
+{
+  "id": "rest-assured",
+  "voice": null,
+  "voices": {
+    "INTERVIEWER": "am_fenrir",
+    "CANDIDATE": "af_heart"
+  },
+  "durationSec": 609.49,
+  "hash": "15d7099a46116253d2abf3ad18e5c31fdddfc1ea77670b6ce3bebd868e1ebc2f",
+  "cues": [
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Welcome in, good to have you.",
+      "start": 0,
+      "end": 2.1
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Let's run a quick REST Assured round, the kind of rapid technical screen you'd get for an SDET role that leans on Java API automation.",
+      "start": 2.24,
+      "end": 11.89
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "I'll ask a question, you give me your best answer, and I may push a little deeper here and there.",
+      "start": 12.03,
+      "end": 17.73
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Nothing exotic, just the fundamentals done well.",
+      "start": 17.87,
+      "end": 21.17
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Ready when you are.",
+      "start": 21.31,
+      "end": 22.885
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Sounds great, let's get into it.",
+      "start": 23.425,
+      "end": 25.875
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Easy warm up first.",
+      "start": 26.415,
+      "end": 28.215
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "What is REST Assured, and why would you pick it over just using a raw HTTP client, and while you're at it, walk me through the given when then structure.",
+      "start": 28.355,
+      "end": 38.155
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "REST Assured is an open source Java DSL for testing REST APIs, and the reason I reach for it over a raw client like HttpClient is that it strips out all the boilerplate and gives you a fluent, readable given when then syntax with built in JSON and XML parsing and Hamcrest matchers for assertions.",
+      "start": 38.695,
+      "end": 60.195
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The structure maps cleanly onto arrange, act, assert.",
+      "start": 60.335,
+      "end": 64.235
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "In given you set up the request, so headers, params, body, auth, the base URI.",
+      "start": 64.375,
+      "end": 69.975
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "In when you fire the actual HTTP action, a get or a post.",
+      "start": 70.115,
+      "end": 75.04
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "In then you validate the status code, headers, and body.",
+      "start": 75.18,
+      "end": 79.08
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "So a typical test reads almost like plain English, given a content type and a query param, when I get the users endpoint, then the status is two hundred and the data array has six items.",
+      "start": 79.22,
+      "end": 91.495
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "One detail interviewers sometimes probe, given is actually optional sugar, for a bare get you can just write when dot get and then chain your assertions, the BDD blocks are readability, not a requirement.",
+      "start": 91.635,
+      "end": 105.26
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Nice, I like that you flagged given as optional.",
+      "start": 105.8,
+      "end": 108.925
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Now, if I open your framework and every test repeats the base URI, the auth header, and a status two hundred check, what would you tell me to fix?",
+      "start": 109.065,
+      "end": 118.49
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "I'd pull all of that into a RequestSpecification and a ResponseSpecification.",
+      "start": 119.03,
+      "end": 124.405
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The request spec, built with RequestSpecBuilder, holds the base URI, the content type, and the common Authorization header once, and every test just calls spec on it.",
+      "start": 124.545,
+      "end": 135.57
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The response spec, built with ResponseSpecBuilder, bundles the repeated expectations, status two hundred, JSON content type, maybe a response time under two seconds, so tests only assert what's actually specific to them.",
+      "start": 135.71,
+      "end": 150.735
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The why is DRY, when the base URL or the auth scheme changes you edit one builder instead of two hundred tests.",
+      "start": 150.875,
+      "end": 159.1
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "There's also a global route, RestAssured dot baseURI and the static requestSpecification, but that's global mutable state, and the trap is parallel runs, one thread can clobber another's config and you get flaky failures that look random.",
+      "start": 159.24,
+      "end": 175.565
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "So my rule is local specs by default, and if static config is used, reset it carefully in an after hook with RestAssured dot reset.",
+      "start": 175.705,
+      "end": 184.655
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Good, and you preempted my parallel question a little, we'll come back to that.",
+      "start": 185.195,
+      "end": 190.12
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Next, how do you actually validate a response body, and show me you can handle arrays, not just a single field.",
+      "start": 190.26,
+      "end": 197.61
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The core mechanism is the body method, which takes a JsonPath expression and a Hamcrest matcher, so REST Assured evaluates the path against the parsed body and asserts it against the matcher, things like equalTo, greaterThan, notNullValue, containsString.",
+      "start": 198.15,
+      "end": 215.375
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "For a single field that's body data dot email equalTo the expected address.",
+      "start": 215.515,
+      "end": 220.99
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "For arrays it gets more interesting because the path language is Groovy's GPath, so on a data array I can assert data dot size equals six, data dot id hasItems seven and eight, or that every first name matches everyItem notNullValue.",
+      "start": 221.13,
+      "end": 237.53
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "And GPath lets you filter inline, so I can say data findAll where the id is greater than eight, take the size, and assert it equals four, or use find to grab the one object whose email matches a value and assert on its first name.",
+      "start": 237.67,
+      "end": 252.92
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "A concrete example from real work, validating one specific user inside a big array by their email rather than a brittle index, because array order changing is a classic false failure.",
+      "start": 253.06,
+      "end": 265.71
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Solid.",
+      "start": 266.25,
+      "end": 267.45
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "But those are all value checks.",
+      "start": 267.59,
+      "end": 269.79
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "What if the values are dynamic and change every run, what's your safety net for the response shape itself?",
+      "start": 269.93,
+      "end": 276.68
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "That's exactly where JSON schema validation comes in.",
+      "start": 277.22,
+      "end": 281.07
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "I add the json schema validator module as a dependency, keep a schema file on the classpath, say schemas slash user schema dot json, and then in the then block assert the body matchesJsonSchemaInClasspath against that file.",
+      "start": 281.21,
+      "end": 297.41
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The why is that schema validation guards the contract rather than the data, it checks field names, types, and required fields, which is far more robust than pinning individual values that legitimately change between environments or runs.",
+      "start": 297.55,
+      "end": 312.725
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "A concrete case, an endpoint returns generated ids and timestamps, so asserting exact values is pointless, but if the backend team renames a field or a required property quietly goes missing, the schema check catches that breaking change immediately.",
+      "start": 312.865,
+      "end": 330.265
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "In practice I pair the two, schema validation for the overall contract, plus a handful of targeted Hamcrest assertions on business critical values, so I'm covered on both shape and content.",
+      "start": 330.405,
+      "end": 343.205
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Good separation of contract versus content.",
+      "start": 343.745,
+      "end": 346.97
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Let's talk request bodies.",
+      "start": 347.11,
+      "end": 349.135
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "What's serialization and deserialization in REST Assured, and why do you prefer POJOs over raw JSON strings?",
+      "start": 349.275,
+      "end": 357.1
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Serialization is converting a Java object, a POJO, into a JSON request body, and deserialization is the reverse, turning a response body back into a Java object.",
+      "start": 357.64,
+      "end": 369.965
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "REST Assured doesn't do the conversion itself, it delegates to Jackson or Gson if either is on the classpath, and it auto detects which one is there.",
+      "start": 370.105,
+      "end": 380.355
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "So in practice I build a User object, set name and job, pass it straight into body, and REST Assured serializes it, then on the response side I call extract dot as User dot class and get a typed object back, and I can assert with plain Java that the created name matches what I sent.",
+      "start": 380.495,
+      "end": 399.52
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "One gotcha, Jackson needs getters and setters on the POJO or the mapping silently misbehaves.",
+      "start": 399.66,
+      "end": 406.26
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The why over raw strings is type safety and refactor friendliness, hand written JSON strings with escaped quotes are brittle and unreusable, while POJOs are shared across tests and the compiler catches mistakes.",
+      "start": 406.4,
+      "end": 420.325
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "That's the mature framework answer.",
+      "start": 420.465,
+      "end": 422.915
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Agreed on the escaped string pain.",
+      "start": 423.455,
+      "end": 425.755
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Now authentication.",
+      "start": 425.895,
+      "end": 427.72
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Explain preemptive versus challenged basic auth, and then walk me through how you'd test a token based flow end to end.",
+      "start": 427.86,
+      "end": 435.985
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "With challenged basic auth, which is what plain auth dot basic gives you, the client first sends the request without credentials, waits for a four oh one with a WWW Authenticate challenge, and only then resends with the header, so two round trips.",
+      "start": 436.525,
+      "end": 453.225
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Preemptive, auth dot preemptive dot basic, sends the Authorization header on the very first request, one round trip, and most modern APIs expect that.",
+      "start": 453.365,
+      "end": 464.115
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The trap is that if the API never returns a proper four oh one challenge, plain basic silently fails, which is a real bug I've seen people chase for hours, preemptive fixes it.",
+      "start": 464.255,
+      "end": 476.53
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "For a token flow the realistic pattern is two steps, first post credentials to the login endpoint, assert two hundred, and extract dot path the token from the response, then use it on protected calls either with auth dot oauth2 or a Bearer header.",
+      "start": 476.67,
+      "end": 493.595
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "In a framework I'd wrap that in a reusable getAuthToken method, cache the token, and inject it through a request specification.",
+      "start": 493.735,
+      "end": 502.41
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "That silent failure point is exactly the kind of thing that separates candidates.",
+      "start": 502.95,
+      "end": 508.225
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Last one, and it's the senior question.",
+      "start": 508.365,
+      "end": 511.015
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "You need to run this suite in parallel.",
+      "start": 511.155,
+      "end": 513.68
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "How, and what breaks?",
+      "start": 513.82,
+      "end": 515.445
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The mechanics are simple, in testng dot xml I set parallel to methods, or classes or tests depending on granularity, give it a thread count, say four, and Surefire runs it.",
+      "start": 515.985,
+      "end": 528.235
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "What breaks is shared mutable state.",
+      "start": 528.375,
+      "end": 530.95
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "REST Assured's static config, so RestAssured dot baseURI and the global request and response specifications, is global, which means one thread can overwrite it while another thread is mid request, and the same goes for any static token variable in a base class.",
+      "start": 531.09,
+      "end": 549.19
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The symptom is flaky, non reproducible failures that pass on rerun, which erodes trust in the suite.",
+      "start": 549.33,
+      "end": 556.38
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The fix is to prefer local RequestSpecifications built per test or per class instead of static config, and where something genuinely must be shared, wrap it in a ThreadLocal so each thread gets its own copy.",
+      "start": 556.52,
+      "end": 570.145
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "A concrete example, a static auth token that two threads refresh simultaneously, half the requests go out with a stale or clobbered token and you get random four oh ones, ThreadLocal makes that disappear.",
+      "start": 570.285,
+      "end": 583.91
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Strong answers, that's the round.",
+      "start": 584.45,
+      "end": 586.625
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "What I liked here, and what listeners should take away, is the structure, a direct answer first, then the why, and then a concrete example or a trap called out, the optional given, the silent basic auth failure, the clobbered static token.",
+      "start": 586.765,
+      "end": 601.315
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "That pattern is what makes an answer sound senior.",
+      "start": 601.455,
+      "end": 604.655
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Practice these until they flow, and I'll see you in the next round.",
+      "start": 604.795,
+      "end": 608.945
+    }
+  ]
+}
