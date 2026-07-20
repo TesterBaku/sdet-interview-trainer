@@ -45,8 +45,10 @@ const ROOT = join(__dirname, "..", "..");
 const LEXICON_PATH = join(ROOT, "data", "audio", "lexicon.json");
 
 // Each kind is a self-contained format: where its scripts live, where its renders go, and
-// the default speaker→Kokoro-voice map. Interview flips the podcast's genders so the two
-// formats sound distinct: Interviewer = male (am_fenrir), Candidate = warm female (af_heart).
+// the default speaker→Kokoro-voice map. Interview reuses the podcast's two voices but SWAPS
+// their roles — the male (am_fenrir) asks, the warm female (af_heart) answers — inverting the
+// podcast's female-mentor / male-learner dynamic. Same timbres; the formats are set apart by
+// structure (Q&A vs conversation) and role, not by a distinct third/fourth voice.
 const KINDS = {
   podcast: {
     srcDir: join(ROOT, "data", "audio", "podcast"),
@@ -80,7 +82,14 @@ const force = args.includes("--force");
 // (a negative slice would otherwise silently drop turns from the END).
 const limit = Number(getArg("limit", "0")) || 0;
 
-const kind = getArg("kind", "podcast");
+// Kind can be given as --kind=<k> or, matching captions.mjs / publish.mjs, a bare
+// --interview / --podcast flag. The bare flag wins so `--interview` alone is unambiguous
+// and can't be silently ignored (which would render podcast into the wrong namespace).
+const kind = args.includes("--interview")
+  ? "interview"
+  : args.includes("--podcast")
+    ? "podcast"
+    : getArg("kind", "podcast");
 const cfg = KINDS[kind];
 if (!cfg) {
   console.error(`Unknown --kind=${kind}. Known: ${Object.keys(KINDS).join(", ")}`);
@@ -105,7 +114,10 @@ if (!existsSync(scriptPath)) {
   process.exit(1);
 }
 
-let turns = parseDialogue(readFileSync(scriptPath, "utf8"));
+// Scope turn boundaries to this kind's known speakers, so a continuation line that opens
+// with an acronym+colon (e.g. a candidate answer starting "TDD: ...") is read as prose, not
+// mistaken for a phantom speaker that would trip the unknown-speaker guard below.
+let turns = parseDialogue(readFileSync(scriptPath, "utf8"), Object.keys(VOICES));
 if (!turns.length) {
   console.error(`No speaker turns parsed from ${scriptPath}.`);
   process.exit(1);

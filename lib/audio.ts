@@ -41,22 +41,32 @@ function loadManifest(base: string): Record<string, ManifestEntry> {
 const manifest = loadManifest("manifest");
 const interviewManifest = loadManifest("manifest.interview");
 
+// Shared readers over either manifest — the podcast and interview lanes have identical
+// shape and differ only by which manifest they read, so both go through these.
+function audioFromManifest(m: Record<string, ManifestEntry>, id: string): CheatSheetAudio | null {
+  const entry = m[id];
+  if (!entry) return null;
+  return { id, mp3Url: entry.mp3Url, vttUrl: entry.vttUrl, durationSec: entry.durationSec };
+}
+
+// Every entry in a manifest, sorted by id (stable order for the Commute playlist/lane).
+function allAudioFromManifest(m: Record<string, ManifestEntry>): CheatSheetAudio[] {
+  return Object.keys(m)
+    .sort()
+    .map((id) => audioFromManifest(m, id))
+    .filter((a): a is CheatSheetAudio => a !== null);
+}
+
 export function hasCheatSheetAudio(id: string): boolean {
   return Boolean(manifest[id]);
 }
 
 export function getCheatSheetAudio(id: string): CheatSheetAudio | null {
-  const entry = manifest[id];
-  if (!entry) return null;
-  return { id, mp3Url: entry.mp3Url, vttUrl: entry.vttUrl, durationSec: entry.durationSec };
+  return audioFromManifest(manifest, id);
 }
 
-// Every episode that has audio, sorted by id (stable order for the Commute playlist).
 export function getAllCheatSheetAudio(): CheatSheetAudio[] {
-  return Object.keys(manifest)
-    .sort()
-    .map((id) => getCheatSheetAudio(id))
-    .filter((a): a is CheatSheetAudio => a !== null);
+  return allAudioFromManifest(manifest);
 }
 
 export function getCheatSheetTranscriptCues(id: string): TranscriptCue[] {
@@ -70,22 +80,13 @@ export function getCheatSheetTranscriptCues(id: string): TranscriptCue[] {
 
 export type InterviewAudio = CheatSheetAudio;
 
-export function hasInterviewAudio(id: string): boolean {
-  return Boolean(interviewManifest[id]);
-}
-
 export function getInterviewAudio(id: string): InterviewAudio | null {
-  const entry = interviewManifest[id];
-  if (!entry) return null;
-  return { id, mp3Url: entry.mp3Url, vttUrl: entry.vttUrl, durationSec: entry.durationSec };
+  return audioFromManifest(interviewManifest, id);
 }
 
 // Every topic that has an interview round, sorted by id (stable order for the Commute lane).
 export function getAllInterviewAudio(): InterviewAudio[] {
-  return Object.keys(interviewManifest)
-    .sort()
-    .map((id) => getInterviewAudio(id))
-    .filter((a): a is InterviewAudio => a !== null);
+  return allAudioFromManifest(interviewManifest);
 }
 
 export function getInterviewTranscriptCues(id: string): TranscriptCue[] {

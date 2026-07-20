@@ -133,8 +133,10 @@ voice pack from Hugging Face; run online once, then `HF_HUB_OFFLINE=1 TRANSFORME
 
 A second two-voice format: an **interviewer asks, a candidate models a strong answer**. Same
 synth, captions, and publish scripts as the podcast, selected with `--kind=interview` (and the
-`--interview` flag on captions/publish). Voices are flipped from the podcast so the formats
-sound distinct: **Interviewer = `am_fenrir` (male), Candidate = `af_heart` (female)**.
+`--interview` flag on captions/publish). It reuses the podcast's two voices but swaps their
+roles — **Interviewer = `am_fenrir` (male), Candidate = `af_heart` (female)** — so the Q&A
+framing is inverted from the podcast's female-mentor / male-learner pairing (same timbres;
+the formats are set apart by structure + role, not a distinct extra voice).
 
 - **Scripts** live in `data/audio/interview/<id>.txt` — committed, human-editable, one turn
   per block (`INTERVIEWER:` / `CANDIDATE:`), keyed by cheat-sheet id. Each is a curated round

@@ -9,7 +9,7 @@
 //
 // Run:  node scripts/audio/captions.mjs [--only=<id>]
 
-import { readFileSync, writeFileSync, readdirSync, mkdirSync } from "node:fs";
+import { readFileSync, writeFileSync, readdirSync, mkdirSync, existsSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -50,6 +50,13 @@ function toVtt(cues) {
 }
 
 mkdirSync(TRANSCRIPT_DIR, { recursive: true });
+
+// The build dir for a namespace only exists after its first synth run; guard so captions
+// before any render prints the friendly hint instead of an unhandled ENOENT from readdirSync.
+if (!existsSync(BUILD_DIR)) {
+  console.log("No timing files found. Run synthesize.mjs first.");
+  process.exit(0);
+}
 
 const timings = readdirSync(BUILD_DIR)
   .filter((f) => f.endsWith(".timing.json"))

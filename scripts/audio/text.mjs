@@ -89,14 +89,21 @@ export function bodyToSpeech(html) {
 // may span them), and any text before the first label (stray notes/headers) is dropped.
 // This is line-driven rather than blank-line-block driven, so adjacent-label lines are
 // not merged into one turn and multi-paragraph turns are not silently truncated.
-export function parseDialogue(text) {
+//
+// Pass `speakers` (an iterable of valid labels) to scope what counts as a turn boundary:
+// only those labels start a new turn, so a continuation line that happens to open with an
+// acronym+colon (e.g. a candidate answer beginning "TDD: ...") is folded into the current
+// turn as prose instead of being mistaken for a phantom speaker. Omit it for the permissive
+// behavior (any uppercase label starts a turn) used as an authoring lint by the guard tests.
+export function parseDialogue(text, speakers = null) {
+  const known = speakers ? new Set(speakers) : null;
   const turns = [];
   let current = null;
   for (const rawLine of text.split(/\r?\n/)) {
     const line = rawLine.trim();
     if (!line) continue;
     const m = line.match(/^([A-Z][A-Z0-9]*):\s*(.*)$/);
-    if (m) {
+    if (m && (!known || known.has(m[1]))) {
       current = { speaker: m[1], text: m[2].trim() };
       turns.push(current);
     } else if (current) {

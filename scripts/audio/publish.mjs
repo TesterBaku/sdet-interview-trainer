@@ -74,6 +74,13 @@ if (!local) {
   ({ put } = await import("@vercel/blob"));
 }
 
+// The build dir for a namespace only exists after its first synth run; guard so a publish
+// before any render prints the friendly hint instead of an unhandled ENOENT from readdirSync.
+if (!existsSync(BUILD_DIR)) {
+  console.log("No built audio found. Run synthesize.mjs (+ captions.mjs) first.");
+  process.exit(0);
+}
+
 const ids = readdirSync(BUILD_DIR)
   .filter((f) => f.endsWith(".mp3"))
   .map((f) => f.replace(/\.mp3$/, ""))
@@ -147,4 +154,4 @@ for (const id of ids) {
 }
 
 saveManifest(manifest);
-console.log(`\nDone. published=${published} skipped=${skipped} → ${local ? "manifest.local.json" : "manifest.json"}`);
+console.log(`\nDone. published=${published} skipped=${skipped} → ${local ? `${manifestBase}.local.json` : `${manifestBase}.json`}`);

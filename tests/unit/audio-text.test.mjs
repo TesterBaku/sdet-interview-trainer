@@ -125,6 +125,24 @@ test("parseDialogue ignores text before the first speaker label", () => {
   assert.deepEqual(parseDialogue(script), [{ speaker: "MAYA", text: "Only this is spoken." }]);
 });
 
+test("parseDialogue (permissive, no speakers) treats any acronym+colon line as a new speaker", () => {
+  // Default behavior — an unscoped label at line-start starts a phantom turn.
+  const script = "CANDIDATE: I favor TDD.\nTDD: red, green, refactor.";
+  assert.deepEqual(parseDialogue(script), [
+    { speaker: "CANDIDATE", text: "I favor TDD." },
+    { speaker: "TDD", text: "red, green, refactor." },
+  ]);
+});
+
+test("parseDialogue scoped to known speakers folds an acronym+colon continuation into the turn", () => {
+  // With a speaker set, a candidate answer that opens a line with "TDD:" is read as prose,
+  // not mistaken for a phantom speaker (which would trip the synth's unknown-speaker guard).
+  const script = "CANDIDATE: I favor TDD.\nTDD: red, green, refactor.";
+  assert.deepEqual(parseDialogue(script, ["INTERVIEWER", "CANDIDATE"]), [
+    { speaker: "CANDIDATE", text: "I favor TDD. TDD: red, green, refactor." },
+  ]);
+});
+
 test("splitSentences breaks on sentence enders and drops empties", () => {
   assert.deepEqual(splitSentences("First. Second! Third?"), ["First.", "Second!", "Third?"]);
 });
