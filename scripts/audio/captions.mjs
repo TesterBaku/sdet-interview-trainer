@@ -16,11 +16,17 @@ import { fileURLToPath } from "node:url";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, "..", "..");
 const args = process.argv.slice(2);
-// --podcast reads the two-voice episodes from build/audio/podcast/ (the podcast synth's
-// separate namespace); default reads the single-voice build/audio/.
-const podcast = args.includes("--podcast");
-const BUILD_DIR = join(ROOT, "build", "audio", ...(podcast ? ["podcast"] : []));
-const TRANSCRIPT_DIR = join(ROOT, "data", "audio", "transcripts");
+// Kind selects a build namespace + transcript namespace so the formats never overwrite
+// each other. Interview transcripts are subdir'd (transcripts/interview/) because they
+// share cheat-sheet ids with the podcast — same id, different content.
+//   --podcast    build/audio/podcast/   → transcripts/
+//   --interview  build/audio/interview/ → transcripts/interview/
+//   (default)    build/audio/           → transcripts/
+const kind = args.includes("--interview") ? "interview" : args.includes("--podcast") ? "podcast" : "single";
+const BUILD_SUBDIR = { single: [], podcast: ["podcast"], interview: ["interview"] }[kind];
+const TRANSCRIPT_SUBDIR = { single: [], podcast: [], interview: ["interview"] }[kind];
+const BUILD_DIR = join(ROOT, "build", "audio", ...BUILD_SUBDIR);
+const TRANSCRIPT_DIR = join(ROOT, "data", "audio", "transcripts", ...TRANSCRIPT_SUBDIR);
 
 const only = (args.find((a) => a.startsWith("--only=")) || "").slice("--only=".length) || null;
 

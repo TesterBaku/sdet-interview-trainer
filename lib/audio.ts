@@ -18,12 +18,14 @@ export type TranscriptCue = { speaker?: string | null; text: string; start: numb
 
 type ManifestEntry = { mp3Url: string; vttUrl: string; durationSec: number; voice?: string | null; hash: string };
 
-// Dev staging (manifest.local.json, gitignored) wins when present and non-empty; otherwise
-// the committed production manifest.json (populated by the Vercel Blob publish). Read via fs
+// Dev staging (<base>.local.json, gitignored) wins when present and non-empty; otherwise
+// the committed production <base>.json (populated by the Vercel Blob publish). Read via fs
 // so a missing local manifest in CI/production just falls back — no build-time import of a
 // gitignored file, and no audio surfaces until the production manifest is published.
-function loadManifest(): Record<string, ManifestEntry> {
-  for (const name of ["manifest.local.json", "manifest.json"]) {
+// The podcast and the interview rounds use SEPARATE manifest files because they share
+// cheat-sheet ids (same id, different audio).
+function loadManifest(base: string): Record<string, ManifestEntry> {
+  for (const name of [`${base}.local.json`, `${base}.json`]) {
     const path = join(AUDIO_DIR, name);
     if (!existsSync(path)) continue;
     try {
@@ -36,7 +38,8 @@ function loadManifest(): Record<string, ManifestEntry> {
   return {};
 }
 
-const manifest = loadManifest();
+const manifest = loadManifest("manifest");
+const interviewManifest = loadManifest("manifest.interview");
 
 export function hasCheatSheetAudio(id: string): boolean {
   return Boolean(manifest[id]);
@@ -57,7 +60,39 @@ export function getAllCheatSheetAudio(): CheatSheetAudio[] {
 }
 
 export function getCheatSheetTranscriptCues(id: string): TranscriptCue[] {
-  const path = join(AUDIO_DIR, "transcripts", `${id}.json`);
+  return readTranscriptCues(join(AUDIO_DIR, "transcripts", `${id}.json`));
+}
+
+// --- Mock-interview rounds (two-voice INTERVIEWER/CANDIDATE audio) -----------------------
+// Same shape as cheat-sheet audio but keyed off the separate interview manifest + the
+// transcripts/interview/ namespace, so a topic can carry both a podcast episode and an
+// interview round without the two colliding.
+
+export type InterviewAudio = CheatSheetAudio;
+
+export function hasInterviewAudio(id: string): boolean {
+  return Boolean(interviewManifest[id]);
+}
+
+export function getInterviewAudio(id: string): InterviewAudio | null {
+  const entry = interviewManifest[id];
+  if (!entry) return null;
+  return { id, mp3Url: entry.mp3Url, vttUrl: entry.vttUrl, durationSec: entry.durationSec };
+}
+
+// Every topic that has an interview round, sorted by id (stable order for the Commute lane).
+export function getAllInterviewAudio(): InterviewAudio[] {
+  return Object.keys(interviewManifest)
+    .sort()
+    .map((id) => getInterviewAudio(id))
+    .filter((a): a is InterviewAudio => a !== null);
+}
+
+export function getInterviewTranscriptCues(id: string): TranscriptCue[] {
+  return readTranscriptCues(join(AUDIO_DIR, "transcripts", "interview", `${id}.json`));
+}
+
+function readTranscriptCues(path: string): TranscriptCue[] {
   if (!existsSync(path)) return [];
   try {
     const parsed = JSON.parse(readFileSync(path, "utf8")) as { cues?: TranscriptCue[] };

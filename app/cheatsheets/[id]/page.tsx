@@ -2,7 +2,12 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { cheatSheets, cheatSheetSelfTest, getCheatSheet } from "@/lib/cheatsheets";
-import { getCheatSheetAudio, getCheatSheetTranscriptCues } from "@/lib/audio";
+import {
+  getCheatSheetAudio,
+  getCheatSheetTranscriptCues,
+  getInterviewAudio,
+  getInterviewTranscriptCues,
+} from "@/lib/audio";
 import { AudioPlayer } from "@/components/AudioPlayer";
 
 export function generateStaticParams() {
@@ -26,6 +31,8 @@ export default async function CheatSheetDetailPage({ params }: { params: Promise
   const selfTest = cheatSheetSelfTest(sheet);
   const audio = getCheatSheetAudio(id);
   const audioCues = audio ? getCheatSheetTranscriptCues(id) : [];
+  const interviewAudio = getInterviewAudio(id);
+  const interviewCues = interviewAudio ? getInterviewTranscriptCues(id) : [];
 
   return (
     <div className="space-y-6">
@@ -39,17 +46,33 @@ export default async function CheatSheetDetailPage({ params }: { params: Promise
         </p>
         <h1 className="mt-2 font-display text-3xl font-black text-blueprint sm:text-5xl">{sheet.title}</h1>
         <p className="mt-3 max-w-3xl text-lg leading-8 text-ink/75">{sheet.summary}</p>
-        {audio ? (
-          <div className="mt-5 max-w-3xl">
-            <AudioPlayer
-              id={sheet.id}
-              title={sheet.title}
-              src={audio.mp3Url}
-              captionsSrc={audio.vttUrl}
-              durationSec={audio.durationSec}
-              cues={audioCues}
-              accent={sheet.accent}
-            />
+        {audio || interviewAudio ? (
+          <div className="mt-5 max-w-3xl space-y-3">
+            {audio ? (
+              <AudioPlayer
+                id={sheet.id}
+                title={sheet.title}
+                src={audio.mp3Url}
+                captionsSrc={audio.vttUrl}
+                durationSec={audio.durationSec}
+                cues={audioCues}
+                accent={sheet.accent}
+              />
+            ) : null}
+            {interviewAudio ? (
+              <AudioPlayer
+                id={`${sheet.id}--interview`}
+                title={sheet.title}
+                src={interviewAudio.mp3Url}
+                captionsSrc={interviewAudio.vttUrl}
+                durationSec={interviewAudio.durationSec}
+                cues={interviewCues}
+                accent={sheet.accent}
+                label="Mock interview"
+                subtitle="Mock interview"
+                icon="🎤"
+              />
+            ) : null}
           </div>
         ) : null}
         {selfTest ? (
