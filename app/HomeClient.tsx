@@ -88,6 +88,24 @@ export function HomeClient({ cheatSheetCount }: { cheatSheetCount: number }) {
       </div>
 
       <Link
+        className="block rounded-[2.5rem] border border-blueprint/20 bg-blueprint/10 p-6 shadow-panel transition hover:-translate-y-1 sm:p-8"
+        href="/commute"
+      >
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="text-sm font-black uppercase tracking-[0.28em] text-blueprint/70">Study by ear · Commute Mode</p>
+            <h2 className="mt-2 font-display text-3xl font-black text-blueprint sm:text-4xl">Learn hands-free with audio</h2>
+            <p className="mt-2 max-w-2xl text-ink/75">
+              Two-host podcast episodes and mock-interview rounds for every topic — screen-free study for the commute, the gym, or the walk.
+            </p>
+          </div>
+          <span className="self-start rounded-full bg-blueprint px-5 py-3 font-bold text-paper sm:self-auto">
+            <span aria-hidden>🎧</span> Open Commute Mode →
+          </span>
+        </div>
+      </Link>
+
+      <Link
         className="block rounded-[2.5rem] border border-ink/15 bg-ink p-6 text-paper shadow-panel transition hover:-translate-y-1 sm:p-8"
         href="/mock-exam/cca-foundations"
       >

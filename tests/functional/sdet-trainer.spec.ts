@@ -77,6 +77,15 @@ test("home Continue Practice card uses generic copy and links to a topic", async
   await expect(page).toHaveURL(href!);
 });
 
+test("home surfaces an audio / Commute Mode entry point", async ({ page }) => {
+  await page.goto("/");
+  await expect(page.getByRole("heading", { name: "Learn hands-free with audio" })).toBeVisible();
+  const link = page.getByRole("link", { name: /Open Commute Mode/ });
+  await expect(link).toHaveAttribute("href", "/commute");
+  await link.click();
+  await expect(page).toHaveURL("/commute");
+});
+
 test("home, topics, and topic detail render the MVP navigation path", async ({ page }) => {
   await clearAppState(page);
   await page.goto("/");
