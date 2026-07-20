@@ -704,6 +704,25 @@ test("commute exposes a Mock Interview lane when interview rounds are published"
   await expect(items).toHaveCount(interviewCount);
 });
 
+test("commute lane switcher is a keyboard-operable ARIA tab pattern", async ({ page }) => {
+  test.skip(interviewCount === 0 || audioCount === 0, "need both lanes for a tablist to render");
+  await page.goto("/commute");
+  // Completed pattern: tabs control a labelled tabpanel, and arrow keys move selection + focus.
+  const podcastTab = page.getByRole("tab", { name: /Podcast/ });
+  const interviewTab = page.getByRole("tab", { name: /Mock Interview/ });
+  const panel = page.getByRole("tabpanel");
+  await expect(panel).toBeVisible();
+  await expect(podcastTab).toHaveAttribute("aria-controls", "commute-tabpanel");
+
+  await podcastTab.focus();
+  await page.keyboard.press("ArrowRight");
+  await expect(interviewTab).toHaveAttribute("aria-selected", "true");
+  await expect(interviewTab).toBeFocused();
+  await page.keyboard.press("ArrowLeft");
+  await expect(podcastTab).toHaveAttribute("aria-selected", "true");
+  await expect(podcastTab).toBeFocused();
+});
+
 // ── Progress breakdown + /review route ──────────────────────────────────────
 
 test("progress page shows per-type breakdown sections and link to review queue", async ({ page }) => {
