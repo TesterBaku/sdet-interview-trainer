@@ -1,19 +1,25 @@
-// Audio pipeline (podcast) — two-voice dialogue synthesis.
+// Audio pipeline (two-voice) — dialogue synthesis for podcast + mock-interview formats.
 //
-// Renders a speaker-labeled dialogue script (data/audio/podcast/<id>.txt) to a
-// single mp3, switching the Kokoro voice per speaker turn and stitching the turns
-// with short breaths. Reuses the pronunciation lexicon + ffmpeg encode from the
-// single-voice path (synthesize.mjs); the committed transcript keeps the real words.
+// Renders a speaker-labeled dialogue script to a single mp3, switching the Kokoro voice
+// per speaker turn and stitching the turns with short breaths. Reuses the pronunciation
+// lexicon + ffmpeg encode from the single-voice path (synthesize.mjs); the committed
+// transcript keeps the real words.
 //
-// Output (mp3 + per-speaker timing) lands in build/audio/podcast/<name>.* — a
-// separate namespace from the single-voice pipeline's build/audio/, so the two never
-// overwrite each other and captions.mjs (which scans build/audio/ non-recursively)
-// does not pick up podcast timings.
+// Two "kinds" share this one path (see KINDS below), each with its own source dir,
+// build namespace, and default speaker→voice map:
+//   • podcast   — data/audio/podcast/<id>.txt   → build/audio/podcast/   (MAYA + LEO)
+//   • interview — data/audio/interview/<id>.txt → build/audio/interview/ (INTERVIEWER + CANDIDATE)
+//
+// Each kind renders into its OWN build namespace, separate from the single-voice
+// pipeline's build/audio/, so the formats never overwrite each other and captions.mjs
+// (which scans a dir non-recursively) only picks up the timings it was pointed at.
 //
 // Run:
-//   node scripts/audio/synthesize-podcast.mjs [--id=api-testing]
-//        [--maya=af_heart] [--leo=am_michael] [--limit=N] [--suffix=name] [--force]
+//   node scripts/audio/synthesize-podcast.mjs [--kind=podcast] [--id=api-testing]
+//        [--<speaker>=<voice>] [--limit=N] [--suffix=name] [--force]
 //
+//   --kind=k    podcast (default) or interview — selects source dir + default voices
+//   --<speaker> override one speaker's voice, e.g. --leo=am_fenrir or --interviewer=am_puck
 //   --limit=N   render only the first N turns (quick voice A/B clips)
 //   --suffix=s  append ".s" to the output name (so A/B clips don't clobber)
 //   --force     re-render even if the content-hash matches an existing render
@@ -36,9 +42,23 @@ import { floatToWav } from "./wav.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, "..", "..");
-const PODCAST_DIR = join(ROOT, "data", "audio", "podcast");
-const OUT_DIR = join(ROOT, "build", "audio", "podcast");
 const LEXICON_PATH = join(ROOT, "data", "audio", "lexicon.json");
+
+// Each kind is a self-contained format: where its scripts live, where its renders go, and
+// the default speaker→Kokoro-voice map. Interview flips the podcast's genders so the two
+// formats sound distinct: Interviewer = male (am_fenrir), Candidate = warm female (af_heart).
+const KINDS = {
+  podcast: {
+    srcDir: join(ROOT, "data", "audio", "podcast"),
+    outDir: join(ROOT, "build", "audio", "podcast"),
+    voices: { MAYA: "af_heart", LEO: "am_michael" },
+  },
+  interview: {
+    srcDir: join(ROOT, "data", "audio", "interview"),
+    outDir: join(ROOT, "build", "audio", "interview"),
+    voices: { INTERVIEWER: "am_fenrir", CANDIDATE: "af_heart" },
+  },
+};
 
 const lexicon = JSON.parse(readFileSync(LEXICON_PATH, "utf8")).terms;
 
@@ -60,11 +80,20 @@ const force = args.includes("--force");
 // (a negative slice would otherwise silently drop turns from the END).
 const limit = Number(getArg("limit", "0")) || 0;
 
-// Speaker → Kokoro voice. Maya = warm female (grade A); Leo = male (overridable for A/B).
-const VOICES = {
-  MAYA: getArg("maya", "af_heart"),
-  LEO: getArg("leo", "am_michael"),
-};
+const kind = getArg("kind", "podcast");
+const cfg = KINDS[kind];
+if (!cfg) {
+  console.error(`Unknown --kind=${kind}. Known: ${Object.keys(KINDS).join(", ")}`);
+  process.exit(1);
+}
+const PODCAST_DIR = cfg.srcDir;
+const OUT_DIR = cfg.outDir;
+
+// Speaker → Kokoro voice, from the kind's defaults, each overridable via --<speaker>=voice
+// (e.g. --leo=am_fenrir, --interviewer=am_puck).
+const VOICES = Object.fromEntries(
+  Object.entries(cfg.voices).map(([spk, def]) => [spk, getArg(spk.toLowerCase(), def)]),
+);
 
 const sha256 = (s) => createHash("sha256").update(s).digest("hex");
 
