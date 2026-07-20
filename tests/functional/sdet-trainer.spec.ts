@@ -703,6 +703,15 @@ test("cheat-sheet page shows a distinct Mock interview player when a round is pu
   await expect(player.getByRole("button", { name: "Play", exact: true })).toBeVisible();
 });
 
+test("cheat-sheet audio player offers an offline download link", async ({ page }) => {
+  test.skip(audioCount === 0, "no audio manifest staged (run audio:podcast:publish --local)");
+  await page.goto(`/cheatsheets/${firstAudioId}`);
+  const download = page.getByRole("link", { name: /Download .* audio for offline listening/ }).first();
+  await expect(download).toBeVisible();
+  // Blob's ?download=1 forces Content-Disposition: attachment, so the mp3 saves to the device.
+  await expect(download).toHaveAttribute("href", /\.mp3(\?|&)download=1$/);
+});
+
 test("commute exposes a Mock Interview lane when interview rounds are published", async ({ page }) => {
   test.skip(interviewCount === 0 || audioCount === 0, "need both lanes staged for the format switch");
   await page.goto("/commute");
