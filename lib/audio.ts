@@ -66,8 +66,3 @@ export function getCheatSheetTranscriptCues(id: string): TranscriptCue[] {
     return [];
   }
 }
-
-// "13 min" for badges/cards.
-export function formatAudioMinutes(durationSec: number): string {
-  return `${Math.max(1, Math.round(durationSec / 60))} min`;
-}

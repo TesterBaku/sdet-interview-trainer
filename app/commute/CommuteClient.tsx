@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { AudioPlayer } from "@/components/AudioPlayer";
+import { formatAudioMinutes } from "@/lib/audioFormat";
 
 type Episode = {
   id: string;
@@ -12,10 +13,6 @@ type Episode = {
   captionsSrc: string;
   durationSec: number;
 };
-
-function minutes(sec: number): string {
-  return `${Math.max(1, Math.round(sec / 60))} min`;
-}
 
 export function CommuteClient({ episodes }: { episodes: Episode[] }) {
   const [index, setIndex] = useState(0);
@@ -49,6 +46,7 @@ export function CommuteClient({ episodes }: { episodes: Episode[] }) {
           durationSec={current.durationSec}
           accent={current.accent}
           autoPlay={autoPlay}
+          resume={false}
           onEnded={advance}
         />
         <p className="mt-3 px-1 text-sm text-ink/60">
@@ -86,7 +84,7 @@ export function CommuteClient({ episodes }: { episodes: Episode[] }) {
                   <span className="block truncate font-bold text-blueprint">{ep.title}</span>
                   <span className="block text-xs font-semibold text-ink/55">
                     {ep.group ? `${ep.group} · ` : ""}
-                    {minutes(ep.durationSec)}
+                    {formatAudioMinutes(ep.durationSec)}
                   </span>
                 </span>
               </button>

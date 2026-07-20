@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { cheatSheetSelfTest } from "@/lib/cheatsheets";
-import { formatAudioMinutes, getCheatSheetAudio } from "@/lib/audio";
+import { getCheatSheetAudio } from "@/lib/audio";
+import { formatAudioMinutes } from "@/lib/audioFormat";
 import type { CheatSheet } from "@/types/CheatSheet";
 
 export function CheatSheetCard({ sheet }: { sheet: CheatSheet }) {

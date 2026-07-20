@@ -1,7 +1,16 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
-import { clearAudioPosition, readAudioPosition, writeAudioPosition } from "@/lib/audioPosition";
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
+import {
+  clearAudioPosition,
+  getServerAudioRate,
+  readAudioPosition,
+  readAudioRate,
+  subscribeToAudioRate,
+  writeAudioPosition,
+  writeAudioRate,
+} from "@/lib/audioPosition";
+import { formatClock } from "@/lib/audioFormat";
 import type { TranscriptCue } from "@/lib/audio";
 
 type AudioPlayerProps = {
@@ -13,15 +22,14 @@ type AudioPlayerProps = {
   cues?: TranscriptCue[];
   accent?: string;
   autoPlay?: boolean;
+  // Resume from the saved position on mount. Off for the Commute playlist, where each
+  // episode should start from the beginning as it's queued.
+  resume?: boolean;
   onEnded?: () => void;
 };
 
 const RATES = [1, 1.25, 1.5, 2] as const;
-
-function clock(sec: number): string {
-  const s = Math.max(0, Math.floor(sec));
-  return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
-}
+type Rate = (typeof RATES)[number];
 
 export function AudioPlayer({
   id,
@@ -32,64 +40,75 @@ export function AudioPlayer({
   cues = [],
   accent = "#17324d",
   autoPlay = false,
+  resume = true,
   onEnded,
 }: AudioPlayerProps) {
   const audioRef = useRef<HTMLAudioElement>(null);
+  const lastSavedSecond = useRef(-1);
   const [playing, setPlaying] = useState(false);
   const [current, setCurrent] = useState(0);
   const [duration, setDuration] = useState(durationSec);
-  const [rate, setRate] = useState<(typeof RATES)[number]>(1);
   const [showTranscript, setShowTranscript] = useState(false);
+  // Speed is a persisted global preference read via an external store (hydration-safe;
+  // server snapshot is always 1, so no SSR mismatch), which also survives remounts.
+  const rate = useSyncExternalStore(subscribeToAudioRate, readAudioRate, getServerAudioRate);
 
-  // Resume from the saved position once metadata is available (read in an effect, never
-  // during render, to stay hydration-safe).
+  // Apply the current speed to the element whenever it changes.
+  useEffect(() => {
+    if (audioRef.current) audioRef.current.playbackRate = rate;
+  }, [rate]);
+
   const onLoadedMetadata = useCallback(() => {
     const audio = audioRef.current;
     if (!audio) return;
     setDuration(audio.duration || durationSec);
+    audio.playbackRate = rate;
+    if (!resume) return;
     const saved = readAudioPosition(id);
     if (saved > 0 && saved < (audio.duration || durationSec) - 2) {
       audio.currentTime = saved;
       setCurrent(saved);
     }
-  }, [id, durationSec]);
+  }, [id, durationSec, resume, rate]);
 
-  // Persist position as it plays (throttled to whole seconds by the store).
+  // Persist position at most once per whole second (timeupdate fires ~4×/sec).
   const onTimeUpdate = useCallback(() => {
     const audio = audioRef.current;
     if (!audio) return;
     setCurrent(audio.currentTime);
-    if (audio.currentTime > 0) writeAudioPosition(id, audio.currentTime);
+    const whole = Math.floor(audio.currentTime);
+    if (whole > 0 && whole !== lastSavedSecond.current) {
+      lastSavedSecond.current = whole;
+      writeAudioPosition(id, whole);
+    }
   }, [id]);
 
   const onEndedInternal = useCallback(() => {
     clearAudioPosition(id);
+    lastSavedSecond.current = -1;
     setPlaying(false);
     onEnded?.();
   }, [id, onEnded]);
 
-  useEffect(() => {
-    const audio = audioRef.current;
-    if (audio) audio.playbackRate = rate;
-  }, [rate]);
-
+  // Play state is driven by the element's own play/pause events (below), so a blocked
+  // play() never leaves the icon out of sync.
   const toggle = useCallback(() => {
     const audio = audioRef.current;
     if (!audio) return;
-    if (audio.paused) {
-      void audio.play();
-      setPlaying(true);
-    } else {
-      audio.pause();
-      setPlaying(false);
-    }
+    if (audio.paused) void audio.play().catch(() => undefined);
+    else audio.pause();
   }, []);
 
-  const skip = useCallback((delta: number) => {
-    const audio = audioRef.current;
-    if (!audio) return;
-    audio.currentTime = Math.min(Math.max(0, audio.currentTime + delta), audio.duration || duration);
-  }, [duration]);
+  const skip = useCallback(
+    (delta: number) => {
+      const audio = audioRef.current;
+      if (!audio) return;
+      const next = Math.min(Math.max(0, audio.currentTime + delta), audio.duration || duration);
+      audio.currentTime = next;
+      setCurrent(next);
+    },
+    [duration],
+  );
 
   const seekTo = useCallback((seconds: number) => {
     const audio = audioRef.current;
@@ -99,8 +118,9 @@ export function AudioPlayer({
   }, []);
 
   const cycleRate = useCallback(() => {
-    setRate((r) => RATES[(RATES.indexOf(r) + 1) % RATES.length]);
-  }, []);
+    const currentIndex = RATES.indexOf(rate as Rate); // -1 (unknown stored value) → next is RATES[0]
+    writeAudioRate(RATES[(currentIndex + 1) % RATES.length]);
+  }, [rate]);
 
   const btn =
     "inline-flex items-center justify-center rounded-full border border-ink/15 bg-white/80 px-3 py-2 text-sm font-bold text-ink transition hover:bg-white focus-ring";
@@ -132,7 +152,7 @@ export function AudioPlayer({
             <span aria-hidden>🎧</span>
             <span className="truncate">{title}</span>
           </p>
-          <p className="text-xs font-semibold text-ink/55">Two-host episode · {clock(duration)}</p>
+          <p className="text-xs font-semibold text-ink/55">Two-host episode · {formatClock(duration)}</p>
         </div>
       </div>
 
@@ -148,8 +168,8 @@ export function AudioPlayer({
         aria-label="Seek"
       />
       <div className="flex items-center justify-between text-xs font-semibold tabular-nums text-ink/55">
-        <span>{clock(current)}</span>
-        <span>{clock(duration)}</span>
+        <span>{formatClock(current)}</span>
+        <span>{formatClock(duration)}</span>
       </div>
 
       <div className="mt-3 flex flex-wrap items-center gap-2">
