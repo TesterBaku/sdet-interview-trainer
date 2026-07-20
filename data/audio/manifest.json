@@ -1,1 +1,128 @@
-{}
+{
+  "api-testing": {
+    "mp3Url": "https://tcvgyxolu5eyurv6.public.blob.vercel-storage.com/audio/api-testing.mp3",
+    "vttUrl": "https://tcvgyxolu5eyurv6.public.blob.vercel-storage.com/audio/api-testing.vtt",
+    "durationSec": 805.17,
+    "voice": "af_heart + am_fenrir",
+    "hash": "9fa011c108aaef6bc4152908f444f519033ea646178762f7b3211c0042ae654c"
+  },
+  "appium": {
+    "mp3Url": "https://tcvgyxolu5eyurv6.public.blob.vercel-storage.com/audio/appium.mp3",
+    "vttUrl": "https://tcvgyxolu5eyurv6.public.blob.vercel-storage.com/audio/appium.vtt",
+    "durationSec": 866.75,
+    "voice": "af_heart + am_fenrir",
+    "hash": "a833155c02e70e3a78fca4206ab960da7f42c8788a2f2af877f1a2d48380be8a"
+  },
+  "cca-foundations": {
+    "mp3Url": "https://tcvgyxolu5eyurv6.public.blob.vercel-storage.com/audio/cca-foundations.mp3",
+    "vttUrl": "https://tcvgyxolu5eyurv6.public.blob.vercel-storage.com/audio/cca-foundations.vtt",
+    "durationSec": 834.79,
+    "voice": "af_heart + am_fenrir",
+    "hash": "144dd905587db05c7c941b4939fb34972dc55d8b709544db5063f8f5a9e9be69"
+  },
+  "csharp": {
+    "mp3Url": "https://tcvgyxolu5eyurv6.public.blob.vercel-storage.com/audio/csharp.mp3",
+    "vttUrl": "https://tcvgyxolu5eyurv6.public.blob.vercel-storage.com/audio/csharp.vtt",
+    "durationSec": 803.66,
+    "voice": "af_heart + am_fenrir",
+    "hash": "63bc3c917843343d06939778d77dc85cd924431357d7efa76bc538d1c5f125ce"
+  },
+  "docker": {
+    "mp3Url": "https://tcvgyxolu5eyurv6.public.blob.vercel-storage.com/audio/docker.mp3",
+    "vttUrl": "https://tcvgyxolu5eyurv6.public.blob.vercel-storage.com/audio/docker.vtt",
+    "durationSec": 828.6,
+    "voice": "af_heart + am_fenrir",
+    "hash": "46dd80011136a46ee73090f105725ea832abefeed8811304218fdd2208ba3a83"
+  },
+  "java": {
+    "mp3Url": "https://tcvgyxolu5eyurv6.public.blob.vercel-storage.com/audio/java.mp3",
+    "vttUrl": "https://tcvgyxolu5eyurv6.public.blob.vercel-storage.com/audio/java.vtt",
+    "durationSec": 888.76,
+    "voice": "af_heart + am_fenrir",
+    "hash": "8435e32855f51ddf501a4b0e9d8b4f362f424c2018f84c2dd1ab1923f321fd2b"
+  },
+  "javascript": {
+    "mp3Url": "https://tcvgyxolu5eyurv6.public.blob.vercel-storage.com/audio/javascript.mp3",
+    "vttUrl": "https://tcvgyxolu5eyurv6.public.blob.vercel-storage.com/audio/javascript.vtt",
+    "durationSec": 777.62,
+    "voice": "af_heart + am_fenrir",
+    "hash": "64c92fbaa5ecd2b6151976f1d0ab0e7f498869f81f08dd3605bc117d81deea08"
+  },
+  "kubernetes": {
+    "mp3Url": "https://tcvgyxolu5eyurv6.public.blob.vercel-storage.com/audio/kubernetes.mp3",
+    "vttUrl": "https://tcvgyxolu5eyurv6.public.blob.vercel-storage.com/audio/kubernetes.vtt",
+    "durationSec": 908.55,
+    "voice": "af_heart + am_fenrir",
+    "hash": "1d1b9ac8193fd999242730c5d2c8af8b2e41c05334f677cfe6cf4c00055cbc3a"
+  },
+  "langchain": {
+    "mp3Url": "https://tcvgyxolu5eyurv6.public.blob.vercel-storage.com/audio/langchain.mp3",
+    "vttUrl": "https://tcvgyxolu5eyurv6.public.blob.vercel-storage.com/audio/langchain.vtt",
+    "durationSec": 836.72,
+    "voice": "af_heart + am_fenrir",
+    "hash": "0784a21af3f292a5edad252793d38b733e7a75d3a984c5c1c71a7e6b51361c64"
+  },
+  "nodejs": {
+    "mp3Url": "https://tcvgyxolu5eyurv6.public.blob.vercel-storage.com/audio/nodejs.mp3",
+    "vttUrl": "https://tcvgyxolu5eyurv6.public.blob.vercel-storage.com/audio/nodejs.vtt",
+    "durationSec": 825.84,
+    "voice": "af_heart + am_fenrir",
+    "hash": "f7a8d76c87f7047cfb7a0b99c1165c8ca43573f73b49e1e54aaabaa228ce1df4"
+  },
+  "playwright": {
+    "mp3Url": "https://tcvgyxolu5eyurv6.public.blob.vercel-storage.com/audio/playwright.mp3",
+    "vttUrl": "https://tcvgyxolu5eyurv6.public.blob.vercel-storage.com/audio/playwright.vtt",
+    "durationSec": 815.86,
+    "voice": "af_heart + am_fenrir",
+    "hash": "4697690aca56b440cf55277a6ae98e80b2d725715bcaf6c53bc0274610a5cae6"
+  },
+  "pyspark": {
+    "mp3Url": "https://tcvgyxolu5eyurv6.public.blob.vercel-storage.com/audio/pyspark.mp3",
+    "vttUrl": "https://tcvgyxolu5eyurv6.public.blob.vercel-storage.com/audio/pyspark.vtt",
+    "durationSec": 858,
+    "voice": "af_heart + am_fenrir",
+    "hash": "e090341ad3b9b8753f06a6366cea055c138dac126a7264acd8ad663a8882c926"
+  },
+  "python": {
+    "mp3Url": "https://tcvgyxolu5eyurv6.public.blob.vercel-storage.com/audio/python.mp3",
+    "vttUrl": "https://tcvgyxolu5eyurv6.public.blob.vercel-storage.com/audio/python.vtt",
+    "durationSec": 772.23,
+    "voice": "af_heart + am_fenrir",
+    "hash": "5898678048f70a116d3e7d37df6b842379089ab06fed9c89e9ec460657cadcf6"
+  },
+  "rest-assured": {
+    "mp3Url": "https://tcvgyxolu5eyurv6.public.blob.vercel-storage.com/audio/rest-assured.mp3",
+    "vttUrl": "https://tcvgyxolu5eyurv6.public.blob.vercel-storage.com/audio/rest-assured.vtt",
+    "durationSec": 850.01,
+    "voice": "af_heart + am_fenrir",
+    "hash": "4cb2391b3a8f374dd723170f8f1fb324d18a830d463d4328b7dabaa36c516ad6"
+  },
+  "selenium": {
+    "mp3Url": "https://tcvgyxolu5eyurv6.public.blob.vercel-storage.com/audio/selenium.mp3",
+    "vttUrl": "https://tcvgyxolu5eyurv6.public.blob.vercel-storage.com/audio/selenium.vtt",
+    "durationSec": 1093.11,
+    "voice": "af_heart + am_fenrir",
+    "hash": "ef40971dbfac317ca37651bd68568ba6688b6d187cf4f302dbca2a964bd4938a"
+  },
+  "sql": {
+    "mp3Url": "https://tcvgyxolu5eyurv6.public.blob.vercel-storage.com/audio/sql.mp3",
+    "vttUrl": "https://tcvgyxolu5eyurv6.public.blob.vercel-storage.com/audio/sql.vtt",
+    "durationSec": 813.75,
+    "voice": "af_heart + am_fenrir",
+    "hash": "8582f96e7092bfffb4d830cf336c026aad77afb961f4b12906222b93824264a9"
+  },
+  "testng": {
+    "mp3Url": "https://tcvgyxolu5eyurv6.public.blob.vercel-storage.com/audio/testng.mp3",
+    "vttUrl": "https://tcvgyxolu5eyurv6.public.blob.vercel-storage.com/audio/testng.vtt",
+    "durationSec": 891.86,
+    "voice": "af_heart + am_fenrir",
+    "hash": "c9ba3ad0a0ebc6f13bf30d0500cd1f69e2f4874ab91e074237173fcdad2c469b"
+  },
+  "xcuitest": {
+    "mp3Url": "https://tcvgyxolu5eyurv6.public.blob.vercel-storage.com/audio/xcuitest.mp3",
+    "vttUrl": "https://tcvgyxolu5eyurv6.public.blob.vercel-storage.com/audio/xcuitest.vtt",
+    "durationSec": 843.56,
+    "voice": "af_heart + am_fenrir",
+    "hash": "0a91d61d1693e6eed94367a0f8ac541bbf18ddcb0d107191f2899854b0056593"
+  }
+}

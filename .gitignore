@@ -9,6 +9,7 @@ tasks/*server*.out
 tasks/*server*.err
 out
 dist
+.env
 .env*.local
 npm-debug.log*
 yarn-debug.log*
