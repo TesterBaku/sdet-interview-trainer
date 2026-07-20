@@ -1,0 +1,780 @@
+{
+  "id": "api-testing",
+  "voice": null,
+  "voices": {
+    "MAYA": "af_heart",
+    "LEO": "am_fenrir"
+  },
+  "durationSec": 805.17,
+  "hash": "9fa011c108aaef6bc4152908f444f519033ea646178762f7b3211c0042ae654c",
+  "cues": [
+    {
+      "speaker": "MAYA",
+      "text": "Okay, here's a good one to start with.",
+      "start": 0,
+      "end": 2.65
+    },
+    {
+      "speaker": "MAYA",
+      "text": "You call DELETE on the same order twice, and the first call comes back 200, but the second one comes back 404.",
+      "start": 2.79,
+      "end": 10.99
+    },
+    {
+      "speaker": "MAYA",
+      "text": "So your teammate says, see, different responses, which means DELETE isn't idempotent.",
+      "start": 11.13,
+      "end": 16.555
+    },
+    {
+      "speaker": "MAYA",
+      "text": "It sounds convincing.",
+      "start": 16.695,
+      "end": 18.595
+    },
+    {
+      "speaker": "MAYA",
+      "text": "But is your teammate actually right?",
+      "start": 18.735,
+      "end": 21.135
+    },
+    {
+      "speaker": "LEO",
+      "text": "And if you just said yes, well, this is the episode for you.",
+      "start": 21.675,
+      "end": 25.55
+    },
+    {
+      "speaker": "LEO",
+      "text": "I'm Leo.",
+      "start": 25.69,
+      "end": 27.09
+    },
+    {
+      "speaker": "MAYA",
+      "text": "And I'm Maya, and this is the topic that opens almost every SDET interview I've ever run, which is API testing.",
+      "start": 27.63,
+      "end": 35.705
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Because here's the thing, if you can only test through the browser, you're really just testing the paint on the house, when APIs are the plumbing underneath.",
+      "start": 35.845,
+      "end": 44.87
+    },
+    {
+      "speaker": "LEO",
+      "text": "And interviewers love it because it's so fast to probe, one question about status codes and they know your depth in thirty seconds, so let's build that depth.",
+      "start": 45.41,
+      "end": 54.985
+    },
+    {
+      "speaker": "LEO",
+      "text": "Start with why API tests even matter, because why not just do everything through the UI?",
+      "start": 55.125,
+      "end": 61.575
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Three reasons, and this is a spoken answer you should have ready.",
+      "start": 62.115,
+      "end": 66.14
+    },
+    {
+      "speaker": "MAYA",
+      "text": "The first is speed, because an API test runs in milliseconds while a UI test has to spin up a whole browser.",
+      "start": 66.28,
+      "end": 74.18
+    },
+    {
+      "speaker": "MAYA",
+      "text": "The second is stability, so no flaky selectors, no waiting for spinners, and far less flakiness overall.",
+      "start": 74.32,
+      "end": 81.42
+    },
+    {
+      "speaker": "MAYA",
+      "text": "And the third is precision, because when a UI test fails, the bug could be anywhere in the stack, but when an API test fails, you know exactly which endpoint and which field.",
+      "start": 81.56,
+      "end": 92.81
+    },
+    {
+      "speaker": "MAYA",
+      "text": "And that's why they sit in the middle of the test pyramid, more of them than UI tests, fewer than unit tests.",
+      "start": 92.95,
+      "end": 99.725
+    },
+    {
+      "speaker": "LEO",
+      "text": "Okay, so the alphabet of this whole topic is HTTP methods, GET, POST, PUT, PATCH, and DELETE, and everyone knows the one-liners.",
+      "start": 100.265,
+      "end": 109.94
+    },
+    {
+      "speaker": "LEO",
+      "text": "So where do people actually get burned?",
+      "start": 110.08,
+      "end": 112.73
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Idempotency, and that word decides who gets the follow-up round, so let's really nail it.",
+      "start": 113.27,
+      "end": 119.27
+    },
+    {
+      "speaker": "MAYA",
+      "text": "An operation is idempotent if calling it once, or calling it fifty times, leaves the server in the same state.",
+      "start": 119.41,
+      "end": 126.76
+    },
+    {
+      "speaker": "LEO",
+      "text": "Okay, give me the physical version.",
+      "start": 127.3,
+      "end": 129.85
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Think of a light switch that only turns off.",
+      "start": 130.39,
+      "end": 133.215
+    },
+    {
+      "speaker": "MAYA",
+      "text": "You press it once and the light's off, and then you press it twenty more times...",
+      "start": 133.355,
+      "end": 138.055
+    },
+    {
+      "speaker": "MAYA",
+      "text": "and it's still off.",
+      "start": 138.195,
+      "end": 139.82
+    },
+    {
+      "speaker": "MAYA",
+      "text": "The state of the room didn't change after that first press, and that's idempotent.",
+      "start": 139.96,
+      "end": 144.86
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Now compare that to dropping a letter in a mailbox, because if you drop two letters, there are two letters in the box, and that's POST.",
+      "start": 145,
+      "end": 153.125
+    },
+    {
+      "speaker": "LEO",
+      "text": "So POST creates, and it's not idempotent, because two calls means two resources, which is exactly why double-clicking a place order button can charge you twice.",
+      "start": 153.665,
+      "end": 163.815
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Exactly, and that's a genuinely great example to use in an interview, because it shows you know why this matters.",
+      "start": 164.355,
+      "end": 171.255
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Now for the rest of the family.",
+      "start": 171.395,
+      "end": 173.62
+    },
+    {
+      "speaker": "MAYA",
+      "text": "GET retrieves, and it's idempotent, it's safe, and it's cacheable.",
+      "start": 173.76,
+      "end": 177.96
+    },
+    {
+      "speaker": "MAYA",
+      "text": "PUT replaces the entire resource, so it's idempotent too, because replacing the whole thing with the same thing twice is still the same thing.",
+      "start": 178.1,
+      "end": 187.25
+    },
+    {
+      "speaker": "MAYA",
+      "text": "DELETE is idempotent as well.",
+      "start": 187.39,
+      "end": 189.89
+    },
+    {
+      "speaker": "MAYA",
+      "text": "And then PATCH is the tricky one, because it's a partial update, and it's not necessarily idempotent.",
+      "start": 190.03,
+      "end": 196.48
+    },
+    {
+      "speaker": "LEO",
+      "text": "Wait, hold on, PUT versus PATCH, say that again slower, because I know candidates blur these two.",
+      "start": 197.02,
+      "end": 203.445
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Okay, picture a whiteboard with your profile written on it.",
+      "start": 203.985,
+      "end": 207.76
+    },
+    {
+      "speaker": "MAYA",
+      "text": "PUT erases the whole board and rewrites everything from scratch, so if you send the same PUT twice, the board reads identically.",
+      "start": 207.9,
+      "end": 215.925
+    },
+    {
+      "speaker": "MAYA",
+      "text": "PATCH walks up and edits one line, say just the email.",
+      "start": 216.065,
+      "end": 219.865
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Now, if the patch says set the email to this value, doing it twice is fine, but if the patch says add five dollars to the balance, well, do that twice and you've got a different state.",
+      "start": 220.005,
+      "end": 231.405
+    },
+    {
+      "speaker": "MAYA",
+      "text": "And that's why PATCH is only sometimes idempotent, because it depends on what the patch actually does.",
+      "start": 231.545,
+      "end": 237.695
+    },
+    {
+      "speaker": "LEO",
+      "text": "Got it.",
+      "start": 238.235,
+      "end": 239.41
+    },
+    {
+      "speaker": "LEO",
+      "text": "So now back to the cold open, DELETE twice, 200 and then 404, and my teammate says different responses means it's not idempotent.",
+      "start": 239.55,
+      "end": 249.25
+    },
+    {
+      "speaker": "MAYA",
+      "text": "And your teammate is wrong, and this is the exact nuance interviewers fish for.",
+      "start": 249.79,
+      "end": 254.94
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Idempotency is about the server's state, not the response you get back.",
+      "start": 255.08,
+      "end": 259.705
+    },
+    {
+      "speaker": "MAYA",
+      "text": "After the first DELETE, the order is gone, and after the second DELETE, the order is...",
+      "start": 259.845,
+      "end": 265.12
+    },
+    {
+      "speaker": "MAYA",
+      "text": "still gone.",
+      "start": 265.26,
+      "end": 266.76
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Same end state.",
+      "start": 266.9,
+      "end": 268.65
+    },
+    {
+      "speaker": "MAYA",
+      "text": "That 404 just means there's nothing here to delete, which is honest, because the switch is already off.",
+      "start": 268.79,
+      "end": 275.865
+    },
+    {
+      "speaker": "LEO",
+      "text": "So the sentence to memorize is, idempotent means same state after one call or many, not same response.",
+      "start": 276.405,
+      "end": 284.005
+    },
+    {
+      "speaker": "LEO",
+      "text": "Love it.",
+      "start": 284.145,
+      "end": 285.295
+    },
+    {
+      "speaker": "LEO",
+      "text": "Okay, status codes, give me the map, but the version for the ear.",
+      "start": 285.435,
+      "end": 289.735
+    },
+    {
+      "speaker": "MAYA",
+      "text": "There are four families you care about.",
+      "start": 290.275,
+      "end": 292.825
+    },
+    {
+      "speaker": "MAYA",
+      "text": "The 200s mean success, the 300s mean redirect, as in go look over there, the 400s mean the client messed up, so you sent something wrong, and the 500s mean the server messed up, meaning you did nothing wrong, the backend just fell over.",
+      "start": 292.965,
+      "end": 308.29
+    },
+    {
+      "speaker": "MAYA",
+      "text": "And as a tester, that fourth-versus-fifth distinction is triage gold, because a 4xx points at the request while a 5xx points at the service.",
+      "start": 308.43,
+      "end": 318.655
+    },
+    {
+      "speaker": "LEO",
+      "text": "And now we're in trap corner, because the single most asked status question in QA interviews is 401 versus 403.",
+      "start": 319.195,
+      "end": 328.47
+    },
+    {
+      "speaker": "MAYA",
+      "text": "So here's the analogy that makes it stick, and it's a nightclub bouncer.",
+      "start": 329.01,
+      "end": 333.61
+    },
+    {
+      "speaker": "MAYA",
+      "text": "A 401 means the bouncer has no idea who you are, maybe you didn't show ID, or your ID is fake or expired, so you're not authenticated.",
+      "start": 333.75,
+      "end": 344.225
+    },
+    {
+      "speaker": "MAYA",
+      "text": "A 403 means the bouncer checked your ID, knows exactly who you are...",
+      "start": 344.365,
+      "end": 349.64
+    },
+    {
+      "speaker": "MAYA",
+      "text": "and you're still not on the list.",
+      "start": 349.78,
+      "end": 351.88
+    },
+    {
+      "speaker": "MAYA",
+      "text": "So you're authenticated, but not permitted.",
+      "start": 352.02,
+      "end": 354.82
+    },
+    {
+      "speaker": "LEO",
+      "text": "So 401 is the bouncer asking who you are, and 403 is the bouncer saying I know exactly who you are, and the answer is still no.",
+      "start": 355.36,
+      "end": 365.46
+    },
+    {
+      "speaker": "MAYA",
+      "text": "And that's the whole answer, delivered in one breath.",
+      "start": 366,
+      "end": 369.325
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Two more worth having ready, though.",
+      "start": 369.465,
+      "end": 371.765
+    },
+    {
+      "speaker": "MAYA",
+      "text": "There's 429, which means too many requests, so you've hit a rate limit, and by the way, that's something you should be testing on purpose.",
+      "start": 371.905,
+      "end": 380.83
+    },
+    {
+      "speaker": "MAYA",
+      "text": "And there's 409, which means conflict, and the classic case is trying to create a user with an email that already exists, where the right answer is often a 409, not a 500, and knowing that shows design maturity.",
+      "start": 380.97,
+      "end": 396.22
+    },
+    {
+      "speaker": "LEO",
+      "text": "Okay, here's where I want to push, because I've seen this in real code review.",
+      "start": 396.76,
+      "end": 401.935
+    },
+    {
+      "speaker": "LEO",
+      "text": "Someone writes a test that calls the endpoint, asserts the status equals 200, and calls it done.",
+      "start": 402.075,
+      "end": 408.9
+    },
+    {
+      "speaker": "LEO",
+      "text": "Then the interviewer asks what you validate in an API test, and if your answer is just the status code, you're finished.",
+      "start": 409.04,
+      "end": 416.765
+    },
+    {
+      "speaker": "LEO",
+      "text": "So what's the real checklist?",
+      "start": 416.905,
+      "end": 418.93
+    },
+    {
+      "speaker": "MAYA",
+      "text": "There are five layers, and I'd literally count them on your fingers in the room.",
+      "start": 419.47,
+      "end": 424.045
+    },
+    {
+      "speaker": "MAYA",
+      "text": "First is the body, the actual values and the types, so is the price really 49.99, and is it a number, not the string 49.99, because type bugs are sneaky.",
+      "start": 424.185,
+      "end": 436.91
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Second is the structure, meaning does the response match the expected schema, with all the required fields present and nothing missing.",
+      "start": 437.05,
+      "end": 445.625
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Third is headers, so content type, caching, and security headers.",
+      "start": 445.765,
+      "end": 450.365
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Fourth is response time, because is it inside the SLA, the service level agreement, and a correct answer that takes nine seconds is still a failing test.",
+      "start": 450.505,
+      "end": 461.155
+    },
+    {
+      "speaker": "MAYA",
+      "text": "And fifth, the one that separates seniors from juniors, is side effects.",
+      "start": 461.295,
+      "end": 465.92
+    },
+    {
+      "speaker": "LEO",
+      "text": "Meaning the API said it created something, but did it actually create anything?",
+      "start": 466.46,
+      "end": 471.86
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Right, because a 201 from a POST is a claim, not proof.",
+      "start": 472.4,
+      "end": 476.75
+    },
+    {
+      "speaker": "MAYA",
+      "text": "So you follow up with a GET and confirm the resource really persisted with the right data, which is trust, but verify.",
+      "start": 476.89,
+      "end": 484.465
+    },
+    {
+      "speaker": "MAYA",
+      "text": "And if an interviewer hears you say you verify the side effect with a follow-up GET, they relax visibly.",
+      "start": 484.605,
+      "end": 491.13
+    },
+    {
+      "speaker": "MAYA",
+      "text": "I've watched it happen.",
+      "start": 491.27,
+      "end": 493.095
+    },
+    {
+      "speaker": "LEO",
+      "text": "Let's talk test design, because how would you test this endpoint is basically guaranteed to come up.",
+      "start": 493.635,
+      "end": 499.935
+    },
+    {
+      "speaker": "LEO",
+      "text": "So say I've got POST slash users, walk me through it.",
+      "start": 500.075,
+      "end": 503.5
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Positive cases first, so valid input, expect the 201, verify the body, and verify persistence.",
+      "start": 504.04,
+      "end": 511.915
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Then comes the negative catalog, and this maps beautifully onto the status codes we just did.",
+      "start": 512.055,
+      "end": 518.055
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Missing or malformed required fields, expect a 400 or a 422.",
+      "start": 518.195,
+      "end": 524.345
+    },
+    {
+      "speaker": "MAYA",
+      "text": "A bad or expired token, that's a 401.",
+      "start": 524.485,
+      "end": 528.235
+    },
+    {
+      "speaker": "MAYA",
+      "text": "A valid token but the wrong role, like a regular user hitting an admin endpoint, that's a 403.",
+      "start": 528.375,
+      "end": 535.45
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Asking for a user that doesn't exist gives you a 404, and creating a duplicate gives you a 409.",
+      "start": 535.59,
+      "end": 543.315
+    },
+    {
+      "speaker": "MAYA",
+      "text": "And then boundary values, so empty strings, maximum lengths, zero, and negative numbers.",
+      "start": 543.455,
+      "end": 549.48
+    },
+    {
+      "speaker": "LEO",
+      "text": "And what about the ones people forget?",
+      "start": 550.02,
+      "end": 552.345
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Pagination, so what happens on page zero, or a page past the end.",
+      "start": 552.885,
+      "end": 557.935
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Rate limiting, as in do you actually get the 429, and does it recover afterward.",
+      "start": 558.075,
+      "end": 564.25
+    },
+    {
+      "speaker": "MAYA",
+      "text": "And concurrency, which is two requests updating the same resource at the same instant, and mentioning concurrency unprompted is a real senior signal.",
+      "start": 564.39,
+      "end": 574.615
+    },
+    {
+      "speaker": "LEO",
+      "text": "Okay, auth, because none of these tests run if you can't get in the door.",
+      "start": 575.155,
+      "end": 579.63
+    },
+    {
+      "speaker": "LEO",
+      "text": "Give me the landscape.",
+      "start": 579.77,
+      "end": 581.47
+    },
+    {
+      "speaker": "MAYA",
+      "text": "There are three tiers, from simplest to richest.",
+      "start": 582.01,
+      "end": 585.26
+    },
+    {
+      "speaker": "MAYA",
+      "text": "First there's an API key, which is a static secret in a header, kind of like a building keycard.",
+      "start": 585.4,
+      "end": 591.8
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Then there are Bearer tokens, usually a JWT, a JSON Web Token, which is three parts separated by dots, a header, a payload, and a signature.",
+      "start": 591.94,
+      "end": 602.49
+    },
+    {
+      "speaker": "MAYA",
+      "text": "The payload carries claims, so things like exp, which is the expiry time, sub, the subject, meaning who you are, and often your roles.",
+      "start": 602.63,
+      "end": 611.88
+    },
+    {
+      "speaker": "MAYA",
+      "text": "And then there's OAuth 2.0, the full framework for delegated access, which is how log in with Google actually works.",
+      "start": 612.02,
+      "end": 620.32
+    },
+    {
+      "speaker": "LEO",
+      "text": "And the interview favorite here, and I've been asked this twice, is token expiry.",
+      "start": 620.86,
+      "end": 626.16
+    },
+    {
+      "speaker": "LEO",
+      "text": "So your suite runs forty minutes, but your token dies at thirty.",
+      "start": 626.3,
+      "end": 630.575
+    },
+    {
+      "speaker": "LEO",
+      "text": "What do you do?",
+      "start": 630.715,
+      "end": 632.115
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Well, the wrong answer is to log in before every test, because that hammers the auth server and slows everything down.",
+      "start": 632.655,
+      "end": 640.405
+    },
+    {
+      "speaker": "MAYA",
+      "text": "The right answer is to get the token once, in a setup step or a fixture, cache it, share it across tests, and refresh it only when it expires, either by checking that exp claim, or by catching a 401 and re-authenticating once.",
+      "start": 640.545,
+      "end": 656.445
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Because login per test is the mark of a suite that was never reviewed.",
+      "start": 656.585,
+      "end": 661.185
+    },
+    {
+      "speaker": "LEO",
+      "text": "Last big idea, schema validation versus contract testing, and I'll be honest, for a long time I thought those were the same thing.",
+      "start": 661.725,
+      "end": 670.725
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Most people do, which is exactly why it gets asked.",
+      "start": 671.265,
+      "end": 675.04
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Schema validation checks the shape of one response, in isolation, so right fields, right types, on my side.",
+      "start": 675.18,
+      "end": 682.68
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Contract testing, and the big tool here is Pact, verifies the agreement between two services, so the consumer writes down exactly what it depends on, and the provider's build replays that contract and fails if it breaks.",
+      "start": 682.82,
+      "end": 697.145
+    },
+    {
+      "speaker": "LEO",
+      "text": "So schema is me checking my own mailbox, and contract is both parties signing the lease, so if the landlord changes the terms, an alarm goes off.",
+      "start": 697.685,
+      "end": 707.56
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Perfect.",
+      "start": 708.1,
+      "end": 709.55
+    },
+    {
+      "speaker": "MAYA",
+      "text": "And the payoff line for the interview is that contract tests catch breaking changes between services without needing a full end-to-end integration environment, so they're consumer-driven, fast, and cheap.",
+      "start": 709.69,
+      "end": 722.565
+    },
+    {
+      "speaker": "MAYA",
+      "text": "That's the whole pitch of Pact in one sentence.",
+      "start": 722.705,
+      "end": 725.73
+    },
+    {
+      "speaker": "LEO",
+      "text": "All right, time for the sixty-second recap.",
+      "start": 726.27,
+      "end": 729.22
+    },
+    {
+      "speaker": "LEO",
+      "text": "If the interviewer asks you to explain idempotency...",
+      "start": 729.36,
+      "end": 732.91
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Say that it means the same server state after one call or many, and the response can differ.",
+      "start": 733.45,
+      "end": 739.3
+    },
+    {
+      "speaker": "MAYA",
+      "text": "DELETE twice gives you a 200 and then a 404, but the resource is equally gone either way.",
+      "start": 739.44,
+      "end": 746.39
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Then name POST as the non-idempotent one, because two calls means two resources.",
+      "start": 746.53,
+      "end": 752.08
+    },
+    {
+      "speaker": "LEO",
+      "text": "And if they ask about 401 versus 403...",
+      "start": 752.62,
+      "end": 757.195
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Go straight to the bouncer.",
+      "start": 757.735,
+      "end": 759.81
+    },
+    {
+      "speaker": "MAYA",
+      "text": "A 401 means the server doesn't know who you are, so not authenticated, and a 403 means it knows exactly who you are and you're still not allowed, so authenticated, but not permitted.",
+      "start": 759.95,
+      "end": 772.875
+    },
+    {
+      "speaker": "LEO",
+      "text": "And if they ask what you validate in an API test...",
+      "start": 773.415,
+      "end": 777.115
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Never just the status code.",
+      "start": 777.655,
+      "end": 779.88
+    },
+    {
+      "speaker": "MAYA",
+      "text": "It's body values and types, schema, headers, response time against the SLA, and the side effect, meaning you follow the POST with a GET and prove it persisted.",
+      "start": 780.02,
+      "end": 791.02
+    },
+    {
+      "speaker": "LEO",
+      "text": "Do that, and the API round is yours.",
+      "start": 791.56,
+      "end": 794.435
+    },
+    {
+      "speaker": "LEO",
+      "text": "Next episode we're covering test pyramids, and why your manager keeps saying the word flaky.",
+      "start": 794.575,
+      "end": 800.75
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Go get the offer.",
+      "start": 801.29,
+      "end": 803.015
+    },
+    {
+      "speaker": "MAYA",
+      "text": "See you there.",
+      "start": 803.155,
+      "end": 804.63
+    }
+  ]
+}

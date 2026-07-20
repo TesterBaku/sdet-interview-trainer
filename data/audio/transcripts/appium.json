@@ -1,0 +1,594 @@
+{
+  "id": "appium",
+  "voice": null,
+  "voices": {
+    "MAYA": "af_heart",
+    "LEO": "am_fenrir"
+  },
+  "durationSec": 866.75,
+  "hash": "a833155c02e70e3a78fca4206ab960da7f42c8788a2f2af877f1a2d48380be8a",
+  "cues": [
+    {
+      "speaker": "MAYA",
+      "text": "Okay, here's one that trips up more mobile candidates than you'd expect.",
+      "start": 0,
+      "end": 4.6
+    },
+    {
+      "speaker": "MAYA",
+      "text": "The interviewer leans in and asks, when your test calls tap on a button on an iPhone, what actually taps it, is it Appium itself reaching into the phone, or is something else doing the work?",
+      "start": 4.74,
+      "end": 16.69
+    },
+    {
+      "speaker": "MAYA",
+      "text": "And most people freeze, because they've written hundreds of Appium tests without ever asking who's really pressing the button.",
+      "start": 16.83,
+      "end": 24.455
+    },
+    {
+      "speaker": "LEO",
+      "text": "And if your honest answer is, uh, the driver thing does it somehow...",
+      "start": 24.995,
+      "end": 29.42
+    },
+    {
+      "speaker": "LEO",
+      "text": "this is the episode for you.",
+      "start": 29.56,
+      "end": 31.66
+    },
+    {
+      "speaker": "LEO",
+      "text": "I'm Leo.",
+      "start": 31.8,
+      "end": 33.2
+    },
+    {
+      "speaker": "MAYA",
+      "text": "And I'm Maya.",
+      "start": 33.74,
+      "end": 35.34
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Today we're doing Appium, mobile test automation, which shows up in basically every SDET interview where the product has an app, and here's why it matters.",
+      "start": 35.48,
+      "end": 45.08
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Interviewers use Appium questions as a two-for-one, because a good answer proves you understand WebDriver architecture in general, and a stale answer instantly reveals that your knowledge is 5 years old, since Appium changed a lot with version 2.",
+      "start": 45.22,
+      "end": 61.095
+    },
+    {
+      "speaker": "MAYA",
+      "text": "So this topic is less about memorizing commands and more about showing you know how the layers fit together.",
+      "start": 61.235,
+      "end": 67.66
+    },
+    {
+      "speaker": "LEO",
+      "text": "Right, and I've noticed mobile questions feel scarier than web questions to a lot of people, because there are 2 operating systems, real devices, emulators, hybrid apps, it's a lot of moving parts.",
+      "start": 68.2,
+      "end": 81.05
+    },
+    {
+      "speaker": "MAYA",
+      "text": "It is, but the mental model is surprisingly clean, so let's build it.",
+      "start": 81.59,
+      "end": 86.24
+    },
+    {
+      "speaker": "MAYA",
+      "text": "First chunk, architecture.",
+      "start": 86.38,
+      "end": 88.63
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Appium automates native apps, hybrid apps, and mobile web, on both Android and iOS, from a single API, and the way it does that is the whole story.",
+      "start": 88.77,
+      "end": 99.595
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Appium is an HTTP server written in Node.js, and it speaks the W3C WebDriver protocol, the exact same protocol Selenium speaks, which means your existing WebDriver client in Java, Python, JavaScript, whatever, drives a phone the same way it drives a browser.",
+      "start": 99.735,
+      "end": 119.635
+    },
+    {
+      "speaker": "LEO",
+      "text": "So my test code doesn't talk to the phone at all, it talks to a server over HTTP.",
+      "start": 120.175,
+      "end": 126.575
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Exactly, and here's the key idea, which is delegation.",
+      "start": 127.115,
+      "end": 131.165
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Think of Appium as a translator at an international summit.",
+      "start": 131.305,
+      "end": 135.33
+    },
+    {
+      "speaker": "MAYA",
+      "text": "You speak one language, WebDriver, and you say the same sentence no matter who you're addressing, but the translator turns it into whatever the listener understands.",
+      "start": 135.47,
+      "end": 145.77
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Appium itself has no idea how to tap a button on iOS, so it forwards your command to Apple's own automation framework, which is called XCUITest, and on Android it forwards to Google's framework, UiAutomator2.",
+      "start": 145.91,
+      "end": 160.835
+    },
+    {
+      "speaker": "MAYA",
+      "text": "The vendors do the real driving, Appium just translates.",
+      "start": 160.975,
+      "end": 164.975
+    },
+    {
+      "speaker": "LEO",
+      "text": "Okay, so the chain is, my client sends WebDriver over HTTP to the Appium server, the server hands it to a platform driver, the driver talks to the vendor framework, and the vendor framework touches the device.",
+      "start": 165.515,
+      "end": 179.54
+    },
+    {
+      "speaker": "LEO",
+      "text": "And the cross-platform magic lives in exactly one layer, because my test only ever talks to Appium.",
+      "start": 179.68,
+      "end": 186.88
+    },
+    {
+      "speaker": "MAYA",
+      "text": "That's the answer that gets you hired, and it also answers our cold open, because the thing actually tapping the button on an iPhone is XCUITest, Apple's framework, with Appium acting as the messenger.",
+      "start": 187.42,
+      "end": 200.795
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Now, those platform drivers are worth a beat on their own.",
+      "start": 200.935,
+      "end": 204.585
+    },
+    {
+      "speaker": "MAYA",
+      "text": "UiAutomator2 is the default and recommended Android driver, XCUITest is the iOS driver, and there's also Espresso as an alternative Android driver, which runs in-process so it's faster, but it's Android only.",
+      "start": 204.725,
+      "end": 220.85
+    },
+    {
+      "speaker": "MAYA",
+      "text": "There are others too, drivers for Mac, Windows, Flutter, but those 3 are the interview core.",
+      "start": 220.99,
+      "end": 227.015
+    },
+    {
+      "speaker": "LEO",
+      "text": "And this is where the version 2 thing comes in?",
+      "start": 227.555,
+      "end": 230.605
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Yes, and it's a favorite freshness probe.",
+      "start": 231.145,
+      "end": 233.945
+    },
+    {
+      "speaker": "MAYA",
+      "text": "In Appium 1, everything shipped bundled together, but Appium 2 decoupled drivers and plugins from the core server, so the server ships lean and you install only what you need, with a command like appium driver install uiautomator2.",
+      "start": 234.085,
+      "end": 249.36
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Think of it like a phone that ships with no apps preinstalled, and you download only the ones you'll use.",
+      "start": 249.5,
+      "end": 255.9
+    },
+    {
+      "speaker": "MAYA",
+      "text": "One more detail from that transition, the default base path moved to just a slash, whereas Appium 1 used the path wd slash hub, and mentioning that casually signals your setup knowledge is current.",
+      "start": 256.04,
+      "end": 269.39
+    },
+    {
+      "speaker": "LEO",
+      "text": "Got it.",
+      "start": 269.93,
+      "end": 271.105
+    },
+    {
+      "speaker": "LEO",
+      "text": "So chunk 2, how do I actually tell Appium what to automate?",
+      "start": 271.245,
+      "end": 275.395
+    },
+    {
+      "speaker": "MAYA",
+      "text": "That's capabilities, key value pairs you send when you start a session, and my analogy here is a boarding pass.",
+      "start": 275.935,
+      "end": 282.885
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Before the flight, everything about your trip is decided by what's printed on that pass, the airline, the destination, the seat, and if it's wrong you board the wrong plane.",
+      "start": 283.025,
+      "end": 293.325
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Capabilities are your session's boarding pass.",
+      "start": 293.465,
+      "end": 296.49
+    },
+    {
+      "speaker": "MAYA",
+      "text": "The big cross-platform ones are platformName, Android or iOS, then automationName, which picks the driver, UiAutomator2 or XCUITest or Espresso, then deviceName, platformVersion, udid if you want a specific real device, and app, which is a path or URL to the apk or ipa file.",
+      "start": 296.63,
+      "end": 317.605
+    },
+    {
+      "speaker": "MAYA",
+      "text": "And under the W3C standard, all the vendor-specific keys carry an appium colon prefix, so it's appium colon automationName, appium colon app, and so on.",
+      "start": 317.745,
+      "end": 329.27
+    },
+    {
+      "speaker": "LEO",
+      "text": "Wait, so what's the deal with appPackage and bundleId then, because I've seen configs use those instead of app.",
+      "start": 329.81,
+      "end": 337.31
+    },
+    {
+      "speaker": "MAYA",
+      "text": "That distinction is a genuine interview question, so lock it in.",
+      "start": 337.85,
+      "end": 342.25
+    },
+    {
+      "speaker": "MAYA",
+      "text": "The app capability installs a fresh build from the file you point at, but if the app is already sitting on the device, you skip the install, and on Android you launch it with appPackage plus appActivity, while on iOS you launch it with bundleId.",
+      "start": 342.39,
+      "end": 358.24
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Fresh install versus launch what's there, that's the whole difference, and on iOS real devices you also need code signing set up, things like the Xcode org id and a provisioning team, which is worth mentioning if they ask about real-device pain.",
+      "start": 358.38,
+      "end": 374.88
+    },
+    {
+      "speaker": "LEO",
+      "text": "Okay, boarding pass filed.",
+      "start": 375.42,
+      "end": 377.57
+    },
+    {
+      "speaker": "LEO",
+      "text": "Once I'm in the session, how do I find elements, because I assume it's not the same as CSS selectors on the web.",
+      "start": 377.71,
+      "end": 385.685
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Right, and locator strategy is where interviewers separate web people from mobile people.",
+      "start": 386.225,
+      "end": 392.05
+    },
+    {
+      "speaker": "MAYA",
+      "text": "The order of preference favors stability and cross-platform reuse.",
+      "start": 392.19,
+      "end": 396.715
+    },
+    {
+      "speaker": "MAYA",
+      "text": "At the top is accessibility id, and here's why it's special, it maps to the content-desc attribute on Android and the accessibilityIdentifier on iOS, so if your developers set the same value on both platforms, 1 locator drives both apps.",
+      "start": 396.855,
+      "end": 413.73
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Below that, plain id, which is the Android resource-id, fast and stable when it exists.",
+      "start": 413.87,
+      "end": 420.445
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Then the native power tools, the android uiautomator strategy, which runs a UiSelector query directly on the device, and on iOS the predicate string and class chain strategies, which are native queries and far faster than XPath.",
+      "start": 420.585,
+      "end": 436.61
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Then class name, which is just the element type.",
+      "start": 436.75,
+      "end": 440.05
+    },
+    {
+      "speaker": "MAYA",
+      "text": "And at the very bottom...",
+      "start": 440.19,
+      "end": 442.09
+    },
+    {
+      "speaker": "MAYA",
+      "text": "XPath.",
+      "start": 442.23,
+      "end": 443.78
+    },
+    {
+      "speaker": "LEO",
+      "text": "I feel a trap coming.",
+      "start": 444.32,
+      "end": 446.12
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Hold that thought, because it's literally our trap corner.",
+      "start": 446.66,
+      "end": 450.135
+    },
+    {
+      "speaker": "MAYA",
+      "text": "But first, chunk 3, hybrid apps and synchronization, because these round out the practical questions.",
+      "start": 450.275,
+      "end": 457.3
+    },
+    {
+      "speaker": "MAYA",
+      "text": "A hybrid app is a native shell with web content embedded inside it, a WebView, and Appium exposes each world as a context.",
+      "start": 457.44,
+      "end": 466.215
+    },
+    {
+      "speaker": "MAYA",
+      "text": "My analogy is the input button on your TV remote, where the same screen shows either the cable box or the game console depending on which input you've selected, and the remote commands mean different things per input.",
+      "start": 466.355,
+      "end": 480.03
+    },
+    {
+      "speaker": "MAYA",
+      "text": "In Appium, the NATIVE_APP context drives native widgets through UiAutomator2 or XCUITest, and the WEBVIEW context drives the embedded page with regular Selenium-style CSS and DOM locators.",
+      "start": 480.17,
+      "end": 496.27
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Your test calls getContextHandles to list what's available, switches into the WEBVIEW context to work the web content, then switches back to NATIVE_APP for the native chrome around it.",
+      "start": 496.41,
+      "end": 508.21
+    },
+    {
+      "speaker": "LEO",
+      "text": "So same driver, same session, I'm just flipping the input source.",
+      "start": 508.75,
+      "end": 513.1
+    },
+    {
+      "speaker": "LEO",
+      "text": "And is there a gotcha on Android, because WebViews are basically Chrome under the hood, right?",
+      "start": 513.24,
+      "end": 519.24
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Good instinct, on Android the WebView is automated by an embedded Chromedriver, and its version has to match the Chrome version inside the WebView, which Appium can auto-download for you, and that version mismatch is a classic real-world debugging story to have ready.",
+      "start": 519.78,
+      "end": 537.13
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Also, mobile web testing in an actual browser is just a special case of all this, you set browserName instead of app, and you're driving Safari or Chrome on the phone.",
+      "start": 537.27,
+      "end": 548.295
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Now waits, quickly, because the story mirrors Selenium exactly.",
+      "start": 548.435,
+      "end": 552.86
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Implicit wait is a global timeout on every element lookup, blunt and capable of masking real timing issues, while explicit wait, WebDriverWait with an expected condition on a specific element, is the recommended approach, and you never mix the two because the timeouts stack unpredictably.",
+      "start": 553,
+      "end": 571.975
+    },
+    {
+      "speaker": "MAYA",
+      "text": "What mobile adds is extra flakiness sources, animations, slow app launches, network variability on real devices, emulator warm-up, so name those when they ask why mobile tests flake.",
+      "start": 572.115,
+      "end": 585.415
+    },
+    {
+      "speaker": "LEO",
+      "text": "Okay, trap corner.",
+      "start": 585.955,
+      "end": 587.805
+    },
+    {
+      "speaker": "LEO",
+      "text": "Give me the classic wrong answer.",
+      "start": 587.945,
+      "end": 590.195
+    },
+    {
+      "speaker": "MAYA",
+      "text": "There are 2 that kill candidates, and they're related because both scream outdated knowledge.",
+      "start": 590.735,
+      "end": 596.41
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Trap number 1 is gestures.",
+      "start": 596.55,
+      "end": 599.025
+    },
+    {
+      "speaker": "MAYA",
+      "text": "The interviewer asks how you'd do a custom swipe, and the doomed candidate proudly describes the TouchAction and MultiTouchAction classes, chaining press and moveTo and release.",
+      "start": 599.165,
+      "end": 610.765
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Those classes are deprecated and actually removed in modern client libraries, so that answer dates you instantly.",
+      "start": 610.905,
+      "end": 618.53
+    },
+    {
+      "speaker": "MAYA",
+      "text": "The current answer is the W3C Actions API, where you build a pointer input sequence, press, move, release, for custom gestures like a pinch, or even simpler, the driver-side mobile commands, things like mobile colon swipe, mobile colon scroll, mobile colon longClickGesture, which the platform driver executes natively and reliably.",
+      "start": 618.67,
+      "end": 641.545
+    },
+    {
+      "speaker": "LEO",
+      "text": "So if I catch myself about to say TouchAction, I stop, and I say W3C Actions or mobile commands instead.",
+      "start": 642.085,
+      "end": 650.61
+    },
+    {
+      "speaker": "LEO",
+      "text": "What's trap number 2?",
+      "start": 650.75,
+      "end": 652.525
+    },
+    {
+      "speaker": "MAYA",
+      "text": "XPath everywhere.",
+      "start": 653.065,
+      "end": 654.915
+    },
+    {
+      "speaker": "MAYA",
+      "text": "On the web, XPath is merely unfashionable, but on mobile it's genuinely expensive, and here's the reason interviewers want you to articulate.",
+      "start": 655.055,
+      "end": 664.405
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Every XPath query forces the driver to serialize the entire native element tree and search through it, on every single lookup.",
+      "start": 664.545,
+      "end": 673.295
+    },
+    {
+      "speaker": "MAYA",
+      "text": "It's like finding a person in an office building by photographing every floor and studying the photos, instead of just calling out their name, when accessibility id is the name tag they're already wearing.",
+      "start": 673.435,
+      "end": 686.035
+    },
+    {
+      "speaker": "MAYA",
+      "text": "So the dodge is, acknowledge XPath works everywhere, then immediately say you avoid it on mobile for performance and brittleness, and you push developers to add accessibility ids, which has the lovely side effect of making the app more accessible for real users.",
+      "start": 686.175,
+      "end": 702.5
+    },
+    {
+      "speaker": "LEO",
+      "text": "In the room, how does this topic actually play out?",
+      "start": 703.04,
+      "end": 706.315
+    },
+    {
+      "speaker": "MAYA",
+      "text": "A few patterns from my hiring-manager days.",
+      "start": 706.855,
+      "end": 710.205
+    },
+    {
+      "speaker": "MAYA",
+      "text": "First, the architecture question we opened with, and they're listening for the word delegate, or translator, plus the names UiAutomator2 and XCUITest.",
+      "start": 710.345,
+      "end": 721.27
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Second, a compare-and-contrast, Appium versus native frameworks like Espresso and XCUITest used directly, and the honest answer is a trade-off, Appium gives you 1 codebase across both platforms and any WebDriver language, while native frameworks run in-process so they're faster and more stable but single-platform and tied to the app's own language, which means Appium for broad black-box end-to-end coverage across Android and iOS, native when a single-platform team wants the fastest feedback.",
+      "start": 721.41,
+      "end": 747.885
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Third, practical tooling, where mentioning Appium Inspector, the GUI that connects to a live session, renders the element tree, and lets you verify locators before you commit them, shows you've actually done this.",
+      "start": 748.025,
+      "end": 761.5
+    },
+    {
+      "speaker": "MAYA",
+      "text": "And structure-wise, Page Object Model applies exactly as on the web, 1 screen object per screen, encapsulating locators and actions, so a UI change touches 1 file.",
+      "start": 761.64,
+      "end": 774.115
+    },
+    {
+      "speaker": "LEO",
+      "text": "Alright, 60-second recap, let me play it back.",
+      "start": 774.655,
+      "end": 778.08
+    },
+    {
+      "speaker": "LEO",
+      "text": "If they ask how Appium works, say it's a Node.js HTTP server speaking the W3C WebDriver protocol that delegates commands to the platform's own framework, UiAutomator2 on Android, XCUITest on iOS, and add that Appium 2 made drivers installable on demand with the base path moving off wd slash hub.",
+      "start": 778.22,
+      "end": 798.02
+    },
+    {
+      "speaker": "LEO",
+      "text": "If they ask about locators, say accessibility id first because it maps to content-desc on Android and accessibilityIdentifier on iOS, so 1 locator serves both platforms, and XPath last because it serializes and walks the whole native tree.",
+      "start": 798.16,
+      "end": 814.985
+    },
+    {
+      "speaker": "LEO",
+      "text": "If they ask about hybrid apps, say you list the context handles, switch to the WEBVIEW context for CSS selectors, then back to NATIVE_APP, remembering the Chromedriver version match on Android.",
+      "start": 815.125,
+      "end": 828.725
+    },
+    {
+      "speaker": "LEO",
+      "text": "And if they ask about gestures, never say TouchAction, say W3C Actions or the mobile colon commands.",
+      "start": 828.865,
+      "end": 836.84
+    },
+    {
+      "speaker": "MAYA",
+      "text": "That's a pass in any interview I've ever run.",
+      "start": 837.38,
+      "end": 840.255
+    },
+    {
+      "speaker": "MAYA",
+      "text": "The boarding pass gets you on the plane, the translator carries your commands, and the name tag beats the building search every time.",
+      "start": 840.395,
+      "end": 848.32
+    },
+    {
+      "speaker": "LEO",
+      "text": "Nice.",
+      "start": 848.86,
+      "end": 849.985
+    },
+    {
+      "speaker": "LEO",
+      "text": "Next time, keep drilling with the Appium flashcards and quiz in the app, because the capabilities and the locator order only stick with repetition, and we'll be back with another topic from the SDET bank.",
+      "start": 850.125,
+      "end": 862.75
+    },
+    {
+      "speaker": "MAYA",
+      "text": "See you in the next one, and happy testing.",
+      "start": 863.29,
+      "end": 866.215
+    }
+  ]
+}

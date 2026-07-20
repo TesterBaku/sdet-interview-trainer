@@ -1,0 +1,528 @@
+{
+  "id": "csharp",
+  "voice": null,
+  "voices": {
+    "MAYA": "af_heart",
+    "LEO": "am_fenrir"
+  },
+  "durationSec": 803.66,
+  "hash": "63bc3c917843343d06939778d77dc85cd924431357d7efa76bc538d1c5f125ce",
+  "cues": [
+    {
+      "speaker": "MAYA",
+      "text": "Okay, here's one that shows up in the first 5 minutes of almost every C sharp phone screen.",
+      "start": 0,
+      "end": 5.95
+    },
+    {
+      "speaker": "MAYA",
+      "text": "You declare an integer a equal to 1, you assign it to a second variable b, you change b to 9, and a is still 1, no surprise there.",
+      "start": 6.09,
+      "end": 14.965
+    },
+    {
+      "speaker": "MAYA",
+      "text": "But then you create an array with one element, assign that array to a second variable, change the element through the second variable, and suddenly the original array changed too.",
+      "start": 15.105,
+      "end": 26.205
+    },
+    {
+      "speaker": "MAYA",
+      "text": "So the interviewer leans back and asks, why did the number stay put but the array didn't...",
+      "start": 26.345,
+      "end": 31.77
+    },
+    {
+      "speaker": "MAYA",
+      "text": "what's really going on under the hood?",
+      "start": 31.91,
+      "end": 34.36
+    },
+    {
+      "speaker": "LEO",
+      "text": "And if your honest answer is something like, huh, arrays are just weird like that, then this is the episode for you.",
+      "start": 34.9,
+      "end": 42.475
+    },
+    {
+      "speaker": "LEO",
+      "text": "I'm Leo.",
+      "start": 42.615,
+      "end": 44.015
+    },
+    {
+      "speaker": "MAYA",
+      "text": "And I'm Maya.",
+      "start": 44.555,
+      "end": 46.155
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Leo, this question looks tiny, but I used to open interviews with it on purpose, because that one distinction, value types versus reference types, quietly explains most of the C sharp behavior questions you'll ever get, from strings to records to why your test data mysteriously mutates between tests.",
+      "start": 46.295,
+      "end": 65.995
+    },
+    {
+      "speaker": "LEO",
+      "text": "And for SDET roles specifically this stuff isn't trivia, because if your stack is Playwright for .NET with NUnit or xUnit, the interviewer wants proof that you understand the machine your tests run on, since half of all flaky test bugs are really just language misunderstandings wearing a disguise.",
+      "start": 66.535,
+      "end": 84.335
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Exactly.",
+      "start": 84.875,
+      "end": 86.475
+    },
+    {
+      "speaker": "MAYA",
+      "text": "So let's build the mental model, and I want you to picture two very different ways of handing someone a document.",
+      "start": 86.615,
+      "end": 93.39
+    },
+    {
+      "speaker": "MAYA",
+      "text": "A value type is a photocopy.",
+      "start": 93.53,
+      "end": 96.03
+    },
+    {
+      "speaker": "MAYA",
+      "text": "When you assign an int, a double, a bool, a DateTime, or a struct to another variable, the machine literally copies the data, so now there are two independent copies, and scribbling on one photocopy does nothing to the other.",
+      "start": 96.17,
+      "end": 110.595
+    },
+    {
+      "speaker": "MAYA",
+      "text": "That's why a stayed 1 in our cold open.",
+      "start": 110.735,
+      "end": 113.585
+    },
+    {
+      "speaker": "LEO",
+      "text": "Okay, so what's the reference type then, if it's not a photocopy?",
+      "start": 114.125,
+      "end": 118.4
+    },
+    {
+      "speaker": "MAYA",
+      "text": "A reference type is a sticky note with a street address on it.",
+      "start": 118.94,
+      "end": 122.84
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Classes, arrays, strings, delegates, all of those live in one place on the heap, and the variable just holds the address.",
+      "start": 122.98,
+      "end": 130.88
+    },
+    {
+      "speaker": "MAYA",
+      "text": "When you assign the array to a second variable, you're not copying the house, you're copying the sticky note, so now two notes point at the same house, and if you go in through either one and repaint the kitchen, everyone holding that address sees the new paint.",
+      "start": 131.02,
+      "end": 145.77
+    },
+    {
+      "speaker": "LEO",
+      "text": "Which explains the cold open perfectly, because changing element 0 through the second variable was repainting the shared house, so the first variable saw it too.",
+      "start": 146.31,
+      "end": 156.835
+    },
+    {
+      "speaker": "LEO",
+      "text": "Let me lock that in as a hook, value types copy the document, reference types copy the address.",
+      "start": 156.975,
+      "end": 163.425
+    },
+    {
+      "speaker": "MAYA",
+      "text": "That's the hook, and here's the nuance that separates a mid-level answer from a senior one.",
+      "start": 163.965,
+      "end": 169.54
+    },
+    {
+      "speaker": "MAYA",
+      "text": "When you pass a reference type into a method, the method can renovate the house, and the caller will absolutely see those changes.",
+      "start": 169.68,
+      "end": 177.48
+    },
+    {
+      "speaker": "MAYA",
+      "text": "But if the method reassigns the parameter to a whole new object, the caller notices nothing, because the method only ever had its own copy of the sticky note, and it just wrote a new address on its private copy.",
+      "start": 177.62,
+      "end": 190.795
+    },
+    {
+      "speaker": "MAYA",
+      "text": "C sharp passes the reference by value, and interviewers love asking exactly that.",
+      "start": 190.935,
+      "end": 196.635
+    },
+    {
+      "speaker": "LEO",
+      "text": "Wait, so mutating the object leaks out, but pointing the parameter somewhere else doesn't, because the note itself was photocopied even though the house wasn't. Okay, that's sneaky but it follows from the model.",
+      "start": 197.175,
+      "end": 210
+    },
+    {
+      "speaker": "LEO",
+      "text": "While we're on types, where do records fit, because they come up constantly in test code.",
+      "start": 210.14,
+      "end": 215.715
+    },
+    {
+      "speaker": "MAYA",
+      "text": "A record is a reference type that compares by contents instead of by address, so two records with the same values are considered equal, which makes them perfect for test DTOs, the models you deserialize API responses into, and the with keyword hands you a modified copy without touching the original.",
+      "start": 216.255,
+      "end": 235.93
+    },
+    {
+      "speaker": "MAYA",
+      "text": "And one more term worth having ready, boxing, which is when a value type gets wrapped in an object on the heap, like putting your photocopy into a rented storage box.",
+      "start": 236.07,
+      "end": 246.345
+    },
+    {
+      "speaker": "MAYA",
+      "text": "It works, but every box costs an allocation, so you avoid it in hot loops.",
+      "start": 246.485,
+      "end": 251.735
+    },
+    {
+      "speaker": "LEO",
+      "text": "Got it.",
+      "start": 252.275,
+      "end": 253.45
+    },
+    {
+      "speaker": "LEO",
+      "text": "Now, you said strings were on the list of reference types, but strings feel like they behave like values, because comparing two strings with the equality operator compares the text, not the address.",
+      "start": 253.59,
+      "end": 266.015
+    },
+    {
+      "speaker": "LEO",
+      "text": "What's going on there?",
+      "start": 266.155,
+      "end": 267.78
+    },
+    {
+      "speaker": "MAYA",
+      "text": "That's our second big idea, and the analogy here is a laminated card.",
+      "start": 268.32,
+      "end": 273.22
+    },
+    {
+      "speaker": "MAYA",
+      "text": "A C sharp string is a reference type, yes, but it's immutable, which means once the card is printed and laminated, nobody can ever write on it again.",
+      "start": 273.36,
+      "end": 283.41
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Every operation that looks like a modification, calling ToUpper, calling Replace, concatenating with plus, none of those touch the original card, they print a brand new laminated card and hand it to you.",
+      "start": 283.55,
+      "end": 296.65
+    },
+    {
+      "speaker": "LEO",
+      "text": "Which means if I call ToUpper on a string and never assign the result anywhere, absolutely nothing happens to my variable, and that's a classic gotcha snippet, right, they show you s dot ToUpper on its own line and ask what s contains afterward, and the answer is still the lowercase original.",
+      "start": 297.19,
+      "end": 314.79
+    },
+    {
+      "speaker": "MAYA",
+      "text": "That exact snippet has ended interviews, so yes.",
+      "start": 315.33,
+      "end": 318.855
+    },
+    {
+      "speaker": "MAYA",
+      "text": "And when they follow up with why the language designers made strings immutable, you've got 3 crisp reasons.",
+      "start": 318.995,
+      "end": 325.495
+    },
+    {
+      "speaker": "MAYA",
+      "text": "One, immutability makes strings naturally thread safe, since nobody can change a shared string underneath you.",
+      "start": 325.635,
+      "end": 332.535
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Two, it makes them safe as dictionary keys, because the hash of a laminated card can never drift.",
+      "start": 332.675,
+      "end": 339.15
+    },
+    {
+      "speaker": "MAYA",
+      "text": "And three, it enables interning, where identical string literals get cached and shared from a single pool instead of being printed twice.",
+      "start": 339.29,
+      "end": 347.965
+    },
+    {
+      "speaker": "LEO",
+      "text": "But there has to be a cost, because if every change prints a new card, then concatenating inside a loop is printing a slightly longer card on every single pass and throwing the old one in the recycling bin.",
+      "start": 348.505,
+      "end": 361.53
+    },
+    {
+      "speaker": "MAYA",
+      "text": "And that's the cost, quadratic garbage, which is why the moment you're building a string in many steps, a big test report, a CSV of results, you switch to StringBuilder, which is the whiteboard next to the laminator.",
+      "start": 362.07,
+      "end": 375.77
+    },
+    {
+      "speaker": "MAYA",
+      "text": "You scribble on the whiteboard freely, append line after line, and only at the very end do you press print once, with a single ToString call and one final allocation.",
+      "start": 375.91,
+      "end": 386.885
+    },
+    {
+      "speaker": "LEO",
+      "text": "String is the laminated card, StringBuilder is the whiteboard, use the whiteboard whenever you're composing in a loop.",
+      "start": 387.425,
+      "end": 394.75
+    },
+    {
+      "speaker": "LEO",
+      "text": "Okay, third topic, and honestly the one I'd bet money on for a Playwright role, async and await, because the entire Playwright .NET API is async from top to bottom.",
+      "start": 394.89,
+      "end": 407.04
+    },
+    {
+      "speaker": "MAYA",
+      "text": "It's the single most likely C sharp deep dive for our field, so here's the analogy, a waiter in a busy restaurant.",
+      "start": 407.58,
+      "end": 415.005
+    },
+    {
+      "speaker": "MAYA",
+      "text": "When your test awaits a page navigation or an HTTP call, the method is a waiter who has just handed an order to the kitchen.",
+      "start": 415.145,
+      "end": 423.695
+    },
+    {
+      "speaker": "MAYA",
+      "text": "A bad waiter stands at the kitchen door staring at your steak until it's done, and while he stands there, no other table gets served.",
+      "start": 423.835,
+      "end": 431.885
+    },
+    {
+      "speaker": "MAYA",
+      "text": "A good waiter hands the ticket over, walks away to serve other tables, and when the kitchen bell rings, comes back to pick up the plate.",
+      "start": 432.025,
+      "end": 440.15
+    },
+    {
+      "speaker": "LEO",
+      "text": "And await is the good waiter, so when a method hits an await, it suspends right there and returns its thread to the thread pool, and the thread goes off serving other work until the operating system rings the bell to say the I/O finished.",
+      "start": 440.69,
+      "end": 454.94
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Which is why async gives you massive concurrency without piles of threads, because a thread costs roughly 1 MB of stack, while a suspended task costs almost nothing, so thousands of concurrent requests can ride on a handful of threads.",
+      "start": 455.48,
+      "end": 470.705
+    },
+    {
+      "speaker": "MAYA",
+      "text": "And that model gives you the 3 rules interviewers probe.",
+      "start": 470.845,
+      "end": 474.72
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Return Task or Task of T, never async void, except for event handlers, because an async void method can't be awaited and its exceptions escape the caller and can take down your whole test run.",
+      "start": 474.86,
+      "end": 487.785
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Never block on dot Result or dot Wait, because that's the waiter standing at the kitchen door, and in the wrong context it deadlocks outright.",
+      "start": 487.925,
+      "end": 497.075
+    },
+    {
+      "speaker": "MAYA",
+      "text": "And when you have independent work, fire the orders together and await Task dot WhenAll, instead of awaiting them one by one in a line.",
+      "start": 497.215,
+      "end": 505.665
+    },
+    {
+      "speaker": "LEO",
+      "text": "Await all the way up, never block, never async void.",
+      "start": 506.205,
+      "end": 509.855
+    },
+    {
+      "speaker": "LEO",
+      "text": "Alright, trap corner time, what's the classic wrong answer you heard most as a hiring manager?",
+      "start": 509.995,
+      "end": 516.145
+    },
+    {
+      "speaker": "MAYA",
+      "text": "The big one is candidates confidently telling me that async await is multithreading, that await spins up a background thread to do the work.",
+      "start": 516.685,
+      "end": 525.385
+    },
+    {
+      "speaker": "MAYA",
+      "text": "It sounds plausible, and it's exactly backwards for I/O, because awaiting a network call doesn't create a thread, it releases one, and the whole point is that no thread at all is burned while the kitchen cooks.",
+      "start": 525.525,
+      "end": 538.825
+    },
+    {
+      "speaker": "MAYA",
+      "text": "So when you get the question, lead with the phrase, await suspends the method and frees the thread, it does not spawn one, and you've instantly dodged the trap.",
+      "start": 538.965,
+      "end": 548.89
+    },
+    {
+      "speaker": "LEO",
+      "text": "What about a quick second trap, since exceptions always come up in test framework questions?",
+      "start": 549.43,
+      "end": 555.23
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Rethrowing.",
+      "start": 555.77,
+      "end": 557.345
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Inside a catch block, writing throw followed by the exception variable feels natural, but it resets the stack trace, so the error now appears to originate at your catch block instead of at the real crime scene, which is a disaster when you're debugging a failed pipeline at midnight.",
+      "start": 557.485,
+      "end": 574.685
+    },
+    {
+      "speaker": "MAYA",
+      "text": "The bare throw statement, just the keyword alone, rethrows and preserves the original stack trace, so the rule is, log what you need, then bare throw.",
+      "start": 574.825,
+      "end": 584.475
+    },
+    {
+      "speaker": "MAYA",
+      "text": "And one bonus in the same family, cleanup, because people say the garbage collector handles everything, but the GC runs on its own schedule and won't promptly release sockets, file handles, or browser contexts, which is why the using statement and IDisposable exist, giving you deterministic disposal at scope exit, even when an exception flies.",
+      "start": 584.615,
+      "end": 607.49
+    },
+    {
+      "speaker": "MAYA",
+      "text": "That's why in Playwright you see await using on a browser context, and why you reuse 1 HttpClient instead of creating one per request, since churning clients exhausts your sockets.",
+      "start": 607.63,
+      "end": 619.93
+    },
+    {
+      "speaker": "LEO",
+      "text": "So how does all of this actually surface in the room, because I doubt anyone asks for a lecture on the heap.",
+      "start": 620.47,
+      "end": 627.12
+    },
+    {
+      "speaker": "MAYA",
+      "text": "It comes as snippet prediction and quick fire pairs.",
+      "start": 627.66,
+      "end": 631.135
+    },
+    {
+      "speaker": "MAYA",
+      "text": "They'll show you the array assignment from our cold open, or the ToUpper line that goes nowhere, and simply ask what prints.",
+      "start": 631.275,
+      "end": 638.95
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Then come the pairs, and you should have each one down to a sentence.",
+      "start": 639.09,
+      "end": 643.065
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Abstract class versus interface, an abstract class is shared code and state for things that are a kind of the same thing, and you extend exactly 1, while an interface is a pure contract for a capability, and you can implement many.",
+      "start": 643.205,
+      "end": 657.83
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Const versus readonly, const is baked in at compile time, readonly is set once at runtime in the constructor.",
+      "start": 657.97,
+      "end": 666.195
+    },
+    {
+      "speaker": "MAYA",
+      "text": "In LINQ, deferred execution means the query is a recipe, not a meal, it only runs when you enumerate it with ToList or a foreach, so the source can change in between, and in tests, Single asserts there's exactly 1 match and throws otherwise, which makes it a hidden assertion, while First just grabs the first of possibly many.",
+      "start": 666.335,
+      "end": 687.11
+    },
+    {
+      "speaker": "MAYA",
+      "text": "And for frameworks, NUnit does setup with SetUp attributes and has the rich Assert dot That constraint model, while xUnit uses the constructor plus IDisposable for setup and teardown and runs tests in parallel by default, which is exactly where shared mutable state comes back to bite you.",
+      "start": 687.25,
+      "end": 705.925
+    },
+    {
+      "speaker": "LEO",
+      "text": "Which loops right back to the sticky notes, because parallel tests sharing one address is the repainted kitchen all over again.",
+      "start": 706.465,
+      "end": 714.29
+    },
+    {
+      "speaker": "LEO",
+      "text": "Okay, give me the 60 second recap, the if they ask this, you say that version.",
+      "start": 714.43,
+      "end": 719.68
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Takeaway 1, if they ask value versus reference types, say value types copy the data like a photocopy, reference types copy an address to a shared object, and add the closer, that even the reference itself is passed by value, so reassigning a parameter never affects the caller.",
+      "start": 720.22,
+      "end": 738.545
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Takeaway 2, if they ask why strings are immutable, say the laminated card never changes, which buys thread safety, stable hashes, and interning, and the moment you concatenate in a loop, you switch to StringBuilder.",
+      "start": 738.685,
+      "end": 752.785
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Takeaway 3, if they ask what await does, say it suspends the method and returns the thread to the pool until the task completes, concurrency without blocking, and then volunteer the hygiene rules, return Task instead of async void, and never block on dot Result.",
+      "start": 752.925,
+      "end": 769.725
+    },
+    {
+      "speaker": "LEO",
+      "text": "Photocopies and sticky notes, laminated cards and whiteboards, and a waiter who never stands at the kitchen door.",
+      "start": 770.265,
+      "end": 777.465
+    },
+    {
+      "speaker": "LEO",
+      "text": "If you can retell those 3 stories, you can survive most of a C sharp screen.",
+      "start": 777.605,
+      "end": 782.93
+    },
+    {
+      "speaker": "MAYA",
+      "text": "That's the episode.",
+      "start": 783.47,
+      "end": 785.27
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Next time we go deeper into the toolbox, collections and LINQ operators, the stuff that makes your assertions read like sentences, so pull up the C sharp cheat sheet, run the quiz twice, and we'll see you in the next one.",
+      "start": 785.41,
+      "end": 799.235
+    },
+    {
+      "speaker": "LEO",
+      "text": "Practice the snippets out loud, and we'll catch you there.",
+      "start": 799.775,
+      "end": 803.125
+    }
+  ]
+}

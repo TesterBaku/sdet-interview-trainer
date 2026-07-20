@@ -1,11 +1,17 @@
 import { expect, test } from "@playwright/test";
 import type { Page } from "@playwright/test";
 import { cheatSheets } from "@/lib/cheatsheets";
+import { getAllCheatSheetAudio } from "@/lib/audio";
 
 // Derive expected counts from the same source of truth the pages render, so adding
 // a cheat sheet never silently breaks these tests again.
 const cheatSheetCount = cheatSheets.length;
 const quizSheetCount = cheatSheets.filter((sheet) => sheet.quiz.length > 0).length;
+// Audio only surfaces when a manifest is staged (manifest.local.json is gitignored, so
+// CI has none). Derive the count so the audio-UI assertions skip cleanly when unpublished.
+const publishedAudio = getAllCheatSheetAudio();
+const audioCount = publishedAudio.length;
+const firstAudioId = publishedAudio[0]?.id ?? cheatSheets[0].id;
 
 const progressKey = "sdet-interview-trainer-progress";
 const codeDraftKey = "sdet-interview-trainer-code-answer:python-coding-001";
@@ -638,6 +644,42 @@ test("Practice hub links to Daily, Topics, and Quizzes", async ({ page }) => {
   await expect(page.getByRole("link", { name: /Open Daily Practice/ })).toHaveAttribute("href", "/daily-practice");
   await expect(page.getByRole("link", { name: /Open Topics/ })).toHaveAttribute("href", "/topics");
   await expect(page.getByRole("link", { name: /Open Quizzes/ })).toHaveAttribute("href", "/quizzes");
+});
+
+// ── Commute Mode (podcast audio) ────────────────────────────────────────────
+
+test("Practice hub links to Commute Mode", async ({ page }) => {
+  await page.goto("/practice");
+  await expect(page.getByRole("link", { name: /Open Commute Mode/ })).toHaveAttribute("href", "/commute");
+});
+
+test("commute page renders and keeps the Practice lane active", async ({ page }) => {
+  await page.goto("/commute");
+  await expect(page.getByRole("heading", { name: /Learn with your eyes closed/ })).toBeVisible();
+  // /commute is folded under Practice, so that nav lane stays reachable/lit.
+  await expect(page.getByRole("link", { name: "Practice", exact: true })).toBeVisible();
+});
+
+test("cheat-sheet page shows a Listen player when an episode is published", async ({ page }) => {
+  test.skip(audioCount === 0, "no audio manifest staged (run audio:podcast:captions + publish --local)");
+  await page.goto(`/cheatsheets/${firstAudioId}`);
+  const player = page.getByRole("region", { name: /^Listen:/ });
+  await expect(player).toBeVisible();
+  await expect(player.getByRole("button", { name: "Play", exact: true })).toBeVisible();
+  await expect(player.getByRole("button", { name: /Playback speed/ })).toBeVisible();
+});
+
+test("commute playlist lists every published episode", async ({ page }) => {
+  test.skip(audioCount === 0, "no audio manifest staged");
+  await page.goto("/commute");
+  const items = page.getByRole("list", { name: "Episode playlist" }).getByRole("listitem");
+  await expect(items).toHaveCount(audioCount);
+});
+
+test("cheat-sheet index shows a headphone badge for episodes with audio", async ({ page }) => {
+  test.skip(audioCount === 0, "no audio manifest staged");
+  await page.goto("/cheatsheets");
+  await expect(page.getByText("🎧").first()).toBeVisible();
 });
 
 // ── Progress breakdown + /review route ──────────────────────────────────────

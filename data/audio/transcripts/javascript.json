@@ -1,0 +1,450 @@
+{
+  "id": "javascript",
+  "voice": null,
+  "voices": {
+    "MAYA": "af_heart",
+    "LEO": "am_fenrir"
+  },
+  "durationSec": 777.62,
+  "hash": "64c92fbaa5ecd2b6151976f1d0ab0e7f498869f81f08dd3605bc117d81deea08",
+  "cues": [
+    {
+      "speaker": "MAYA",
+      "text": "Okay, here's one that shows up in almost every JavaScript screen.",
+      "start": 0,
+      "end": 4.45
+    },
+    {
+      "speaker": "MAYA",
+      "text": "I give you 4 lines of code, console log 1, then a setTimeout with 0 delay that logs 2, then a resolved promise with a then that logs 3, and finally console log 4.",
+      "start": 4.59,
+      "end": 17.215
+    },
+    {
+      "speaker": "MAYA",
+      "text": "The interviewer leans back and asks what order the numbers print in, and if your instinct says 1, 2, 3, 4, because that's the order they're written in...",
+      "start": 17.355,
+      "end": 26.955
+    },
+    {
+      "speaker": "MAYA",
+      "text": "this is the episode for you.",
+      "start": 27.095,
+      "end": 29.42
+    },
+    {
+      "speaker": "LEO",
+      "text": "And I'll admit, the first time I saw that question I confidently said the timer fires first because it was registered first, which is exactly the wrong answer, so yeah, I felt that one.",
+      "start": 29.96,
+      "end": 41.835
+    },
+    {
+      "speaker": "LEO",
+      "text": "I'm Leo, I write automation for a living, and I still get burned by JavaScript at least once a sprint.",
+      "start": 41.975,
+      "end": 49.025
+    },
+    {
+      "speaker": "MAYA",
+      "text": "And I'm Maya, I've been an SDET for a long time and I've sat on the hiring side of the table, and today we're doing JavaScript for testers, which is the language question set you'll face for any Playwright or Cypress role.",
+      "start": 49.565,
+      "end": 63.665
+    },
+    {
+      "speaker": "MAYA",
+      "text": "The real answer to that opener, by the way, is 1, 4, 3, 2, and by the end of this episode you'll be able to explain why in one clean sentence.",
+      "start": 63.805,
+      "end": 73.755
+    },
+    {
+      "speaker": "LEO",
+      "text": "So before we dig in, why does this matter so much for testers specifically, because I've heard people say they just need locators and assertions, and the language is a detail.",
+      "start": 74.295,
+      "end": 85.27
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Because the language is where flaky tests come from.",
+      "start": 85.81,
+      "end": 89.21
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Almost every mysterious Playwright failure I've debugged came down to somebody misunderstanding async behavior, or a closure capturing the wrong value, or a shared object getting mutated between tests, so interviewers probe JavaScript fundamentals as a proxy for whether your test suite will be stable.",
+      "start": 89.35,
+      "end": 108.6
+    },
+    {
+      "speaker": "MAYA",
+      "text": "If you can predict what the runtime does, you can write tests that don't lie to you.",
+      "start": 108.74,
+      "end": 113.89
+    },
+    {
+      "speaker": "LEO",
+      "text": "Okay, so where do we start.",
+      "start": 114.43,
+      "end": 116.53
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Chunk one, values and variables, and here's the physical picture I want you to hold.",
+      "start": 117.07,
+      "end": 122.545
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Primitives, which are strings, numbers, booleans, null, undefined, bigint, and symbol, behave like photocopies, so when you assign a number from one variable to another you hand over a copy, and scribbling on the copy never touches the original.",
+      "start": 122.685,
+      "end": 138.46
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Objects and arrays behave like keys to a storage locker, which means assigning an array to a second variable doesn't copy the locker, it cuts a second key, and now both variables open the exact same locker.",
+      "start": 138.6,
+      "end": 152.2
+    },
+    {
+      "speaker": "LEO",
+      "text": "So if I set a to 1, copy it to b, and change b to 9, then a stays 1 because b only got a photocopy, but if x is an array and I do y equals x and then change y at index 0, then x sees that change too, because both keys open one locker.",
+      "start": 152.74,
+      "end": 169.415
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Exactly right, and that locker picture also explains the copying trap we'll hit later.",
+      "start": 169.955,
+      "end": 175.855
+    },
+    {
+      "speaker": "MAYA",
+      "text": "While we're on values, two quick pairs interviewers love.",
+      "start": 175.995,
+      "end": 179.57
+    },
+    {
+      "speaker": "MAYA",
+      "text": "First, null versus undefined, where undefined means a variable was declared but nobody assigned it, so it's the engine's default, and null is you deliberately writing down that there is no value, it's intentional emptiness.",
+      "start": 179.71,
+      "end": 194.535
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Second, double equals versus triple equals, where triple equals compares value and type with no conversion at all, and double equals tries to coerce the types to match first, which produces surprises like 0 double equals empty string being true, so the professional answer is that you always use triple equals and you can name coercion as the reason.",
+      "start": 194.675,
+      "end": 216.825
+    },
+    {
+      "speaker": "LEO",
+      "text": "And what about var, let, and const, because that's basically guaranteed to come up.",
+      "start": 217.365,
+      "end": 222.59
+    },
+    {
+      "speaker": "MAYA",
+      "text": "It is, so here's the compact version.",
+      "start": 223.13,
+      "end": 225.98
+    },
+    {
+      "speaker": "MAYA",
+      "text": "var is function scoped and gets hoisted with a value of undefined, which means you can read it before its line and get undefined instead of an error, while let and const are block scoped and sit in what's called the temporal dead zone, so they exist but throw if you touch them before their declaration runs.",
+      "start": 226.12,
+      "end": 244.695
+    },
+    {
+      "speaker": "MAYA",
+      "text": "The working rule is default to const, use let only when you actually reassign, and treat var as legacy.",
+      "start": 244.835,
+      "end": 252.06
+    },
+    {
+      "speaker": "LEO",
+      "text": "Wait, so const makes the thing constant, right, nothing can change it.",
+      "start": 252.6,
+      "end": 257.225
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Careful, because that's a trap we're coming back to, but hold that thought, because chunk two is the single most asked JavaScript concept in interviews, which is closures.",
+      "start": 257.765,
+      "end": 268.44
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Here's the analogy, a closure is a backpack.",
+      "start": 268.58,
+      "end": 271.805
+    },
+    {
+      "speaker": "MAYA",
+      "text": "When a function is created, it packs a backpack with the variables from the scope where it was born, and it carries that backpack wherever it goes, even after the function that created it has finished and returned.",
+      "start": 271.945,
+      "end": 284.47
+    },
+    {
+      "speaker": "MAYA",
+      "text": "So if a counter function declares a variable n at 0 and returns an inner arrow function that increments n, calling that inner function later still works, it returns 1, then 2, because n is right there in the backpack, alive long after counter finished.",
+      "start": 284.61,
+      "end": 301.435
+    },
+    {
+      "speaker": "LEO",
+      "text": "So the memory hook is that a function remembers where it was born, not where it gets called, and that backpack is why closures give you private state, because nothing outside can reach into it except through the function you returned.",
+      "start": 301.975,
+      "end": 315.475
+    },
+    {
+      "speaker": "MAYA",
+      "text": "That's the definition to say out loud, a closure is a function that retains access to the variables from the scope where it was created, even after that scope has returned.",
+      "start": 316.015,
+      "end": 326.94
+    },
+    {
+      "speaker": "MAYA",
+      "text": "And there's a famous interview bug that tests whether you really get it.",
+      "start": 327.08,
+      "end": 331.305
+    },
+    {
+      "speaker": "MAYA",
+      "text": "You write a for loop with var i, and inside the loop you schedule a setTimeout that logs i, and instead of printing 0, 1, 2, it prints 3, 3, 3.",
+      "start": 331.445,
+      "end": 341.62
+    },
+    {
+      "speaker": "MAYA",
+      "text": "The reason is that var is function scoped, so all 3 callbacks packed the same single i into their backpacks, one shared binding, and by the time the timers fire the loop has already pushed it to 3.",
+      "start": 341.76,
+      "end": 354.66
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Switch var to let and it prints 0, 1, 2, because let creates a fresh binding on every iteration, so each callback gets its own little i in its own backpack.",
+      "start": 354.8,
+      "end": 365.3
+    },
+    {
+      "speaker": "LEO",
+      "text": "One loop, but with let it's 3 separate backpacks each holding a different number, and with var it's 3 hands gripping the same variable.",
+      "start": 365.84,
+      "end": 374.19
+    },
+    {
+      "speaker": "LEO",
+      "text": "That one I can remember.",
+      "start": 374.33,
+      "end": 376.18
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Good, because that exact snippet gets pasted into screens constantly.",
+      "start": 376.72,
+      "end": 381.445
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Now chunk three, the event loop, which is our cold open.",
+      "start": 381.585,
+      "end": 385.36
+    },
+    {
+      "speaker": "MAYA",
+      "text": "The picture here is a restaurant with exactly one chef.",
+      "start": 385.5,
+      "end": 389.2
+    },
+    {
+      "speaker": "MAYA",
+      "text": "JavaScript is single threaded, so there is 1 chef, and the call stack is whatever dish is on the stove right now, meaning synchronous code cooks immediately, start to finish, nothing interrupts it.",
+      "start": 389.34,
+      "end": 401.74
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Async work goes onto order tickets, but here's the crucial part, there are 2 ticket rails.",
+      "start": 401.88,
+      "end": 407.505
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Promise callbacks, so anything from a then or the continuation after an await, go on the VIP rail, called the microtask queue, and timers like setTimeout, plus I O and events, go on the regular rail, the macrotask queue.",
+      "start": 407.645,
+      "end": 422.47
+    },
+    {
+      "speaker": "MAYA",
+      "text": "When the chef finishes the current dish and the stove is clear, the rule is that the entire VIP rail gets cooked first, every last ticket on it, before the chef takes even 1 ticket from the regular rail.",
+      "start": 422.61,
+      "end": 435.485
+    },
+    {
+      "speaker": "LEO",
+      "text": "Which cracks the opener wide open, so let me replay it.",
+      "start": 436.025,
+      "end": 439.85
+    },
+    {
+      "speaker": "LEO",
+      "text": "Console log 1 cooks immediately, the setTimeout puts log 2 on the regular rail even with a 0 delay, the resolved promise puts log 3 on the VIP rail, console log 4 cooks immediately, and then the stack is empty, so VIP drains first, printing 3, and only then does the timer ticket run, printing 2, which gives 1, 4, 3, 2.",
+      "start": 439.99,
+      "end": 459.64
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Perfect, and the one sentence answer for interviews is that promise callbacks are microtasks, microtasks fully drain before the next macrotask, so a resolved promise always beats a setTimeout of 0.",
+      "start": 460.18,
+      "end": 473.655
+    },
+    {
+      "speaker": "MAYA",
+      "text": "And async await sits right on top of this, because await just pauses that one async function until the promise settles, while the chef stays free to cook other things, it never blocks the thread.",
+      "start": 473.795,
+      "end": 485.645
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Two practical points that impress interviewers, first, wrap awaits in try catch to handle rejections, and second, when your calls are independent, don't await them one by one in a loop, fire them together with Promise dot all, which runs them concurrently and rejects fast if any one fails, whereas Promise dot allSettled waits for everybody and reports each outcome, which is handy when you're tearing down test data and want every deletion attempted.",
+      "start": 485.785,
+      "end": 512.285
+    },
+    {
+      "speaker": "LEO",
+      "text": "Okay, trap corner time, and I already know one of them is aimed at me, because earlier I said const means nothing can change.",
+      "start": 512.825,
+      "end": 521.125
+    },
+    {
+      "speaker": "MAYA",
+      "text": "It is aimed at you, with love.",
+      "start": 521.665,
+      "end": 524.04
+    },
+    {
+      "speaker": "MAYA",
+      "text": "The classic wrong answer is that const makes a value immutable, and the truth is that const only stops reassignment of the variable name, not mutation of the object it points to, so with a const config object you can happily change config dot retries from 3 to 5, and the only thing that throws is trying to point config at a whole new object.",
+      "start": 524.18,
+      "end": 545.93
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Back to the locker analogy, const welds the key to your hand, but it does absolutely nothing to lock the locker.",
+      "start": 546.07,
+      "end": 553.47
+    },
+    {
+      "speaker": "LEO",
+      "text": "And the sibling trap is copying, right, because people say they copied an object with spread so they're safe.",
+      "start": 554.01,
+      "end": 560.66
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Right, spread and Object dot assign are shallow, they copy exactly one level, so any nested object inside is still shared, both copies hold keys to the same inner locker, and mutating a nested field in the copy silently corrupts the original, which in a test suite looks like tests polluting each other's data.",
+      "start": 561.2,
+      "end": 581.5
+    },
+    {
+      "speaker": "MAYA",
+      "text": "If you genuinely need a deep copy, say structuredClone, and you'll sound current.",
+      "start": 581.64,
+      "end": 586.79
+    },
+    {
+      "speaker": "MAYA",
+      "text": "One more quick trap while we're here, the fallback operators, because the or operator falls back on any falsy value, including 0, empty string, and false, while the double question mark, nullish coalescing, only falls back on null and undefined, so if 0 is a legitimate value in your data, or will eat it and the nullish operator won't.",
+      "start": 586.93,
+      "end": 607.88
+    },
+    {
+      "speaker": "LEO",
+      "text": "So how does all of this actually surface in the room, because I doubt anyone asks for a lecture on ticket rails.",
+      "start": 608.42,
+      "end": 615.62
+    },
+    {
+      "speaker": "MAYA",
+      "text": "It comes as prediction and debugging.",
+      "start": 616.16,
+      "end": 618.76
+    },
+    {
+      "speaker": "MAYA",
+      "text": "They'll paste the log ordering snippet or the var loop and ask what prints, and they're listening for the vocabulary, microtask, macrotask, fresh binding per iteration, closure.",
+      "start": 618.9,
+      "end": 630.3
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Then it turns practical, they'll describe a flaky Playwright test and the answer is almost always a missing await, a floating promise that let the test finish before the assertion ran, and mentioning that Playwright's expect assertions auto retry, or that you'd use Promise dot all for independent setup calls, shows you connect language theory to real test stability.",
+      "start": 630.44,
+      "end": 653.215
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Senior loops sometimes add a theory check, like whether ES6 classes are real classes, and the crisp answer is no, they're syntactic sugar over the prototype chain, where property lookups walk up from object to prototype until found, extends and super just wire those links, same mechanism, cleaner syntax.",
+      "start": 653.355,
+      "end": 673.605
+    },
+    {
+      "speaker": "MAYA",
+      "text": "And for this, the keyword, the answer is that it's decided by the call site, so obj dot fn gives you obj, a plain call gives undefined in strict mode, and arrow functions have no this of their own, they inherit it from the enclosing scope, which is exactly why arrows are the safe choice for callbacks.",
+      "start": 673.745,
+      "end": 693.17
+    },
+    {
+      "speaker": "LEO",
+      "text": "Alright, recap, 60 seconds, let me drive.",
+      "start": 693.71,
+      "end": 696.86
+    },
+    {
+      "speaker": "LEO",
+      "text": "If they ask double equals versus triple equals, say triple equals compares value and type with no coercion, double equals coerces first and surprises you, so you always use triple equals.",
+      "start": 697,
+      "end": 709.65
+    },
+    {
+      "speaker": "LEO",
+      "text": "If they ask what a closure is, say it's a function that keeps access to the variables from the scope where it was created even after that scope returns, it carries a backpack from where it was born, and the var loop prints 3, 3, 3 while let fixes it with a fresh binding per iteration.",
+      "start": 709.79,
+      "end": 726.915
+    },
+    {
+      "speaker": "LEO",
+      "text": "And if they ask about the event loop, say JavaScript is single threaded, sync code runs on the call stack, and when the stack is empty the engine drains all microtasks, meaning promise callbacks, before taking 1 macrotask like a timer, which is why that snippet prints 1, 4, 3, 2.",
+      "start": 727.055,
+      "end": 744.78
+    },
+    {
+      "speaker": "MAYA",
+      "text": "That's the whole game, one chef, two ticket rails, backpacks, and lockers.",
+      "start": 745.32,
+      "end": 749.995
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Nail those pictures and the follow ups take care of themselves.",
+      "start": 750.135,
+      "end": 754.21
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Next time you've got a spare commute, pull up the async questions in your question bank and drill Promise dot all versus allSettled until it's reflex, because that pairing is the difference between a good answer and a hire answer.",
+      "start": 754.35,
+      "end": 768.425
+    },
+    {
+      "speaker": "LEO",
+      "text": "Photocopies for primitives, keys for objects, and never trust a 0 millisecond timer.",
+      "start": 768.965,
+      "end": 775.165
+    },
+    {
+      "speaker": "LEO",
+      "text": "See you in the next one.",
+      "start": 775.305,
+      "end": 777.08
+    }
+  ]
+}

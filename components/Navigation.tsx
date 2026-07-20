@@ -16,7 +16,7 @@ type NavLink = {
 // Primary lanes. Home lives on the wordmark (left). Daily / Topics / Quizzes are
 // folded into the Practice hub; Review is folded into Progress.
 const links: NavLink[] = [
-  { href: "/practice", label: "Practice", match: ["/topics", "/quizzes", "/quiz", "/daily-practice", "/flashcards", "/mock-interview"] },
+  { href: "/practice", label: "Practice", match: ["/topics", "/quizzes", "/quiz", "/daily-practice", "/flashcards", "/mock-interview", "/commute"] },
   { href: "/coding-gym", label: "Coding Gym" },
   { href: "/mock-exam", label: "Mock Exam" },
   { href: "/cheatsheets", label: "Cheat Sheets" },

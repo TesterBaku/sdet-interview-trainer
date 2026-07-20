@@ -1,0 +1,540 @@
+{
+  "id": "sql",
+  "voice": null,
+  "voices": {
+    "MAYA": "af_heart",
+    "LEO": "am_fenrir"
+  },
+  "durationSec": 813.75,
+  "hash": "8582f96e7092bfffb4d830cf336c026aad77afb961f4b12906222b93824264a9",
+  "cues": [
+    {
+      "speaker": "MAYA",
+      "text": "Okay, here is one that shows up in almost every SDET loop.",
+      "start": 0,
+      "end": 4.075
+    },
+    {
+      "speaker": "MAYA",
+      "text": "You write a LEFT JOIN from customers to orders because you want every customer, including the ones who never bought anything, and then in the WHERE clause you filter on order status equals paid.",
+      "start": 4.215,
+      "end": 16.39
+    },
+    {
+      "speaker": "MAYA",
+      "text": "You run it, and suddenly all your customers with no orders have vanished from the result.",
+      "start": 16.53,
+      "end": 22.205
+    },
+    {
+      "speaker": "MAYA",
+      "text": "So the question is, what happened, and why did your LEFT JOIN quietly stop being a LEFT JOIN?",
+      "start": 22.345,
+      "end": 28.395
+    },
+    {
+      "speaker": "LEO",
+      "text": "And if your answer was something like, huh, the database must be broken, then stick around, because this is the episode for you.",
+      "start": 28.935,
+      "end": 37.01
+    },
+    {
+      "speaker": "LEO",
+      "text": "I'm Leo, I write automation for a living, and I am the guy who once shipped that exact bug to a data reconciliation check.",
+      "start": 37.15,
+      "end": 45.475
+    },
+    {
+      "speaker": "MAYA",
+      "text": "And I'm Maya, I've spent years as a staff SDET and I used to run hiring loops, which means I have watched that question sink more candidates than any algorithm puzzle.",
+      "start": 46.015,
+      "end": 56.915
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Today we're doing SQL for SDET interviews, and I want to say up front why this matters so much for testers specifically.",
+      "start": 57.055,
+      "end": 64.755
+    },
+    {
+      "speaker": "MAYA",
+      "text": "For an SDET, SQL is not a nice-to-have, it's your verification tool, because the UI can lie and the API can lie, but the database is where the truth actually lands.",
+      "start": 64.895,
+      "end": 76.67
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Interviewers know that, so they probe whether you can go one layer deeper than the screen.",
+      "start": 76.81,
+      "end": 82.06
+    },
+    {
+      "speaker": "LEO",
+      "text": "Right, and in practice that means three families of questions keep coming back, which is how a query actually executes, how joins behave when rows don't match, and how you handle grouping, ranking, and NULLs without falling into the classic traps.",
+      "start": 82.6,
+      "end": 97.9
+    },
+    {
+      "speaker": "LEO",
+      "text": "So let's start at the beginning, Maya, because the execution order thing confused me for years.",
+      "start": 98.04,
+      "end": 104.215
+    },
+    {
+      "speaker": "LEO",
+      "text": "I write SELECT first, so I assumed the database reads it first.",
+      "start": 104.355,
+      "end": 108.705
+    },
+    {
+      "speaker": "MAYA",
+      "text": "That assumption is the root of half the confusion in SQL, so let's kill it with an analogy.",
+      "start": 109.245,
+      "end": 115.07
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Think of a restaurant kitchen working from a ticket.",
+      "start": 115.21,
+      "end": 118.61
+    },
+    {
+      "speaker": "MAYA",
+      "text": "The words on the ticket are written in one order, but the kitchen works in its own order, because you can't plate a dish before you've cooked it.",
+      "start": 118.75,
+      "end": 126.85
+    },
+    {
+      "speaker": "MAYA",
+      "text": "The database is the same.",
+      "start": 126.99,
+      "end": 129.14
+    },
+    {
+      "speaker": "MAYA",
+      "text": "It starts with FROM and JOIN, which is gathering the ingredients, pulling the source tables and combining them.",
+      "start": 129.28,
+      "end": 136.155
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Then WHERE runs, which is the prep cook throwing out the ingredients you won't use, filtering individual rows before anything else happens.",
+      "start": 136.295,
+      "end": 144.97
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Then GROUP BY collapses rows into groups, HAVING filters those groups, and only then does SELECT run, picking the columns and computing your expressions.",
+      "start": 145.11,
+      "end": 154.96
+    },
+    {
+      "speaker": "MAYA",
+      "text": "After that come ORDER BY to sort and LIMIT to cut the result down.",
+      "start": 155.1,
+      "end": 159.6
+    },
+    {
+      "speaker": "LEO",
+      "text": "Wait, so SELECT is basically step 5 out of 7, even though it's the first word I type.",
+      "start": 160.14,
+      "end": 166.34
+    },
+    {
+      "speaker": "LEO",
+      "text": "And that finally explains the alias thing, right, because if I define an alias in SELECT, like total spend, and then try to use that alias in WHERE, the database complains, because WHERE already ran before the alias even existed.",
+      "start": 166.48,
+      "end": 181.13
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Exactly, and here's the flip side that makes it a great interview answer.",
+      "start": 181.67,
+      "end": 186.545
+    },
+    {
+      "speaker": "MAYA",
+      "text": "That same alias does work in ORDER BY, because ORDER BY runs near the end, after SELECT has created it.",
+      "start": 186.685,
+      "end": 193.935
+    },
+    {
+      "speaker": "MAYA",
+      "text": "So when an interviewer asks why an alias works in one clause and not another, you don't just recite the rule, you explain that logical execution goes FROM, WHERE, GROUP BY, HAVING, SELECT, ORDER BY, LIMIT, and everything else falls out of that ordering.",
+      "start": 194.075,
+      "end": 210.3
+    },
+    {
+      "speaker": "LEO",
+      "text": "My memory hook for it is that the kitchen cooks in its own order no matter what the ticket says.",
+      "start": 210.84,
+      "end": 216.79
+    },
+    {
+      "speaker": "LEO",
+      "text": "Okay, chunk two, joins, which is where our cold open lives.",
+      "start": 216.93,
+      "end": 221.23
+    },
+    {
+      "speaker": "MAYA",
+      "text": "So a join combines rows from two tables on a matching condition, and the join type is really just a policy for what happens to rows that don't match.",
+      "start": 221.77,
+      "end": 231.795
+    },
+    {
+      "speaker": "MAYA",
+      "text": "My analogy here is a wedding with a guest list and a stack of RSVP cards.",
+      "start": 231.935,
+      "end": 237.36
+    },
+    {
+      "speaker": "MAYA",
+      "text": "An INNER JOIN gives you only the people who are on the list and also sent a card back, matches on both sides.",
+      "start": 237.5,
+      "end": 244.6
+    },
+    {
+      "speaker": "MAYA",
+      "text": "A LEFT JOIN gives you the entire guest list, and for anyone who never replied, the RSVP columns come back as NULL, an empty slot where the card would be.",
+      "start": 244.74,
+      "end": 255.49
+    },
+    {
+      "speaker": "MAYA",
+      "text": "RIGHT JOIN is just the mirror of that, FULL OUTER keeps everybody from both piles with NULLs filling either gap, and CROSS JOIN pairs every guest with every card, which is a Cartesian product and almost always an accident.",
+      "start": 255.63,
+      "end": 269.68
+    },
+    {
+      "speaker": "MAYA",
+      "text": "There's also the self join, where a table joins to itself, like matching each employee row to the row of their manager in the same table.",
+      "start": 269.82,
+      "end": 278.97
+    },
+    {
+      "speaker": "LEO",
+      "text": "And the reason LEFT JOIN matters so much for testers is that missing-match pattern, because customers with no orders is really the shape of orphaned data.",
+      "start": 279.51,
+      "end": 289.46
+    },
+    {
+      "speaker": "LEO",
+      "text": "You LEFT JOIN orders onto customers, and then you keep only the rows where the order id IS NULL, and what falls out is exactly the customers who have nothing on the other side.",
+      "start": 289.6,
+      "end": 301.075
+    },
+    {
+      "speaker": "LEO",
+      "text": "I use the same shape in reverse for referential integrity, LEFT JOIN customers onto orders and keep the rows where the customer comes back NULL, and now I've found orders pointing at customers that don't exist.",
+      "start": 301.215,
+      "end": 314.79
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Which brings us back to the cold open, and this is genuinely the most common SQL trap in interviews.",
+      "start": 315.33,
+      "end": 321.905
+    },
+    {
+      "speaker": "MAYA",
+      "text": "The candidate writes the LEFT JOIN correctly, then filters the right-hand table in the WHERE clause, say where order status equals paid.",
+      "start": 322.045,
+      "end": 330.92
+    },
+    {
+      "speaker": "MAYA",
+      "text": "But think about the unmatched customers, their status column is NULL, and a comparison against NULL is never true, so WHERE throws those rows away.",
+      "start": 331.06,
+      "end": 340.61
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Your LEFT JOIN has silently degraded into an INNER JOIN.",
+      "start": 340.75,
+      "end": 344.85
+    },
+    {
+      "speaker": "MAYA",
+      "text": "The fix is to move that condition into the ON clause, so the filter is applied while matching rather than after, and the unmatched left rows survive with their NULLs intact.",
+      "start": 344.99,
+      "end": 355.715
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Conditions on the left table can live in WHERE, conditions on the right table of a LEFT JOIN usually belong in ON.",
+      "start": 355.855,
+      "end": 363.205
+    },
+    {
+      "speaker": "LEO",
+      "text": "My hook there is that WHERE filters the finished result, ON filters the matchmaking.",
+      "start": 363.745,
+      "end": 369.12
+    },
+    {
+      "speaker": "LEO",
+      "text": "Alright, third chunk, grouping and its cooler sibling, window functions.",
+      "start": 369.26,
+      "end": 373.935
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Let's ground GROUP BY first, because WHERE versus HAVING is probably the single most asked SQL question in SDET screens.",
+      "start": 374.475,
+      "end": 382.675
+    },
+    {
+      "speaker": "MAYA",
+      "text": "WHERE filters individual rows before grouping happens, so it cannot use aggregates, because the groups don't exist yet.",
+      "start": 382.815,
+      "end": 390.365
+    },
+    {
+      "speaker": "MAYA",
+      "text": "HAVING filters after the groups are formed, so it can say things like having the SUM of amount greater than 1000.",
+      "start": 390.505,
+      "end": 398.655
+    },
+    {
+      "speaker": "MAYA",
+      "text": "So a query for big customers reads naturally as, filter to paid orders with WHERE, group by customer, then keep only the groups whose total passes the bar with HAVING.",
+      "start": 398.795,
+      "end": 409.77
+    },
+    {
+      "speaker": "MAYA",
+      "text": "And a couple of details interviewers love, every non-aggregated column in your SELECT has to appear in the GROUP BY, and COUNT star counts rows while COUNT of a column skips NULLs, which are not the same number.",
+      "start": 409.91,
+      "end": 423.11
+    },
+    {
+      "speaker": "LEO",
+      "text": "Okay, and window functions, because whenever I hear second highest salary or latest record per key, that's this territory, right?",
+      "start": 423.65,
+      "end": 432.525
+    },
+    {
+      "speaker": "MAYA",
+      "text": "It is, and here's the analogy that makes the difference click.",
+      "start": 433.065,
+      "end": 436.915
+    },
+    {
+      "speaker": "MAYA",
+      "text": "GROUP BY is a blender, you pour 10 rows in and you get 1 smoothie out, the individual rows are gone.",
+      "start": 437.055,
+      "end": 443.78
+    },
+    {
+      "speaker": "MAYA",
+      "text": "A window function is more like standing the rows in a line and letting each one glance at its neighbors, every row stays intact but it gains extra information, its rank in the line, a running total, the value of the row before it.",
+      "start": 443.92,
+      "end": 458.945
+    },
+    {
+      "speaker": "MAYA",
+      "text": "PARTITION BY decides which line each row stands in, and the ORDER BY inside the OVER clause decides the sequence within that line.",
+      "start": 459.085,
+      "end": 467.635
+    },
+    {
+      "speaker": "MAYA",
+      "text": "So for top 3 earners per department, you partition by department, order by salary descending, compute a rank, and then filter to rank at most 3.",
+      "start": 467.775,
+      "end": 477.5
+    },
+    {
+      "speaker": "MAYA",
+      "text": "For deduplication, you partition by the business key, order by updated at descending, take ROW_NUMBER, and keep only row number 1, which leaves you the latest version of every record.",
+      "start": 477.64,
+      "end": 489.49
+    },
+    {
+      "speaker": "LEO",
+      "text": "And the three ranking functions differ on ties, which I remember as strict, gappy, and packed.",
+      "start": 490.03,
+      "end": 496.13
+    },
+    {
+      "speaker": "LEO",
+      "text": "ROW_NUMBER is strict, always unique even on ties.",
+      "start": 496.27,
+      "end": 500.045
+    },
+    {
+      "speaker": "LEO",
+      "text": "RANK is gappy, two people tied at 1 and the next rank is 3.",
+      "start": 500.185,
+      "end": 504.585
+    },
+    {
+      "speaker": "LEO",
+      "text": "DENSE_RANK is packed, 1, 1, then 2.",
+      "start": 504.725,
+      "end": 507.35
+    },
+    {
+      "speaker": "LEO",
+      "text": "So for second highest salary I want DENSE_RANK descending and filter to rank 2, because if two people tie for the top, RANK would skip right past second place.",
+      "start": 507.49,
+      "end": 518.04
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Nicely put, and that's exactly the level of nuance that separates a memorized answer from an understood one.",
+      "start": 518.58,
+      "end": 525.805
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Now, trap corner, because beyond the LEFT JOIN one we already covered, there are 2 more classics, and both are about NULL.",
+      "start": 525.945,
+      "end": 533.695
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Remember that NULL means unknown, not zero and not empty string, and unknown spreads.",
+      "start": 533.835,
+      "end": 539.685
+    },
+    {
+      "speaker": "MAYA",
+      "text": "So 5 plus NULL is NULL, and any comparison using equals NULL is unknown, never true, which is why you must write IS NULL or IS NOT NULL instead.",
+      "start": 539.825,
+      "end": 550.45
+    },
+    {
+      "speaker": "LEO",
+      "text": "And the really evil one is NOT IN.",
+      "start": 550.99,
+      "end": 553.49
+    },
+    {
+      "speaker": "LEO",
+      "text": "Say I check for order ids that are not in some subquery, and that subquery happens to return even a single NULL.",
+      "start": 553.63,
+      "end": 561.955
+    },
+    {
+      "speaker": "LEO",
+      "text": "The whole query returns no rows at all, zero, with no error and no warning, because the database can't prove any value is not in a set containing unknown.",
+      "start": 562.095,
+      "end": 572.82
+    },
+    {
+      "speaker": "LEO",
+      "text": "I lost an afternoon to that once, the test just went green because the data-quality check returned nothing, which looked like no violations.",
+      "start": 572.96,
+      "end": 582.01
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Which is the worst kind of bug for a tester, a check that silently passes.",
+      "start": 582.55,
+      "end": 587.5
+    },
+    {
+      "speaker": "MAYA",
+      "text": "So the professional answer is to prefer NOT EXISTS over NOT IN, because EXISTS handles NULLs predictably and is usually faster for existence checks anyway.",
+      "start": 587.64,
+      "end": 597.99
+    },
+    {
+      "speaker": "MAYA",
+      "text": "And round out your NULL toolkit with COALESCE, which returns the first non-null argument, great for display fallbacks, and NULLIF, which returns NULL when its two arguments are equal, the classic guard against divide by zero, dividing by NULLIF of count and 0.",
+      "start": 598.13,
+      "end": 615.33
+    },
+    {
+      "speaker": "MAYA",
+      "text": "One more NULL surprise worth naming, aggregates skip NULLs, so AVG of a column ignores the null rows entirely, and that can quietly shift your averages.",
+      "start": 615.47,
+      "end": 626.37
+    },
+    {
+      "speaker": "LEO",
+      "text": "Okay, so how does all of this actually surface in the room, because I doubt anyone hands you a laptop and says go write 40 lines of SQL.",
+      "start": 626.91,
+      "end": 636.01
+    },
+    {
+      "speaker": "MAYA",
+      "text": "For SDET roles it usually comes in three flavors.",
+      "start": 636.55,
+      "end": 640.375
+    },
+    {
+      "speaker": "MAYA",
+      "text": "First, rapid-fire definitions, WHERE versus HAVING, INNER versus LEFT, DELETE versus TRUNCATE versus DROP, and on that last one the crisp answer is that DELETE removes rows, takes a WHERE clause, is fully logged and can be rolled back, TRUNCATE empties the whole table fast with minimal logging, and DROP removes the table itself, structure and all.",
+      "start": 640.515,
+      "end": 662.49
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Second, a small whiteboard query, almost always one of the greatest hits, customers with no orders, duplicate emails via GROUP BY and HAVING COUNT greater than 1, second highest salary, or latest record per key.",
+      "start": 662.63,
+      "end": 677.055
+    },
+    {
+      "speaker": "MAYA",
+      "text": "And third, the testing angle, where they ask how you'd verify that an API call really persisted correctly, and the answer they want is that you query the database after the action and assert on the actual row, plus you use SQL for data-quality checks like duplicates, orphans, and row-count reconciliation, and for seeding and cleaning test data around your automated tests.",
+      "start": 677.195,
+      "end": 700.57
+    },
+    {
+      "speaker": "MAYA",
+      "text": "If performance comes up, say that indexes are like a book's index, a sorted lookup that makes reads fast at the cost of slower writes and extra storage, that a composite index on a and b follows the left-prefix rule so it won't help a filter on b alone, that wrapping an indexed column in a function like YEAR kills index use so you rewrite it as a date range, and that you check all of this with EXPLAIN.",
+      "start": 700.71,
+      "end": 724.985
+    },
+    {
+      "speaker": "MAYA",
+      "text": "And if transactions come up, ACID is Atomicity, Consistency, Isolation, Durability, everything commits or nothing does.",
+      "start": 725.125,
+      "end": 733.7
+    },
+    {
+      "speaker": "LEO",
+      "text": "Alright, 60-second recap, three takeaways.",
+      "start": 734.24,
+      "end": 737.465
+    },
+    {
+      "speaker": "LEO",
+      "text": "If they ask about WHERE versus HAVING, say WHERE filters rows before grouping and can't use aggregates, HAVING filters groups after GROUP BY and can, and anchor it in the execution order, FROM, WHERE, GROUP BY, HAVING, SELECT, ORDER BY, LIMIT, the kitchen cooks in its own order.",
+      "start": 737.605,
+      "end": 754.53
+    },
+    {
+      "speaker": "LEO",
+      "text": "If they ask about LEFT JOIN, say it keeps all left rows with NULLs for the misses, that finding non-matches is LEFT JOIN plus WHERE the right key IS NULL, and volunteer the trap, filtering the right table in WHERE collapses it into an INNER JOIN, so that condition goes in ON.",
+      "start": 754.67,
+      "end": 771.345
+    },
+    {
+      "speaker": "LEO",
+      "text": "And if they ask about ranking or NULLs, say ROW_NUMBER is unique, RANK leaves gaps, DENSE_RANK doesn't, so second highest salary is DENSE_RANK descending filtered to 2, and never write equals NULL or trust NOT IN near nullable columns, reach for IS NULL and NOT EXISTS instead.",
+      "start": 771.485,
+      "end": 788.785
+    },
+    {
+      "speaker": "MAYA",
+      "text": "That's the core of it, and honestly, if you can explain the LEFT JOIN trap and the NOT IN trap without prompting, you'll sound stronger than most candidates I ever interviewed.",
+      "start": 789.325,
+      "end": 799.925
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Go run these patterns against a real database until they're muscle memory, and then come back, because next time we're going deeper into the rest of the SDET toolkit.",
+      "start": 800.065,
+      "end": 810.59
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Until then, happy querying.",
+      "start": 810.73,
+      "end": 813.205
+    }
+  ]
+}

@@ -1,0 +1,564 @@
+{
+  "id": "pyspark",
+  "voice": null,
+  "voices": {
+    "MAYA": "af_heart",
+    "LEO": "am_fenrir"
+  },
+  "durationSec": 858,
+  "hash": "e090341ad3b9b8753f06a6366cea055c138dac126a7264acd8ad663a8882c926",
+  "cues": [
+    {
+      "speaker": "MAYA",
+      "text": "Okay, picture this, you're in a PySpark interview and they show you 3 lines of code, a read, a filter, and a select, and they ask why the job finished in half a second even though the table has 2 billion rows.",
+      "start": 0,
+      "end": 14.1
+    },
+    {
+      "speaker": "MAYA",
+      "text": "And then they lean in and ask the follow-up, so when does Spark actually do any work.",
+      "start": 14.24,
+      "end": 19.115
+    },
+    {
+      "speaker": "MAYA",
+      "text": "If your answer starts and ends with the word lazy, you're only halfway to the offer.",
+      "start": 19.255,
+      "end": 24.33
+    },
+    {
+      "speaker": "LEO",
+      "text": "And if you were about to confidently say, well, it ran fast because Spark is just fast...",
+      "start": 24.87,
+      "end": 30.67
+    },
+    {
+      "speaker": "LEO",
+      "text": "yeah, this is the episode for you.",
+      "start": 30.81,
+      "end": 33.185
+    },
+    {
+      "speaker": "LEO",
+      "text": "I'm Leo.",
+      "start": 33.325,
+      "end": 34.725
+    },
+    {
+      "speaker": "MAYA",
+      "text": "And I'm Maya.",
+      "start": 35.265,
+      "end": 36.865
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Today we're doing PySpark for SDETs, which is the data engineering and big data testing topic, and I want to say up front why this matters for testers specifically.",
+      "start": 37.005,
+      "end": 47.93
+    },
+    {
+      "speaker": "MAYA",
+      "text": "More and more automation roles sit next to data pipelines now, and the interviewer isn't hiring you to build the pipeline, they're hiring you to prove the pipeline is correct, which means you need to understand how Spark runs a job, where it gets slow, and how you test data instead of just testing code.",
+      "start": 48.07,
+      "end": 66.52
+    },
+    {
+      "speaker": "LEO",
+      "text": "Right, because a pipeline can run green every night and still be quietly writing garbage, and nobody notices until finance opens a dashboard.",
+      "start": 67.06,
+      "end": 76.71
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Exactly.",
+      "start": 77.25,
+      "end": 78.85
+    },
+    {
+      "speaker": "MAYA",
+      "text": "So let's build the mental model first.",
+      "start": 78.99,
+      "end": 81.615
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Spark is a distributed engine, and the analogy I always use is a restaurant kitchen.",
+      "start": 81.755,
+      "end": 87.68
+    },
+    {
+      "speaker": "MAYA",
+      "text": "There's one head chef, that's the driver, it runs your main program, holds the SparkSession, and builds the plan.",
+      "start": 87.82,
+      "end": 94.82
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Then there are many line cooks, those are the executors, separate processes on worker machines that actually do the cooking in parallel.",
+      "start": 94.96,
+      "end": 103.685
+    },
+    {
+      "speaker": "MAYA",
+      "text": "And the food itself arrives chopped into portions called partitions, where one task works on one partition, so your parallelism is literally the number of portions you can cook at once.",
+      "start": 103.825,
+      "end": 115.5
+    },
+    {
+      "speaker": "LEO",
+      "text": "Okay, and the lazy part, where does that fit in the kitchen?",
+      "start": 116.04,
+      "end": 119.865
+    },
+    {
+      "speaker": "MAYA",
+      "text": "The lazy part is that when you write transformations, things like select, filter, join, groupBy, withColumn, nothing gets cooked.",
+      "start": 120.405,
+      "end": 129.005
+    },
+    {
+      "speaker": "MAYA",
+      "text": "You're just writing steps onto the recipe card, and each transformation returns a new DataFrame that represents a longer recipe.",
+      "start": 129.145,
+      "end": 137.72
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Cooking only starts when an action shows up, something like count, collect, show, or write, because an action is a customer actually ordering the dish, it demands a real result, and that forces the whole plan to execute.",
+      "start": 137.86,
+      "end": 152.235
+    },
+    {
+      "speaker": "LEO",
+      "text": "So wait, that's why the interview question about the half-second job works.",
+      "start": 152.775,
+      "end": 157.525
+    },
+    {
+      "speaker": "LEO",
+      "text": "The read, the filter, the select, those were all transformations, so Spark just wrote down the recipe and returned instantly, and the 2 billion rows never moved.",
+      "start": 157.665,
+      "end": 168.44
+    },
+    {
+      "speaker": "MAYA",
+      "text": "That's it, and here's the part that separates a good answer from a great one.",
+      "start": 168.98,
+      "end": 173.605
+    },
+    {
+      "speaker": "MAYA",
+      "text": "The reason Spark is lazy on purpose is that deferring execution until an action lets the Catalyst optimizer see the entire plan before running any of it, so it can push filters down to the file scan, prune columns you never use, and reorder joins.",
+      "start": 173.745,
+      "end": 190.47
+    },
+    {
+      "speaker": "MAYA",
+      "text": "If Spark executed eagerly line by line, it would have already read all the columns before finding out you only wanted 2 of them.",
+      "start": 190.61,
+      "end": 198.91
+    },
+    {
+      "speaker": "MAYA",
+      "text": "And that's also why you use DataFrames instead of raw RDDs, because a DataFrame has a schema, named typed columns that Catalyst can optimize, while an RDD is a low-level bag of objects the optimizer can't see into.",
+      "start": 199.05,
+      "end": 214.475
+    },
+    {
+      "speaker": "MAYA",
+      "text": "And if they ask about Datasets, the clean answer is that the typed Dataset API is Scala and Java only, so in PySpark the whole DataFrame versus Dataset debate collapses down to, use DataFrames.",
+      "start": 214.615,
+      "end": 228.94
+    },
+    {
+      "speaker": "LEO",
+      "text": "Let me lock that in.",
+      "start": 229.48,
+      "end": 231.155
+    },
+    {
+      "speaker": "LEO",
+      "text": "Transformations write the recipe, actions cook the meal, and Spark waits because the optimizer wants to read the whole recipe before turning on the stove.",
+      "start": 231.295,
+      "end": 241.295
+    },
+    {
+      "speaker": "LEO",
+      "text": "Got it.",
+      "start": 241.435,
+      "end": 242.61
+    },
+    {
+      "speaker": "LEO",
+      "text": "But you said transformations split further, right, narrow versus wide?",
+      "start": 242.75,
+      "end": 247.475
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Yes, and this is the bridge to the second big idea, the shuffle.",
+      "start": 248.015,
+      "end": 252.44
+    },
+    {
+      "speaker": "MAYA",
+      "text": "A narrow transformation, like filter or select, is work each cook can do at their own station, because each output portion depends on only one input portion, so no food moves around the kitchen and it's cheap.",
+      "start": 252.58,
+      "end": 266.63
+    },
+    {
+      "speaker": "MAYA",
+      "text": "A wide transformation, like groupBy, join, distinct, or orderBy, needs rows regrouped across partitions, which means every station has to pass ingredients to other stations, and that regrouping is called a shuffle.",
+      "start": 266.77,
+      "end": 281.495
+    },
+    {
+      "speaker": "LEO",
+      "text": "And I'm guessing the shuffle is the expensive part.",
+      "start": 282.035,
+      "end": 285.285
+    },
+    {
+      "speaker": "MAYA",
+      "text": "It's the single most expensive thing Spark does, full stop, and that's a sentence worth saying verbatim in an interview.",
+      "start": 285.825,
+      "end": 293.525
+    },
+    {
+      "speaker": "MAYA",
+      "text": "A shuffle writes intermediate data to disk and drags it across the network between executors, so almost all Spark performance tuning is really just the art of avoiding shuffles or making them smaller.",
+      "start": 293.665,
+      "end": 306.84
+    },
+    {
+      "speaker": "MAYA",
+      "text": "And there are 3 levers interviewers love to probe here.",
+      "start": 306.98,
+      "end": 310.68
+    },
+    {
+      "speaker": "MAYA",
+      "text": "First, repartition versus coalesce, where repartition of n does a full shuffle to get exactly n partitions, up or down, which you'd use to fix skew or raise parallelism, while coalesce merges partitions down without a full shuffle, which is what you call before writing so you don't spray thousands of tiny files into storage.",
+      "start": 310.82,
+      "end": 332.245
+    },
+    {
+      "speaker": "LEO",
+      "text": "So repartition is repacking every box in the warehouse from scratch, and coalesce is just taping a few half-empty boxes together.",
+      "start": 332.785,
+      "end": 341.585
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Perfect hook.",
+      "start": 342.125,
+      "end": 343.7
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Second lever, the broadcast join.",
+      "start": 343.84,
+      "end": 346.465
+    },
+    {
+      "speaker": "MAYA",
+      "text": "If one side of a join is small, under the auto broadcast threshold which defaults to about 10 megabytes, Spark ships a full copy of that small table to every executor, like handing every cook a pocket reference booklet, so each one joins locally and the big table never shuffles at all.",
+      "start": 346.605,
+      "end": 364.905
+    },
+    {
+      "speaker": "MAYA",
+      "text": "And third, data skew, which is my favorite interview scenario.",
+      "start": 365.045,
+      "end": 369.47
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Skew means a few keys hold most of the rows, one hot user id, or a null join key, so one poor task gets a giant partition while everyone else finishes, and the classic symptom, the thing you should recognize instantly, is 199 tasks finishing in seconds while 1 task runs for an hour, because the whole stage waits on the slowest task.",
+      "start": 369.61,
+      "end": 392.685
+    },
+    {
+      "speaker": "LEO",
+      "text": "One checkout lane with 500 people in it while every other lane is empty.",
+      "start": 393.225,
+      "end": 398.4
+    },
+    {
+      "speaker": "LEO",
+      "text": "So how do you fix it?",
+      "start": 398.54,
+      "end": 400.265
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Give the fixes in order of preference.",
+      "start": 400.805,
+      "end": 403.605
+    },
+    {
+      "speaker": "MAYA",
+      "text": "First, turn on Adaptive Query Execution with skew join handling enabled, because Spark will detect and split the fat partitions at runtime, and that's the modern first move.",
+      "start": 403.745,
+      "end": 414.97
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Second, broadcast the small side if it fits, since no shuffle means no skew.",
+      "start": 415.11,
+      "end": 420.485
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Third, salting, where you append a random suffix, say 1 of 8 values, to the hot key on both sides of the join, which spreads that one hot key across 8 partitions, and then you strip the salt after joining.",
+      "start": 420.625,
+      "end": 434.25
+    },
+    {
+      "speaker": "MAYA",
+      "text": "It's literally opening 8 extra checkout lanes for the one crowded key.",
+      "start": 434.39,
+      "end": 439.24
+    },
+    {
+      "speaker": "MAYA",
+      "text": "And if the hot key is a null or a sentinel value, just handle those rows separately and union the results back.",
+      "start": 439.38,
+      "end": 446.78
+    },
+    {
+      "speaker": "LEO",
+      "text": "Nice.",
+      "start": 447.32,
+      "end": 448.445
+    },
+    {
+      "speaker": "LEO",
+      "text": "Okay, third chunk, because you promised me the part that actually wins SDET interviews, the testing story.",
+      "start": 448.585,
+      "end": 455.735
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Right, and here's the mindset shift, you test the data, not just the code.",
+      "start": 456.275,
+      "end": 461.175
+    },
+    {
+      "speaker": "MAYA",
+      "text": "The framework I'd name in the room is a checklist of quality dimensions.",
+      "start": 461.315,
+      "end": 465.915
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Completeness, meaning no unexpected nulls in required columns.",
+      "start": 466.055,
+      "end": 470.805
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Uniqueness, meaning primary keys aren't duplicated.",
+      "start": 470.945,
+      "end": 474.745
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Row-count reconciliation, meaning the output count squares with the source, because an inner join can silently drop rows and never throw an error.",
+      "start": 474.885,
+      "end": 484.285
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Then range and domain checks, like amounts never negative and statuses inside an allowed set, referential checks, where every foreign key resolves to a dimension row, and freshness, where the latest partition is recent enough.",
+      "start": 484.425,
+      "end": 499.3
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Tools like Great Expectations or dbt tests run exactly these checks as a gate in CI, and mature pipelines quarantine bad rows into a dead-letter table instead of crashing the whole job, so good data keeps flowing while bad data sits captured for triage.",
+      "start": 499.44,
+      "end": 517.465
+    },
+    {
+      "speaker": "LEO",
+      "text": "And for unit tests, how do you even test something that normally runs on a cluster?",
+      "start": 518.005,
+      "end": 523.23
+    },
+    {
+      "speaker": "MAYA",
+      "text": "You structure for it.",
+      "start": 523.77,
+      "end": 525.545
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Keep your logic in pure transform functions, meaning a function takes a DataFrame in and returns a DataFrame out with no reads or writes inside, and suddenly it's testable like any other function.",
+      "start": 525.685,
+      "end": 538.885
+    },
+    {
+      "speaker": "MAYA",
+      "text": "In pytest you spin up a session-scoped local SparkSession, build tiny inputs with createDataFrame, and compare results with chispa's assert df equality, or the built-in assertDataFrameEqual from Spark 3.5 onward, because those handle column order and nullability and give you readable diffs.",
+      "start": 539.025,
+      "end": 559.05
+    },
+    {
+      "speaker": "MAYA",
+      "text": "And one more layer that impresses interviewers, Delta Lake.",
+      "start": 559.19,
+      "end": 563.015
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Plain Parquet on object storage has no transactions, so a job that dies mid-write leaves readers seeing half the data, and Delta adds a transaction log on top that gives you ACID, writes that fully commit or don't happen at all, schema enforcement that rejects bad writes, and snapshot isolation for concurrent readers.",
+      "start": 563.155,
+      "end": 583.755
+    },
+    {
+      "speaker": "MAYA",
+      "text": "For a tester the killer feature is time travel, because when last night's run looks wrong, you can query the table as of the previous version and diff it against the current one to isolate exactly which rows changed, which is basically version control for data.",
+      "start": 583.895,
+      "end": 599.97
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Delta's merge statement also gives you idempotent upserts keyed on the primary key, and here's the tester's angle on that, idempotency is itself a test case, you rerun the same batch and assert the table comes out identical with no duplicates.",
+      "start": 600.11,
+      "end": 615.985
+    },
+    {
+      "speaker": "LEO",
+      "text": "Alright, trap corner time.",
+      "start": 616.525,
+      "end": 618.55
+    },
+    {
+      "speaker": "LEO",
+      "text": "What's the classic wrong answer here?",
+      "start": 618.69,
+      "end": 620.99
+    },
+    {
+      "speaker": "MAYA",
+      "text": "The trap has 3 heads, and they all come from treating Spark like pandas.",
+      "start": 621.53,
+      "end": 626.155
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Head number 1, someone asks how you'd verify output and the candidate says they would collect the DataFrame and compare the lists in Python.",
+      "start": 626.295,
+      "end": 635.42
+    },
+    {
+      "speaker": "MAYA",
+      "text": "The problem is collect pulls every row across the network into the driver's memory, so on production-scale data you just crashed the head chef, and the dodge is to assert on aggregates, counts, and bounded samples with a limit, or use a proper DataFrame equality tool.",
+      "start": 635.56,
+      "end": 652.31
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Head number 2, inferSchema in production, which reads the file twice and can silently decide a column is a different type from one run to the next, and that is a flaky-test factory, so the answer is you always pin an explicit schema.",
+      "start": 652.45,
+      "end": 667.775
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Head number 3, reaching for a Python UDF when a built-in function exists, because a plain Python UDF is a black box Catalyst can't optimize and it serializes data row by row, so the rule of thumb is native functions first, and a pandas Arrow UDF only if you truly must.",
+      "start": 667.915,
+      "end": 688.79
+    },
+    {
+      "speaker": "LEO",
+      "text": "So the pattern under all 3 is the same, the moment you drag distributed data into single-machine Python habits, you lose the optimizer, you lose the memory safety, and you lose determinism.",
+      "start": 689.33,
+      "end": 702.08
+    },
+    {
+      "speaker": "MAYA",
+      "text": "That's the exact sentence I'd want a candidate to say.",
+      "start": 702.62,
+      "end": 706.37
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Now, how this surfaces in the room.",
+      "start": 706.51,
+      "end": 709.16
+    },
+    {
+      "speaker": "MAYA",
+      "text": "It's rarely a definition quiz, it's scenarios.",
+      "start": 709.3,
+      "end": 712.55
+    },
+    {
+      "speaker": "MAYA",
+      "text": "They'll say a job that took 20 minutes now takes 4 hours and ask you to debug, and they want you to say you'd open the Spark UI, look for one straggler task in a stage, suspect skew, and reach for AQE, broadcast, or salting.",
+      "start": 712.69,
+      "end": 727.59
+    },
+    {
+      "speaker": "MAYA",
+      "text": "They'll ask you to deduplicate a table keeping the most recent record per key, and the canonical answer is a window, row number over partition by the key ordered by timestamp descending, then keep row number equals 1, which beats dropDuplicates because dropDuplicates gives you no guarantee about which duplicate survives.",
+      "start": 727.73,
+      "end": 747.88
+    },
+    {
+      "speaker": "MAYA",
+      "text": "And they'll ask how you'd test a pipeline end to end, where they want the layered answer, unit tests on pure transforms locally, data-quality gates between the bronze, silver, and gold layers, and reconciliation against the source.",
+      "start": 748.02,
+      "end": 762.27
+    },
+    {
+      "speaker": "LEO",
+      "text": "Okay, 60-second recap, let me play it back.",
+      "start": 762.81,
+      "end": 766.31
+    },
+    {
+      "speaker": "LEO",
+      "text": "If they ask why Spark is lazy, say transformations only build the plan and actions trigger it, and the payoff of deferring is that Catalyst gets to optimize the whole DAG, pushdown, pruning, join reordering, before anything runs.",
+      "start": 766.45,
+      "end": 782.1
+    },
+    {
+      "speaker": "LEO",
+      "text": "If they ask about shuffles, say a shuffle redistributes rows across executors through disk and network for wide transformations, it's the most expensive thing Spark does, and your tools against it are broadcast joins for small tables, coalesce before writes, and AQE or salting for skew.",
+      "start": 782.24,
+      "end": 800.44
+    },
+    {
+      "speaker": "LEO",
+      "text": "And if they ask how you'd validate a pipeline as an SDET, don't say you'd check the logs, name the checklist, pinned schema, completeness, uniqueness, row-count reconciliation, range, referential, freshness, run as CI gates, with pure transform functions unit-tested on a local SparkSession and chispa for equality.",
+      "start": 800.58,
+      "end": 819.03
+    },
+    {
+      "speaker": "MAYA",
+      "text": "That's the whole episode in 3 answers, and honestly, the candidate who frames Spark testing as testing the data, not the code, is the one I remember after a long loop of interviews.",
+      "start": 819.57,
+      "end": 831.745
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Practice writing that dedupe window from memory, spin up a local session tonight and break something on purpose, and then go run the PySpark question bank in the app until the answers come out in full sentences.",
+      "start": 831.885,
+      "end": 845.31
+    },
+    {
+      "speaker": "LEO",
+      "text": "Recipes, kitchens, and checkout lanes, that's how I'm storing all of this.",
+      "start": 845.85,
+      "end": 850.725
+    },
+    {
+      "speaker": "LEO",
+      "text": "Next time, more topics from the SDET bank, until then, keep your schemas pinned and your shuffles small.",
+      "start": 850.865,
+      "end": 857.465
+    }
+  ]
+}

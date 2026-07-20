@@ -1,0 +1,594 @@
+{
+  "id": "testng",
+  "voice": null,
+  "voices": {
+    "MAYA": "af_heart",
+    "LEO": "am_fenrir"
+  },
+  "durationSec": 891.86,
+  "hash": "c9ba3ad0a0ebc6f13bf30d0500cd1f69e2f4874ab91e074237173fcdad2c469b",
+  "cues": [
+    {
+      "speaker": "MAYA",
+      "text": "Okay, here's one that trips people up in real interviews.",
+      "start": 0,
+      "end": 3.9
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Your suite runs, createUser fails, and right below it deleteUser shows up as skipped, not failed, and your teammate insists that's a bug in TestNG because a broken flow should produce 2 failures, not 1 failure and a skip.",
+      "start": 4.04,
+      "end": 19.04
+    },
+    {
+      "speaker": "MAYA",
+      "text": "So the interviewer looks at you and asks, is TestNG broken here, or is it doing exactly what it was designed to do?",
+      "start": 19.18,
+      "end": 27.08
+    },
+    {
+      "speaker": "LEO",
+      "text": "And if your gut said that's a bug, well, this is the episode for you.",
+      "start": 27.62,
+      "end": 31.995
+    },
+    {
+      "speaker": "LEO",
+      "text": "I'm Leo, I spend my days writing automation and my nights getting grilled about it in mock interviews.",
+      "start": 32.135,
+      "end": 38.66
+    },
+    {
+      "speaker": "MAYA",
+      "text": "And I'm Maya, staff SDET, former hiring manager, and today we're covering TestNG, the Java test framework that shows up in almost every Selenium-flavored interview loop.",
+      "start": 39.2,
+      "end": 50.85
+    },
+    {
+      "speaker": "MAYA",
+      "text": "And here's the thing, TestNG isn't just a Java detail, because almost every test runner on the planet shares the same skeleton, lifecycle hooks, assertions, data-driven inputs, grouping, parallelism, and reporting.",
+      "start": 50.99,
+      "end": 65.665
+    },
+    {
+      "speaker": "MAYA",
+      "text": "So if you truly understand TestNG, you can read JUnit 5, NUnit, and pytest at a glance, which means this 1 topic quietly covers 4.",
+      "start": 65.805,
+      "end": 76.28
+    },
+    {
+      "speaker": "LEO",
+      "text": "That's actually why interviewers love it, right, it's a proxy question.",
+      "start": 76.82,
+      "end": 81.245
+    },
+    {
+      "speaker": "LEO",
+      "text": "They ask about TestNG but what they're really probing is whether you understand how test runners work at all.",
+      "start": 81.385,
+      "end": 88.535
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Exactly, and the name itself is a hint, the NG stands for Next Generation, because it was built to go beyond plain unit testing with flexible configuration, data-driven tests, groups, dependencies, and built-in parallelism, which is why it became the default runner in most Java plus Selenium stacks.",
+      "start": 89.075,
+      "end": 108.8
+    },
+    {
+      "speaker": "MAYA",
+      "text": "So let's build it up in 3 chunks, starting with the lifecycle.",
+      "start": 108.94,
+      "end": 112.94
+    },
+    {
+      "speaker": "LEO",
+      "text": "The annotations, this is the one they ask in the first 5 minutes of every screen.",
+      "start": 113.48,
+      "end": 119.005
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Right, and the mental model I want you to carry is a concert venue.",
+      "start": 119.545,
+      "end": 123.945
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Think about what happens on show night.",
+      "start": 124.085,
+      "end": 126.61
+    },
+    {
+      "speaker": "MAYA",
+      "text": "The venue itself gets unlocked and powered up once for the whole evening, then the stage gets set for a particular act, then each band does its own setup, and then before every single song the crew resets the mics and the lighting.",
+      "start": 126.75,
+      "end": 140.975
+    },
+    {
+      "speaker": "MAYA",
+      "text": "TestNG is exactly that, nested rings of setup from the widest scope down to the narrowest.",
+      "start": 141.115,
+      "end": 147.54
+    },
+    {
+      "speaker": "MAYA",
+      "text": "At-BeforeSuite and at-AfterSuite run once around the entire suite, that's unlocking the venue.",
+      "start": 147.68,
+      "end": 153.93
+    },
+    {
+      "speaker": "MAYA",
+      "text": "At-BeforeTest and at-AfterTest wrap a test tag inside the testng.xml file, that's setting the stage for one act.",
+      "start": 154.07,
+      "end": 162.045
+    },
+    {
+      "speaker": "MAYA",
+      "text": "At-BeforeClass and at-AfterClass run once per test class, that's the band's own soundcheck.",
+      "start": 162.185,
+      "end": 168.11
+    },
+    {
+      "speaker": "MAYA",
+      "text": "And at-BeforeMethod and at-AfterMethod run before and after every single at-Test method, that's the reset between songs.",
+      "start": 168.25,
+      "end": 176.4
+    },
+    {
+      "speaker": "LEO",
+      "text": "So the order going in is suite, test, class, method, and then when everything tears down, the after hooks unwind in reverse, method first, suite last, like walking back out of the building the way you came in.",
+      "start": 176.94,
+      "end": 189.765
+    },
+    {
+      "speaker": "MAYA",
+      "text": "That's the answer word for word, and notice how natural it is once you have the venue picture, because you'd never lock the whole building before the band finished packing up.",
+      "start": 190.305,
+      "end": 200.355
+    },
+    {
+      "speaker": "MAYA",
+      "text": "In a Selenium context the classic pattern is at-BeforeMethod creates a fresh driver, the at-Test does its thing, and at-AfterMethod quits the driver, so every test gets a clean browser.",
+      "start": 200.495,
+      "end": 212.395
+    },
+    {
+      "speaker": "LEO",
+      "text": "And the translation layer, since you promised this covers 4 frameworks.",
+      "start": 212.935,
+      "end": 217.51
+    },
+    {
+      "speaker": "LEO",
+      "text": "At-BeforeMethod is JUnit 5's at-BeforeEach, at-BeforeClass is roughly at-BeforeAll, NUnit calls them SetUp and OneTimeSetUp, and pytest does the same job with fixtures scoped to function, class, or session.",
+      "start": 217.65,
+      "end": 232.3
+    },
+    {
+      "speaker": "LEO",
+      "text": "Same lifecycle, different spelling.",
+      "start": 232.44,
+      "end": 234.865
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Perfect.",
+      "start": 235.405,
+      "end": 236.855
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Chunk 2 is assertions and data-driven testing, and these are 2 of the most reliable interview questions in existence.",
+      "start": 236.995,
+      "end": 245.095
+    },
+    {
+      "speaker": "MAYA",
+      "text": "First, hard versus soft assertions.",
+      "start": 245.235,
+      "end": 248.085
+    },
+    {
+      "speaker": "MAYA",
+      "text": "A hard assertion, your standard Assert dot assertEquals, fails fast, meaning the test stops dead at the first failed check.",
+      "start": 248.225,
+      "end": 256.3
+    },
+    {
+      "speaker": "MAYA",
+      "text": "A soft assertion, using the SoftAssert class, collects every failure quietly and only reports them all together when you call assertAll at the end.",
+      "start": 256.44,
+      "end": 266.09
+    },
+    {
+      "speaker": "LEO",
+      "text": "Give me the analogy, because I always blank on which is which under pressure.",
+      "start": 266.63,
+      "end": 271.38
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Think of a home inspector.",
+      "start": 271.92,
+      "end": 273.97
+    },
+    {
+      "speaker": "MAYA",
+      "text": "The hard-assert inspector walks into the house, spots a crack in the foundation, turns around, and leaves, so you get a report with exactly 1 problem and no idea what else is wrong.",
+      "start": 274.11,
+      "end": 285.91
+    },
+    {
+      "speaker": "MAYA",
+      "text": "The soft-assert inspector walks the entire house, notes the crack, the leaky faucet, the bad wiring, and hands you 1 complete report at the end.",
+      "start": 286.05,
+      "end": 295.85
+    },
+    {
+      "speaker": "MAYA",
+      "text": "That final handover, that moment of handing you the full report, is the assertAll call, and here's the detail candidates miss, if you forget to call assertAll, nothing ever fails, the inspector just never files the report, and your broken test passes silently.",
+      "start": 295.99,
+      "end": 312.865
+    },
+    {
+      "speaker": "LEO",
+      "text": "Ooh, that's a nasty one.",
+      "start": 313.405,
+      "end": 315.205
+    },
+    {
+      "speaker": "LEO",
+      "text": "So the memory hook is, soft assert without assertAll is an inspector who never mails the report.",
+      "start": 315.345,
+      "end": 321.895
+    },
+    {
+      "speaker": "LEO",
+      "text": "And when would I actually choose soft asserts?",
+      "start": 322.035,
+      "end": 324.86
+    },
+    {
+      "speaker": "MAYA",
+      "text": "When you're validating several independent things in 1 test, say 5 fields on a profile page, and you want to see all the broken ones in a single run instead of playing whack-a-mole 1 failure at a time.",
+      "start": 325.4,
+      "end": 338.175
+    },
+    {
+      "speaker": "MAYA",
+      "text": "And the mapping, JUnit 5 has an assertAll method, NUnit has Assert dot Multiple, and AssertJ and Playwright both ship soft assertions, so the concept travels everywhere.",
+      "start": 338.315,
+      "end": 350.415
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Now, staying in this chunk, data-driven tests, because it's the same theme of 1 test body, many checks.",
+      "start": 350.555,
+      "end": 357.455
+    },
+    {
+      "speaker": "MAYA",
+      "text": "TestNG gives you 2 doors.",
+      "start": 357.595,
+      "end": 360.22
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Door 1 is at-DataProvider, a method that returns a 2-dimensional Object array, and TestNG runs your test once per row, so if your provider returns a valid login row and an invalid login row, the same test method executes twice with different inputs.",
+      "start": 360.36,
+      "end": 377.735
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Door 2 is at-Parameters, which injects simple values from testng.xml, things like a browser name or a base URL.",
+      "start": 377.875,
+      "end": 386.3
+    },
+    {
+      "speaker": "LEO",
+      "text": "So the way I'd keep those straight is, DataProvider is for the actual test data, the rows, the interesting combinations, stuff that lives in code or gets computed, while Parameters is for environment-ish knobs that ops or CI might want to flip without recompiling anything.",
+      "start": 386.84,
+      "end": 404.34
+    },
+    {
+      "speaker": "MAYA",
+      "text": "That's exactly the split, and if the interviewer pushes on other frameworks, JUnit 5 does this with at-ParameterizedTest plus sources, NUnit uses TestCase attributes, and pytest uses parametrize.",
+      "start": 404.88,
+      "end": 419.03
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Okay, chunk 3, and this is where TestNG really earns its keep in interviews, groups, dependencies, and parallel execution, all orchestrated through testng.xml.",
+      "start": 419.17,
+      "end": 430.77
+    },
+    {
+      "speaker": "MAYA",
+      "text": "And my analogy for testng.xml is an air traffic control tower.",
+      "start": 430.91,
+      "end": 435.61
+    },
+    {
+      "speaker": "MAYA",
+      "text": "The planes are your test classes, and the code inside them doesn't know or care about scheduling, but the tower decides everything about the traffic, which flights take off tonight, meaning which classes and groups get selected, what instructions each pilot receives, meaning the parameters injected, and critically, how many runways operate at once, meaning the parallel mode and the thread count.",
+      "start": 435.75,
+      "end": 458.975
+    },
+    {
+      "speaker": "MAYA",
+      "text": "And the beautiful part is that the tower changes the schedule without rebuilding any planes, you reconfigure the whole suite without recompiling code.",
+      "start": 459.115,
+      "end": 468.465
+    },
+    {
+      "speaker": "LEO",
+      "text": "So when someone asks what testng.xml is, the answer is, it's the suite descriptor, it selects classes and groups, passes parameters, and configures parallelism, all without touching or recompiling the tests themselves.",
+      "start": 469.005,
+      "end": 483.555
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Nailed it.",
+      "start": 484.095,
+      "end": 485.57
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Now the pieces the tower controls.",
+      "start": 485.71,
+      "end": 488.235
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Groups first, you tag a test with at-Test groups equals smoke, and then from testng.xml or the command line you run just that group, which is how teams carve a fast smoke slice out of a big regression suite.",
+      "start": 488.375,
+      "end": 501.925
+    },
+    {
+      "speaker": "MAYA",
+      "text": "That's the same idea as JUnit 5 tags, NUnit categories, and pytest markers.",
+      "start": 502.065,
+      "end": 508.315
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Then priority, at-Test priority equals 1, which simply orders independent tests, lower numbers run first and the default is 0.",
+      "start": 508.455,
+      "end": 517.755
+    },
+    {
+      "speaker": "MAYA",
+      "text": "And then dependencies, dependsOnMethods and dependsOnGroups, which say this test only makes sense if that one passed, and if the prerequisite fails, the dependent test gets skipped rather than failed.",
+      "start": 517.895,
+      "end": 530.37
+    },
+    {
+      "speaker": "LEO",
+      "text": "Which brings us right back to your cold open.",
+      "start": 530.91,
+      "end": 533.81
+    },
+    {
+      "speaker": "LEO",
+      "text": "CreateUser fails, deleteUser gets skipped, and that is not a bug, that's the whole point, because deleteUser failing would be a misleading second failure, there was never a user to delete, so the skip is TestNG telling you the truth, only 1 thing is actually broken.",
+      "start": 533.95,
+      "end": 550.275
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Exactly right, and that sets up trap corner, because there are 2 classic wrong answers buried in this area.",
+      "start": 550.815,
+      "end": 557.69
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Trap number 1 is confusing priority with dependsOnMethods.",
+      "start": 557.83,
+      "end": 562.33
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Under pressure, candidates say they both just control test order, and that answer costs points, because priority is cosmetic ordering of independent tests, nothing more, while dependsOnMethods creates a real prerequisite relationship that can skip dependents when the prerequisite fails.",
+      "start": 562.47,
+      "end": 580.87
+    },
+    {
+      "speaker": "MAYA",
+      "text": "One is a seating chart, the other is a load-bearing wall.",
+      "start": 581.01,
+      "end": 584.935
+    },
+    {
+      "speaker": "LEO",
+      "text": "And trap number 2, I'm guessing, is the over-eager candidate who hears all this and starts bragging about their beautiful 10-test dependency chain where login feeds into search which feeds into checkout.",
+      "start": 585.475,
+      "end": 598.125
+    },
+    {
+      "speaker": "MAYA",
+      "text": "That's the big one, and it's sneaky because it sounds like sophistication.",
+      "start": 598.665,
+      "end": 603.24
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Heavy use of dependsOnMethods couples your tests together, so 1 upstream failure cascades into a wall of skips, your report gets murky, and worse, chained tests can't run in parallel, because parallelism assumes tests are independent.",
+      "start": 603.38,
+      "end": 618.88
+    },
+    {
+      "speaker": "MAYA",
+      "text": "So the strong answer is, I know dependencies exist, I use them sparingly for genuine setup ordering, and I prefer independent, isolated tests, and you can even add that JUnit deliberately limits ordering features for exactly this reason.",
+      "start": 619.02,
+      "end": 634.92
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Saying that sentence tells the interviewer you've maintained a real suite, not just read the docs.",
+      "start": 635.06,
+      "end": 641.06
+    },
+    {
+      "speaker": "LEO",
+      "text": "So dodge the trap by naming the trade-off before they do.",
+      "start": 641.6,
+      "end": 645.475
+    },
+    {
+      "speaker": "LEO",
+      "text": "And that flows straight into parallelism, since you just said independence is what unlocks it.",
+      "start": 645.615,
+      "end": 651.465
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Right, so in testng.xml you set parallel to methods, tests, classes, or instances, plus a thread-count, say 4, and TestNG fans your suite out across threads.",
+      "start": 652.005,
+      "end": 663.455
+    },
+    {
+      "speaker": "MAYA",
+      "text": "But, and this is the follow-up interviewers always spring, parallel tests must be thread-safe, they can share no mutable state, and in Selenium specifically the classic answer is a ThreadLocal wrapper around the WebDriver, so each thread gets its very own driver instead of 4 threads fighting over 1 browser.",
+      "start": 663.595,
+      "end": 683.52
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Back to the airport, 4 runways only work because each plane has its own pilot, its own fuel, its own instruments, and the moment 2 flights share a pilot the whole schedule collapses.",
+      "start": 683.66,
+      "end": 695.41
+    },
+    {
+      "speaker": "LEO",
+      "text": "ThreadLocal means every thread gets its own car keys, nobody shares a steering wheel.",
+      "start": 695.95,
+      "end": 701.825
+    },
+    {
+      "speaker": "LEO",
+      "text": "Got it.",
+      "start": 701.965,
+      "end": 703.14
+    },
+    {
+      "speaker": "LEO",
+      "text": "What about the last mile, reporting and the extension points?",
+      "start": 703.28,
+      "end": 707.105
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Quick tour, because it comes up as a how-would-you question.",
+      "start": 707.645,
+      "end": 711.07
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Listeners hook into the test lifecycle, so implementing ITestListener and overriding onTestFailure is the canonical way to capture a screenshot on failure and attach it to the report, and you register the listener with the at-Listeners annotation or in testng.xml.",
+      "start": 711.21,
+      "end": 728.785
+    },
+    {
+      "speaker": "MAYA",
+      "text": "For flaky tests there's IRetryAnalyzer, which re-runs a failed test a set number of times, and the senior move is to immediately add that retries should be used sparingly because they mask real flakiness rather than fixing it.",
+      "start": 728.925,
+      "end": 743.975
+    },
+    {
+      "speaker": "MAYA",
+      "text": "And for reporting, TestNG emits HTML and XML out of the box, but real teams usually layer Allure or ExtentReports on top for richer output.",
+      "start": 744.115,
+      "end": 755.365
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Same extension idea exists everywhere, JUnit 5 has TestWatcher, pytest has hooks in conftest.",
+      "start": 755.505,
+      "end": 762.955
+    },
+    {
+      "speaker": "LEO",
+      "text": "Alright, time for the in-the-room segment.",
+      "start": 763.495,
+      "end": 766.145
+    },
+    {
+      "speaker": "LEO",
+      "text": "How does this actually surface when I'm sitting across from the panel?",
+      "start": 766.285,
+      "end": 770.435
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Three flavors.",
+      "start": 770.975,
+      "end": 772.625
+    },
+    {
+      "speaker": "MAYA",
+      "text": "The screener asks definitional stuff, annotation order, hard versus soft assert, what testng.xml is, and those need crisp 1-breath answers.",
+      "start": 772.765,
+      "end": 782.89
+    },
+    {
+      "speaker": "MAYA",
+      "text": "The mid-round asks design questions, how would you run only smoke tests, how would you get a 4-hour regression suite under 30 minutes, and the shape of that answer is groups for selection plus parallel with thread-count plus ThreadLocal for safety.",
+      "start": 783.03,
+      "end": 798.855
+    },
+    {
+      "speaker": "MAYA",
+      "text": "And the senior round probes judgment, they'll invite you to praise dependencies or retries and watch whether you volunteer the downsides, so the meta-skill is pairing every feature with its cost.",
+      "start": 798.995,
+      "end": 811.195
+    },
+    {
+      "speaker": "LEO",
+      "text": "Okay, 60-second recap, here we go.",
+      "start": 811.735,
+      "end": 814.66
+    },
+    {
+      "speaker": "LEO",
+      "text": "If they ask the annotation order, say suite, test, class, method going in, at-Test in the middle, and the after hooks unwind in reverse, like leaving the concert venue the way you came in.",
+      "start": 814.8,
+      "end": 827.175
+    },
+    {
+      "speaker": "LEO",
+      "text": "If they ask hard versus soft assertions, say hard fails fast at the first broken check, soft collects everything and reports at assertAll, and mention that forgetting assertAll means failures vanish, the inspector who never mails the report.",
+      "start": 827.315,
+      "end": 842.915
+    },
+    {
+      "speaker": "LEO",
+      "text": "And if they ask why TestNG over JUnit, say same core ideas, but TestNG adds the testng.xml suite descriptor, DataProvider, groups, and dependencies, which shine for integration and end-to-end suites, then earn the senior nod by adding that you keep tests independent so parallelism stays cheap and failures stay honest.",
+      "start": 843.055,
+      "end": 862.305
+    },
+    {
+      "speaker": "MAYA",
+      "text": "That's the episode.",
+      "start": 862.845,
+      "end": 864.645
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Skips are a feature, dependency chains are a smell, and 1 framework's skeleton unlocks 4.",
+      "start": 864.785,
+      "end": 870.86
+    },
+    {
+      "speaker": "MAYA",
+      "text": "Next time you're studying, take the comparison table, TestNG, JUnit 5, NUnit, pytest, and quiz yourself dialect to dialect, because that cross-mapping is what makes you sound fluent instead of memorized.",
+      "start": 871,
+      "end": 885.15
+    },
+    {
+      "speaker": "LEO",
+      "text": "Keep your tests independent and your assertions honest, and we'll see you in the next one.",
+      "start": 885.69,
+      "end": 891.315
+    }
+  ]
+}

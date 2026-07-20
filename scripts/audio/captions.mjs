@@ -15,10 +15,14 @@ import { fileURLToPath } from "node:url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, "..", "..");
-const BUILD_DIR = join(ROOT, "build", "audio");
+const args = process.argv.slice(2);
+// --podcast reads the two-voice episodes from build/audio/podcast/ (the podcast synth's
+// separate namespace); default reads the single-voice build/audio/.
+const podcast = args.includes("--podcast");
+const BUILD_DIR = join(ROOT, "build", "audio", ...(podcast ? ["podcast"] : []));
 const TRANSCRIPT_DIR = join(ROOT, "data", "audio", "transcripts");
 
-const only = (process.argv.slice(2).find((a) => a.startsWith("--only=")) || "").slice("--only=".length) || null;
+const only = (args.find((a) => a.startsWith("--only=")) || "").slice("--only=".length) || null;
 
 const pad = (n, w = 2) => String(n).padStart(w, "0");
 function vttTime(sec) {
@@ -30,9 +34,12 @@ function vttTime(sec) {
 }
 
 function toVtt(cues) {
-  const blocks = cues.map(
-    (c, i) => `${i + 1}\n${vttTime(c.start)} --> ${vttTime(c.end)}\n${c.text}`
-  );
+  // For two-voice episodes, tag each cue with the speaker via a WebVTT <v> voice span
+  // so players can label who's talking; single-voice cues have no speaker and stay plain.
+  const blocks = cues.map((c, i) => {
+    const line = c.speaker ? `<v ${c.speaker}>${c.text}` : c.text;
+    return `${i + 1}\n${vttTime(c.start)} --> ${vttTime(c.end)}\n${line}`;
+  });
   return `WEBVTT\n\n${blocks.join("\n\n")}\n`;
 }
 
@@ -56,8 +63,9 @@ for (const id of timings) {
   writeFileSync(
     join(TRANSCRIPT_DIR, `${id}.json`),
     JSON.stringify(
-      // hash mirrors the timing/mp3 hash so publish can detect stale captions.
-      { id, voice: timing.voice, durationSec: timing.durationSec, hash: timing.hash, cues: timing.cues },
+      // hash mirrors the timing/mp3 hash so publish can detect stale captions. `voices`
+      // (plural) is present for two-voice episodes; `voice` for single-voice.
+      { id, voice: timing.voice ?? null, voices: timing.voices ?? null, durationSec: timing.durationSec, hash: timing.hash, cues: timing.cues },
       null,
       2
     ) + "\n",
