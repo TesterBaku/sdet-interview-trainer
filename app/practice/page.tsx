@@ -37,7 +37,7 @@ const lanes = [
     href: "/commute",
     eyebrow: "On the go",
     title: "Commute Mode",
-    body: "Two-host podcast episodes that teach each topic out loud — hands-free, screen-free, one per cheat sheet.",
+    body: "Two-host podcast episodes and mock-interview rounds that teach each topic out loud — hands-free, screen-free, one per cheat sheet.",
     className: "border-ink/15 bg-ink/5",
     eyebrowClass: "text-ink/60",
   },
