@@ -133,6 +133,11 @@ export function AudioPlayer({
   const btn =
     "inline-flex items-center justify-center rounded-full border border-ink/15 bg-white/80 px-3 py-2 text-sm font-bold text-ink transition hover:bg-white focus-ring";
 
+  // Offline download: Vercel Blob serves `?download=1` with Content-Disposition: attachment,
+  // so a plain link saves the mp3 to the device (listen offline in the device's own player) —
+  // no service-worker/Range machinery needed.
+  const downloadHref = `${src}${src.includes("?") ? "&" : "?"}download=1`;
+
   return (
     <section className="rounded-2xl border border-ink/10 bg-white/80 p-4 shadow-panel sm:p-5" aria-label={`${label}: ${title}`}>
       <audio
@@ -186,6 +191,14 @@ export function AudioPlayer({
         <button type="button" className={btn} onClick={cycleRate} aria-label={`Playback speed ${rate} times`}>
           {rate}×
         </button>
+        <a
+          className={btn}
+          href={downloadHref}
+          download
+          aria-label={`Download ${title} audio for offline listening`}
+        >
+          <span aria-hidden>⬇</span>&nbsp;Download
+        </a>
         {cues.length > 0 ? (
           <button type="button" className={btn} onClick={() => setShowTranscript((v) => !v)} aria-expanded={showTranscript}>
             {showTranscript ? "Hide transcript" : "Transcript"}

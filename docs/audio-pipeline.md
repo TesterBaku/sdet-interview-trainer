@@ -165,8 +165,17 @@ by `tests/unit/interview-scripts.test.mjs` (script format) and functional tests 
 - **Mock-interview Q&A** — a two-voice interviewer/candidate round per topic, published to
   Blob and surfaced beside the podcast player plus as a Mock Interview lane in Commute Mode.
 
+## Shipped — offline download
+
+Each player has a **Download** button: it links to the Blob mp3 with `?download=1`, which Vercel
+Blob serves as `Content-Disposition: attachment`, so the file saves to the device for offline
+listening in the device's own player. No service-worker or Range machinery — see `downloadHref`
+in `components/AudioPlayer.tsx`.
+
 ## Planned expansion (later phases)
 
-- **Offline listening** — cache audio in the service worker (`public/sw.js`) behind a
-  same-origin `/audio/[id]` route, plus a "Download for offline" button (leverages the PWA).
+- **In-app offline playback (PWA)** — cache audio in the service worker (`public/sw.js`) behind a
+  same-origin `/audio/[id]` proxy route, so episodes replay *inside the app* offline. Deferred:
+  the hard part is Range-request handling against the Cache API (synthetic `206` slicing), plus
+  iOS-PWA testing. The Download button above covers offline listening more cheaply for now.
 - **Audio flashcards** — question → pause → answer, generated from `data/questions/*.json`.
