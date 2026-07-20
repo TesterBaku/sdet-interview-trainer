@@ -11,6 +11,7 @@ QA Automation / SDET interview practice app — flashcards, quizzes, mock interv
 - Tailwind CSS
 - Static JSON content (no backend)
 - localStorage for progress
+- Self-owned study audio: local neural TTS (Kokoro) → Vercel Blob hosting
 - `@vercel/analytics` for page-view tracking
 - PWA-installable (manifest + service worker)
 - Playwright for functional tests
@@ -34,6 +35,24 @@ Python Coding · Java Coding · SQL / PostgreSQL · Selenium · Playwright (Pyth
 | `/coding-gym` | All coding tasks; supports `?topic=<id>` to scope to one topic |
 | `/review` | Global queue of all questions marked weak or review-later, with status/type/topic filters |
 | `/progress` | Overall + per-type (coding / quiz / mock interview) + per-topic breakdowns |
+| `/cheatsheets` and `/cheatsheets/[id]` | Per-topic cheat sheets — each with a **Listen** podcast player (audio + synced transcript) when audio is published |
+| `/commute` | **Commute Mode** — a screen-free playlist that queues the study-audio episodes back to back |
+
+## Study audio (podcast)
+
+Each cheat-sheet topic has a **standalone two-host podcast episode** (in the style of
+NotebookLM's Audio Overview) — a real conversation between two hosts that teaches the topic
+screen-free, sized to cover the main interview questions. 18 topics, ~4.25 hours total. They
+surface as a **Listen** player on each cheat-sheet page and as a **Commute Mode** playlist.
+
+Unlike a black-box tool, the whole pipeline is **self-owned and offline**: scripts are
+committed, human-editable text (the patchable source of truth), rendered locally with neural
+TTS (Kokoro, Apache-2.0 — no third-party API, no per-use cost), and hosted on our own Vercel
+Blob. Only changed episodes re-render/re-upload (content-hash gated), and every episode ships
+with a transcript for accessibility + SEO.
+
+See [`docs/audio-pipeline.md`](docs/audio-pipeline.md) for the full authoring → synthesis →
+publish workflow.
 
 ## Install as an app (PWA)
 
@@ -66,6 +85,11 @@ Open http://localhost:3000.
 | `npm run build` | Production build + typecheck |
 | `npm run lint` | ESLint (zero warnings policy) |
 | `npm run test:functional` | Run all Playwright tests headlessly |
+| `npm run test:unit` | Node unit tests for the audio text transforms |
+| `npm run audio:podcast:captions` | Build transcripts + WebVTT from rendered podcast episodes |
+| `npm run audio:podcast:publish` | Upload changed episodes to Vercel Blob + update the manifest (needs `BLOB_READ_WRITE_TOKEN`) |
+
+Rendering episodes and the full authoring loop live in [`docs/audio-pipeline.md`](docs/audio-pipeline.md).
 
 ### CI / regression
 

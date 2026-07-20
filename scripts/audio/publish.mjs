@@ -19,6 +19,14 @@ import { fileURLToPath } from "node:url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, "..", "..");
+
+// Load the gitignored .env so BLOB_READ_WRITE_TOKEN can live there instead of on the
+// command line. A real environment variable (e.g. an inline `TOKEN=... npm run …`) still
+// wins — loadEnvFile only fills what's unset.
+if (!process.env.BLOB_READ_WRITE_TOKEN && existsSync(join(ROOT, ".env"))) {
+  process.loadEnvFile(join(ROOT, ".env"));
+}
+
 const args = process.argv.slice(2);
 const force = args.includes("--force");
 const local = args.includes("--local");

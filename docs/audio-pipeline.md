@@ -129,11 +129,16 @@ Renders are content-hash gated (voices + spoken text), so re-running skips uncha
 episodes; pass `--force` to override. The first render of a new voice downloads its ~1 MB
 voice pack from Hugging Face; run online once, then `HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1` works.
 
+## Shipped
+
+- **Podcast rollout** — all 18 cheat-sheet topics authored, rendered, and published to Blob.
+- **In-app player** — a **Listen** player (audio + synced transcript) on each cheat-sheet page.
+- **Commute Mode** (`/commute`) — a screen-free playlist that queues the episodes back to back.
+
 ## Planned expansion (later phases)
 
 - **Offline listening** — cache audio in the service worker (`public/sw.js`) behind a
   same-origin `/audio/[id]` route, plus a "Download for offline" button (leverages the PWA).
 - **Audio flashcards** — question → pause → answer, generated from `data/questions/*.json`.
-- **Commute Mode** — a playlist page queuing a topic's episodes + Q&A.
-- **Podcast rollout** — author + render the remaining topics (pilot: `api-testing`), then
-  an in-app podcast player (audio + synced transcript) as its own PR.
+- **Interview Q&A audio** — a two-voice mock-interview round per topic (interviewer asks,
+  candidate models a strong answer), sharing the two-voice synth via `--kind=interview`.
