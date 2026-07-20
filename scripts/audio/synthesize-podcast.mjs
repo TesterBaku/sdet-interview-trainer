@@ -39,27 +39,20 @@ import { execFileSync } from "node:child_process";
 import { KokoroTTS } from "kokoro-js";
 import { applyLexicon, normalizeText, parseDialogue, splitSentences } from "./text.mjs";
 import { floatToWav } from "./wav.mjs";
+import { KIND_NAMESPACES } from "./kinds.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, "..", "..");
 const LEXICON_PATH = join(ROOT, "data", "audio", "lexicon.json");
 
-// Each kind is a self-contained format: where its scripts live, where its renders go, and
-// the default speaker→Kokoro-voice map. Interview reuses the podcast's two voices but SWAPS
-// their roles — the male (am_fenrir) asks, the warm female (af_heart) answers — inverting the
-// podcast's female-mentor / male-learner dynamic. Same timbres; the formats are set apart by
-// structure (Q&A vs conversation) and role, not by a distinct third/fourth voice.
-const KINDS = {
-  podcast: {
-    srcDir: join(ROOT, "data", "audio", "podcast"),
-    outDir: join(ROOT, "build", "audio", "podcast"),
-    voices: { MAYA: "af_heart", LEO: "am_michael" },
-  },
-  interview: {
-    srcDir: join(ROOT, "data", "audio", "interview"),
-    outDir: join(ROOT, "build", "audio", "interview"),
-    voices: { INTERVIEWER: "am_fenrir", CANDIDATE: "af_heart" },
-  },
+// The default speaker→Kokoro-voice map per kind (the namespaces themselves live in
+// kinds.mjs, shared with captions/publish). Interview reuses the podcast's two voices but
+// SWAPS their roles — the male (am_fenrir) asks, the warm female (af_heart) answers —
+// inverting the podcast's female-mentor / male-learner dynamic. Same timbres; the formats
+// are set apart by structure (Q&A vs conversation) and role, not by a distinct extra voice.
+const VOICES_BY_KIND = {
+  podcast: { MAYA: "af_heart", LEO: "am_michael" },
+  interview: { INTERVIEWER: "am_fenrir", CANDIDATE: "af_heart" },
 };
 
 const lexicon = JSON.parse(readFileSync(LEXICON_PATH, "utf8")).terms;
@@ -90,27 +83,27 @@ const kind = args.includes("--interview")
   : args.includes("--podcast")
     ? "podcast"
     : getArg("kind", "podcast");
-const cfg = KINDS[kind];
-if (!cfg) {
-  console.error(`Unknown --kind=${kind}. Known: ${Object.keys(KINDS).join(", ")}`);
+const defaultVoices = VOICES_BY_KIND[kind];
+if (!defaultVoices) {
+  console.error(`Unknown --kind=${kind}. Known: ${Object.keys(VOICES_BY_KIND).join(", ")}`);
   process.exit(1);
 }
-const PODCAST_DIR = cfg.srcDir;
-const OUT_DIR = cfg.outDir;
+const SRC_DIR = join(ROOT, "data", "audio", kind);
+const OUT_DIR = join(ROOT, "build", "audio", ...KIND_NAMESPACES[kind].buildSubdir);
 
 // Speaker → Kokoro voice, from the kind's defaults, each overridable via --<speaker>=voice
 // (e.g. --leo=am_fenrir, --interviewer=am_puck).
 const VOICES = Object.fromEntries(
-  Object.entries(cfg.voices).map(([spk, def]) => [spk, getArg(spk.toLowerCase(), def)]),
+  Object.entries(defaultVoices).map(([spk, def]) => [spk, getArg(spk.toLowerCase(), def)]),
 );
 
 const sha256 = (s) => createHash("sha256").update(s).digest("hex");
 
 mkdirSync(OUT_DIR, { recursive: true });
 
-const scriptPath = join(PODCAST_DIR, `${id}.txt`);
+const scriptPath = join(SRC_DIR, `${id}.txt`);
 if (!existsSync(scriptPath)) {
-  console.error(`No podcast script at ${scriptPath}`);
+  console.error(`No ${kind} script at ${scriptPath}`);
   process.exit(1);
 }
 

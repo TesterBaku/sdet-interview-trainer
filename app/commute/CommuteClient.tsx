@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { AudioPlayer } from "@/components/AudioPlayer";
 import { formatAudioMinutes } from "@/lib/audioFormat";
 
@@ -31,6 +31,10 @@ export function CommuteClient({ lanes }: { lanes: Lane[] }) {
   // Only auto-play after the listener has actually picked/advanced an episode, so landing on
   // the page — or switching lanes — never blares audio unprompted.
   const [autoPlay, setAutoPlay] = useState(false);
+  // The lane switcher is an ARIA tablist only when there's more than one lane to switch
+  // between; with a single lane it's just the panel (no tabs rendered).
+  const isTabbed = lanes.length > 1;
+  const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
   const lane = lanes[laneIndex];
   const episodes = lane.episodes;
@@ -42,6 +46,21 @@ export function CommuteClient({ lanes }: { lanes: Lane[] }) {
     setLaneIndex(i);
     setIndex(0);
     setAutoPlay(false);
+  };
+  // Arrow/Home/End move the selected tab and take focus with them (automatic activation),
+  // per the WAI-ARIA tabs pattern; the tablist uses roving tabindex (only the active tab is
+  // in the tab order).
+  const onTabKeyDown = (e: React.KeyboardEvent<HTMLButtonElement>) => {
+    const count = lanes.length;
+    let next = laneIndex;
+    if (e.key === "ArrowRight" || e.key === "ArrowDown") next = (laneIndex + 1) % count;
+    else if (e.key === "ArrowLeft" || e.key === "ArrowUp") next = (laneIndex - 1 + count) % count;
+    else if (e.key === "Home") next = 0;
+    else if (e.key === "End") next = count - 1;
+    else return;
+    e.preventDefault();
+    selectLane(next);
+    tabRefs.current[next]?.focus();
   };
   const select = (i: number) => {
     setAutoPlay(true);
@@ -65,10 +84,17 @@ export function CommuteClient({ lanes }: { lanes: Lane[] }) {
           {lanes.map((l, i) => (
             <button
               key={l.key}
+              ref={(el) => {
+                tabRefs.current[i] = el;
+              }}
               type="button"
               role="tab"
+              id={`commute-tab-${l.key}`}
+              aria-controls="commute-tabpanel"
               aria-selected={i === laneIndex}
+              tabIndex={i === laneIndex ? 0 : -1}
               onClick={() => selectLane(i)}
+              onKeyDown={onTabKeyDown}
               className={`rounded-full px-4 py-2 text-sm font-bold transition focus-ring ${
                 i === laneIndex ? "bg-blueprint text-paper" : "text-ink/70 hover:text-blueprint"
               }`}
@@ -80,7 +106,14 @@ export function CommuteClient({ lanes }: { lanes: Lane[] }) {
       ) : null}
 
       <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
-        <div className="lg:sticky lg:top-24 lg:self-start">
+        <div
+          className="lg:sticky lg:top-24 lg:self-start"
+          // When lanes are tabs, this is the tabpanel they control; labelled by the active
+          // tab. With a single lane there are no tabs, so the role is omitted.
+          {...(isTabbed
+            ? { role: "tabpanel", id: "commute-tabpanel", "aria-labelledby": `commute-tab-${lane.key}`, tabIndex: 0 }
+            : {})}
+        >
           <AudioPlayer
             // Namespaced per lane + episode so the queue's transient position never overwrites
             // the saved position on a topic's cheat-sheet page.

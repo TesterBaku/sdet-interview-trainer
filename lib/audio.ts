@@ -38,6 +38,10 @@ function loadManifest(base: string): Record<string, ManifestEntry> {
   return {};
 }
 
+// The interview manifest basename + transcript subdir mirror scripts/audio/kinds.mjs
+// (KIND_NAMESPACES.interview.manifestBase / .transcriptSubdir). This app read can't import
+// that .mjs cleanly from the typed bundle, so the two strings are kept in sync by hand —
+// if you rename the interview namespace there, update here (this line + the cues path below).
 const manifest = loadManifest("manifest");
 const interviewManifest = loadManifest("manifest.interview");
 
