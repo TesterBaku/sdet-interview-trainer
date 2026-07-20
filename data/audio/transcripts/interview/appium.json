@@ -1,0 +1,396 @@
+{
+  "id": "appium",
+  "voice": null,
+  "voices": {
+    "INTERVIEWER": "am_fenrir",
+    "CANDIDATE": "af_heart"
+  },
+  "durationSec": 598.78,
+  "hash": "585c55e42ace8d9b402fe0b84bd56529dd74352179547f266fc4b9395938ccd6",
+  "cues": [
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Welcome in, glad you could make it.",
+      "start": 0,
+      "end": 2.35
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Today we're running a quick Appium round, the kind of rapid technical screen you'd face for an SDET role that touches mobile.",
+      "start": 2.49,
+      "end": 10.915
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "I'll ask a question, you give me your best answer, and I might dig a little deeper where it gets interesting.",
+      "start": 11.055,
+      "end": 17.23
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Nothing exotic, just the fundamentals done properly.",
+      "start": 17.37,
+      "end": 21.045
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Ready when you are.",
+      "start": 21.185,
+      "end": 22.76
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Sounds good, let's get into it.",
+      "start": 23.3,
+      "end": 25.675
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Let's start at the top.",
+      "start": 26.215,
+      "end": 27.915
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "What is Appium, and how does it actually drive a device when you send it a command?",
+      "start": 28.055,
+      "end": 33.405
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Appium is a tool for automating native, hybrid, and mobile-web apps on both Android and iOS through a single API.",
+      "start": 33.945,
+      "end": 42.87
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Under the hood it's an HTTP server written in Node.js that speaks the W3C WebDriver protocol, the same protocol Selenium uses, so any existing WebDriver client in Java, Python, JavaScript, or C sharp can drive a phone the way it drives a browser.",
+      "start": 43.01,
+      "end": 62.21
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The reason that matters is delegation.",
+      "start": 62.35,
+      "end": 65.175
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Appium itself doesn't know how to tap a button on iOS, it forwards the command to a platform driver, which hands it to the vendor's own automation framework, so UiAutomator2 on Android and XCUITest on iOS do the real driving.",
+      "start": 65.315,
+      "end": 82.015
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The flow is client, to WebDriver over HTTP, to the Appium server, to the platform driver, to the device.",
+      "start": 82.155,
+      "end": 90.18
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "A trap here is thinking Appium injects some agent into the app, it doesn't, it's a translator sitting in front of the frameworks the OS already provides.",
+      "start": 90.32,
+      "end": 100.27
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Good, that delegation model is exactly the mental picture I want.",
+      "start": 100.81,
+      "end": 105.435
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "You mentioned platform drivers, so tell me, what changed about them in Appium 2.0?",
+      "start": 105.575,
+      "end": 112.225
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The big change in Appium 2.0 is that drivers and plugins were decoupled from the core server.",
+      "start": 112.765,
+      "end": 119.615
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "In the old world everything shipped bundled together, but now the server ships lean and you install only what you need on demand, so for Android you'd run the driver install command for UiAutomator2 and that's it.",
+      "start": 119.755,
+      "end": 133.855
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The why is maintainability and footprint, each driver evolves on its own release cycle and you're not dragging along iOS tooling on a project that only tests Android.",
+      "start": 133.995,
+      "end": 145.195
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "There's also a practical gotcha that trips people up when migrating, the default base path moved to just a slash, whereas Appium 1 used the wd hub path, so old client configurations pointing at wd hub suddenly fail to connect.",
+      "start": 145.335,
+      "end": 161.56
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Beyond UiAutomator2 and XCUITest there are alternatives like Espresso, which runs in-process on Android and is faster but Android-only, plus drivers for Flutter and desktop platforms.",
+      "start": 161.7,
+      "end": 175.6
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Nice, and you flagged the base path change before I could ask.",
+      "start": 176.14,
+      "end": 179.94
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Next one, how do you actually configure a session, and specifically what's the difference between the app capability and appPackage or bundleId?",
+      "start": 180.08,
+      "end": 189.18
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "A session is configured with capabilities, key value pairs that tell Appium what to automate, and under the W3C standard any vendor-specific key carries the appium prefix.",
+      "start": 189.72,
+      "end": 202.045
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The core ones are platformName for Android or iOS, automationName to pick the driver like UiAutomator2 or XCUITest, then deviceName, platformVersion, and udid when you want to pin a specific real device.",
+      "start": 202.185,
+      "end": 217.96
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Now the distinction you asked about, the app capability points at a path or URL to the actual apk or ipa file, so Appium installs a fresh build, that's what you want in CI where every run should exercise the newest artifact.",
+      "start": 218.1,
+      "end": 233.875
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "By contrast, appPackage and appActivity on Android, or bundleId on iOS, launch an app that's already installed on the device, no reinstall, which is much faster for local iteration.",
+      "start": 234.015,
+      "end": 247.465
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The trap is using app everywhere and wondering why every session wastes a minute reinstalling, or on real iOS devices forgetting that you also need code signing set up through the Xcode organization capabilities.",
+      "start": 247.605,
+      "end": 262.405
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Solid, that install versus launch distinction is one a lot of people fumble.",
+      "start": 262.945,
+      "end": 268.445
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Let's talk locators.",
+      "start": 268.585,
+      "end": 270.435
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "What's your order of preference on mobile, and why is XPath treated differently here than on the web?",
+      "start": 270.575,
+      "end": 276.9
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "My first choice is always accessibility id, because it maps to content-desc on Android and accessibilityIdentifier on iOS, which means one locator can work on both platforms, and that's the whole cross-platform promise in one attribute.",
+      "start": 277.44,
+      "end": 293.89
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "After that I'd reach for id, which is the Android resource-id, fast and stable when developers actually set it.",
+      "start": 294.03,
+      "end": 302.13
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "When I need something more powerful I go native, the android uiautomator strategy runs a UiSelector query directly on the device, and on iOS the predicate string and class chain strategies are far faster than XPath.",
+      "start": 302.27,
+      "end": 317.72
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Class name is there for element types but rarely unique.",
+      "start": 317.86,
+      "end": 321.835
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "XPath sits at the bottom, and the why is important, on mobile every XPath query forces the entire native element tree to be serialized and searched, so it's dramatically slower than on the web and brittle whenever the hierarchy shifts.",
+      "start": 321.975,
+      "end": 337.325
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The trap I call out is teams copying web habits, sprinkling XPath everywhere, then blaming Appium for slow, flaky suites.",
+      "start": 337.465,
+      "end": 346.04
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Right, XPath abuse is probably the number one mobile suite killer I see.",
+      "start": 346.58,
+      "end": 352.03
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Now, flakiness more broadly.",
+      "start": 352.17,
+      "end": 354.32
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "How do you handle waits, and what makes mobile tests flaky beyond locators?",
+      "start": 354.46,
+      "end": 359.41
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Because Appium is WebDriver-based, the synchronization story mirrors Selenium, and my default is explicit waits, a WebDriverWait with an ExpectedConditions check on a specific element or state, for example waiting until the submit button located by accessibility id is clickable before tapping it.",
+      "start": 359.95,
+      "end": 380.4
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The why is precision, an explicit wait targets one condition with its own timeout, whereas an implicit wait is a global timeout applied to every single lookup, which is blunt and tends to mask real timing issues.",
+      "start": 380.54,
+      "end": 394.59
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The rule I hold hard is never mix implicit and explicit waits, because the timeouts stack in unpredictable ways, and never patch flakiness with hard sleeps, they just slow the suite and still fail on a bad day.",
+      "start": 394.73,
+      "end": 408.03
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Mobile then adds its own flake sources on top, animations that keep elements moving, slow app launches, network variability on real devices, and emulator warm-up time, so a stable suite accounts for those rather than blaming the tool.",
+      "start": 408.17,
+      "end": 423.97
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Good discipline.",
+      "start": 424.51,
+      "end": 426.06
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Here's a currency check, if I asked you to automate a custom swipe today, how would you do it, and what would you not use?",
+      "start": 426.2,
+      "end": 433.7
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The modern answer has two options.",
+      "start": 434.24,
+      "end": 436.815
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The simple path is the driver-side mobile commands, so I'd call executeScript with something like mobile swipe or mobile scroll, and there are equivalents for tap and long click gestures, these execute natively inside the platform driver so they're concise and reliable.",
+      "start": 436.955,
+      "end": 454.48
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "When I need a truly custom gesture, say a pinch or a precise drag, I build a W3C Actions sequence, a PointerInput that presses down, moves through coordinates, and releases, which gives full control over the motion.",
+      "start": 454.62,
+      "end": 469.595
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "What I would not use, and this is the trap the question is really probing, is the old TouchAction and MultiTouchAction classes, they're deprecated and actually removed from newer client libraries, so code samples from older tutorials simply won't compile.",
+      "start": 469.735,
+      "end": 486.81
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Interviewers ask this one specifically to check whether your knowledge is current or whether you learned Appium from a five year old course.",
+      "start": 486.95,
+      "end": 495.55
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "You spotted the probe, I'll admit that's exactly what it was.",
+      "start": 496.09,
+      "end": 499.94
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Last one, your app has an embedded web checkout inside the native shell.",
+      "start": 500.08,
+      "end": 504.83
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "How do you automate that?",
+      "start": 504.97,
+      "end": 506.72
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "That's a hybrid app, web content running in a WebView inside a native shell, and Appium handles it through contexts.",
+      "start": 507.26,
+      "end": 515.21
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The direct answer is that I'd call getContextHandles, which returns something like the native app context plus a WebView context named after the app, then switch into the WebView context, and from that point I'm driving the embedded page with Selenium-style CSS and DOM locators as if it were a browser.",
+      "start": 515.35,
+      "end": 535.975
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "When the flow returns to native screens I switch back to the native app context and I'm on UiAutomator2 or XCUITest again.",
+      "start": 536.115,
+      "end": 545.265
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The why is that native widgets and web content live in completely different worlds, one element tree cannot describe both.",
+      "start": 545.405,
+      "end": 553.48
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The trap on Android is Chromedriver versioning, WebView automation drives an embedded Chromedriver that has to match the WebView's Chrome version, though Appium can auto-download the right one.",
+      "start": 553.62,
+      "end": 565.895
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "And pure mobile-web testing is just a special case, you set browserName instead of the app capability.",
+      "start": 566.035,
+      "end": 572.985
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Strong answers, that's the round.",
+      "start": 573.525,
+      "end": 575.7
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "What I liked here, and what listeners should take away, is the structure, a direct answer first, then the why, and then a concrete example or a trap called out, the XPath tree walk, the removed TouchAction classes, the Chromedriver version match.",
+      "start": 575.84,
+      "end": 590.615
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "That pattern is what makes an answer sound senior.",
+      "start": 590.755,
+      "end": 593.955
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Practice these until they flow, and I'll see you in the next round.",
+      "start": 594.095,
+      "end": 598.245
+    }
+  ]
+}

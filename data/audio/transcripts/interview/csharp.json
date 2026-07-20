@@ -1,0 +1,456 @@
+{
+  "id": "csharp",
+  "voice": null,
+  "voices": {
+    "INTERVIEWER": "am_fenrir",
+    "CANDIDATE": "af_heart"
+  },
+  "durationSec": 663.26,
+  "hash": "b40d1bef429d1351f38bdc296e79c1b2bbda255a5a75de558dda6fa0bf241c3d",
+  "cues": [
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Welcome in, thanks for making the time today.",
+      "start": 0,
+      "end": 3
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Let's run a quick C sharp round, the kind of rapid technical screen you'd get for an SDET role working with a dot net test stack.",
+      "start": 3.14,
+      "end": 11.565
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "I'll ask a question, you give me your best answer, and I may push a little deeper here and there.",
+      "start": 11.705,
+      "end": 17.405
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Nothing tricky, just the fundamentals done well.",
+      "start": 17.545,
+      "end": 20.67
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Ready when you are.",
+      "start": 20.81,
+      "end": 22.385
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Sounds great, let's do it.",
+      "start": 22.925,
+      "end": 25.025
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Let's start with the one that explains almost everything else.",
+      "start": 25.565,
+      "end": 29.515
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "What's the difference between value types and reference types in C sharp?",
+      "start": 29.655,
+      "end": 34.18
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Value types hold the data itself and get copied on assignment, while reference types hold a reference to an object on the heap, so assigning one just copies the reference and both variables point at the same object.",
+      "start": 34.72,
+      "end": 48.07
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "That matters because it decides whether two variables can affect each other.",
+      "start": 48.21,
+      "end": 52.685
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "So if I copy an int and change the copy, the original stays untouched, but if I copy an array variable and change an element through the copy, the original sees it, because there's only one array.",
+      "start": 52.825,
+      "end": 65.45
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Value types are things like int, double, bool, structs, and DateTime, while classes, strings, arrays, and delegates are reference types.",
+      "start": 65.59,
+      "end": 74.615
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The trap I always call out is passing a reference type into a method, the method can mutate the object and the caller sees it, but if the method reassigns the parameter to a new object, the caller is unaffected, because C sharp passes the reference itself by value.",
+      "start": 74.755,
+      "end": 91.655
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Good, and you caught the reassignment subtlety, which most people miss.",
+      "start": 92.195,
+      "end": 96.545
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Staying on design, when would you reach for an abstract class versus an interface?",
+      "start": 96.685,
+      "end": 101.885
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "I use an abstract class when types are genuinely a kind of the same thing and I want to share code and state, and I use an interface when unrelated types just need to promise the same capability.",
+      "start": 102.425,
+      "end": 115.15
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The reason is structural, a class can extend only one base class, so that slot is precious and should express an is-a relationship, while a class can implement many interfaces, so interfaces are perfect for can-do contracts.",
+      "start": 115.29,
+      "end": 129.965
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "A concrete example from test code, I might have an abstract base page with shared navigation logic that every page object extends, and a separate interface like IDrawable or a searchable contract that only some pages implement.",
+      "start": 130.105,
+      "end": 145.28
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The abstract class can hold real implementations and properties that subclasses inherit, while the interface just says what members must exist.",
+      "start": 145.42,
+      "end": 154.67
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "If I choose an abstract class where a contract was enough, I've burned the single inheritance slot for nothing, so I default to interfaces and reach for a base class only when there's real shared code.",
+      "start": 154.81,
+      "end": 167.51
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Nice, the single inheritance slot framing is exactly right.",
+      "start": 168.05,
+      "end": 172.275
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Now, strings.",
+      "start": 172.415,
+      "end": 173.965
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Why is string immutable in C sharp, and what does that cost you?",
+      "start": 174.105,
+      "end": 178.28
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "A string can never change once it's created, every operation like Replace or ToUpper returns a brand new string and leaves the original alone, which is why calling ToUpper without reassigning the result is a classic bug, the variable still holds the lowercase value.",
+      "start": 178.82,
+      "end": 196.295
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The why is safety, an immutable string is thread safe by nature, nobody can change a shared string underneath you, its hash never changes so it's safe as a dictionary key, and the runtime can intern identical literals into a shared pool.",
+      "start": 196.435,
+      "end": 211.885
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The cost shows up in loops, concatenating inside a loop creates a new object every pass, which turns into quadratic garbage.",
+      "start": 212.025,
+      "end": 220.575
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "So the rule I follow is plain string for fixed or few values, and StringBuilder the moment I'm building a string across many iterations, appending as I go and calling ToString once at the end for a single allocation.",
+      "start": 220.715,
+      "end": 234.84
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "One more nice property, the double equals operator on strings compares value, not reference.",
+      "start": 234.98,
+      "end": 241.18
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Solid.",
+      "start": 241.72,
+      "end": 242.92
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Let's go where the real depth is for a Playwright role.",
+      "start": 243.06,
+      "end": 246.46
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Explain async and await, and why it matters so much in your test code.",
+      "start": 246.6,
+      "end": 251.275
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The async keyword marks a method that returns a Task, and await suspends that method without blocking the thread, the thread goes back to the pool while the I O completes and the method resumes when the result is ready.",
+      "start": 251.815,
+      "end": 265.09
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "That's why it matters, it gives you concurrency without extra threads, a thread costs about a megabyte of stack, while tasks are cheap, so thousands of concurrent requests only need a handful of threads.",
+      "start": 265.23,
+      "end": 278.055
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "For an SDET this is unavoidable because the Playwright API is async throughout, every click and navigation returns a Task.",
+      "start": 278.195,
+      "end": 286.62
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "There are two traps I watch for.",
+      "start": 286.76,
+      "end": 289.06
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "First, async void, it can't be awaited and its exceptions escape the caller, so I return Task everywhere except event handlers.",
+      "start": 289.2,
+      "end": 297.75
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Second, calling dot Result or Wait on a task can deadlock, so the rule is await all the way up.",
+      "start": 297.89,
+      "end": 304.515
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "And when I want real concurrency, like firing several API requests at once, I start them all and use Task WhenAll to await them together.",
+      "start": 304.655,
+      "end": 314.355
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "That's the answer I was hoping for, especially the await all the way up rule.",
+      "start": 314.895,
+      "end": 319.92
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Let's talk LINQ.",
+      "start": 320.06,
+      "end": 321.61
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "What is deferred execution, and how does Single differ from First?",
+      "start": 321.75,
+      "end": 326.1
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Deferred execution means a LINQ query doesn't run when you define it, it runs when you enumerate it, with ToList, a foreach, or Count.",
+      "start": 326.64,
+      "end": 335.715
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The why is that operators like Where and Select just build up a pipeline over an IEnumerable, nothing executes until something pulls results through it.",
+      "start": 335.855,
+      "end": 346.03
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The practical consequence is that the source can change between defining the query and enumerating it, so if I build a filter over a list and then add items before calling ToList, the new items are included, which surprises people and can also mean a query runs multiple times if you enumerate it twice.",
+      "start": 346.17,
+      "end": 365.395
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "On Single versus First, Single asserts there is exactly one match and throws otherwise, while First just takes the first of possibly many.",
+      "start": 365.535,
+      "end": 374.41
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "In tests I deliberately use Single when uniqueness is part of what I'm proving, say exactly one user with a given id, because First would quietly hide a duplicate.",
+      "start": 374.55,
+      "end": 385.725
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "And the OrDefault variants return a default instead of throwing on empty, which is handy in assertions.",
+      "start": 385.865,
+      "end": 392.665
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Good, using Single as an assertion of uniqueness is a nice testing instinct.",
+      "start": 393.205,
+      "end": 398.48
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Next, exception handling.",
+      "start": 398.62,
+      "end": 400.645
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Walk me through try, catch, finally, and the difference between rethrowing with throw versus throw ex.",
+      "start": 400.785,
+      "end": 407.41
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The try block wraps the code that might fail, catch handles a specific exception type, and I catch the narrowest type first, and finally always runs whether or not something was thrown, which makes it the place for cleanup like stopping a stopwatch.",
+      "start": 407.95,
+      "end": 423.05
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Worth noting C sharp has no checked exceptions, unlike Java nothing forces you to declare or catch anything, so discipline is on you.",
+      "start": 423.19,
+      "end": 432.19
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The rethrow difference is the classic trap, a bare throw statement rethrows the current exception and preserves the original stack trace, while throwing the caught variable resets the trace to that line, so when the failure surfaces in C I, the trace points at your catch block instead of the real cause.",
+      "start": 432.33,
+      "end": 450.23
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "So I always prefer the bare throw, typically after logging.",
+      "start": 450.37,
+      "end": 454.295
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "In my API tests the pattern is catch the HttpRequestException, log it with context, then rethrow bare so the report still shows exactly where the request actually failed.",
+      "start": 454.435,
+      "end": 466.785
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Right, and losing the stack trace in C I is exactly where that bites.",
+      "start": 467.325,
+      "end": 471.825
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "One more in this area, what is the using statement for, given that C sharp already has a garbage collector?",
+      "start": 471.965,
+      "end": 478.865
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The using statement gives deterministic cleanup, it calls Dispose automatically when the scope ends, even if an exception was thrown.",
+      "start": 479.405,
+      "end": 488.13
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The reason it exists alongside the garbage collector is that the G C frees managed memory on its own schedule, but it won't promptly release things like sockets, file handles, or browser contexts, and those you want closed the moment you're done.",
+      "start": 488.27,
+      "end": 503.62
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "So in Playwright I write await using on a new browser context, and the context is disposed at scope exit no matter how the test finished, with await using and IAsyncDisposable handling the async cleanup.",
+      "start": 503.76,
+      "end": 517.56
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "A real trap here is HttpClient, people wrap it in a using and create a new client per request, which leads to socket exhaustion, so the right move is to reuse one HttpClient across requests.",
+      "start": 517.7,
+      "end": 532.125
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The mental model I keep is memory belongs to the garbage collector, everything else, handles, connections, browser sessions, belongs to using and IDisposable.",
+      "start": 532.265,
+      "end": 543.39
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Good catch on the HttpClient reuse, that one takes down real test suites.",
+      "start": 543.93,
+      "end": 549.93
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Last question, compare NUnit and xUnit, and how does your test stack fit together around them?",
+      "start": 550.07,
+      "end": 556.145
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "NUnit is the richer, attribute-driven framework, you get Test, SetUp and OneTimeSetUp for lifecycle, TestCase and TestCaseSource for data-driven tests, and the fluent Assert dot That constraint model.",
+      "start": 556.685,
+      "end": 570.435
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "xUnit is leaner and more opinionated, Fact for plain tests, Theory for parameterized ones, and instead of setup attributes it uses the test class constructor for setup and IDisposable for teardown, plus it runs tests in parallel by default, which is great for speed but means you have to keep shared state out of your tests.",
+      "start": 570.575,
+      "end": 591.225
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The why behind choosing is really team taste, NUnit gives you more built in, xUnit forces cleaner isolation.",
+      "start": 591.365,
+      "end": 599.04
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Around the framework, my stack is Playwright for dot net for U I, where the PageTest base class wires up a fresh context per test, RestSharp or HttpClient for API tests, Moq for mocking dependencies, where I set up a return value and verify the call happened exactly once, and FluentAssertions for readable asserts.",
+      "start": 599.18,
+      "end": 620.73
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The trap with xUnit is assuming tests run serially, parallel by default will expose any hidden shared state.",
+      "start": 620.87,
+      "end": 628.37
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Strong answers, that's the round.",
+      "start": 628.91,
+      "end": 631.085
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "What I liked here, and what listeners should take away, is the structure, a direct answer first, then the why, and then a concrete example or a trap called out.",
+      "start": 631.225,
+      "end": 641.25
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "You did that on every question, the reassignment trap on reference types, the ToUpper bug on strings, async void and the deadlock rule, the stack trace loss on rethrow, the HttpClient socket exhaustion.",
+      "start": 641.39,
+      "end": 655.09
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "That pattern is what makes an answer sound senior.",
+      "start": 655.23,
+      "end": 658.43
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Practice these until they flow, and I'll see you in the next round.",
+      "start": 658.57,
+      "end": 662.72
+    }
+  ]
+}

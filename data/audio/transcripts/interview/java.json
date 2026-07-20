@@ -1,0 +1,360 @@
+{
+  "id": "java",
+  "voice": null,
+  "voices": {
+    "INTERVIEWER": "am_fenrir",
+    "CANDIDATE": "af_heart"
+  },
+  "durationSec": 582.7,
+  "hash": "2b24a9c5019fb19b0cf0159042f5504450d7c3e56f17bdb316c92ec2bb97eda7",
+  "cues": [
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Welcome in, thanks for making the time today.",
+      "start": 0,
+      "end": 3
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Let's run a quick Java round, the kind of rapid technical screen you'd get for an SDET role.",
+      "start": 3.14,
+      "end": 9.265
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "I'll ask a question, you give me your best answer, and I may push a little deeper here and there.",
+      "start": 9.405,
+      "end": 15.105
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Nothing tricky, just the core language fundamentals every automation engineer gets asked.",
+      "start": 15.245,
+      "end": 21.22
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Ready when you are.",
+      "start": 21.36,
+      "end": 22.935
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Sounds great, let's do it.",
+      "start": 23.475,
+      "end": 25.575
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Let's start at the ground floor.",
+      "start": 26.115,
+      "end": 28.24
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Walk me through the difference between primitive and reference types, and while you're in there, settle the old debate for me, is Java pass-by-value or pass-by-reference?",
+      "start": 28.38,
+      "end": 38.88
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Java is always pass-by-value, and the primitive versus reference split is exactly why people get that wrong.",
+      "start": 39.42,
+      "end": 46.695
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "A primitive like int or boolean holds the value directly, so assignment copies the value, if I copy an int into a second variable and change the copy, the original stays untouched.",
+      "start": 46.835,
+      "end": 59.285
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "A reference type, meaning objects, arrays, and String, holds a reference to data on the heap, so assignment copies the reference and both variables end up pointing at the same object.",
+      "start": 59.425,
+      "end": 71.15
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "That carries into method calls, when I pass an object in, the reference itself is copied, so the method can change the object's fields but it can never reseat my variable to point somewhere else, which is why it is still pass-by-value.",
+      "start": 71.29,
+      "end": 85.94
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The classic trap is copying an array, changing element zero through the copy, and being surprised the original changed too, both variables share the same array on the heap.",
+      "start": 86.08,
+      "end": 97.255
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Nicely grounded, that reseating point is the one most people miss.",
+      "start": 97.795,
+      "end": 102.295
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Now, Strings trip candidates up constantly, so tell me the difference between double equals and the equals method, and why String is immutable in the first place.",
+      "start": 102.435,
+      "end": 112.41
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Double equals compares references, asking whether two variables point at the same object, while equals compares content, so for Strings and objects generally I always compare with equals.",
+      "start": 112.95,
+      "end": 125.15
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The reason double equals sometimes appears to work is the string pool, identical literals are interned and shared, so two variables assigned the same literal actually point at one pooled object and double equals happens to return true, but build the same text with new String and it returns false even though the content matches, which is a nasty trap in test assertions.",
+      "start": 125.29,
+      "end": 148.74
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "On immutability, a String never changes once created, every so-called modification hands back a new object, and that buys thread-safety, a stable hashCode so Strings are safe as HashMap keys, and the pool sharing itself.",
+      "start": 148.88,
+      "end": 164.155
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The practical consequence is that concatenating in a loop allocates a fresh object every pass, so for building output row by row I reach for StringBuilder and do one final allocation at the end.",
+      "start": 164.295,
+      "end": 177.395
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Good, and you walked straight into my next one.",
+      "start": 177.935,
+      "end": 180.66
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "You mentioned hashCode, so explain the equals and hashCode contract and what actually breaks when you violate it.",
+      "start": 180.8,
+      "end": 187.95
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The contract says that if two objects are equal they must return the same hashCode, and the reason is how hash collections work, a HashMap or HashSet locates an object by its hash first to pick the bucket, and only then uses equals to confirm the match.",
+      "start": 188.49,
+      "end": 204.74
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "So if I override equals without hashCode, two logically equal objects can land in different buckets, lookups miss, entries effectively go missing, and duplicates slip into sets.",
+      "start": 204.88,
+      "end": 216.88
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "I hit this on a real project, we placed expected user response objects into a Set and checked whether each actual API response was contained in it, and every contains call came back false even with perfectly matching data, because the class overrode neither method and the default reference equality kicked in.",
+      "start": 217.02,
+      "end": 237.12
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Generating equals and hashCode together from the same fields fixed the test immediately, and in modern Java a record generates both for you, which makes records a great fit for test data objects.",
+      "start": 237.26,
+      "end": 250.06
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "That is exactly the failure mode, silent and confusing.",
+      "start": 250.6,
+      "end": 254.55
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Let's move to design.",
+      "start": 254.69,
+      "end": 256.49
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Abstract class versus interface, what's the difference, and where does each one live in a test framework you'd build?",
+      "start": 256.63,
+      "end": 263.63
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "An abstract class is a partial base with shared code and state, a class extends exactly one of them, and it models an is-a relationship, while an interface is a contract, a capability, a class can implement many, and since Java 8 an interface can even carry default methods.",
+      "start": 264.17,
+      "end": 282.37
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The deciding question is what I'm actually sharing, if subclasses genuinely share fields and setup logic, an abstract class holds that in one place, but if I only need to promise a capability across otherwise unrelated classes, an interface does it without forcing everyone into a hierarchy.",
+      "start": 282.51,
+      "end": 301.56
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "In a Selenium framework that maps very cleanly, a BasePage abstract class holds the WebDriver reference and the common waiting logic, and every page object extends it, while something like a Navigable interface marks just the pages that support direct URL navigation so tests can drive those uniformly.",
+      "start": 301.7,
+      "end": 322.425
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The trap is using deep inheritance to share code, composition is usually the better tool there.",
+      "start": 322.565,
+      "end": 328.84
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Solid, I like that you tied it to page objects.",
+      "start": 329.38,
+      "end": 332.73
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Staying practical, when you're writing a test helper, how do you choose between an ArrayList, a HashSet, and a HashMap?",
+      "start": 332.87,
+      "end": 340.07
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "I ask three questions, does order matter, are duplicates meaningful, and which operation dominates.",
+      "start": 340.61,
+      "end": 347.06
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "ArrayList keeps insertion order, allows duplicates, and gives fast index access, so it fits an ordered sequence like test steps or a request log where position carries meaning.",
+      "start": 347.2,
+      "end": 359.075
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "HashSet enforces uniqueness with roughly constant-time contains, so it fits membership checks and duplicate detection.",
+      "start": 359.215,
+      "end": 367.24
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "HashMap is my default for key to value lookup, counting word frequency with getOrDefault is the classic one-pass example.",
+      "start": 367.38,
+      "end": 376.18
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The performance trap is calling contains on an ArrayList inside a loop, every check scans the whole list, and I lived that one, an API response validator kept expected field names in a list and checked each against the actual fields with contains, and for large schemas it crawled, switching the actual fields to a HashSet cut validation time roughly twenty times.",
+      "start": 376.32,
+      "end": 399.545
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "And when I need uniqueness but the order still matters, LinkedHashSet gives me both, it drops duplicates while preserving insertion order.",
+      "start": 399.685,
+      "end": 408.385
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Good instincts, that contains-in-a-loop mistake is everywhere.",
+      "start": 408.925,
+      "end": 412.8
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Two more.",
+      "start": 412.94,
+      "end": 414.165
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Checked versus unchecked exceptions, and how do you keep exception handling clean in test code?",
+      "start": 414.305,
+      "end": 420.53
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "A checked exception must be handled or declared with throws, the compiler enforces it, IOException is the classic case, while unchecked means the RuntimeException family, things like NullPointerException or IllegalArgumentException, where nothing is enforced.",
+      "start": 421.07,
+      "end": 438.77
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The idea is that recoverable external failures, files, streams, that sort of thing, get acknowledged at compile time.",
+      "start": 438.91,
+      "end": 447.01
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "My hygiene rules are to catch the narrowest exception, never leave an empty catch block, and keep the original cause whenever I wrap.",
+      "start": 447.15,
+      "end": 455.7
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "So reading a data file I'd use try-with-resources, which automatically closes anything AutoCloseable even when an exception is thrown mid-read, and if the read fails I wrap the IOException in a RuntimeException with the cause attached, so the stack trace still tells the whole story.",
+      "start": 455.84,
+      "end": 474.39
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "In tests specifically I let unexpected errors fail loudly, because a swallowed exception is how a broken test quietly passes, and a test that lies is worse than no test at all.",
+      "start": 474.53,
+      "end": 486.555
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Couldn't agree more on failing loudly.",
+      "start": 487.095,
+      "end": 489.545
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Last one then.",
+      "start": 489.685,
+      "end": 491.185
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "What is a stream, and just as important, when would you deliberately not use one?",
+      "start": 491.325,
+      "end": 496.625
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "A stream, from Java 8, processes a collection as a pipeline, a source, then lazy intermediate operations like filter and map, then exactly one terminal operation like collect or count, and nothing executes until that terminal operation runs, the intermediate steps just describe the work.",
+      "start": 497.165,
+      "end": 516.915
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The win is readability for filter, transform, and collect jobs, a concrete case from API testing is filtering a list of response rows to keep only the ones where the status field equals active, streaming the rows, filtering with Objects dot equals so an absent key returning null doesn't blow up with a NullPointerException, then collecting to a list, and Collectors groupingBy does the same kind of heavy lifting when I need rows bucketed by a field.",
+      "start": 517.055,
+      "end": 545.105
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "But I don't force everything into a stream, a plain for loop is fine and often faster for simple iteration or when I need to break early, and the beginner trap is returning the stream itself without a terminal operation, so the pipeline never actually runs.",
+      "start": 545.245,
+      "end": 561.645
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Strong answers, that's the round.",
+      "start": 562.185,
+      "end": 564.36
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "What I liked here, and what listeners should take away, is the structure, a direct answer first, then the why, and then a concrete example or a trap called out.",
+      "start": 564.5,
+      "end": 574.525
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "That pattern is what makes an answer sound senior.",
+      "start": 574.665,
+      "end": 577.865
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Practice these until they flow, and I'll see you in the next round.",
+      "start": 578.005,
+      "end": 582.155
+    }
+  ]
+}

@@ -9,9 +9,9 @@
   "appium": {
     "mp3Url": "https://tcvgyxolu5eyurv6.public.blob.vercel-storage.com/audio/appium.mp3",
     "vttUrl": "https://tcvgyxolu5eyurv6.public.blob.vercel-storage.com/audio/appium.vtt",
-    "durationSec": 866.75,
+    "durationSec": 872.15,
     "voice": "af_heart + am_fenrir",
-    "hash": "a833155c02e70e3a78fca4206ab960da7f42c8788a2f2af877f1a2d48380be8a"
+    "hash": "7785d4926387bc0456ca6921c2880fc42d9fbefc546e7c3d8e141f17a47f9131"
   },
   "cca-foundations": {
     "mp3Url": "https://tcvgyxolu5eyurv6.public.blob.vercel-storage.com/audio/cca-foundations.mp3",
@@ -121,8 +121,8 @@
   "xcuitest": {
     "mp3Url": "https://tcvgyxolu5eyurv6.public.blob.vercel-storage.com/audio/xcuitest.mp3",
     "vttUrl": "https://tcvgyxolu5eyurv6.public.blob.vercel-storage.com/audio/xcuitest.vtt",
-    "durationSec": 843.56,
+    "durationSec": 844.18,
     "voice": "af_heart + am_fenrir",
-    "hash": "0a91d61d1693e6eed94367a0f8ac541bbf18ddcb0d107191f2899854b0056593"
+    "hash": "8c3a13ca06ab2233bdadb98c47e845aa6de7a513f2ca87130acffd669af3334b"
   }
 }

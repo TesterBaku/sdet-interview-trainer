@@ -1,0 +1,396 @@
+{
+  "id": "playwright",
+  "voice": null,
+  "voices": {
+    "INTERVIEWER": "am_fenrir",
+    "CANDIDATE": "af_heart"
+  },
+  "durationSec": 524.24,
+  "hash": "b85dc7b756be3c0ce59700ae6bfafa9c17a2cc6b92d9ba627f30b5ab2ee4730d",
+  "cues": [
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Welcome in, good to have you here today.",
+      "start": 0,
+      "end": 2.675
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Let's run a quick Playwright round, the kind of rapid technical screen you'd get for an SDET role.",
+      "start": 2.815,
+      "end": 9.015
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "I'll ask a question, you give me your best answer, and I may push a little deeper here and there.",
+      "start": 9.155,
+      "end": 14.855
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Nothing exotic, just the fundamentals done well.",
+      "start": 14.995,
+      "end": 18.295
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Ready when you are.",
+      "start": 18.435,
+      "end": 20.01
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Sounds good, let's get into it.",
+      "start": 20.55,
+      "end": 22.925
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Let's start at the top.",
+      "start": 23.465,
+      "end": 25.165
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "You've used Selenium before, so tell me, what actually makes Playwright different, beyond it just being newer?",
+      "start": 25.305,
+      "end": 32.28
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The core difference is the protocol and what's built in.",
+      "start": 32.82,
+      "end": 36.47
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Playwright talks to the browser over a persistent DevTools style connection instead of the WebDriver wire protocol, so it's one process holding an open channel to Chromium, Firefox, and WebKit through a single API.",
+      "start": 36.61,
+      "end": 51.36
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Why that matters is speed and reliability, there's no request and response handshake per command, and Playwright layers auto-waiting into every single action, so the flaky wait logic you'd assemble yourself in Selenium comes for free.",
+      "start": 51.5,
+      "end": 66.425
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "On top of that you get network interception, tracing, video, and screenshots without bolting on third party tools.",
+      "start": 66.565,
+      "end": 74.54
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "A concrete example, in a Selenium suite I'd maintain a custom explicit wait helper for every dynamic element, and in Playwright that whole helper class disappears because a click already waits for the element to be visible, stable, and enabled.",
+      "start": 74.68,
+      "end": 90.405
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The trap is assuming they're interchangeable, the architecture is genuinely different.",
+      "start": 90.545,
+      "end": 96.195
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Good framing.",
+      "start": 96.735,
+      "end": 98.185
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "You mentioned the browser once, so let's go there, walk me through the browser, context, and page model.",
+      "start": 98.325,
+      "end": 104.7
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Three layers.",
+      "start": 105.24,
+      "end": 106.865
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The browser is the actual instance, it's expensive to launch, so you reuse one across the whole run.",
+      "start": 107.005,
+      "end": 113.755
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "A browser context is an isolated session inside that browser, its own cookies, storage, and cache, essentially a fresh incognito profile, and it's cheap to create.",
+      "start": 113.895,
+      "end": 125.52
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "A page is a single tab inside a context, and that's where most interactions happen.",
+      "start": 125.66,
+      "end": 131.435
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The why is the trade-off between speed and isolation, relaunching a browser per test would be clean but painfully slow, while sharing one session would leak state between tests.",
+      "start": 131.575,
+      "end": 142.725
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Contexts give you both, one browser, but every test gets its own clean context, so no test sees another test's cookies or login.",
+      "start": 142.865,
+      "end": 151.965
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "In practice that means a test that logs in as an admin and a test that checks the logged out view can run back to back, or even in parallel, without ever polluting each other, and that context isolation is exactly what makes safe parallel execution possible.",
+      "start": 152.105,
+      "end": 168.905
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Nice, and you flagged the interview point yourself, that isolation without relaunching is the key.",
+      "start": 169.445,
+      "end": 175.595
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Next one, how do you choose locators, and what is auto-waiting actually doing for you?",
+      "start": 175.735,
+      "end": 181.235
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "My first choice is getByRole, locating by the ARIA role and accessible name, because it matches how a user and assistive technology perceive the page, so it survives markup refactors that would kill a CSS class or an id selector.",
+      "start": 181.775,
+      "end": 198.075
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "After that I reach for getByLabel, getByText, or a stable data-testid hook, and CSS or XPath only as a fallback.",
+      "start": 198.215,
+      "end": 207.24
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The deeper point is that a locator is lazy, it re-queries the DOM every time you act on it, which is why stale element problems basically vanish in Playwright.",
+      "start": 207.38,
+      "end": 218.28
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Auto-waiting means that before any action fires, Playwright waits for the element to be attached, visible, stable, enabled, and able to receive events, and web-first assertions like expecting a locator to be visible keep retrying until the condition holds or times out.",
+      "start": 218.42,
+      "end": 236.445
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The trap I call out in reviews is someone grabbing the text content once and asserting on that snapshot, that races on slow machines, whereas the retrying assertion just waits it out.",
+      "start": 236.585,
+      "end": 248.06
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "That distinction between a one-shot snapshot and a retrying assertion trips up a lot of people, well spotted.",
+      "start": 248.6,
+      "end": 255.725
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Now, logging in through the UI before every test gets expensive fast.",
+      "start": 255.865,
+      "end": 260.89
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "How do you handle authentication across a big suite?",
+      "start": 261.03,
+      "end": 264.505
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The pattern is authenticate once and reuse the state.",
+      "start": 265.045,
+      "end": 268.72
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "In a global setup step I log in through the app one time, then save the storage state, which is the cookies plus local storage, out to a JSON file.",
+      "start": 268.86,
+      "end": 278.685
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The config then points new contexts at that file, so every test starts with the session already active and never touches the login screen.",
+      "start": 278.825,
+      "end": 287.725
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The why is both speed and stability, login is usually the slowest and one of the flakiest flows in any app, so removing it from hundreds of tests is a massive win, it's the equivalent of seeding a logged in session instead of clicking through the form each time.",
+      "start": 287.865,
+      "end": 304.49
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "On one suite that alone shaved minutes off every CI run.",
+      "start": 304.63,
+      "end": 308.68
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "It also extends naturally to multiple roles, you save one state file per role, admin, editor, viewer, and a test that needs two roles just opens two contexts, each loading its own file.",
+      "start": 308.82,
+      "end": 322.045
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The trap is doing both, loading saved state and also running a login fixture, which double authenticates and can create session conflicts.",
+      "start": 322.185,
+      "end": 331.61
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Solid, that's the pattern I wanted to hear.",
+      "start": 332.15,
+      "end": 334.8
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Let's talk about the network.",
+      "start": 334.94,
+      "end": 336.89
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Your UI test depends on a backend that's slow or flaky, what do you do?",
+      "start": 337.03,
+      "end": 342.28
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "I isolate the UI from the backend with network interception.",
+      "start": 342.82,
+      "end": 347.32
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Playwright lets me register a route against a URL pattern, and inside that handler I can fulfill the request with fixed JSON of my own, modify it, or abort it entirely to simulate a network failure.",
+      "start": 347.46,
+      "end": 361.16
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "So for a deterministic UI test I stub the API, the users endpoint returns exactly the payload I define, every run, and now the test is verifying my rendering logic rather than the backend's mood that day.",
+      "start": 361.3,
+      "end": 376.4
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The why is determinism, a UI test should fail because the UI broke, not because staging was slow.",
+      "start": 376.54,
+      "end": 383.59
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "A concrete case, testing an empty state screen used to mean somehow arranging an account with no data, instead I intercept the list endpoint and fulfill it with an empty array, and the empty state renders instantly.",
+      "start": 383.73,
+      "end": 398.055
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "When I do need the real backend, I can wait for a specific response before asserting.",
+      "start": 398.195,
+      "end": 403.77
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The trap is over-mocking, if everything is stubbed you're no longer testing integration, so I keep a thin layer of end to end tests against the real API alongside the mocked ones.",
+      "start": 403.91,
+      "end": 416.01
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Good balance at the end there, mocking is a tool, not a religion.",
+      "start": 416.55,
+      "end": 420.8
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Last one, and it's the practical one.",
+      "start": 420.94,
+      "end": 423.44
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "A test passes locally every time but fails intermittently in CI.",
+      "start": 423.58,
+      "end": 428.63
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Walk me through how you attack that.",
+      "start": 428.77,
+      "end": 430.995
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "My first stop is the trace, not re-running the test.",
+      "start": 431.535,
+      "end": 435.235
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "I configure tracing to record on the first retry, so when CI retries a failed test, Playwright captures a full trace, DOM snapshots before and after every step, the network waterfall, and console output.",
+      "start": 435.375,
+      "end": 449.7
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "I open that in the Trace Viewer and step through the failure frame by frame, which usually shows me a timing issue, an element momentarily detached during a re-render, or an API call that takes ten times longer on the CI box than on my machine.",
+      "start": 449.84,
+      "end": 466.015
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The why is that CI flakiness is almost always a race the faster local environment hides, so I need evidence from the failing environment, not a local reproduction that will never fail.",
+      "start": 466.155,
+      "end": 478.73
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "A real example, a continue button that was briefly disabled while a validation call finished, locally the call was instant, in CI it wasn't, and the fix was asserting the button was enabled before clicking, letting auto-waiting absorb the delay.",
+      "start": 478.87,
+      "end": 495.045
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The trap is just bumping the timeout, that hides the race instead of fixing it, and retries should be a safety net, not the cure.",
+      "start": 495.185,
+      "end": 503.185
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Strong answers, that's the round.",
+      "start": 503.725,
+      "end": 505.9
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "What I liked here, and what listeners should take away, is the structure, a direct answer first, then the why, and then a concrete example or a trap called out.",
+      "start": 506.04,
+      "end": 516.065
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "That pattern is what makes an answer sound senior.",
+      "start": 516.205,
+      "end": 519.405
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Practice these until they flow, and I'll see you in the next round.",
+      "start": 519.545,
+      "end": 523.695
+    }
+  ]
+}

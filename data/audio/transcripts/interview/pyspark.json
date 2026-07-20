@@ -1,0 +1,438 @@
+{
+  "id": "pyspark",
+  "voice": null,
+  "voices": {
+    "INTERVIEWER": "am_fenrir",
+    "CANDIDATE": "af_heart"
+  },
+  "durationSec": 557.47,
+  "hash": "7220c7bf30cbda3fd49416251110de3afd7ff6d442f036729ca264e7f01e1e5a",
+  "cues": [
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Welcome in, glad you could make it.",
+      "start": 0,
+      "end": 2.35
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Let's run a quick PySpark round, the kind of rapid technical screen you'd get for an SDET role that touches data pipelines.",
+      "start": 2.49,
+      "end": 10.715
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "I'll ask a question, you give me your best answer, and I may dig a little deeper here and there.",
+      "start": 10.855,
+      "end": 16.455
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Nothing exotic, just the fundamentals done well.",
+      "start": 16.595,
+      "end": 19.895
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Ready when you are.",
+      "start": 20.035,
+      "end": 21.61
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Sounds good, let's get into it.",
+      "start": 22.15,
+      "end": 24.525
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Let's start at the foundation.",
+      "start": 25.065,
+      "end": 27.115
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Walk me through how Spark actually runs a job, and why people keep saying it's lazy.",
+      "start": 27.255,
+      "end": 33.005
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Spark is a distributed engine, so there's one driver that plans the work and many executors that run it in parallel, with the data split into partitions and one task processing one partition.",
+      "start": 33.545,
+      "end": 46.02
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The lazy part means transformations like select, filter, or join don't run anything, they just build up a plan, and nothing executes until an action like count, show, or write asks for a result.",
+      "start": 46.16,
+      "end": 59.135
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The why is optimization, because deferring execution lets the Catalyst optimizer see the whole plan and rewrite it, pushing filters down, pruning columns, reordering joins, before a single row moves.",
+      "start": 59.275,
+      "end": 72.875
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "A concrete trap I've hit in testing is calling collect on a big DataFrame, which pulls every row back to the driver and can crash it with an out of memory error, so in tests I assert on aggregates or a bounded limit instead of collecting everything.",
+      "start": 73.015,
+      "end": 88.965
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Good, and you already flagged the collect trap, which most people miss.",
+      "start": 89.505,
+      "end": 93.855
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Now, PySpark specifically, how do you think about RDD versus DataFrame versus Dataset?",
+      "start": 93.995,
+      "end": 100.72
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The direct answer is that in PySpark you use DataFrames, almost always.",
+      "start": 101.26,
+      "end": 106.41
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "A DataFrame is a distributed table with a schema, named and typed columns, and because Spark knows the structure, Catalyst can optimize your queries and Tungsten can generate efficient code.",
+      "start": 106.55,
+      "end": 119.2
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "An RDD is the low level distributed collection underneath, full control but no schema and no optimizer, so it's reserved for rare cases like custom partitioning or truly unstructured data.",
+      "start": 119.34,
+      "end": 132.865
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "And the Dataset, which adds compile time type safety, only exists on the JVM in Scala and Java, so in Python the whole DataFrame versus Dataset debate collapses to just use DataFrames.",
+      "start": 133.005,
+      "end": 147.53
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "One habit worth mentioning is that when I read data I always pass an explicit schema rather than using inferSchema, because inference reads the file twice and can silently change types between runs, which is a flaky test factory.",
+      "start": 147.67,
+      "end": 163.02
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "That schema point is one I wish more candidates made.",
+      "start": 163.56,
+      "end": 167.235
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Let's talk performance.",
+      "start": 167.375,
+      "end": 169.15
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "What is a shuffle, and how do repartition and coalesce fit into that picture?",
+      "start": 169.29,
+      "end": 174.34
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "A shuffle is Spark redistributing data across executors for a wide transformation like groupBy, join, or distinct, and it's the single most expensive thing Spark does, because it writes intermediate data to disk and reads it back over the network.",
+      "start": 174.88,
+      "end": 191.43
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "That's why the narrow versus wide distinction matters, a narrow transformation like filter or select stays within a partition and is cheap, while wide ones regroup rows across the cluster.",
+      "start": 191.57,
+      "end": 203.945
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Repartition does a full shuffle to exactly the number of partitions you ask for, up or down, and you use it to fix skew or raise parallelism.",
+      "start": 204.085,
+      "end": 213.435
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Coalesce only merges partitions down and avoids the full shuffle, so it's the cheap option right before a write, which prevents the small files problem where you spray thousands of tiny files into storage.",
+      "start": 213.575,
+      "end": 227.125
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "And post shuffle partition count defaults to two hundred, which adaptive query execution now tunes at runtime.",
+      "start": 227.265,
+      "end": 235.015
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Nice.",
+      "start": 235.555,
+      "end": 236.68
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "You mentioned skew, so let's go there.",
+      "start": 236.82,
+      "end": 239.295
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Your join has a hundred and ninety nine tasks finishing in seconds and one running for an hour.",
+      "start": 239.435,
+      "end": 245.81
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "What's happening and what do you do?",
+      "start": 245.95,
+      "end": 248.3
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "That's the classic signature of data skew, a few hot keys, maybe one heavy user id or a null join key, holding most of the rows, so one task gets a giant partition and the whole stage waits on it.",
+      "start": 248.84,
+      "end": 262.715
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "My fixes go in order of preference.",
+      "start": 262.855,
+      "end": 265.63
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "First, enable adaptive query execution's skew join handling, because Spark will split the skewed partitions automatically and it's the cheapest thing to try.",
+      "start": 265.77,
+      "end": 276.095
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Second, if the small side of the join fits under the broadcast threshold, around ten megabytes by default, broadcast it to every executor so the join happens locally with no shuffle at all, and no shuffle means no skew.",
+      "start": 276.235,
+      "end": 290.335
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Third, salting, where I append a random suffix to the hot key on both sides to spread it across partitions and strip it after the join.",
+      "start": 290.475,
+      "end": 299.475
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "And for null or sentinel keys, I'd handle those rows separately and union the results back in.",
+      "start": 299.615,
+      "end": 306.19
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Solid ladder of options.",
+      "start": 306.73,
+      "end": 308.78
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Here's a practical one you'd hit in any pipeline.",
+      "start": 308.92,
+      "end": 311.995
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "You have duplicate records per key and you need to keep only the most recent one.",
+      "start": 312.135,
+      "end": 317.61
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "How do you do that?",
+      "start": 317.75,
+      "end": 319.275
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "That's a window function job.",
+      "start": 319.815,
+      "end": 322.04
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "I'd define a window partitioned by the key and ordered by the timestamp descending, apply row number over it, and keep only the rows where the row number equals one, then drop the helper column.",
+      "start": 322.18,
+      "end": 334.58
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The why is that window functions compute across related rows without collapsing them the way groupBy does, so I get to rank every record within its key and choose the winner, and the descending order guarantees the latest one ranks first.",
+      "start": 334.72,
+      "end": 349.095
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "It's the same machinery I'd use for running totals with sum over a window, or period comparisons with lag and lead.",
+      "start": 349.235,
+      "end": 356.885
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "A trap worth calling out is reaching for dropDuplicates and assuming it keeps the most recent row, it doesn't make that guarantee, so the row number pattern is the reliable answer.",
+      "start": 357.025,
+      "end": 368.475
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "It's also a lovely unit test, two rows for one id with different timestamps in, one row out, the newer one.",
+      "start": 368.615,
+      "end": 376.19
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "And you just wrote your own test case for it, which is a good segue.",
+      "start": 376.73,
+      "end": 380.83
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "As an SDET, the pipeline ran green last night.",
+      "start": 380.97,
+      "end": 384.27
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "How do you know the data is actually right?",
+      "start": 384.41,
+      "end": 387.085
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Green just means the code didn't crash, so I test the data itself against a checklist of quality dimensions.",
+      "start": 387.625,
+      "end": 394.575
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Completeness, no unexpected nulls in required columns.",
+      "start": 394.715,
+      "end": 398.915
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Uniqueness, primary keys aren't duplicated.",
+      "start": 399.055,
+      "end": 402.43
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Row count reconciliation, the output count squares with the source, because an inner join can silently drop rows and nobody notices.",
+      "start": 402.57,
+      "end": 411.82
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Range and domain checks, amounts are non negative and statuses come from an allowed set.",
+      "start": 411.96,
+      "end": 418.235
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Referential integrity, every foreign key resolves to a dimension row, and freshness, the latest partition is recent enough.",
+      "start": 418.375,
+      "end": 426.775
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The mature pattern is to quarantine rather than crash, routing bad rows to a dead letter table so good data keeps flowing while the bad rows are captured for triage.",
+      "start": 426.915,
+      "end": 437.865
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "And when a run looks wrong on a Delta table, time travel is my favorite debugging tool, I diff the current version against the previous good version to isolate exactly which rows changed.",
+      "start": 438.005,
+      "end": 449.88
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "That quarantine versus crash distinction is exactly the maturity signal I'm listening for.",
+      "start": 450.42,
+      "end": 456.845
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Last one.",
+      "start": 456.985,
+      "end": 458.36
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "How do you unit test PySpark transformations so this all runs in CI?",
+      "start": 458.5,
+      "end": 463.775
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The trick is structure.",
+      "start": 464.315,
+      "end": 466.19
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "I keep the logic in pure transform functions that take a DataFrame and return a DataFrame with no input or output inside them, which makes the pipeline testable like any other code.",
+      "start": 466.33,
+      "end": 478.53
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "In pytest I spin up a session scoped local SparkSession using local star, build tiny inputs with createDataFrame, and run the function.",
+      "start": 478.67,
+      "end": 488.07
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "For assertions I use a proper DataFrame equality helper, chispa's assert df equality or the built in assertDataFrameEqual from Spark three five onward, rather than comparing collected lists, because those helpers handle column order and nullability and give readable diffs when something breaks.",
+      "start": 488.21,
+      "end": 507.435
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "On top of the unit layer, the data quality checks I mentioned become contract tests, running through something like Great Expectations or dbt tests as a gate in CI.",
+      "start": 507.575,
+      "end": 519.15
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "And the earlier trap still applies, never assert on a full collect of production scale data, keep test inputs small and assertions on aggregates.",
+      "start": 519.29,
+      "end": 528.84
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Strong answers, that's the round.",
+      "start": 529.38,
+      "end": 531.555
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "What I liked here, and what listeners should take away, is the structure, a direct answer first, then the why, and then a concrete example or a trap called out, the collect that crashes a driver, the dropDuplicates that doesn't keep the latest row, the pipeline that runs green while the data is wrong.",
+      "start": 531.695,
+      "end": 549.295
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "That pattern is what makes an answer sound senior.",
+      "start": 549.435,
+      "end": 552.635
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Practice these until they flow, and I'll see you in the next round.",
+      "start": 552.775,
+      "end": 556.925
+    }
+  ]
+}

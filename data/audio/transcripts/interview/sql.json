@@ -1,0 +1,408 @@
+{
+  "id": "sql",
+  "voice": null,
+  "voices": {
+    "INTERVIEWER": "am_fenrir",
+    "CANDIDATE": "af_heart"
+  },
+  "durationSec": 552.34,
+  "hash": "8bff4c8ff3030d570f5c19d16c6fab9d4e54c89a9b663413ceec4e0aa2e0a336",
+  "cues": [
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Welcome in, thanks for making the time today.",
+      "start": 0,
+      "end": 3
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Let's run a quick SQL round, the kind of rapid technical screen you'd get for an SDET role.",
+      "start": 3.14,
+      "end": 9.29
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "I'll ask a question, you give me your best answer, and I may push a little deeper here and there.",
+      "start": 9.43,
+      "end": 15.13
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Nothing tricky, just the fundamentals done well.",
+      "start": 15.27,
+      "end": 18.395
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Ready when you are.",
+      "start": 18.535,
+      "end": 20.11
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Sounds great, let's do it.",
+      "start": 20.65,
+      "end": 22.75
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Let's start with a classic.",
+      "start": 23.29,
+      "end": 25.19
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "What's the difference between WHERE and HAVING, and why does the difference exist at all?",
+      "start": 25.33,
+      "end": 30.53
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The direct answer is that WHERE filters individual rows before any grouping happens, and HAVING filters the groups after GROUP BY has collapsed them, which is why HAVING can use aggregates like COUNT or SUM and WHERE can't. The reason the difference exists is the logical execution order of a query, the database runs FROM and the joins first, then WHERE, then GROUP BY, then HAVING, and only then SELECT, ORDER BY, and LIMIT.",
+      "start": 31.07,
+      "end": 56.67
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "So when WHERE runs, the aggregate values simply don't exist yet.",
+      "start": 56.81,
+      "end": 61.21
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "A concrete example I use all the time, if I want customers with more than a thousand in paid orders, I filter status equals paid in WHERE first so I only aggregate the right rows, then group by customer, then use HAVING on the sum.",
+      "start": 61.35,
+      "end": 76.35
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "And that execution order explains a common trap too, a column alias defined in SELECT isn't visible in WHERE, because WHERE runs before SELECT, but it does work in ORDER BY, which runs last.",
+      "start": 76.49,
+      "end": 89.34
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Nice, and you got the execution order in there before I could ask.",
+      "start": 89.88,
+      "end": 94.08
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Next one, walk me through join types, and specifically, how would you find customers who have never placed an order?",
+      "start": 94.22,
+      "end": 101.17
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "A join combines rows from two tables on a matching condition, and the type decides what happens to non-matching rows.",
+      "start": 101.71,
+      "end": 109.785
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "INNER keeps only rows that match on both sides, LEFT keeps every left row and fills the right columns with NULL when there's no match, RIGHT is the mirror of that, FULL OUTER keeps everything from both sides, and CROSS gives every combination, which is usually an accident.",
+      "start": 109.925,
+      "end": 126.925
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "For customers with no orders, I'd LEFT JOIN orders onto customers on the customer id, then filter where the order id IS NULL, because those NULL rows are exactly the customers nothing matched.",
+      "start": 127.065,
+      "end": 139.89
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "NOT EXISTS with a subquery works just as well.",
+      "start": 140.03,
+      "end": 143.405
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The trap I always call out is that if you filter the right table's columns in the WHERE clause, say where order status equals paid, you silently turn the LEFT JOIN back into an INNER JOIN, because the NULL rows fail that condition and get dropped.",
+      "start": 143.545,
+      "end": 158.595
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The fix is to put that condition in the ON clause instead.",
+      "start": 158.735,
+      "end": 162.585
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Good, and you already touched on NULL there, so let's stay on it.",
+      "start": 163.125,
+      "end": 166.9
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "What makes NULL tricky in SQL, and how do you handle it?",
+      "start": 167.04,
+      "end": 170.715
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The core idea is that NULL means unknown, not zero and not an empty string, and that unknown spreads through everything it touches.",
+      "start": 171.255,
+      "end": 179.93
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "So you can never compare with equals NULL, that comparison is always unknown and never true, you have to use IS NULL or IS NOT NULL.",
+      "start": 180.07,
+      "end": 188.87
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Any arithmetic with NULL is NULL, five plus NULL is just NULL.",
+      "start": 189.01,
+      "end": 193.485
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "And aggregates quietly skip NULLs, so AVG on a column ignores the null rows, and COUNT of a column counts only non-null values while COUNT star counts every row, which can surprise you in a report.",
+      "start": 193.625,
+      "end": 207.575
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "For handling it, COALESCE returns the first non-null argument, so I can fall back from nickname to name to a default label, and NULLIF is handy for guarding a divide by zero, dividing by NULLIF of count and zero returns NULL instead of crashing.",
+      "start": 207.715,
+      "end": 224.065
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The nastiest trap is NOT IN against a subquery that returns a NULL, that query returns no rows at all, so I reach for NOT EXISTS instead.",
+      "start": 224.205,
+      "end": 233.755
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "That NOT IN trap has bitten a lot of people.",
+      "start": 234.295,
+      "end": 237.17
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Now, suppose I ask you for the latest order per customer, or the second highest salary.",
+      "start": 237.31,
+      "end": 243.31
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "What's your tool for those?",
+      "start": 243.45,
+      "end": 245.325
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Both of those are window function problems.",
+      "start": 245.865,
+      "end": 248.865
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "A window function computes over a set of related rows without collapsing them the way GROUP BY does, which is exactly what you need when you want the whole row back, not just an aggregate.",
+      "start": 249.005,
+      "end": 260.53
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "For latest order per customer, I take ROW_NUMBER over a window partitioned by customer id and ordered by created at descending, wrap that in a subquery or CTE, and keep the rows where the row number is one.",
+      "start": 260.67,
+      "end": 275.045
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "For second highest salary, same shape, DENSE_RANK over salary descending and filter where the rank equals two.",
+      "start": 275.185,
+      "end": 282.635
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The reason I pick each function deliberately is the tie behavior, ROW_NUMBER is always unique, RANK leaves gaps after ties, so you'd see one, one, three, and DENSE_RANK doesn't, one, one, two.",
+      "start": 282.775,
+      "end": 295.675
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "For a salary question ties matter, so DENSE_RANK is the honest answer.",
+      "start": 295.815,
+      "end": 300.74
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The trap is forgetting PARTITION BY, then you're numbering the entire table as one big window instead of per customer.",
+      "start": 300.88,
+      "end": 308.655
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Solid, and the tie behavior is exactly the follow-up I was holding.",
+      "start": 309.195,
+      "end": 313.995
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Let's shift to performance.",
+      "start": 314.135,
+      "end": 316.01
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "What does an index actually do for you, and when does it stop helping?",
+      "start": 316.15,
+      "end": 320.5
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "An index is a sorted lookup structure, usually a B-tree, that lets the database find rows without scanning the whole table.",
+      "start": 321.04,
+      "end": 329.34
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The trade is real though, reads on the indexed columns get faster, but every insert, update, and delete has to maintain the index, and it costs storage, so the guidance I give is to index what you filter, join, and sort on, not every column.",
+      "start": 329.48,
+      "end": 345.405
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "A composite index on two columns follows the left prefix rule, it helps filters on the first column or on both, but not on the second column alone.",
+      "start": 345.545,
+      "end": 355.52
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The classic way an index stops helping is wrapping the column in a function, filtering where the year function of a date equals a value kills index use, and the fix is rewriting it as a date range so the predicate is sargable.",
+      "start": 355.66,
+      "end": 369.885
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "When I suspect a slow query, I don't guess, I run EXPLAIN or EXPLAIN ANALYZE and check whether it's doing an index seek or a full scan.",
+      "start": 370.025,
+      "end": 379.1
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Good instinct going to the plan instead of guessing.",
+      "start": 379.64,
+      "end": 382.89
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "One more on the database side, tell me about transactions and what ACID actually guarantees.",
+      "start": 383.03,
+      "end": 389.305
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "A transaction groups statements so they succeed or fail as one unit, and ACID is the set of guarantees that makes that reliable.",
+      "start": 389.845,
+      "end": 398.445
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Atomicity means all statements commit or none do, a rollback leaves nothing changed.",
+      "start": 398.585,
+      "end": 404.135
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Consistency means constraints hold before and after.",
+      "start": 404.275,
+      "end": 408.2
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Isolation means concurrent transactions don't corrupt each other, and durability means once it's committed, it survives a crash.",
+      "start": 408.34,
+      "end": 416.665
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The textbook example is a money transfer, begin a transaction, subtract a hundred from one account, add a hundred to the other, then commit, and if anything fails in between, the rollback means you never end up with money vanishing from one side only.",
+      "start": 416.805,
+      "end": 432.705
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The nuance worth adding is that isolation isn't one thing, it's a dial of levels trading consistency for concurrency, read uncommitted allows dirty reads, read committed is the common default, repeatable read stops non-repeatable reads, and serializable is strictest and stops phantoms.",
+      "start": 432.845,
+      "end": 451.795
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Knowing that dial exists matters when tests read data mid-transaction.",
+      "start": 451.935,
+      "end": 456.91
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Nice bridge to my last question, because you're interviewing for an SDET role, not a DBA role.",
+      "start": 457.45,
+      "end": 464.125
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "How do you actually use SQL in your testing work?",
+      "start": 464.265,
+      "end": 467.465
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "For me SQL is a verification tool, I assert against the database, not just against the UI or the API.",
+      "start": 468.005,
+      "end": 475.93
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "So after an action in a test, I query the table directly to confirm the row was written with the right values, which catches bugs where the API returns success but persists the wrong thing.",
+      "start": 476.07,
+      "end": 488.495
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "I also run data quality checks, grouping by email with HAVING count greater than one to catch duplicates, and the LEFT JOIN with IS NULL pattern to catch orphaned orders pointing at customers that don't exist, plus null checks on required fields and row count reconciliation between source and target.",
+      "start": 488.635,
+      "end": 507.885
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Beyond assertions, I use SQL for setup and teardown, seeding fixtures and cleaning state from inside the test framework.",
+      "start": 508.025,
+      "end": 516
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "And a real lesson learned, on an order history bug our test picked the latest row by max id while the app used the updated at timestamp, so backfilled records broke the assertion until we matched the query to the actual product rule.",
+      "start": 516.14,
+      "end": 531.29
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Strong answers, that's the round.",
+      "start": 531.83,
+      "end": 534.005
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "What I liked here, and what listeners should take away, is the structure, a direct answer first, then the why, and then a concrete example or a trap called out.",
+      "start": 534.145,
+      "end": 544.17
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "That pattern is what makes an answer sound senior.",
+      "start": 544.31,
+      "end": 547.51
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Practice these until they flow, and I'll see you in the next round.",
+      "start": 547.65,
+      "end": 551.8
+    }
+  ]
+}

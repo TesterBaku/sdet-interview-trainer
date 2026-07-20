@@ -1,0 +1,366 @@
+{
+  "id": "api-testing",
+  "voice": null,
+  "voices": {
+    "INTERVIEWER": "am_fenrir",
+    "CANDIDATE": "af_heart"
+  },
+  "durationSec": 478.21,
+  "hash": "b9119de9c9e9721b18433271721a883b9ab6d9f0b6398787a0a46b077e5b9512",
+  "cues": [
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Welcome in, thanks for making the time today.",
+      "start": 0,
+      "end": 3
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Let's run a quick API testing round, the kind of rapid technical screen you'd get for an SDET role.",
+      "start": 3.14,
+      "end": 10.24
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "I'll ask a question, you give me your best answer, and I may push a little deeper here and there.",
+      "start": 10.38,
+      "end": 16.08
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Nothing tricky, just the fundamentals done well.",
+      "start": 16.22,
+      "end": 19.345
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Ready when you are.",
+      "start": 19.485,
+      "end": 21.06
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Sounds great, let's do it.",
+      "start": 21.6,
+      "end": 23.7
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Let's start with a classic HTTP question.",
+      "start": 24.24,
+      "end": 27.615
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Walk me through the difference between PUT and PATCH, and tell me why it actually matters when you're testing.",
+      "start": 27.755,
+      "end": 34.13
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Sure.",
+      "start": 34.67,
+      "end": 35.97
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "PUT replaces the whole resource, so whatever I send becomes the complete new state, and any fields I leave out effectively get reset.",
+      "start": 36.11,
+      "end": 44.785
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "PATCH is a partial update, it only changes the fields I include and leaves everything else untouched.",
+      "start": 44.925,
+      "end": 51.6
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The other key difference is idempotency, PUT is idempotent by definition, sending the same full replacement five times leaves the resource in the same state, while PATCH usually behaves that way but it's not guaranteed by the spec.",
+      "start": 51.74,
+      "end": 66.765
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "From a testing perspective this matters a lot, because a really common bug is a PUT that silently wipes fields the client didn't send, so one of my go-to test cases is sending a PUT with a missing optional field and verifying the server resets it rather than keeping the old value, and then the mirror test for PATCH, confirming untouched fields survive the update.",
+      "start": 66.905,
+      "end": 89.455
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Nice, I like that you tied it back to an actual test case.",
+      "start": 89.995,
+      "end": 93.82
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Here's another one that comes up in almost every screen, what's the difference between a 401 and a 403?",
+      "start": 93.96,
+      "end": 101.785
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "This is the identity versus permission distinction.",
+      "start": 102.325,
+      "end": 105.825
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "A 401 means unauthorized in name but what it really means is unauthenticated, the server doesn't know who I am, so I get it when the token is missing, malformed, or expired.",
+      "start": 105.965,
+      "end": 118.59
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "A 403 means the server knows exactly who I am, my credentials are valid, but I'm not permitted to do this particular thing, say a regular user calling an admin endpoint.",
+      "start": 118.73,
+      "end": 130.58
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The memory hook I use is that 401 is the server asking who are you, and 403 is the server saying I know who you are and the answer is still no.",
+      "start": 130.72,
+      "end": 141.645
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "In practice I always test both paths separately, no token should give me 401, and a valid token with the wrong role should give me 403, because if an API returns 401 for a permissions problem, that's a real defect worth raising.",
+      "start": 141.785,
+      "end": 158.91
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Good, and that's exactly the trap, people blur those two together.",
+      "start": 159.45,
+      "end": 163.675
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Let's zoom out a bit.",
+      "start": 163.815,
+      "end": 165.54
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "When you get a response back from an API, what do you actually validate beyond the status code?",
+      "start": 165.68,
+      "end": 172.055
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The status code is just the headline, so I work through several layers.",
+      "start": 172.595,
+      "end": 177.195
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "First the response body, are the values correct and are the data types correct, an ID that comes back as a string when it should be a number is a bug even if everything reads fine to the eye.",
+      "start": 177.335,
+      "end": 189.585
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Second, the schema, I validate the overall structure against a JSON schema, required fields present, correct shape, which is much more maintainable than field by field assertions on a large payload.",
+      "start": 189.725,
+      "end": 202.9
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Third, headers, things like Content Type, caching headers, and rate limit headers.",
+      "start": 203.04,
+      "end": 208.265
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Fourth, response time, is it within the SLA, because a correct answer that takes 8 seconds is still a failure.",
+      "start": 208.405,
+      "end": 216.205
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "And finally side effects, if I POST a new user I don't just trust the 201, I follow up with a GET to confirm the resource actually persisted with the right data.",
+      "start": 216.345,
+      "end": 227.445
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "That last one is what separates checking the response from actually testing the system.",
+      "start": 227.585,
+      "end": 233.035
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "That follow-up GET is a detail a lot of candidates miss.",
+      "start": 233.575,
+      "end": 237.475
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Let's build on that.",
+      "start": 237.615,
+      "end": 239.34
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "How do you approach testing an endpoint that requires authentication, both in terms of framework design and coverage?",
+      "start": 239.48,
+      "end": 247.28
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "On the framework side, I acquire the token once in a setup phase or fixture, typically through a client credentials flow for OAuth or a login call for JWT, then I attach it as an Authorization Bearer header and reuse it across the suite, refreshing it only when it expires.",
+      "start": 247.82,
+      "end": 266.395
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Logging in fresh inside every single test is slow and adds noise, so caching the token is the pattern I reach for.",
+      "start": 266.535,
+      "end": 274.735
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "But the setup is only half the answer, the coverage is where the real testing happens.",
+      "start": 274.875,
+      "end": 280.225
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "I always include the negative auth cases, no token at all should return 401, an expired or tampered token should return 401, and a valid token that belongs to a user without the right role should return 403.",
+      "start": 280.365,
+      "end": 296.54
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Auth is a security boundary, so I'd argue those negative cases matter even more than the happy path.",
+      "start": 296.68,
+      "end": 303.505
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Agreed, the negative cases are where the risk lives.",
+      "start": 304.045,
+      "end": 307.545
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Now, you mentioned idempotency earlier when we talked about PUT.",
+      "start": 307.685,
+      "end": 311.785
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Define it properly for me, and give me the subtlety that trips people up.",
+      "start": 311.925,
+      "end": 316.45
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Idempotency means that making the same request once or making it many times leaves the server in the same state.",
+      "start": 316.99,
+      "end": 324.54
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "GET, PUT, and DELETE are idempotent, POST is not, because two identical POSTs typically create two separate resources.",
+      "start": 324.68,
+      "end": 333.03
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The subtlety, and this is the trap I'd flag, is that idempotency is about server state, not about getting an identical response.",
+      "start": 333.17,
+      "end": 341.67
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "If I DELETE a resource twice, the first call might return a 200 and the second a 404, and that's still perfectly idempotent, because the end state of the server is the same either way, the resource is gone.",
+      "start": 341.81,
+      "end": 355.585
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Candidates often say idempotent means you always get the same response, and that's the wrong definition.",
+      "start": 355.725,
+      "end": 362.625
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "As a tester I verify this directly, I send the same PUT or DELETE twice and assert that the state, not necessarily the status code, is unchanged after the repeat.",
+      "start": 362.765,
+      "end": 374.39
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "That state versus response distinction is exactly what I was fishing for.",
+      "start": 374.93,
+      "end": 380.08
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Last one, and it's a design question rather than an HTTP question.",
+      "start": 380.22,
+      "end": 385.145
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Where do API tests sit in the test pyramid, and why would you invest there?",
+      "start": 385.285,
+      "end": 390.66
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "They sit in the middle layer, above unit tests and below UI tests, and I think it's the highest leverage layer for an SDET.",
+      "start": 391.2,
+      "end": 399.275
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The base of the pyramid is a large number of fast unit tests, the top is a small number of UI or end to end tests, and the API layer in between gives you the best balance of speed, stability, and coverage.",
+      "start": 399.415,
+      "end": 413.49
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "API tests exercise real business logic and data integrity without any of the rendering or element waiting that makes UI tests slow and flaky, so they run in milliseconds rather than seconds and fail for real reasons.",
+      "start": 413.63,
+      "end": 429.055
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "They also localize failures much better, when an API test breaks I know which endpoint and which contract, whereas a UI failure could be anything from the frontend down to the database.",
+      "start": 429.195,
+      "end": 441.52
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "So my strategy is usually to push as much coverage as possible down into the API layer and keep the UI suite thin, just a few critical journeys.",
+      "start": 441.66,
+      "end": 451.76
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Strong answers, that's the round.",
+      "start": 452.3,
+      "end": 454.475
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "What I liked here, and what listeners should take away, is the structure, a direct answer first, then the why, and then a concrete example or a trap called out, like the PUT that wipes missing fields or idempotency being about state rather than the response.",
+      "start": 454.615,
+      "end": 470.04
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "That pattern is what makes an answer sound senior.",
+      "start": 470.18,
+      "end": 473.38
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Practice these until they flow, and I'll see you in the next round.",
+      "start": 473.52,
+      "end": 477.67
+    }
+  ]
+}

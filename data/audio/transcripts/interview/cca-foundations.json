@@ -1,0 +1,384 @@
+{
+  "id": "cca-foundations",
+  "voice": null,
+  "voices": {
+    "INTERVIEWER": "am_fenrir",
+    "CANDIDATE": "af_heart"
+  },
+  "durationSec": 600.36,
+  "hash": "4c6039a06ef6f6f8b73e80ba53922a365d52fab49cd0f15778a737da19f9abf9",
+  "cues": [
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Welcome in, thanks for making the time today.",
+      "start": 0,
+      "end": 3
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Let's run a quick Claude Certified Architect foundations round, the kind of rapid technical screen you'd get before the real exam, sixty questions in two hours, proctored, so the fundamentals need to be automatic.",
+      "start": 3.14,
+      "end": 16.79
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "I'll ask a question, you give me your best answer, and I may push a little deeper here and there.",
+      "start": 16.93,
+      "end": 22.63
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Nothing tricky, just the exam domains done well, agentic architecture, Claude Code, prompt engineering, MCP, and context management.",
+      "start": 22.77,
+      "end": 32.67
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Ready when you are.",
+      "start": 32.81,
+      "end": 34.385
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Sounds great, let's do it.",
+      "start": 34.925,
+      "end": 37.025
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Let's start with model selection.",
+      "start": 37.565,
+      "end": 39.865
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "You're architecting a system on Claude, how do you decide which model tier handles which task?",
+      "start": 40.005,
+      "end": 46.205
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "I route by task complexity, so simple high volume subtasks go to Haiku, the production default sits on Sonnet, and complex reasoning or architecture decisions go to Opus.",
+      "start": 46.745,
+      "end": 58.895
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The reason is cost, all three tiers give you the same two hundred k context window, so the real lever is price and latency, and Haiku is the cheap low latency option for things like classification while Opus buys you depth where it actually matters.",
+      "start": 59.035,
+      "end": 75.835
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "A concrete example would be a support pipeline where Haiku triages and classifies every incoming ticket, and only the hard escalations get handed to Opus, which keeps the bill sane at scale.",
+      "start": 75.975,
+      "end": 88.625
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "One trap worth calling out, the API has no default for max tokens, it's a required parameter, and if you omit it the request errors, so every call in the system needs it set explicitly.",
+      "start": 88.765,
+      "end": 101.64
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Good, that routing rule shows up on the exam constantly.",
+      "start": 102.18,
+      "end": 105.955
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Next one, walk me through prompt caching, how it works and when you'd reach for it.",
+      "start": 106.095,
+      "end": 110.92
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "You mark a large static prefix with a cache control block of type ephemeral, and the platform caches it for five minutes, which is the only TTL available.",
+      "start": 111.46,
+      "end": 121.635
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The economics are the why, a cache write costs one point two five times the base input price, but a cache read costs a tenth of it, so you get a ninety percent discount every time you reuse that context within the window.",
+      "start": 121.775,
+      "end": 136.2
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "There are minimums, about a thousand tokens on Haiku and two thousand on Sonnet and Opus, and you get at most four cache breakpoints per request.",
+      "start": 136.34,
+      "end": 145.665
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "It's best for big static system prompts like docs or personas, for RAG where you cache the retrieved documents and vary only the question, and for multi turn conversations where you cache prior turns.",
+      "start": 145.805,
+      "end": 159.455
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The trap is that a cache miss is charged at the full write price, so caching content that changes every request actually costs you more than not caching at all.",
+      "start": 159.595,
+      "end": 169.995
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Nice, you had the numbers ready, that matters in a proctored exam.",
+      "start": 170.535,
+      "end": 174.835
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Now, structured output.",
+      "start": 174.975,
+      "end": 176.825
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "I need Claude to return data my code can parse reliably, what's your approach?",
+      "start": 176.965,
+      "end": 182.165
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "I use tool use with an input schema rather than asking the model to output JSON in prose, because the schema is actually enforced, every field you mark as required will be present, whereas a plain JSON instruction can drift.",
+      "start": 182.705,
+      "end": 197.33
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Mechanically the cycle is that the model returns a tool use block carrying an id, a name, and the input, you run the tool on your side, and you send back a tool result block with that same tool use id so the model resumes with the result in context.",
+      "start": 197.47,
+      "end": 214.245
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "You can steer this with tool choice, auto lets the model decide, any forces it to use at least one tool, you can force one specific tool by name, or forbid tools entirely with none.",
+      "start": 214.385,
+      "end": 226.485
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "So for pure extraction I define a single tool and force it by name.",
+      "start": 226.625,
+      "end": 231.35
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "For nullable fields the trap is to declare them with anyOf allowing string or null, and when determinism matters I test at temperature zero.",
+      "start": 231.49,
+      "end": 240.64
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "That's exactly the pattern, schema over hope.",
+      "start": 241.18,
+      "end": 244.055
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Let's go up a level, tell me about the core agentic architecture patterns and how you design for failure inside them.",
+      "start": 244.195,
+      "end": 251.72
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The main patterns are orchestrator subagent, where a main agent delegates to specialists and keeps the state itself, parallel agents where independent subtasks fan out concurrently and you merge the results, pipeline where agent A's output feeds agent B in a linear chain, evaluator optimizer where one agent generates and another critiques in a loop until it passes, and loop until dry, where you keep running until a few consecutive rounds return nothing new.",
+      "start": 252.26,
+      "end": 278.11
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The reason failure design matters is that agents loop, so before any loop starts I define a maximum retry count, and I distinguish retryable errors like timeouts and rate limits from fatal ones like auth failures or invalid input, because retrying a fatal error just burns money.",
+      "start": 278.25,
+      "end": 297.1
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "A real scenario, if the primary agent fails I fall back to a simpler model instead of crashing, and I log every decision, which tool was called and why, so I can debug it later.",
+      "start": 297.24,
+      "end": 309.215
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "And for high volume non latency sensitive work like evals, the Batch API gives a fifty percent discount with up to twenty four hour turnaround.",
+      "start": 309.355,
+      "end": 319.305
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Solid, the retryable versus fatal distinction is one people miss.",
+      "start": 319.845,
+      "end": 324.72
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Speaking of tools, let's talk MCP.",
+      "start": 324.86,
+      "end": 327.685
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Give me the shape of the protocol, primitives, transport, and this sampling idea.",
+      "start": 327.825,
+      "end": 333.125
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "MCP has three primitives, all flowing from server to client.",
+      "start": 333.665,
+      "end": 338.565
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Tools are executable functions the model can call, resources are read only data or files it can access, and prompts are reusable templates with arguments.",
+      "start": 338.705,
+      "end": 349.43
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "For transport, a local server runs over stdio as a subprocess talking through stdin and stdout, and a remote server runs over HTTP with server sent events, and remote auth should be OAuth two point oh.",
+      "start": 349.57,
+      "end": 364.47
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Sampling is the interesting one, it flips the direction, the server can ask the client to make an LLM call on its behalf, which lets an MCP server leverage the host's model without holding its own API key, and the client decides which sampling requests to honour, so there's a human in the loop.",
+      "start": 364.61,
+      "end": 383.885
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The trap area is security, you scope tool permissions to least privilege, and you never expose a destructive tool without a confirmation prompt, because an agent will eventually call it.",
+      "start": 384.025,
+      "end": 395.6
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Good, and I like that you flagged sampling as the reversed direction, that's a common exam distractor.",
+      "start": 396.14,
+      "end": 403.015
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Now Claude Code itself.",
+      "start": 403.155,
+      "end": 405.13
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "How do hooks work, and what should I know about subagents?",
+      "start": 405.27,
+      "end": 408.92
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Hooks are lifecycle scripts, and the key fact is that only PreToolUse can block, it fires before any tool call and if it exits with code two the call is blocked and Claude sees the hook's stdout as the reason.",
+      "start": 409.46,
+      "end": 423.16
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "PostToolUse fires after a tool completes, Notification when Claude sends a message, Stop when the conversation ends, and PreCompact before context compaction, and none of those can block.",
+      "start": 423.3,
+      "end": 435.6
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Exit code zero means proceed, and any other code is just logged while execution continues, which surprises people.",
+      "start": 435.74,
+      "end": 443.69
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The why is governance, a concrete example is a PreToolUse hook that inspects bash commands and exits two on anything destructive, giving you a policy gate the model can't talk its way past.",
+      "start": 443.83,
+      "end": 456.63
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "On subagents, they're spawned through the Task tool and run in a completely isolated context, they do not inherit the parent conversation, results come back as text, so anything they need must be passed in explicitly.",
+      "start": 456.77,
+      "end": 470.87
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "And configuration layers through the CLAUDE dot md hierarchy, global in the home directory, project level, and the repo root.",
+      "start": 471.01,
+      "end": 479.585
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Careful and correct, especially the point that only exit two on PreToolUse blocks.",
+      "start": 480.125,
+      "end": 485.975
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Last one, bring it home on context management.",
+      "start": 486.115,
+      "end": 489.44
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Your input outgrows the context window, what's your playbook?",
+      "start": 489.58,
+      "end": 493.43
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "There are four strategies and they trade off differently.",
+      "start": 493.97,
+      "end": 497.47
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "A sliding window drops the oldest turns, simple but you lose early context, summarise and compress replaces old turns with a summary and preserves the key facts, RAG injection retrieves only the relevant chunks per query so you scale beyond the context limit entirely, and prompt caching makes the expensive static part cheap to reuse.",
+      "start": 497.61,
+      "end": 520.235
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "For RAG specifically I chunk at roughly five hundred to a thousand tokens with ten to twenty percent overlap so facts don't get cut at boundaries, retrieve by embedding the query and taking top k cosine similarity with a rerank if needed, and I wrap the injected chunks in XML tags with source attribution so Claude can cite them and so retrieved content stays separate from instructions, which is also your prompt injection defence, the system prompt states that content inside those tags is untrusted data.",
+      "start": 520.375,
+      "end": 546.6
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The budgeting trap, always reserve headroom so the context limit minus input tokens still exceeds max tokens, pre validate with the token counting endpoint, and if you must truncate, truncate the retrieved documents, never the system prompt or the question.",
+      "start": 546.74,
+      "end": 563.815
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Strong answers, that's the round.",
+      "start": 564.355,
+      "end": 566.53
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "What I liked here, and what listeners should take away, is the structure, a direct answer first, then the why, and then a concrete example or a trap called out.",
+      "start": 566.67,
+      "end": 576.695
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "You gave the routing rule before the pricing story, the caching numbers before the cache miss trap, the hook that blocks before the exit codes people get wrong.",
+      "start": 576.835,
+      "end": 586.56
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "That pattern is what makes an answer sound senior, and it's exactly what a proctored exam rewards, precise recall delivered in order.",
+      "start": 586.7,
+      "end": 595.525
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Practice these until they flow, and I'll see you in the next round.",
+      "start": 595.665,
+      "end": 599.815
+    }
+  ]
+}

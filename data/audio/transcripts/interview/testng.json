@@ -1,0 +1,390 @@
+{
+  "id": "testng",
+  "voice": null,
+  "voices": {
+    "INTERVIEWER": "am_fenrir",
+    "CANDIDATE": "af_heart"
+  },
+  "durationSec": 557.52,
+  "hash": "a842b3fd9ece567cc3ed1c982c4f4d9a6cc801d099d5886219b3b4edf93f1f45",
+  "cues": [
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Welcome in, glad you could make it.",
+      "start": 0,
+      "end": 2.35
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Today we're doing a quick TestNG round, the kind of rapid technical screen you'd face for an SDET role on a Java automation stack.",
+      "start": 2.49,
+      "end": 11.74
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "I'll ask a question, you give me your best answer, and I may dig a little deeper here and there.",
+      "start": 11.88,
+      "end": 17.48
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Nothing exotic, just the fundamentals done well.",
+      "start": 17.62,
+      "end": 20.92
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Ready when you are.",
+      "start": 21.06,
+      "end": 22.635
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Sounds good, let's get into it.",
+      "start": 23.175,
+      "end": 25.55
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Let's start at the top.",
+      "start": 26.09,
+      "end": 27.79
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Why would a team pick TestNG over JUnit, and what does it actually give you?",
+      "start": 27.93,
+      "end": 33.255
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The short answer is that TestNG and JUnit 5 share the same core ideas, but TestNG adds richer built-in suite control, so teams doing integration and end to end work often prefer it.",
+      "start": 33.795,
+      "end": 47.545
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The name literally means next generation, and the extras it was built for are flexible configuration, data-driven tests, grouping, dependencies, and built-in parallelism, which is why it became the default runner in most Java plus Selenium stacks.",
+      "start": 47.685,
+      "end": 63.935
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The why is that a UI or API suite needs more orchestration than a unit suite, and TestNG's suite file plus its data provider give finer control over grouping and parallelism than vanilla JUnit.",
+      "start": 64.075,
+      "end": 78.55
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "A concrete point I'd raise is that once you know TestNG, you can read JUnit 5, NUnit, and pytest at a glance, because almost every runner shares the same skeleton, lifecycle hooks, assertions, data-driven inputs, parallelism, and reporting.",
+      "start": 78.69,
+      "end": 95.54
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Good framing, I like that you called it a family.",
+      "start": 96.08,
+      "end": 99.255
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "So walk me through the annotation lifecycle, what runs when.",
+      "start": 99.395,
+      "end": 103.52
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The order goes from the widest scope inward, suite, then test, then class, then method, wrapped around the actual test.",
+      "start": 104.06,
+      "end": 112.01
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "So BeforeSuite runs once around the whole suite, BeforeTest runs around a test tag in the suite file, BeforeClass runs once per class, BeforeMethod runs before every single test method, then the Test itself executes, and the matching After hooks unwind in reverse order back out to AfterSuite.",
+      "start": 112.15,
+      "end": 131.55
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The reason the scoping matters is cost, you put expensive one-time setup at the suite or class level and per-test setup like creating a fresh browser driver in BeforeMethod, with the quit in AfterMethod, so every test starts clean.",
+      "start": 131.69,
+      "end": 146.565
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "A classic example is a login test class where BeforeMethod spins up a new Chrome driver and AfterMethod quits it.",
+      "start": 146.705,
+      "end": 154.18
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "And it maps directly, JUnit 5 calls these BeforeEach and BeforeAll, NUnit uses SetUp and OneTimeSetUp, pytest does it with fixture scopes.",
+      "start": 154.32,
+      "end": 164.62
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Exactly right, widest scope out, unwinding in reverse.",
+      "start": 165.16,
+      "end": 169.11
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Now a favorite of mine, hard versus soft assertions, when do you reach for each?",
+      "start": 169.25,
+      "end": 174.7
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "A hard assertion, like a plain assertEquals, fails fast, the test stops at the very first failed check.",
+      "start": 175.24,
+      "end": 182.29
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "A soft assertion, using SoftAssert, collects every failure and only reports them together when you call assertAll at the end, nothing actually fails until that call.",
+      "start": 182.43,
+      "end": 193.305
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The why is diagnostic value, if I'm validating five independent fields on a page and the first one is broken, a hard assert hides the other four, while soft asserts show me everything wrong in a single run.",
+      "start": 193.445,
+      "end": 207.12
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "So my rule is hard asserts for preconditions where continuing makes no sense, soft asserts for a batch of independent checks in one test.",
+      "start": 207.26,
+      "end": 216.435
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The trap people fall into is forgetting to call assertAll, then the soft assertions silently pass and the test goes green while the product is broken.",
+      "start": 216.575,
+      "end": 225.975
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "And the idea travels, JUnit 5 has assertAll, NUnit has Assert dot Multiple.",
+      "start": 226.115,
+      "end": 232.265
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "That missing assertAll trap is real, I've seen it in production suites.",
+      "start": 232.805,
+      "end": 237.655
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Let's move to data.",
+      "start": 237.795,
+      "end": 239.57
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "How do you make a test data-driven in TestNG?",
+      "start": 239.71,
+      "end": 243.285
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "There are two mechanisms and they serve different jobs.",
+      "start": 243.825,
+      "end": 247.5
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The main one is DataProvider, a method that returns a two-dimensional Object array, and TestNG runs the test once per row, passing the row values in as parameters, so one login test can cover a valid user and an invalid user as two executions.",
+      "start": 247.64,
+      "end": 265.065
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "That's best for in-code or computed datasets.",
+      "start": 265.205,
+      "end": 268.555
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The second is Parameters, which injects simple values from the suite file, things like a browser name or a base URL, so environment-level knobs live in configuration rather than code.",
+      "start": 268.695,
+      "end": 281.37
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The why is separation, test logic stays in one method while the data varies, which kills copy-pasted near-identical tests.",
+      "start": 281.51,
+      "end": 290.185
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "A nice detail worth mentioning is that a data provider can be marked parallel, so the rows themselves run concurrently.",
+      "start": 290.325,
+      "end": 298.075
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The equivalents elsewhere are ParameterizedTest with method or CSV sources in JUnit 5, TestCase in NUnit, and parametrize in pytest.",
+      "start": 298.215,
+      "end": 308.84
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Nice, and you drew the right line between data providers and suite parameters.",
+      "start": 309.38,
+      "end": 314.405
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Next one, tell me about groups, priority, and dependsOnMethods, and be honest about the downsides.",
+      "start": 314.545,
+      "end": 321.045
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Groups let you tag tests, say with a smoke group, and then run just that subset from the suite file or the command line, which is how you carve a fast smoke run out of a big regression suite, same idea as tags in JUnit 5 or markers in pytest.",
+      "start": 321.585,
+      "end": 338.135
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Priority orders tests, the default is zero and lower numbers run first, but it's purely ordering between independent tests.",
+      "start": 338.275,
+      "end": 346.675
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "DependsOnMethods and dependsOnGroups are different, they create a real prerequisite, so if the prerequisite fails the dependent test is skipped rather than failed, and the why is honest reporting, you see one real failure instead of a misleading cascade, like a delete user test being skipped when create user already failed.",
+      "start": 346.815,
+      "end": 367.215
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The trap is overuse, heavy dependencies couple tests together, hurt isolation, and block parallelism, which is exactly why JUnit deliberately limits ordering.",
+      "start": 367.355,
+      "end": 378.505
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "I keep tests independent and reserve dependencies for genuine setup ordering.",
+      "start": 378.645,
+      "end": 384.345
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Good, that restraint about dependencies is what I was listening for.",
+      "start": 384.885,
+      "end": 389.435
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "So if tests are independent, let's use that, how do you run them in parallel, and what breaks when people try?",
+      "start": 389.575,
+      "end": 396.625
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Parallelism lives in the suite file, testng dot xml, which is really TestNG's control center, it selects classes and groups, injects parameters, and configures concurrency without touching code.",
+      "start": 397.165,
+      "end": 410.94
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "You set the parallel attribute to methods, tests, classes, or instances, and pair it with a thread count, so parallel methods with a thread count of four runs four test methods at once.",
+      "start": 411.08,
+      "end": 423.205
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The why is simple wall-clock time, a regression suite that takes an hour serially can shrink dramatically.",
+      "start": 423.345,
+      "end": 430.67
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "What breaks is thread safety, parallel tests must share no mutable state, and the classic failure in Selenium is a single shared driver field, where two threads fight over one browser and tests fail randomly.",
+      "start": 430.81,
+      "end": 444.36
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The fix is a ThreadLocal wrapper around the WebDriver so each thread gets its own instance.",
+      "start": 444.5,
+      "end": 450.625
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Elsewhere the same knob is a properties file in JUnit 5, Parallelizable in NUnit, and pytest-xdist in Python.",
+      "start": 450.765,
+      "end": 459.09
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "The shared driver story is painfully familiar.",
+      "start": 459.63,
+      "end": 462.83
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Last one, how do you extend TestNG, say for screenshots on failure, retries, and reporting?",
+      "start": 462.97,
+      "end": 469.67
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The extension point is listeners, which hook into the test lifecycle.",
+      "start": 470.21,
+      "end": 474.81
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "For screenshots I implement ITestListener and override onTestFailure, capture the screenshot there with the test name, and attach it to the report, then register the listener either with the Listeners annotation or in the suite file, so it applies everywhere without cluttering test code.",
+      "start": 474.95,
+      "end": 492.65
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "For retries there's IRetryAnalyzer, which re-runs a failed test a set number of times, and my honest position is to use it sparingly, because retries mask real flakiness rather than fixing it, so a retried pass should be a signal to investigate, not a habit.",
+      "start": 492.79,
+      "end": 510.44
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "For reporting, TestNG emits HTML and XML out of the box, but most teams layer Allure or ExtentReports on top for richer output.",
+      "start": 510.58,
+      "end": 521.105
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The same extension-point idea exists everywhere, TestWatcher in JUnit 5, ITestAction in NUnit, and hooks in a pytest conftest file.",
+      "start": 521.245,
+      "end": 531.52
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Strong answers, that's the round.",
+      "start": 532.06,
+      "end": 534.235
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "What I liked here, and what listeners should take away, is the structure, a direct answer first, then the why, and then a concrete example or a trap called out, the missing assertAll, the shared driver without ThreadLocal, retries hiding flakiness.",
+      "start": 534.375,
+      "end": 549.35
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "That pattern is what makes an answer sound senior.",
+      "start": 549.49,
+      "end": 552.69
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Practice these until they flow, and I'll see you in the next round.",
+      "start": 552.83,
+      "end": 556.98
+    }
+  ]
+}

@@ -1,0 +1,438 @@
+{
+  "id": "langchain",
+  "voice": null,
+  "voices": {
+    "INTERVIEWER": "am_fenrir",
+    "CANDIDATE": "af_heart"
+  },
+  "durationSec": 601.01,
+  "hash": "6a5956722e8381a995a499bb196f8b405f68a864c2885517855f2a3ac42629ce",
+  "cues": [
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Welcome in, good to have you.",
+      "start": 0,
+      "end": 2.1
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Today let's run a quick LangChain round, the kind of rapid technical screen you'd get for an SDET role on a team building or testing LLM features.",
+      "start": 2.24,
+      "end": 12.715
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "I'll ask a question, you give me your best answer, and I may dig a little deeper here and there.",
+      "start": 12.855,
+      "end": 18.455
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Nothing exotic, just the fundamentals done well.",
+      "start": 18.595,
+      "end": 21.895
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Ready when you are.",
+      "start": 22.035,
+      "end": 23.61
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Sounds good, let's get into it.",
+      "start": 24.15,
+      "end": 26.525
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Let's start at the top.",
+      "start": 27.065,
+      "end": 28.765
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "What is LangChain, and what does it actually give you beyond just calling a model's API directly?",
+      "start": 28.905,
+      "end": 35.63
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "LangChain is a framework for building applications powered by large language models, and its real value is not the model itself, it's the glue.",
+      "start": 36.17,
+      "end": 45.795
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "It gives you two things.",
+      "start": 45.935,
+      "end": 47.81
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "First, standard interfaces over many providers, so every chat model looks the same to your code, which means swapping OpenAI for Anthropic is essentially a one line change.",
+      "start": 47.95,
+      "end": 59.8
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Second, composition primitives, so you can wire models, prompts, retrievers, and tools together into pipelines and observe what happened.",
+      "start": 59.94,
+      "end": 69.015
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The codebase reflects that split, langchain-core holds the lightweight base abstractions like Runnables, messages, prompts, and output parsers, the main langchain package holds higher level chains, agents, and retrieval strategies, and then there's one integration package per provider, like langchain-openai or langchain-anthropic, plus langchain-community for community maintained integrations.",
+      "start": 69.155,
+      "end": 93.38
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The trap is thinking LangChain is the intelligence, it isn't, it's the abstraction layer that makes the pieces swappable and testable.",
+      "start": 93.52,
+      "end": 102.22
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Good framing, the glue, not the model.",
+      "start": 102.76,
+      "end": 105.185
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "You mentioned Runnables, so tell me about LCEL.",
+      "start": 105.325,
+      "end": 108.875
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "What is it, and why does that pipe operator work at all?",
+      "start": 109.015,
+      "end": 112.615
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "LCEL is the LangChain Expression Language, and it's how you compose components into a chain.",
+      "start": 113.155,
+      "end": 120.03
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The pipe operator works because every component, whether it's a prompt template, a chat model, an output parser, or a retriever, implements the same Runnable interface, so they all snap together the same way.",
+      "start": 120.17,
+      "end": 133.495
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "A classic example is prompt, pipe, model, pipe, StrOutputParser, and that whole thing is itself a Runnable.",
+      "start": 133.635,
+      "end": 141.36
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The why is what you get for free, every chain has invoke to run once on a single input, batch to run many inputs concurrently, stream to yield tokens as they're generated, and the async variants like ainvoke and astream, all without writing extra code.",
+      "start": 141.5,
+      "end": 157.725
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "You can also compose in parallel with RunnableParallel, which runs branches concurrently and collects a dict, and inject inputs with RunnablePassthrough.",
+      "start": 157.865,
+      "end": 167.765
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "From a testing angle that's gold, because I can build the pipeline once and exercise it in sync, async, batch, and streaming modes against the same contract.",
+      "start": 167.905,
+      "end": 177.98
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Nice, build once, four execution modes.",
+      "start": 178.52,
+      "end": 181.495
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Now, models return free text, but my code needs data.",
+      "start": 181.635,
+      "end": 185.66
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "How do you get structured, machine-readable output reliably?",
+      "start": 185.8,
+      "end": 189.8
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The direct answer is, bind a schema to the model with with_structured_output rather than parsing free text after the fact.",
+      "start": 190.34,
+      "end": 198.265
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Output parsers are the classic approach, they sit as the last step of a chain, StrOutputParser pulls the plain string out of an AIMessage, and JSON or Pydantic parsers coerce the response into a typed object and validate it.",
+      "start": 198.405,
+      "end": 214.33
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "That works, but the more robust modern approach is calling with_structured_output on the model with your schema, because it uses the provider's native tool or JSON mode support to guarantee the shape.",
+      "start": 214.47,
+      "end": 226.97
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The why is reliability, parsing free-form text means the model can drift, and then you're detecting the failure and re-prompting, which is slow and flaky.",
+      "start": 227.11,
+      "end": 237.185
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "For example, if I'm extracting fields from a support ticket into a typed object, I'd define the schema, bind it, and I get a validated object back every time.",
+      "start": 237.325,
+      "end": 248.025
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The trap is treating brittle string parsing as good enough, it's exactly where flaky behavior hides.",
+      "start": 248.165,
+      "end": 254.44
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Agreed, guaranteed shape beats parse and retry.",
+      "start": 254.98,
+      "end": 258.355
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Let's move to retrieval.",
+      "start": 258.495,
+      "end": 260.395
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Walk me through RAG, what the pipeline looks like end to end.",
+      "start": 260.535,
+      "end": 265.11
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "RAG, retrieval-augmented generation, grounds the model in your own data, you fetch relevant documents, put them in the prompt as context, and then answer.",
+      "start": 265.65,
+      "end": 275.975
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "There are two halves.",
+      "start": 276.115,
+      "end": 277.815
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Ingestion goes in a fixed order, document loaders read your sources, PDFs, web pages, databases, into Document objects, text splitters chunk long documents so each piece fits the embedding and context limits, an embedding model converts each chunk into a vector that captures its meaning, and a vector store like Chroma, FAISS, pgvector, or Pinecone indexes those vectors for similarity search.",
+      "start": 277.955,
+      "end": 303.705
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Then at query time, a retriever embeds the question, finds the nearest chunks, and the chain stuffs them into the prompt.",
+      "start": 303.845,
+      "end": 311.395
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "And because the retriever is itself a Runnable, RAG is just another LCEL pipeline, retriever, format docs, prompt, model, parser.",
+      "start": 311.535,
+      "end": 321.71
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The trap worth calling out is that chunking strategy and retrieval quality usually matter more to answer quality than the model choice, so when a RAG app gives bad answers, I test retrieval first, not the model.",
+      "start": 321.85,
+      "end": 335.7
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "That last point is the one most people miss, test retrieval first.",
+      "start": 336.24,
+      "end": 340.74
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Next one.",
+      "start": 340.88,
+      "end": 342.23
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "If I build a chatbot with LangChain, why doesn't the model just remember the conversation, and how do you handle that?",
+      "start": 342.37,
+      "end": 350.02
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "Because LLM calls are stateless, the model only knows what's in the current request, so if you want a conversation, you have to pass the prior turns back in yourself.",
+      "start": 350.56,
+      "end": 361.135
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The standard pattern is keeping a message history per session and prepending it to each new prompt, usually through a MessagesPlaceholder in the template, and RunnableWithMessageHistory wraps a chain to load and save that history automatically, keyed by a session id.",
+      "start": 361.275,
+      "end": 378.3
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The why behind the extra care is the context window, for long chats you trim or summarize old turns so you stay within the limit and control token cost.",
+      "start": 378.44,
+      "end": 388.89
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "A real scenario, in a support bot I'd key history by session id so two users never see each other's context, which is also a great test case.",
+      "start": 389.03,
+      "end": 399.355
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The trap is reaching for the older ConversationBufferMemory style classes, those are largely superseded, current guidance is explicit message-history wiring or LangGraph persistence with checkpointers, which also survives restarts and supports branching.",
+      "start": 399.495,
+      "end": 416.17
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Good, and flagging the deprecated path is exactly the kind of thing I listen for.",
+      "start": 416.71,
+      "end": 422.185
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Now tools and agents.",
+      "start": 422.325,
+      "end": 424.275
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "When an agent uses a tool, who actually executes it, and why does that matter for someone in quality?",
+      "start": 424.415,
+      "end": 430.965
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The model never executes anything itself, it only requests a call, and that distinction is the whole answer.",
+      "start": 431.505,
+      "end": 438.655
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "A tool is a function the model can choose to call, a calculator, a search API, a database query.",
+      "start": 438.795,
+      "end": 446.02
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "You expose it with bind_tools, which hands the tool schemas to the model, the model replies with tool calls, meaning a name and arguments, your application code actually runs the tool, and the results go back in as ToolMessages, and the loop continues until the model can answer.",
+      "start": 446.16,
+      "end": 463.935
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "An agent is exactly that, an LLM in a loop deciding which tool to call next.",
+      "start": 464.075,
+      "end": 469.875
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The why it matters for quality is that your code running the tool is where you enforce permissions and validation, so that's the seam I test, what happens when the model requests a tool with bad arguments, or a tool it shouldn't be allowed to touch.",
+      "start": 470.015,
+      "end": 484.74
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The trap is assuming the LLM is sandboxed by magic, the safety boundary is your executing code, not the model.",
+      "start": 484.88,
+      "end": 493.23
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Exactly, the boundary is your code.",
+      "start": 493.77,
+      "end": 496.12
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Last one, and it builds on that agent loop.",
+      "start": 496.26,
+      "end": 499.135
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "When do you reach for LangGraph instead of a plain LCEL chain, and how do you debug any of this in production?",
+      "start": 499.275,
+      "end": 506.6
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The rule of thumb is, a linear pipeline is an LCEL chain, a looping, branching, stateful agent is LangGraph.",
+      "start": 507.14,
+      "end": 515.315
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "LangGraph models the workflow as a graph, nodes do the work, edges decide what runs next, and a shared state object flows through, and unlike a straight chain it supports cycles, branching, persistence, and human-in-the-loop pauses, which is why it's the recommended path for production agents over the older AgentExecutor.",
+      "start": 515.455,
+      "end": 536.055
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "For debugging, the answer is LangSmith, the observability layer, it traces every step, token, and latency of a run and supports evaluation, and it's provider agnostic, it even works without LangChain.",
+      "start": 536.195,
+      "end": 550.045
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "As an SDET that's my favorite piece, because when an agent misbehaves I can open the trace and see exactly which node fired, what the prompt contained, and which tool call went wrong.",
+      "start": 550.185,
+      "end": 561.885
+    },
+    {
+      "speaker": "CANDIDATE",
+      "text": "The trap is shipping a demo chain with no tracing, observability is what turns a demo into something you can debug and trust in production.",
+      "start": 562.025,
+      "end": 571.025
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Strong answers, that's the round.",
+      "start": 571.565,
+      "end": 573.74
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "What I liked here, and what listeners should take away, is the structure, a direct answer first, then the why, and then a concrete example or a trap called out.",
+      "start": 573.88,
+      "end": 583.905
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "You did that on every question, statelessness led to a session id test case, the tool loop led to where the safety boundary lives.",
+      "start": 584.045,
+      "end": 592.845
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "That pattern is what makes an answer sound senior.",
+      "start": 592.985,
+      "end": 596.185
+    },
+    {
+      "speaker": "INTERVIEWER",
+      "text": "Practice these until they flow, and I'll see you in the next round.",
+      "start": 596.325,
+      "end": 600.475
+    }
+  ]
+}
