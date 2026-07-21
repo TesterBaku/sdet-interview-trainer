@@ -11,6 +11,7 @@ import {
   writeAudioRate,
 } from "@/lib/audioPosition";
 import { formatClock } from "@/lib/audioFormat";
+import { parseVtt } from "@/lib/vtt";
 import type { TranscriptCue } from "@/lib/audio";
 
 // One track the player can load. In single-track mode (cheat-sheet pages) the fields are
@@ -105,6 +106,19 @@ export function AudioPlayer({
   const [current, setCurrent] = useState(0);
   const [duration, setDuration] = useState(trackDurationProp);
   const [showTranscript, setShowTranscript] = useState(false);
+  // In queue mode (Commute) cues aren't passed as props — they're fetched + parsed from the
+  // episode's published .vtt the first time the transcript opens. Cheat-sheet pages pass `cues`
+  // directly, so `displayCues` prefers those.
+  const [fetchedCues, setFetchedCues] = useState<TranscriptCue[]>([]);
+  const [transcriptState, setTranscriptState] = useState<"idle" | "loading" | "loaded" | "error">("idle");
+  // The captions src we've already fetched/attempted (don't re-hit the network on every reopen),
+  // and a live mirror of the current captions src so a fetch that resolves after the track
+  // changed can drop its stale result instead of pinning it onto the new episode.
+  const attemptedCaptions = useRef<string | null>(null);
+  const activeCaptions = useRef(trackCaptions);
+  useEffect(() => {
+    activeCaptions.current = trackCaptions;
+  }, [trackCaptions]);
   // Flaky-network resilience (#4): `buffering` while an actively-playing element waits for
   // data, `errored` when a source fails (or a stall drags on). Recovery is user-driven — Retry
   // the current episode or (in a queue) Skip to the next — so a transient blip never silently
@@ -157,6 +171,10 @@ export function AudioPlayer({
       setDuration(next.durationSec);
       setErrored(false);
       setBuffering(false);
+      setFetchedCues([]);
+      setTranscriptState("idle");
+      attemptedCaptions.current = null;
+      setShowTranscript(false);
       if (stallTimer.current != null) {
         window.clearTimeout(stallTimer.current);
         stallTimer.current = null;
@@ -182,6 +200,10 @@ export function AudioPlayer({
     setDuration(trackDurationProp);
     setErrored(false);
     setBuffering(false);
+    setFetchedCues([]);
+    setTranscriptState("idle");
+    attemptedCaptions.current = null;
+    setShowTranscript(false);
     if (stallTimer.current != null) {
       window.clearTimeout(stallTimer.current);
       stallTimer.current = null;
@@ -316,6 +338,45 @@ export function AudioPlayer({
     }
   }, [queue, queueIndex, goToIndex]);
 
+  // Cues passed as props (cheat-sheet pages) win; otherwise use whatever we fetched for the queue.
+  const displayCues = cues.length > 0 ? cues : fetchedCues;
+
+  // Fetch + parse the current episode's published .vtt once per src. Guards: `attemptedCaptions`
+  // avoids re-hitting the network on every reopen (incl. after an empty/404 result), and the
+  // `activeCaptions` check drops a response that arrives after the track already changed.
+  const loadTranscript = useCallback(() => {
+    const src = trackCaptions;
+    if (!src || cues.length > 0) return;
+    attemptedCaptions.current = src;
+    setTranscriptState("loading");
+    fetch(src)
+      .then((res) => (res.ok ? res.text() : Promise.reject(new Error(String(res.status)))))
+      .then((text) => {
+        if (activeCaptions.current !== src) return; // track changed while in flight — drop it
+        setFetchedCues(parseVtt(text));
+        setTranscriptState("loaded");
+      })
+      .catch(() => {
+        if (activeCaptions.current !== src) return;
+        setTranscriptState("error");
+      });
+  }, [trackCaptions, cues.length]);
+
+  const toggleTranscript = useCallback(() => {
+    const willOpen = !showTranscript;
+    setShowTranscript(willOpen);
+    if (willOpen && cues.length === 0 && trackCaptions && attemptedCaptions.current !== trackCaptions) {
+      loadTranscript();
+    }
+  }, [showTranscript, cues.length, trackCaptions, loadTranscript]);
+
+  // Explicit retry from the "unavailable" panel — a transient network failure shouldn't strand
+  // the transcript until the user closes and reopens it.
+  const retryTranscript = useCallback(() => {
+    attemptedCaptions.current = null;
+    loadTranscript();
+  }, [loadTranscript]);
+
   // Stop the stall timer if the player unmounts mid-buffer.
   useEffect(() => clearStallTimer, [clearStallTimer]);
 
@@ -369,8 +430,9 @@ export function AudioPlayer({
     set("nexttrack", canNext ? () => goToIndex(queueIndex! + 1, true) : null);
   }, [playing, trackTitle, label, queue, queueIndex, skip, seekTo, goToIndex]);
 
+  // min-h-[44px] keeps the transport controls thumb-friendly (≥44 px) on small screens (#10).
   const btn =
-    "inline-flex items-center justify-center rounded-full border border-ink/15 bg-white/80 px-3 py-2 text-sm font-bold text-ink transition hover:bg-white focus-ring";
+    "inline-flex min-h-[44px] items-center justify-center rounded-full border border-ink/15 bg-white/80 px-4 py-2 text-sm font-bold text-ink transition hover:bg-white focus-ring";
 
   // Offline download: Vercel Blob serves `?download=1` with Content-Disposition: attachment,
   // so a plain link saves the mp3 to the device (listen offline in the device's own player) —
@@ -392,12 +454,16 @@ export function AudioPlayer({
         onPlaying={onPlaying}
         onCanPlay={clearBuffering}
         onError={onError}
-      >
-        <track kind="captions" src={trackCaptions} srcLang="en" label="English" default />
-      </audio>
+      />
+
+      {/* Announce track changes to screen readers (auto-advance is otherwise silent). */}
+      <p className="sr-only" aria-live="polite">
+        Now playing: {trackTitle}
+      </p>
 
       <div className="flex items-center gap-3">
-        <button type="button" onClick={toggle} aria-label={playing ? "Pause" : "Play"} aria-pressed={playing}
+        {/* No aria-pressed: the Play/Pause label swap is the single correct semantic (#13). */}
+        <button type="button" onClick={toggle} aria-label={playing ? "Pause" : "Play"}
           className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-lg font-black text-paper transition focus-ring"
           style={{ backgroundColor: trackAccent }}>
           {playing ? "❚❚" : "▶"}
@@ -439,8 +505,11 @@ export function AudioPlayer({
         max={Math.floor(duration) || 0}
         value={Math.floor(current)}
         onChange={(e) => seekTo(Number(e.target.value))}
-        className="mt-3 w-full accent-signal focus-ring"
+        // h-6 gives the thumb a ≥44 px vertical hit area for thumbs; aria-valuetext makes the
+        // screen reader announce "7:17" instead of "437" (#10).
+        className="mt-3 h-6 w-full cursor-pointer accent-signal focus-ring"
         aria-label="Seek"
+        aria-valuetext={`${formatClock(current)} of ${formatClock(duration)}`}
       />
       <div className="flex items-center justify-between text-xs font-semibold tabular-nums text-ink/55">
         <span>{formatClock(current)}</span>
@@ -450,7 +519,7 @@ export function AudioPlayer({
       <div className="mt-3 flex flex-wrap items-center gap-2">
         <button type="button" className={btn} onClick={() => skip(-15)} aria-label="Back 15 seconds">« 15s</button>
         <button type="button" className={btn} onClick={() => skip(30)} aria-label="Forward 30 seconds">30s »</button>
-        <button type="button" className={btn} onClick={cycleRate} aria-label={`Playback speed ${rate} times`}>
+        <button type="button" className={btn} onClick={cycleRate} aria-label={`Playback speed: ${rate}×`}>
           {rate}×
         </button>
         <a
@@ -461,16 +530,31 @@ export function AudioPlayer({
         >
           <span aria-hidden>⬇</span>&nbsp;Download
         </a>
-        {cues.length > 0 ? (
-          <button type="button" className={btn} onClick={() => setShowTranscript((v) => !v)} aria-expanded={showTranscript}>
+        {/* Cues arrive as props (cheat-sheet) or are fetched from the .vtt on open (queue). */}
+        {displayCues.length > 0 || trackCaptions ? (
+          <button type="button" className={btn} onClick={toggleTranscript} aria-expanded={showTranscript}>
             {showTranscript ? "Hide transcript" : "Transcript"}
           </button>
         ) : null}
       </div>
 
-      {showTranscript && cues.length > 0 ? (
-        <ol className="mt-4 max-h-80 space-y-2 overflow-y-auto rounded-xl border border-ink/10 bg-paper/50 p-4 text-sm leading-6">
-          {cues.map((cue, i) => (
+      {showTranscript && displayCues.length === 0 && transcriptState === "loading" ? (
+        <p className="mt-4 rounded-xl border border-ink/10 bg-paper/50 p-4 text-sm text-ink/60">Loading transcript…</p>
+      ) : null}
+      {showTranscript && displayCues.length === 0 && transcriptState !== "loading" ? (
+        <div className="mt-4 flex flex-wrap items-center gap-3 rounded-xl border border-ink/10 bg-paper/50 p-4 text-sm text-ink/60">
+          <span>Transcript unavailable for this episode.</span>
+          {trackCaptions ? (
+            <button type="button" className={`${btn} border-ink/20`} onClick={retryTranscript}>
+              <span aria-hidden>↻</span>&nbsp;Retry
+            </button>
+          ) : null}
+        </div>
+      ) : null}
+
+      {showTranscript && displayCues.length > 0 ? (
+        <ol aria-label="Transcript" className="mt-4 max-h-80 space-y-2 overflow-y-auto rounded-xl border border-ink/10 bg-paper/50 p-4 text-sm leading-6">
+          {displayCues.map((cue, i) => (
             <li key={i}>
               <button
                 type="button"
