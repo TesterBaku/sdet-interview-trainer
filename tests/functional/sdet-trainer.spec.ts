@@ -1133,6 +1133,48 @@ test("commute offers a 0.75× slow-listening speed", async ({ page }) => {
   await expect(rateBtn).toHaveText(/0\.75×/);
 });
 
+test("commute tapping the active row dismisses the Resume banner and syncs the URL", async ({ page }) => {
+  test.skip(audioCount < 2, "need two episodes");
+  const resumeId = orderedPodcast[1].id;
+  await seedLocalStorage(page, {
+    [commuteResumeKey]: JSON.stringify({ laneKey: "podcast", episodeId: resumeId }),
+    [audioPositionKey("podcast", resumeId)]: "60",
+  });
+  await page.goto("/commute");
+  const resume = page.getByRole("button", { name: /Resume where you left off/ });
+  await expect(resume).toBeVisible();
+  // Tap the active (default) row — starts it AND must run select()'s side-effects: dismiss the
+  // "restore last time" banner and write the episode into the URL.
+  const items = page.getByRole("list", { name: "Episode playlist" }).getByRole("listitem");
+  await items.nth(0).getByRole("button").click();
+  await expect(resume).toBeHidden();
+  await expect(page).toHaveURL(/[?&]ep=/);
+});
+
+test("commute lane switch does not auto-play from a stale toggle command", async ({ page }) => {
+  test.skip(interviewCount === 0 || audioCount === 0, "need both lanes");
+  await page.goto("/commute");
+  await page.evaluate(() => {
+    const w = window as unknown as { __plays: number };
+    w.__plays = 0;
+    HTMLMediaElement.prototype.play = function () {
+      w.__plays += 1;
+      return Promise.resolve();
+    };
+  });
+  const items = page.getByRole("list", { name: "Episode playlist" }).getByRole("listitem");
+  // Tap the active row to bump the toggle command, then switch lanes: the re-keyed player must
+  // NOT replay the stale toggle and start playing (switching is a silent peek).
+  await items.nth(0).getByRole("button").click();
+  await page.evaluate(() => {
+    (window as unknown as { __plays: number }).__plays = 0;
+  });
+  await page.getByRole("tab", { name: /Mock Interview/ }).click();
+  await page.waitForTimeout(300);
+  const plays = await page.evaluate(() => (window as unknown as { __plays: number }).__plays);
+  expect(plays).toBe(0);
+});
+
 // ── Progress breakdown + /review route ──────────────────────────────────────
 
 test("progress page shows per-type breakdown sections and link to review queue", async ({ page }) => {

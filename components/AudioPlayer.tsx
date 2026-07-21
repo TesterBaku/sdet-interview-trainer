@@ -106,8 +106,10 @@ export function AudioPlayer({
   // React-controlled attribute), this guards the load effect from reloading a src the ended
   // handler already swapped in — which would restart the just-started next episode.
   const loadedSrcRef = useRef<string | null>(null);
-  // The last resume command consumed, so a re-render never re-applies the same jump.
-  const handledResumeToken = useRef(-1);
+  // The last resume command consumed, so a re-render never re-applies the same jump. Seeded from
+  // the current token so a remount (e.g. lane switch re-keys the player) doesn't replay a stale
+  // command and auto-play/seek the newly-mounted track.
+  const handledResumeToken = useRef(resumeCommand?.token ?? -1);
   const [playing, setPlaying] = useState(false);
   const [current, setCurrent] = useState(0);
   const [duration, setDuration] = useState(trackDurationProp);
@@ -400,8 +402,9 @@ export function AudioPlayer({
     onPlayingChange?.(playing);
   }, [playing, onPlayingChange]);
 
-  // Consume a one-shot toggle command (e.g. tapping the active playlist row).
-  const handledToggleToken = useRef(0);
+  // Consume a one-shot toggle command (e.g. tapping the active playlist row). Seeded from the
+  // current token so a remount doesn't fire a stale toggle and auto-play the new lane.
+  const handledToggleToken = useRef(toggleCommand ?? 0);
   useEffect(() => {
     if (!toggleCommand || toggleCommand === handledToggleToken.current) return;
     handledToggleToken.current = toggleCommand;

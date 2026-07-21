@@ -205,9 +205,12 @@ export function CommuteClient({ lanes }: { lanes: Lane[] }) {
 
   const selectLane = (i: number) => {
     if (i === laneIndex) return;
-    // Keep each lane's own position (#8); switching is a silent peek, never autoplay.
+    // Keep each lane's own position (#8); switching is a silent peek, never autoplay. The old
+    // player unmounts (re-keyed) without reporting a pause, so clear playing here to stop the
+    // now-stale play state from flashing the new lane in the title/active-row badge.
     setLaneIndex(i);
     setAutoPlay(false);
+    setPlaying(false);
     const target = lanes[i];
     writeUrl(target.key, target.episodes[indexByLane[target.key] ?? 0]?.id);
   };
@@ -234,6 +237,18 @@ export function CommuteClient({ lanes }: { lanes: Lane[] }) {
     setIndexFor(lane.key, i);
     recordResume(lane.key, episodes[i].id);
     writeUrl(lane.key, episodes[i].id);
+  };
+
+  // Tapping the active row toggles play/pause, but must still run the same engagement side-effects
+  // select() does — dismiss the Resume banner (hasStarted), record the resume pointer, sync the URL
+  // — otherwise a first tap on the default episode starts audio yet leaves all of that stale.
+  const toggleActive = () => {
+    const ep = episodes[index];
+    if (ep) {
+      recordResume(lane.key, ep.id);
+      writeUrl(lane.key, ep.id);
+    }
+    setToggleToken((t) => t + 1);
   };
 
   // Auto-advance (or a Media Session next/prev): the player drove the index, so mirror it and
@@ -381,7 +396,7 @@ export function CommuteClient({ lanes }: { lanes: Lane[] }) {
                 <button
                   type="button"
                   // Tapping the active row toggles play/pause; tapping any other row starts it.
-                  onClick={() => (active ? setToggleToken((t) => t + 1) : select(i))}
+                  onClick={() => (active ? toggleActive() : select(i))}
                   aria-current={active ? "true" : undefined}
                   aria-label={active ? `${playing ? "Pause" : "Play"} ${ep.title}` : undefined}
                   className={`relative flex w-full items-center gap-3 overflow-hidden rounded-2xl border p-3 text-left shadow-panel transition focus-ring ${
