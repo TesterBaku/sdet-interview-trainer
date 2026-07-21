@@ -938,6 +938,11 @@ test("commute error card lets you Skip a failed episode without losing it to an 
 test("commute error card offers no Skip on the last episode (nothing to advance to)", async ({ page }) => {
   test.skip(audioCount === 0, "needs published audio");
   await page.goto("/commute");
+  // Stub play() so selecting the episode doesn't start real playback — a real "playing" event
+  // would clear the error state (onPlaying) before we can assert the card, flaking in CI.
+  await page.evaluate(() => {
+    HTMLMediaElement.prototype.play = () => Promise.resolve();
+  });
   const items = page.getByRole("list", { name: "Episode playlist" }).getByRole("listitem");
   await items.last().getByRole("button").click();
   // Wait for the selection to commit so onError sees the last index (no next) — otherwise a
