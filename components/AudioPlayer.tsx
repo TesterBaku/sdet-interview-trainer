@@ -105,6 +105,15 @@ export function AudioPlayer({
   const [current, setCurrent] = useState(0);
   const [duration, setDuration] = useState(trackDurationProp);
   const [showTranscript, setShowTranscript] = useState(false);
+  // Flaky-network resilience (#4): `buffering` while an actively-playing element waits for
+  // data, `errored` when a source fails (or a stall drags on). Recovery is user-driven — Retry
+  // the current episode or (in a queue) Skip to the next — so a transient blip never silently
+  // loses the episode you were on, and a dead connection never cascades through the playlist.
+  const [buffering, setBuffering] = useState(false);
+  const [errored, setErrored] = useState(false);
+  // A prolonged stall (waiting with no error/playing) escalates to the error card after this.
+  const stallTimer = useRef<number | null>(null);
+  const STALL_ESCALATE_MS = 20000;
   // Speed is a persisted global preference read via an external store (hydration-safe;
   // server snapshot is always 1, so no SSR mismatch), which also survives remounts.
   const rate = useSyncExternalStore(subscribeToAudioRate, readAudioRate, getServerAudioRate);
@@ -146,6 +155,12 @@ export function AudioPlayer({
       lastSavedSecond.current = -1;
       setCurrent(0);
       setDuration(next.durationSec);
+      setErrored(false);
+      setBuffering(false);
+      if (stallTimer.current != null) {
+        window.clearTimeout(stallTimer.current);
+        stallTimer.current = null;
+      }
       onQueueIndexChange?.(i);
       return true;
     },
@@ -165,6 +180,12 @@ export function AudioPlayer({
     lastSavedSecond.current = -1;
     setCurrent(0);
     setDuration(trackDurationProp);
+    setErrored(false);
+    setBuffering(false);
+    if (stallTimer.current != null) {
+      window.clearTimeout(stallTimer.current);
+      stallTimer.current = null;
+    }
     if (autoPlay) void audio.play().catch(() => undefined);
   }, [trackSrc, autoPlay, rate, trackDurationProp]);
 
@@ -237,6 +258,67 @@ export function AudioPlayer({
     onEnded?.();
   }, [trackId, queue, queueIndex, goToIndex, onEnded, onTrackEnded]);
 
+  const clearStallTimer = useCallback(() => {
+    if (stallTimer.current != null) {
+      window.clearTimeout(stallTimer.current);
+      stallTimer.current = null;
+    }
+  }, []);
+
+  // Buffering: the element is waiting for data. If a stall drags on with no recovery, escalate
+  // to the error card so the listener gets a Retry/Skip path (a silent forever-spinner can't
+  // be recovered without a page reload).
+  const onWaiting = useCallback(() => {
+    setBuffering(true);
+    clearStallTimer();
+    stallTimer.current = window.setTimeout(() => {
+      setBuffering(false);
+      setErrored(true);
+    }, STALL_ESCALATE_MS);
+  }, [clearStallTimer]);
+  const clearBuffering = useCallback(() => {
+    setBuffering(false);
+    clearStallTimer();
+  }, [clearStallTimer]);
+  const onPlaying = useCallback(() => {
+    clearBuffering();
+    setErrored(false);
+  }, [clearBuffering]);
+  const onPauseInternal = useCallback(() => {
+    setPlaying(false);
+    clearBuffering(); // a paused track isn't buffering — don't leave the spinner up
+  }, [clearBuffering]);
+
+  // A source failed. Surface a recoverable card (Retry the current episode, or Skip in a queue)
+  // rather than auto-advancing — an unprompted skip loses the current episode on a transient
+  // blip and, over a dead connection, would cascade the whole queue.
+  const onError = useCallback(() => {
+    clearBuffering();
+    setPlaying(false);
+    setErrored(true);
+  }, [clearBuffering]);
+
+  // Retry re-loads and resumes from where playback was, so a blip near the end doesn't restart
+  // a long episode (and the elapsed-time readout stays truthful — `current` is the seek target).
+  const retry = useCallback(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    setErrored(false);
+    const resumeAt = current;
+    audio.load();
+    if (resumeAt > 0) audio.currentTime = resumeAt;
+    void audio.play().catch(() => undefined);
+  }, [current]);
+
+  const skipToNext = useCallback(() => {
+    if (queue != null && queueIndex != null && queueIndex + 1 < queue.length) {
+      goToIndex(queueIndex + 1, true);
+    }
+  }, [queue, queueIndex, goToIndex]);
+
+  // Stop the stall timer if the player unmounts mid-buffer.
+  useEffect(() => clearStallTimer, [clearStallTimer]);
+
   // Play state is driven by the element's own play/pause events (below), so a blocked
   // play() never leaves the icon out of sync.
   const toggle = useCallback(() => {
@@ -303,8 +385,13 @@ export function AudioPlayer({
         onLoadedMetadata={onLoadedMetadata}
         onTimeUpdate={onTimeUpdate}
         onPlay={() => setPlaying(true)}
-        onPause={() => setPlaying(false)}
+        onPause={onPauseInternal}
         onEnded={onEndedInternal}
+        onWaiting={onWaiting}
+        onStalled={onWaiting}
+        onPlaying={onPlaying}
+        onCanPlay={clearBuffering}
+        onError={onError}
       >
         <track kind="captions" src={trackCaptions} srcLang="en" label="English" default />
       </audio>
@@ -319,10 +406,30 @@ export function AudioPlayer({
           <p className="flex items-center gap-2 text-sm font-bold text-blueprint">
             <span aria-hidden>{icon}</span>
             <span className="truncate">{trackTitle}</span>
+            {playing && buffering && !errored ? (
+              <span className="inline-flex items-center gap-1 text-xs font-semibold text-ink/50">
+                <span aria-hidden className="h-3 w-3 animate-spin rounded-full border-2 border-ink/20 border-t-ink/60" />
+                Buffering…
+              </span>
+            ) : null}
           </p>
           <p className="text-xs font-semibold text-ink/55">{subtitle} · {formatClock(duration)}</p>
         </div>
       </div>
+
+      {errored ? (
+        <div role="alert" className="mt-3 flex flex-wrap items-center gap-3 rounded-xl border border-signal/40 bg-signal/10 p-3 text-sm">
+          <span className="font-bold text-blueprint">Couldn&apos;t play this episode.</span>
+          <button type="button" className={`${btn} border-signal/40`} onClick={retry}>
+            <span aria-hidden>↻</span>&nbsp;Retry
+          </button>
+          {queue != null && queueIndex != null && queueIndex + 1 < queue.length ? (
+            <button type="button" className={`${btn} border-signal/40`} onClick={skipToNext}>
+              Skip to next <span aria-hidden>»</span>
+            </button>
+          ) : null}
+        </div>
+      ) : null}
 
       <label className="sr-only" htmlFor={`seek-${trackId}`}>Seek</label>
       <input
