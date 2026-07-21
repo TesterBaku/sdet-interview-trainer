@@ -49,6 +49,9 @@ type AudioPlayerProps = {
   // episode starts from the beginning as it's queued.
   resume?: boolean;
   onEnded?: () => void;
+  // Fires on EVERY track's `ended` (before any auto-advance), with the id that just finished —
+  // so a queue host can mark it listened. `onEnded` differs: it fires only when the queue runs out.
+  onTrackEnded?: (trackId: string) => void;
 };
 
 const RATES = [1, 1.25, 1.5, 2] as const;
@@ -73,6 +76,7 @@ export function AudioPlayer({
   icon = "🎧",
   resume = true,
   onEnded,
+  onTrackEnded,
 }: AudioPlayerProps) {
   // The active track resolves from the queue when present, else the single-track props.
   const activeTrack = queue && queueIndex != null ? queue[queueIndex] : null;
@@ -198,6 +202,7 @@ export function AudioPlayer({
 
   const onEndedInternal = useCallback(() => {
     clearAudioPosition(trackId);
+    onTrackEnded?.(trackId);
     lastSavedSecond.current = -1;
     // Auto-advance by swapping src on the SAME element synchronously inside the ended handler,
     // which browsers treat as a continuation of the current session (survives lock-screen).
@@ -207,7 +212,7 @@ export function AudioPlayer({
     }
     setPlaying(false);
     onEnded?.();
-  }, [trackId, queue, queueIndex, goToIndex, onEnded]);
+  }, [trackId, queue, queueIndex, goToIndex, onEnded, onTrackEnded]);
 
   // Play state is driven by the element's own play/pause events (below), so a blocked
   // play() never leaves the icon out of sync.
