@@ -1,8 +1,8 @@
 "use client";
 
-import { useMemo, useRef, useState, useSyncExternalStore } from "react";
+import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { AudioPlayer, type QueueTrack } from "@/components/AudioPlayer";
-import { formatAudioMinutes, formatClock } from "@/lib/audioFormat";
+import { formatAudioMinutes, formatAudioTotal, formatClock } from "@/lib/audioFormat";
 import {
   getCommuteProgressSnapshot,
   getServerCommuteProgressSnapshot,
@@ -73,6 +73,41 @@ export function CommuteClient({ lanes }: { lanes: Lane[] }) {
   const episodes = lane.episodes;
   const index = indexByLane[lane.key] ?? 0;
   const upNext = episodes[index + 1];
+  const laneTotalSec = useMemo(() => episodes.reduce((sum, ep) => sum + ep.durationSec, 0), [episodes]);
+
+  // URL state (#11): mirror ?lane=&ep= so a lane/episode is linkable and refresh-proof. Uses
+  // history.replaceState (not useSearchParams) to keep the page statically rendered. Seed once
+  // from the URL on mount, then write on every subsequent lane/episode change.
+  const seededUrl = useRef(false);
+  useEffect(() => {
+    if (seededUrl.current) return;
+    seededUrl.current = true;
+    const params = new URLSearchParams(window.location.search);
+    const laneKey = params.get("lane");
+    const epId = params.get("ep");
+    const li = laneKey ? lanes.findIndex((l) => l.key === laneKey) : -1;
+    const targetLane = lanes[li >= 0 ? li : 0];
+    const ei = epId ? targetLane.episodes.findIndex((e) => e.id === epId) : -1;
+    // window.location can't be read during the SSR/hydration render without a mismatch, so this
+    // one-time seed is a legitimate post-hydration effect (not a continuous store).
+    /* eslint-disable react-hooks/set-state-in-effect */
+    if (li >= 0) setLaneIndex(li);
+    if (ei >= 0) setIndexByLane((m) => ({ ...m, [targetLane.key]: ei }));
+    /* eslint-enable react-hooks/set-state-in-effect */
+  }, [lanes]);
+
+  const wroteUrlOnce = useRef(false);
+  useEffect(() => {
+    // Skip the initial mount so a passive landing doesn't rewrite the address bar.
+    if (!wroteUrlOnce.current) {
+      wroteUrlOnce.current = true;
+      return;
+    }
+    const params = new URLSearchParams(window.location.search);
+    params.set("lane", lane.key);
+    if (episodes[index]) params.set("ep", episodes[index].id);
+    window.history.replaceState(null, "", `${window.location.pathname}?${params.toString()}`);
+  }, [lane.key, index, episodes]);
 
   // One persistent queue for the player. Position ids are namespaced per lane + episode so the
   // queue's transient position never overwrites the saved position on a topic's cheat-sheet page.
@@ -286,7 +321,12 @@ export function CommuteClient({ lanes }: { lanes: Lane[] }) {
           </p>
         </div>
 
-        <ol className="space-y-2" aria-label="Episode playlist">
+        <div>
+          {/* Lane totals so a listener can plan the commute (#9). */}
+          <p className="mb-2 px-1 text-xs font-bold uppercase tracking-wide text-ink/45">
+            {episodes.length} {episodes.length === 1 ? "episode" : "episodes"} · ~{formatAudioTotal(laneTotalSec)}
+          </p>
+          <ol className="space-y-2" aria-label="Episode playlist">
           {episodes.map((ep, i) => {
             const active = i === index;
             const id = trackId(lane.key, ep.id);
@@ -336,7 +376,8 @@ export function CommuteClient({ lanes }: { lanes: Lane[] }) {
               </li>
             );
           })}
-        </ol>
+          </ol>
+        </div>
       </div>
     </div>
   );
