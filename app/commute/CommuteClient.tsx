@@ -1,7 +1,7 @@
 "use client";
 
-import { useRef, useState } from "react";
-import { AudioPlayer } from "@/components/AudioPlayer";
+import { useMemo, useRef, useState } from "react";
+import { AudioPlayer, type QueueTrack } from "@/components/AudioPlayer";
 import { formatAudioMinutes } from "@/lib/audioFormat";
 
 type Episode = {
@@ -38,8 +38,22 @@ export function CommuteClient({ lanes }: { lanes: Lane[] }) {
 
   const lane = lanes[laneIndex];
   const episodes = lane.episodes;
-  const current = episodes[index];
   const upNext = episodes[index + 1];
+
+  // One persistent queue for the player. Position ids are namespaced per lane + episode so the
+  // queue's transient position never overwrites the saved position on a topic's cheat-sheet page.
+  const queue = useMemo<QueueTrack[]>(
+    () =>
+      episodes.map((ep) => ({
+        id: `commute:${lane.key}:${ep.id}`,
+        title: ep.title,
+        src: ep.src,
+        captionsSrc: ep.captionsSrc,
+        durationSec: ep.durationSec,
+        accent: ep.accent,
+      })),
+    [episodes, lane.key],
+  );
 
   const selectLane = (i: number) => {
     if (i === laneIndex) return;
@@ -65,12 +79,6 @@ export function CommuteClient({ lanes }: { lanes: Lane[] }) {
   const select = (i: number) => {
     setAutoPlay(true);
     setIndex(i);
-  };
-  const advance = () => {
-    if (index + 1 < episodes.length) {
-      setAutoPlay(true);
-      setIndex(index + 1);
-    }
   };
 
   return (
@@ -115,21 +123,18 @@ export function CommuteClient({ lanes }: { lanes: Lane[] }) {
             : {})}
         >
           <AudioPlayer
-            // Namespaced per lane + episode so the queue's transient position never overwrites
-            // the saved position on a topic's cheat-sheet page.
-            key={`${lane.key}:${current.id}`}
-            id={`commute:${lane.key}:${current.id}`}
-            title={current.title}
-            src={current.src}
-            captionsSrc={current.captionsSrc}
-            durationSec={current.durationSec}
-            accent={current.accent}
+            // One persistent player for the whole lane: the queue drives which episode plays,
+            // and it auto-advances in place (no remount) so playback survives a locked screen.
+            // Re-keyed only per lane so switching formats resets to that lane's first episode.
+            key={lane.key}
+            queue={queue}
+            queueIndex={index}
+            onQueueIndexChange={setIndex}
             label={lane.playerLabel}
             subtitle={lane.playerSubtitle}
             icon={lane.icon}
             autoPlay={autoPlay}
             resume={false}
-            onEnded={advance}
           />
           <p className="mt-3 px-1 text-sm text-ink/60">
             {upNext ? (
