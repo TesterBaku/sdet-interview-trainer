@@ -1,8 +1,18 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { AudioPlayer, type QueueTrack } from "@/components/AudioPlayer";
-import { formatAudioMinutes } from "@/lib/audioFormat";
+import { formatAudioMinutes, formatClock } from "@/lib/audioFormat";
+import {
+  getCommuteProgressSnapshot,
+  getServerCommuteProgressSnapshot,
+  markAudioCompleted,
+  readAudioPosition,
+  readCommuteResume,
+  readCompletedAudio,
+  subscribeToCommuteProgress,
+  writeCommuteResume,
+} from "@/lib/audioPosition";
 
 type Episode = {
   id: string;
@@ -25,12 +35,35 @@ export type Lane = {
   episodes: Episode[];
 };
 
+// Position/completed ids are namespaced per lane + episode so a queue's transient state never
+// collides with the same topic's saved position on its cheat-sheet page.
+const trackId = (laneKey: string, episodeId: string) => `commute:${laneKey}:${episodeId}`;
+
+type ResumePoint = {
+  laneIndex: number;
+  episodeIndex: number;
+  laneLabel: string;
+  title: string;
+  seconds: number;
+};
+
 export function CommuteClient({ lanes }: { lanes: Lane[] }) {
   const [laneIndex, setLaneIndex] = useState(0);
-  const [index, setIndex] = useState(0);
+  // Per-lane playback position (#8): peeking at another lane must not reset the one you're in.
+  // Missing key ⇒ episode 0.
+  const [indexByLane, setIndexByLane] = useState<Record<string, number>>({});
   // Only auto-play after the listener has actually picked/advanced an episode, so landing on
   // the page — or switching lanes — never blares audio unprompted.
   const [autoPlay, setAutoPlay] = useState(false);
+  // A one-shot "jump to saved position and play" command, issued only by an explicit Resume
+  // click — so a normal landing/lane-switch never seeks, and (unlike a standing "resume mode")
+  // auto-advanced episodes always start from the top.
+  const [resumeCommand, setResumeCommand] = useState<{ seconds: number; token: number } | null>(null);
+  const resumeToken = useRef(0);
+  // The listener has started a session (picked/resumed/advanced) — hides the Resume banner,
+  // which is only a "restore last time" affordance.
+  const [hasStarted, setHasStarted] = useState(false);
+
   // The lane switcher is an ARIA tablist only when there's more than one lane to switch
   // between; with a single lane it's just the panel (no tabs rendered).
   const isTabbed = lanes.length > 1;
@@ -38,6 +71,7 @@ export function CommuteClient({ lanes }: { lanes: Lane[] }) {
 
   const lane = lanes[laneIndex];
   const episodes = lane.episodes;
+  const index = indexByLane[lane.key] ?? 0;
   const upNext = episodes[index + 1];
 
   // One persistent queue for the player. Position ids are namespaced per lane + episode so the
@@ -45,7 +79,7 @@ export function CommuteClient({ lanes }: { lanes: Lane[] }) {
   const queue = useMemo<QueueTrack[]>(
     () =>
       episodes.map((ep) => ({
-        id: `commute:${lane.key}:${ep.id}`,
+        id: trackId(lane.key, ep.id),
         title: ep.title,
         src: ep.src,
         captionsSrc: ep.captionsSrc,
@@ -55,10 +89,67 @@ export function CommuteClient({ lanes }: { lanes: Lane[] }) {
     [episodes, lane.key],
   );
 
+  // Listened/partial state (#6) + the resume pointer (#3) are read from localStorage via an
+  // external store: the server/pre-hydration snapshot is -1, so the memo below stays empty on
+  // the first render (matching the localStorage-free server HTML) and fills in once live. Every
+  // transition that matters (select / advance / finish) goes through a progress write, which
+  // bumps `progressVersion` and re-reads — so checks and partial bars stay current without a
+  // per-tick re-render, and the memo needs no lane/episode deps.
+  const progressVersion = useSyncExternalStore(
+    subscribeToCommuteProgress,
+    getCommuteProgressSnapshot,
+    getServerCommuteProgressSnapshot,
+  );
+
+  const { completedIds, positions, resumePoint } = useMemo(() => {
+    const empty = {
+      completedIds: [] as string[],
+      positions: {} as Record<string, number>,
+      resumePoint: null as ResumePoint | null,
+    };
+    if (progressVersion < 0) return empty; // server / pre-hydration — no localStorage yet
+
+    const completed = readCompletedAudio();
+    // Only the current lane's rows are rendered, so only its positions need reading.
+    const pos: Record<string, number> = {};
+    for (const ep of lanes[laneIndex].episodes) {
+      const id = trackId(lanes[laneIndex].key, ep.id);
+      const sec = readAudioPosition(id);
+      if (sec > 0) pos[id] = sec;
+    }
+
+    let point: ResumePoint | null = null;
+    const saved = readCommuteResume();
+    if (saved) {
+      const li = lanes.findIndex((l) => l.key === saved.laneKey);
+      const ei = li >= 0 ? lanes[li].episodes.findIndex((e) => e.id === saved.episodeId) : -1;
+      // Skip the banner when the pointer sits on an already-finished episode — that only happens
+      // when the whole queue ran to its end, so there's nothing to resume (no restart-from-top).
+      if (li >= 0 && ei >= 0 && !completed.includes(trackId(saved.laneKey, saved.episodeId))) {
+        point = {
+          laneIndex: li,
+          episodeIndex: ei,
+          laneLabel: lanes[li].label,
+          title: lanes[li].episodes[ei].title,
+          seconds: readAudioPosition(trackId(saved.laneKey, saved.episodeId)),
+        };
+      }
+    }
+    return { completedIds: completed, positions: pos, resumePoint: point };
+  }, [progressVersion, lanes, laneIndex]);
+
+  const setIndexFor = (laneKey: string, i: number) =>
+    setIndexByLane((m) => ({ ...m, [laneKey]: i }));
+
+  const recordResume = (laneKey: string, episodeId: string) => {
+    writeCommuteResume({ laneKey, episodeId });
+    setHasStarted(true);
+  };
+
   const selectLane = (i: number) => {
     if (i === laneIndex) return;
+    // Keep each lane's own position (#8); switching is a silent peek, never autoplay.
     setLaneIndex(i);
-    setIndex(0);
     setAutoPlay(false);
   };
   // Arrow/Home/End move the selected tab and take focus with them (automatic activation),
@@ -76,9 +167,36 @@ export function CommuteClient({ lanes }: { lanes: Lane[] }) {
     selectLane(next);
     tabRefs.current[next]?.focus();
   };
+
+  // Playlist row click: start the episode from the top (the Resume banner is the dedicated
+  // resume-from-position path).
   const select = (i: number) => {
     setAutoPlay(true);
-    setIndex(i);
+    setIndexFor(lane.key, i);
+    recordResume(lane.key, episodes[i].id);
+  };
+
+  // Auto-advance (or a Media Session next/prev): the player drove the index, so mirror it and
+  // remember the new episode as the resume point.
+  const onQueueIndexChange = (i: number) => {
+    setIndexFor(lane.key, i);
+    const ep = episodes[i];
+    if (ep) recordResume(lane.key, ep.id);
+  };
+
+  const onTrackEnded = (endedId: string) => {
+    markAudioCompleted(endedId); // bumps the progress store → playlist re-reads
+  };
+
+  const resumeHere = () => {
+    if (!resumePoint) return;
+    setLaneIndex(resumePoint.laneIndex);
+    setIndexFor(lanes[resumePoint.laneIndex].key, resumePoint.episodeIndex);
+    // One-shot command: seek to the saved second and play — works whether that episode's src is
+    // already loaded (episode 0 on a fresh visit) or gets swapped in by the index change.
+    resumeToken.current += 1;
+    setResumeCommand({ seconds: resumePoint.seconds, token: resumeToken.current });
+    setHasStarted(true);
   };
 
   return (
@@ -113,6 +231,25 @@ export function CommuteClient({ lanes }: { lanes: Lane[] }) {
         </div>
       ) : null}
 
+      {resumePoint && !hasStarted ? (
+        <button
+          type="button"
+          onClick={resumeHere}
+          className="flex w-full items-center gap-3 rounded-2xl border border-signal/30 bg-signal/10 p-3 text-left shadow-panel transition hover:bg-signal/15 focus-ring"
+        >
+          <span aria-hidden className="text-lg">↻</span>
+          <span className="min-w-0 flex-1">
+            <span className="block text-sm font-black text-signal">Resume where you left off</span>
+            <span className="block truncate text-sm font-bold text-blueprint">
+              {isTabbed ? `${resumePoint.laneLabel} · ` : ""}
+              {resumePoint.title}
+              {resumePoint.seconds >= 3 ? ` · ${formatClock(resumePoint.seconds)}` : ""}
+            </span>
+          </span>
+          <span aria-hidden className="font-black text-signal">→</span>
+        </button>
+      ) : null}
+
       <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
         <div
           className="lg:sticky lg:top-24 lg:self-start"
@@ -129,12 +266,14 @@ export function CommuteClient({ lanes }: { lanes: Lane[] }) {
             key={lane.key}
             queue={queue}
             queueIndex={index}
-            onQueueIndexChange={setIndex}
+            onQueueIndexChange={onQueueIndexChange}
+            onTrackEnded={onTrackEnded}
             label={lane.playerLabel}
             subtitle={lane.playerSubtitle}
             icon={lane.icon}
             autoPlay={autoPlay}
             resume={false}
+            resumeCommand={resumeCommand}
           />
           <p className="mt-3 px-1 text-sm text-ink/60">
             {upNext ? (
@@ -150,30 +289,49 @@ export function CommuteClient({ lanes }: { lanes: Lane[] }) {
         <ol className="space-y-2" aria-label="Episode playlist">
           {episodes.map((ep, i) => {
             const active = i === index;
+            const id = trackId(lane.key, ep.id);
+            const done = completedIds.includes(id);
+            const savedSec = positions[id] ?? 0;
+            const ratio =
+              !done && ep.durationSec > 0 ? Math.min(1, savedSec / ep.durationSec) : 0;
+            const marker = active ? "▶" : done ? "✓" : i + 1;
+            // Partial state is only shown on rows you're NOT on — the active episode's live
+            // position is the player's job (the saved second wouldn't update mid-play here).
+            const showPartial = !active && !done && ratio > 0.01;
+            const statusNote = done ? "Listened" : showPartial ? `${formatClock(savedSec)} in` : "";
             return (
               <li key={ep.id}>
                 <button
                   type="button"
                   onClick={() => select(i)}
                   aria-current={active ? "true" : undefined}
-                  className={`flex w-full items-center gap-3 rounded-2xl border p-3 text-left shadow-panel transition focus-ring ${
+                  className={`relative flex w-full items-center gap-3 overflow-hidden rounded-2xl border p-3 text-left shadow-panel transition focus-ring ${
                     active ? "border-ink/20 bg-white" : "border-ink/10 bg-white/70 hover:bg-white"
-                  }`}
+                  } ${done && !active ? "opacity-60" : ""}`}
                 >
                   <span
                     aria-hidden
                     className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-sm font-black text-paper"
                     style={{ backgroundColor: ep.accent }}
                   >
-                    {active ? "▶" : i + 1}
+                    {marker}
                   </span>
                   <span className="min-w-0 flex-1">
                     <span className="block truncate font-bold text-blueprint">{ep.title}</span>
                     <span className="block text-xs font-semibold text-ink/55">
                       {ep.group ? `${ep.group} · ` : ""}
                       {formatAudioMinutes(ep.durationSec)}
+                      {statusNote ? ` · ${statusNote}` : ""}
                     </span>
                   </span>
+                  {/* Thin progress bar for a partially-heard episode you're not currently on. */}
+                  {showPartial ? (
+                    <span
+                      aria-hidden
+                      className="absolute bottom-0 left-0 h-1 rounded-full bg-signal/70"
+                      style={{ width: `${Math.round(ratio * 100)}%` }}
+                    />
+                  ) : null}
                 </button>
               </li>
             );

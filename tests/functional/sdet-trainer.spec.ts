@@ -776,6 +776,124 @@ test("commute publishes Media Session metadata for lock-screen controls", async 
   expect(title.length).toBeGreaterThan(0);
 });
 
+// Position keys mirror lib/audioPosition.ts + the commute lane/episode namespace.
+const audioPositionKey = (laneKey: string, episodeId: string) =>
+  `sdet-interview-trainer-audio-position:commute:${laneKey}:${episodeId}`;
+const commuteResumeKey = "sdet-interview-trainer-commute-resume";
+
+async function seedLocalStorage(page: Page, entries: Record<string, string>) {
+  await page.goto("/");
+  await page.evaluate((pairs) => {
+    for (const [key, value] of Object.entries(pairs)) window.localStorage.setItem(key, value);
+  }, entries);
+}
+
+test("commute offers an explicit Resume affordance for the last-played episode", async ({ page }) => {
+  test.skip(audioCount < 2, "need at least two episodes to resume a later one");
+  const resumeId = publishedAudio[1].id;
+  await seedLocalStorage(page, {
+    [commuteResumeKey]: JSON.stringify({ laneKey: "podcast", episodeId: resumeId }),
+    [audioPositionKey("podcast", resumeId)]: "120",
+  });
+  await page.goto("/commute");
+
+  // The banner is a client-only affordance (localStorage-backed) — poll for it to appear.
+  const resume = page.getByRole("button", { name: /Resume where you left off/ });
+  await expect(resume).toBeVisible();
+  await expect(resume).toContainText("2:00"); // formatClock(120)
+
+  // Explicit jump: clicking it makes the saved episode the current one (never a silent auto-seek
+  // on load — the queue is still parked at episode 1 until the listener acts).
+  const items = page.getByRole("list", { name: "Episode playlist" }).getByRole("listitem");
+  await expect(items.nth(0).getByRole("button")).toHaveAttribute("aria-current", "true");
+  await resume.click();
+  await expect(items.nth(1).getByRole("button")).toHaveAttribute("aria-current", "true");
+  // Once a session has started, the "restore last time" banner steps out of the way.
+  await expect(resume).toBeHidden();
+});
+
+test("commute Resume seeks even when the saved episode is the already-loaded first track", async ({ page }) => {
+  test.skip(audioCount === 0, "needs published audio");
+  // Episode 0 is the default loaded track; resuming it must still seek + play (not no-op).
+  const resumeId = publishedAudio[0].id;
+  await seedLocalStorage(page, {
+    [commuteResumeKey]: JSON.stringify({ laneKey: "podcast", episodeId: resumeId }),
+    [audioPositionKey("podcast", resumeId)]: "75",
+  });
+  await page.goto("/commute");
+  // Record play() + the seek target without touching the network. Previously (resume as a
+  // standing prop) episode 0 was a no-op here: src unchanged ⇒ no metadata reload ⇒ no seek and
+  // no play. The one-shot command must seek to 75 s and start playback regardless.
+  await page.evaluate(() => {
+    const w = window as unknown as { __played: number; __seekedTo: number };
+    w.__played = 0;
+    w.__seekedTo = -1;
+    HTMLMediaElement.prototype.play = function () {
+      w.__played += 1;
+      return Promise.resolve();
+    };
+    const proto = HTMLMediaElement.prototype as unknown as {
+      __ct?: PropertyDescriptor;
+    };
+    const desc = Object.getOwnPropertyDescriptor(HTMLMediaElement.prototype, "currentTime");
+    if (desc) {
+      Object.defineProperty(HTMLMediaElement.prototype, "currentTime", {
+        configurable: true,
+        get() {
+          return desc.get?.call(this) ?? 0;
+        },
+        set(v: number) {
+          w.__seekedTo = v;
+          desc.set?.call(this, v);
+        },
+      });
+      void proto;
+    }
+  });
+  const resume = page.getByRole("button", { name: /Resume where you left off/ });
+  await expect(resume).toBeVisible();
+  await resume.click();
+  const result = await page.evaluate(() => {
+    const w = window as unknown as { __played: number; __seekedTo: number };
+    return { played: w.__played, seekedTo: w.__seekedTo };
+  });
+  expect(result.played).toBeGreaterThan(0);
+  expect(result.seekedTo).toBe(75);
+});
+
+test("commute keeps a separate position per lane when you peek at another", async ({ page }) => {
+  test.skip(interviewCount === 0 || audioCount < 3, "need both lanes + a few podcast episodes");
+  await page.goto("/commute");
+  const items = page.getByRole("list", { name: "Episode playlist" }).getByRole("listitem");
+
+  // Pick episode 3 in the podcast lane.
+  await items.nth(2).getByRole("button").click();
+  await expect(items.nth(2).getByRole("button")).toHaveAttribute("aria-current", "true");
+
+  // Peek at the Mock Interview lane — it has its own (fresh) position.
+  await page.getByRole("tab", { name: /Mock Interview/ }).click();
+  await expect(items.nth(0).getByRole("button")).toHaveAttribute("aria-current", "true");
+
+  // Back to podcast: the spot is preserved, not reset to episode 1.
+  await page.getByRole("tab", { name: /Podcast/ }).click();
+  await expect(items.nth(2).getByRole("button")).toHaveAttribute("aria-current", "true");
+});
+
+test("commute playlist reflects listened + partially-heard episodes", async ({ page }) => {
+  test.skip(audioCount < 2, "need at least two episodes");
+  // Seed episode 2 as partially heard before load.
+  await seedLocalStorage(page, {
+    [audioPositionKey("podcast", publishedAudio[1].id)]: "90",
+  });
+  await page.goto("/commute");
+  const items = page.getByRole("list", { name: "Episode playlist" }).getByRole("listitem");
+  await expect(items.nth(1)).toContainText("1:30 in"); // formatClock(90) + partial marker
+
+  // Finishing episode 1 records it as listened (fires for every ended, not just queue end).
+  await page.locator("audio").evaluate((el: HTMLAudioElement) => el.dispatchEvent(new Event("ended")));
+  await expect(items.nth(0)).toContainText("Listened");
+});
+
 // ── Progress breakdown + /review route ──────────────────────────────────────
 
 test("progress page shows per-type breakdown sections and link to review queue", async ({ page }) => {

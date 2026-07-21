@@ -49,6 +49,14 @@ type AudioPlayerProps = {
   // episode starts from the beginning as it's queued.
   resume?: boolean;
   onEnded?: () => void;
+  // Fires on EVERY track's `ended` (before any auto-advance), with the id that just finished —
+  // so a queue host can mark it listened. `onEnded` differs: it fires only when the queue runs out.
+  onTrackEnded?: (trackId: string) => void;
+  // One-shot "jump into this track at `seconds` and play" command (bump `token` to re-issue).
+  // Used by the Commute Resume affordance so an explicit resume works whether the target src is
+  // already loaded (e.g. episode 0) or just swapped in — unlike `resume`, it's not a standing
+  // mode, so auto-advanced episodes still start from the top.
+  resumeCommand?: { seconds: number; token: number } | null;
 };
 
 const RATES = [1, 1.25, 1.5, 2] as const;
@@ -73,6 +81,8 @@ export function AudioPlayer({
   icon = "🎧",
   resume = true,
   onEnded,
+  onTrackEnded,
+  resumeCommand,
 }: AudioPlayerProps) {
   // The active track resolves from the queue when present, else the single-track props.
   const activeTrack = queue && queueIndex != null ? queue[queueIndex] : null;
@@ -89,6 +99,8 @@ export function AudioPlayer({
   // React-controlled attribute), this guards the load effect from reloading a src the ended
   // handler already swapped in — which would restart the just-started next episode.
   const loadedSrcRef = useRef<string | null>(null);
+  // The last resume command consumed, so a re-render never re-applies the same jump.
+  const handledResumeToken = useRef(-1);
   const [playing, setPlaying] = useState(false);
   const [current, setCurrent] = useState(0);
   const [duration, setDuration] = useState(trackDurationProp);
@@ -156,6 +168,21 @@ export function AudioPlayer({
     if (autoPlay) void audio.play().catch(() => undefined);
   }, [trackSrc, autoPlay, rate, trackDurationProp]);
 
+  // Consume a one-shot resume command. Declared after the load effect so, when the command
+  // arrives together with a track switch, the new src is already attached; setting currentTime
+  // on a still-loading element queues the seek until metadata arrives (survives `load()`), and
+  // it also works when the src is unchanged (the resume target is the already-loaded track).
+  useEffect(() => {
+    if (!resumeCommand || resumeCommand.token === handledResumeToken.current) return;
+    handledResumeToken.current = resumeCommand.token;
+    const audio = audioRef.current;
+    if (!audio) return;
+    // Seek then play; the resulting timeupdate carries the position into `current` (no
+    // setState here — resume is a user gesture, so play() is allowed and playback starts).
+    if (resumeCommand.seconds > 0) audio.currentTime = resumeCommand.seconds;
+    void audio.play().catch(() => undefined);
+  }, [resumeCommand]);
+
   const onLoadedMetadata = useCallback(() => {
     const audio = audioRef.current;
     if (!audio) return;
@@ -198,6 +225,7 @@ export function AudioPlayer({
 
   const onEndedInternal = useCallback(() => {
     clearAudioPosition(trackId);
+    onTrackEnded?.(trackId);
     lastSavedSecond.current = -1;
     // Auto-advance by swapping src on the SAME element synchronously inside the ended handler,
     // which browsers treat as a continuation of the current session (survives lock-screen).
@@ -207,7 +235,7 @@ export function AudioPlayer({
     }
     setPlaying(false);
     onEnded?.();
-  }, [trackId, queue, queueIndex, goToIndex, onEnded]);
+  }, [trackId, queue, queueIndex, goToIndex, onEnded, onTrackEnded]);
 
   // Play state is driven by the element's own play/pause events (below), so a blocked
   // play() never leaves the icon out of sync.
