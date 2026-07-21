@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { getAllCheatSheetAudio, getAllInterviewAudio, type CheatSheetAudio } from "@/lib/audio";
-import { cheatSheets, getCheatSheet } from "@/lib/cheatsheets";
+import { getAllCheatSheetAudio, getAllInterviewAudio, orderAudioByCurriculum } from "@/lib/audio";
+import { getCheatSheet } from "@/lib/cheatsheets";
 import { CommuteClient, type Lane } from "./CommuteClient";
 
 export const metadata: Metadata = {
@@ -24,26 +24,9 @@ function toEpisode(audio: { id: string; mp3Url: string; vttUrl: string; duration
   };
 }
 
-// Order the queue by the curated curriculum (grouped: Test Frameworks, API & Data, …,
-// Certifications last) instead of the manifest's id-sort, so the playlist reads as a syllabus
-// rather than interleaving unrelated topics (#9). Any audio without a matching cheat sheet keeps
-// its original order at the end.
-function byCurriculum(audios: CheatSheetAudio[]) {
-  const byId = new Map(audios.map((a) => [a.id, a]));
-  const ordered: CheatSheetAudio[] = [];
-  for (const sheet of cheatSheets) {
-    const a = byId.get(sheet.id);
-    if (a) {
-      ordered.push(a);
-      byId.delete(sheet.id);
-    }
-  }
-  return [...ordered, ...byId.values()];
-}
-
 export default function CommutePage() {
-  const podcast = byCurriculum(getAllCheatSheetAudio()).map(toEpisode);
-  const interview = byCurriculum(getAllInterviewAudio()).map(toEpisode);
+  const podcast = orderAudioByCurriculum(getAllCheatSheetAudio()).map(toEpisode);
+  const interview = orderAudioByCurriculum(getAllInterviewAudio()).map(toEpisode);
 
   const lanes: Lane[] = [];
   if (podcast.length > 0) {

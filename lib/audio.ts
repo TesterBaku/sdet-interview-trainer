@@ -1,5 +1,6 @@
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
+import { cheatSheets } from "@/lib/cheatsheets";
 
 // Server-only audio metadata access (uses fs). Cheat-sheet pages and the Commute page
 // are static (generateStaticParams / no dynamic segments), so these reads happen at build
@@ -71,6 +72,23 @@ export function getCheatSheetAudio(id: string): CheatSheetAudio | null {
 
 export function getAllCheatSheetAudio(): CheatSheetAudio[] {
   return allAudioFromManifest(manifest);
+}
+
+// Order audio by the curated curriculum (grouped: Test Frameworks, API & Data, …,
+// Certifications last) instead of the manifest's id-sort, so the Commute playlist reads as a
+// syllabus (#9). Any audio without a matching cheat sheet keeps its original order at the end.
+// Exported so the page and its tests share one definition of the order.
+export function orderAudioByCurriculum<T extends { id: string }>(audios: T[]): T[] {
+  const byId = new Map(audios.map((a) => [a.id, a]));
+  const ordered: T[] = [];
+  for (const sheet of cheatSheets) {
+    const a = byId.get(sheet.id);
+    if (a) {
+      ordered.push(a);
+      byId.delete(sheet.id);
+    }
+  }
+  return [...ordered, ...byId.values()];
 }
 
 export function getCheatSheetTranscriptCues(id: string): TranscriptCue[] {
