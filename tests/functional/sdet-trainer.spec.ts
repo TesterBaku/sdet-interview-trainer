@@ -894,35 +894,47 @@ test("commute playlist reflects listened + partially-heard episodes", async ({ p
   await expect(items.nth(0)).toContainText("Listened");
 });
 
-test("commute shows a buffering indicator while the source stalls", async ({ page }) => {
+test("commute shows a buffering indicator only while actively playing", async ({ page }) => {
   test.skip(audioCount === 0, "needs published audio");
   await page.goto("/commute");
   const audio = page.locator("audio");
+  // A stall before playback (preload) must NOT show a spinner on an idle track.
   await audio.evaluate((el: HTMLAudioElement) => el.dispatchEvent(new Event("waiting")));
+  await expect(page.getByText(/Buffering/)).toBeHidden();
+  // Once playing, a stall shows the spinner; recovering (playing) clears it.
+  await audio.evaluate((el: HTMLAudioElement) => {
+    el.dispatchEvent(new Event("play"));
+    el.dispatchEvent(new Event("waiting"));
+  });
   await expect(page.getByText(/Buffering/)).toBeVisible();
   await audio.evaluate((el: HTMLAudioElement) => el.dispatchEvent(new Event("playing")));
   await expect(page.getByText(/Buffering/)).toBeHidden();
 });
 
-test("commute auto-skips a failed episode so a bad source can't halt the queue", async ({ page }) => {
+test("commute error card lets you Skip a failed episode without losing it to an auto-cascade", async ({ page }) => {
   test.skip(audioCount < 2, "need a next episode to skip to");
   await page.goto("/commute");
   const items = page.getByRole("list", { name: "Episode playlist" }).getByRole("listitem");
-  // A source error on episode 1 advances to episode 2 rather than stalling.
+  const player = page.getByRole("region", { name: /^Listen:/ });
+  // A source error surfaces a recoverable card (no silent auto-advance) — episode 1 stays put.
   await page.locator("audio").evaluate((el: HTMLAudioElement) => el.dispatchEvent(new Event("error")));
+  await expect(player.getByText(/Couldn't play this episode/)).toBeVisible();
+  await expect(items.nth(0).getByRole("button")).toHaveAttribute("aria-current", "true");
+  await expect(player.getByRole("button", { name: /Retry/ })).toBeVisible();
+  // Skip is the explicit way forward, and it advances the queue.
+  await player.getByRole("button", { name: /Skip to next/ }).click();
   await expect(items.nth(1).getByRole("button")).toHaveAttribute("aria-current", "true");
 });
 
-test("commute surfaces an error card with Retry when the last episode fails", async ({ page }) => {
+test("commute error card offers no Skip on the last episode (nothing to advance to)", async ({ page }) => {
   test.skip(audioCount === 0, "needs published audio");
   await page.goto("/commute");
   const items = page.getByRole("list", { name: "Episode playlist" }).getByRole("listitem");
-  // On the final episode there's nothing to skip to, so a failure surfaces a recoverable card.
   await items.last().getByRole("button").click();
   await page.locator("audio").evaluate((el: HTMLAudioElement) => el.dispatchEvent(new Event("error")));
   const player = page.getByRole("region", { name: /^Listen:/ });
-  await expect(player.getByText(/Couldn't play this episode/)).toBeVisible();
   await expect(player.getByRole("button", { name: /Retry/ })).toBeVisible();
+  await expect(player.getByRole("button", { name: /Skip to next/ })).toHaveCount(0);
 });
 
 // ── Progress breakdown + /review route ──────────────────────────────────────
