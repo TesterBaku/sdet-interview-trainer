@@ -63,6 +63,10 @@ export function CommuteClient({ lanes }: { lanes: Lane[] }) {
   // The listener has started a session (picked/resumed/advanced) — hides the Resume banner,
   // which is only a "restore last time" affordance.
   const [hasStarted, setHasStarted] = useState(false);
+  // Actual play/pause state (reported by the player) drives the now-playing polish (#13): the
+  // active row's play/pause badge, tap-to-toggle, and document.title.
+  const [playing, setPlaying] = useState(false);
+  const [toggleToken, setToggleToken] = useState(0);
 
   // The lane switcher is an ARIA tablist only when there's more than one lane to switch
   // between; with a single lane it's just the panel (no tabs rendered).
@@ -114,6 +118,18 @@ export function CommuteClient({ lanes }: { lanes: Lane[] }) {
     if (li >= 0 && ei >= 0) setIndexByLane((m) => ({ ...m, [lanes[li].key]: ei }));
     /* eslint-enable react-hooks/set-state-in-effect */
   }, [lanes]);
+
+  // Reflect the playing episode in the tab title (#13); restore the page's title when paused or
+  // on leaving. Captures the original title on first run so it never hard-codes the page name.
+  const baseTitle = useRef<string | null>(null);
+  useEffect(() => {
+    if (baseTitle.current === null) baseTitle.current = document.title;
+    const t = episodes[index]?.title;
+    document.title = playing && t ? `▶ ${t} · Commute Mode` : baseTitle.current;
+    return () => {
+      if (baseTitle.current !== null) document.title = baseTitle.current;
+    };
+  }, [playing, episodes, index]);
 
   // One persistent queue for the player. Position ids are namespaced per lane + episode so the
   // queue's transient position never overwrites the saved position on a topic's cheat-sheet page.
@@ -323,16 +339,21 @@ export function CommuteClient({ lanes }: { lanes: Lane[] }) {
             autoPlay={autoPlay}
             resume={false}
             resumeCommand={resumeCommand}
+            onPlayingChange={setPlaying}
+            toggleCommand={toggleToken}
           />
-          <p className="mt-3 px-1 text-sm text-ink/60">
-            {upNext ? (
-              <>
-                Up next: <span className="font-bold text-blueprint">{upNext.title}</span>
-              </>
-            ) : (
-              "Last episode in the queue."
-            )}
-          </p>
+          {upNext ? (
+            <button
+              type="button"
+              onClick={() => select(index + 1)}
+              className="mt-3 flex w-full items-center gap-1 px-1 text-left text-sm text-ink/60 transition hover:text-blueprint focus-ring"
+            >
+              Up next: <span className="font-bold text-blueprint">{upNext.title}</span>
+              <span aria-hidden>→</span>
+            </button>
+          ) : (
+            <p className="mt-3 px-1 text-sm text-ink/60">Last episode in the queue.</p>
+          )}
         </div>
 
         <div>
@@ -348,7 +369,9 @@ export function CommuteClient({ lanes }: { lanes: Lane[] }) {
             const savedSec = positions[id] ?? 0;
             const ratio =
               !done && ep.durationSec > 0 ? Math.min(1, savedSec / ep.durationSec) : 0;
-            const marker = active ? "▶" : done ? "✓" : i + 1;
+            // The active row's badge reflects real play state and doubles as a play/pause toggle
+            // (#13); other rows show a check (listened), a partial dot, or their number.
+            const marker = active ? (playing ? "❚❚" : "▶") : done ? "✓" : i + 1;
             // Partial state is only shown on rows you're NOT on — the active episode's live
             // position is the player's job (the saved second wouldn't update mid-play here).
             const showPartial = !active && !done && ratio > 0.01;
@@ -357,8 +380,10 @@ export function CommuteClient({ lanes }: { lanes: Lane[] }) {
               <li key={ep.id}>
                 <button
                   type="button"
-                  onClick={() => select(i)}
+                  // Tapping the active row toggles play/pause; tapping any other row starts it.
+                  onClick={() => (active ? setToggleToken((t) => t + 1) : select(i))}
                   aria-current={active ? "true" : undefined}
+                  aria-label={active ? `${playing ? "Pause" : "Play"} ${ep.title}` : undefined}
                   className={`relative flex w-full items-center gap-3 overflow-hidden rounded-2xl border p-3 text-left shadow-panel transition focus-ring ${
                     active ? "border-ink/20 bg-white" : "border-ink/10 bg-white/70 hover:bg-white"
                   } ${done && !active ? "opacity-60" : ""}`}

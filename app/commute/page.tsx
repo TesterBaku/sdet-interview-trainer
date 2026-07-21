@@ -52,13 +52,16 @@ export default function CommutePage() {
 
   return (
     <div className="space-y-6">
-      <header className="rounded-[2.5rem] border border-ink/10 bg-white/75 p-6 shadow-panel sm:p-8">
-        <p className="text-sm font-black uppercase tracking-[0.28em] text-signal">Commute Mode</p>
-        <h1 className="mt-3 font-display text-3xl font-black text-blueprint sm:text-5xl">Learn with your eyes closed</h1>
-        <p className="mt-4 max-w-3xl text-lg leading-8 text-ink/75">
+      {/* Compact on mobile so the player + lane tabs sit above the fold; full-size from sm up (#12). */}
+      <header className="rounded-[2rem] border border-ink/10 bg-white/75 p-4 shadow-panel sm:rounded-[2.5rem] sm:p-8">
+        <p className="text-xs font-black uppercase tracking-[0.28em] text-signal sm:text-sm">Commute Mode</p>
+        <h1 className="mt-2 font-display text-2xl font-black text-blueprint sm:mt-3 sm:text-5xl">Learn with your eyes closed</h1>
+        <p className="mt-2 hidden max-w-3xl text-lg leading-8 text-ink/75 sm:mt-4 sm:block">
           Every topic as audio — a two-host podcast that walks the interview traps out loud, and a mock-interview round
           where a candidate models strong answers. Queue them up for the commute; they play back-to-back.
         </p>
+        {/* A one-line summary stands in for the full intro on small screens. */}
+        <p className="mt-1 text-sm text-ink/70 sm:hidden">Podcast + mock-interview audio for every topic — plays back-to-back.</p>
       </header>
 
       {lanes.length > 0 ? (

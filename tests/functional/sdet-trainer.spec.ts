@@ -1099,6 +1099,40 @@ test("commute does not rewrite the URL on a passive landing", async ({ page }) =
   await expect(page).toHaveURL(/\/commute$/);
 });
 
+test("commute reflects play state in the active row badge and document title", async ({ page }) => {
+  test.skip(audioCount === 0, "needs published audio");
+  await page.goto("/commute");
+  const items = page.getByRole("list", { name: "Episode playlist" }).getByRole("listitem");
+  const audio = page.locator("audio");
+  const activeRow = items.nth(0).getByRole("button");
+  await expect(activeRow).toHaveAttribute("aria-label", /^Play /);
+  await audio.evaluate((el: HTMLAudioElement) => el.dispatchEvent(new Event("play")));
+  await expect(activeRow).toHaveAttribute("aria-label", /^Pause /);
+  await expect.poll(() => page.title()).toMatch(/^▶ /);
+  await audio.evaluate((el: HTMLAudioElement) => el.dispatchEvent(new Event("pause")));
+  await expect(activeRow).toHaveAttribute("aria-label", /^Play /);
+  await expect.poll(() => page.title()).not.toMatch(/^▶ /);
+});
+
+test("commute Up next jumps to the next episode", async ({ page }) => {
+  test.skip(audioCount < 2, "need a next episode");
+  await page.goto("/commute");
+  const items = page.getByRole("list", { name: "Episode playlist" }).getByRole("listitem");
+  await page.getByRole("button", { name: /Up next:/ }).click();
+  await expect(items.nth(1).getByRole("button")).toHaveAttribute("aria-current", "true");
+});
+
+test("commute offers a 0.75× slow-listening speed", async ({ page }) => {
+  test.skip(audioCount === 0, "needs published audio");
+  await page.goto("/commute");
+  const rateBtn = page
+    .getByRole("region", { name: /^Listen:/ })
+    .getByRole("button", { name: /Playback speed/ });
+  // 1× → 1.25 → 1.5 → 2 → 0.75
+  for (let i = 0; i < 4; i++) await rateBtn.click();
+  await expect(rateBtn).toHaveText(/0\.75×/);
+});
+
 // ── Progress breakdown + /review route ──────────────────────────────────────
 
 test("progress page shows per-type breakdown sections and link to review queue", async ({ page }) => {

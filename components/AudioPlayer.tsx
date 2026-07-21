@@ -58,9 +58,13 @@ type AudioPlayerProps = {
   // already loaded (e.g. episode 0) or just swapped in — unlike `resume`, it's not a standing
   // mode, so auto-advanced episodes still start from the top.
   resumeCommand?: { seconds: number; token: number } | null;
+  // Report play/pause up so a queue host can reflect it (e.g. a playlist equalizer, document.title).
+  onPlayingChange?: (playing: boolean) => void;
+  // One-shot toggle play/pause command (bump the token), e.g. tapping the active playlist row.
+  toggleCommand?: number;
 };
 
-const RATES = [1, 1.25, 1.5, 2] as const;
+const RATES = [0.75, 1, 1.25, 1.5, 2] as const;
 type Rate = (typeof RATES)[number];
 
 const hasMediaSession = () => typeof navigator !== "undefined" && "mediaSession" in navigator;
@@ -84,6 +88,8 @@ export function AudioPlayer({
   onEnded,
   onTrackEnded,
   resumeCommand,
+  onPlayingChange,
+  toggleCommand,
 }: AudioPlayerProps) {
   // The active track resolves from the queue when present, else the single-track props.
   const activeTrack = queue && queueIndex != null ? queue[queueIndex] : null;
@@ -388,6 +394,19 @@ export function AudioPlayer({
     if (audio.paused) void audio.play().catch(() => undefined);
     else audio.pause();
   }, []);
+
+  // Report play/pause up (single source, covers play/pause/ended/error transitions).
+  useEffect(() => {
+    onPlayingChange?.(playing);
+  }, [playing, onPlayingChange]);
+
+  // Consume a one-shot toggle command (e.g. tapping the active playlist row).
+  const handledToggleToken = useRef(0);
+  useEffect(() => {
+    if (!toggleCommand || toggleCommand === handledToggleToken.current) return;
+    handledToggleToken.current = toggleCommand;
+    toggle();
+  }, [toggleCommand, toggle]);
 
   const cycleRate = useCallback(() => {
     const currentIndex = RATES.indexOf(rate as Rate); // -1 (unknown stored value) → next is RATES[0]
