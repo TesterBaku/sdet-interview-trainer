@@ -1,8 +1,8 @@
 // Bump this string on each deploy to invalidate stale caches
-const CACHE_NAME = "sdet-trainer-v1";
+const CACHE_NAME = "sdet-trainer-v2";
 
 // App shell routes to pre-cache on install
-const PRECACHE_URLS = ["/", "/topics", "/coding-gym", "/progress"];
+const PRECACHE_URLS = ["/", "/topics", "/coding-gym", "/progress", "/practice", "/commute"];
 
 self.addEventListener("install", (event) => {
   // addAll is all-or-nothing; cache each URL individually so a single

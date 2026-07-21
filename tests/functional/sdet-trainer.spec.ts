@@ -1099,6 +1099,82 @@ test("commute does not rewrite the URL on a passive landing", async ({ page }) =
   await expect(page).toHaveURL(/\/commute$/);
 });
 
+test("commute reflects play state in the active row badge and document title", async ({ page }) => {
+  test.skip(audioCount === 0, "needs published audio");
+  await page.goto("/commute");
+  const items = page.getByRole("list", { name: "Episode playlist" }).getByRole("listitem");
+  const audio = page.locator("audio");
+  const activeRow = items.nth(0).getByRole("button");
+  await expect(activeRow).toHaveAttribute("aria-label", /^Play /);
+  await audio.evaluate((el: HTMLAudioElement) => el.dispatchEvent(new Event("play")));
+  await expect(activeRow).toHaveAttribute("aria-label", /^Pause /);
+  await expect.poll(() => page.title()).toMatch(/^▶ /);
+  await audio.evaluate((el: HTMLAudioElement) => el.dispatchEvent(new Event("pause")));
+  await expect(activeRow).toHaveAttribute("aria-label", /^Play /);
+  await expect.poll(() => page.title()).not.toMatch(/^▶ /);
+});
+
+test("commute Up next jumps to the next episode", async ({ page }) => {
+  test.skip(audioCount < 2, "need a next episode");
+  await page.goto("/commute");
+  const items = page.getByRole("list", { name: "Episode playlist" }).getByRole("listitem");
+  await page.getByRole("button", { name: /Up next:/ }).click();
+  await expect(items.nth(1).getByRole("button")).toHaveAttribute("aria-current", "true");
+});
+
+test("commute offers a 0.75× slow-listening speed", async ({ page }) => {
+  test.skip(audioCount === 0, "needs published audio");
+  await page.goto("/commute");
+  const rateBtn = page
+    .getByRole("region", { name: /^Listen:/ })
+    .getByRole("button", { name: /Playback speed/ });
+  // 1× → 1.25 → 1.5 → 2 → 0.75
+  for (let i = 0; i < 4; i++) await rateBtn.click();
+  await expect(rateBtn).toHaveText(/0\.75×/);
+});
+
+test("commute tapping the active row dismisses the Resume banner and syncs the URL", async ({ page }) => {
+  test.skip(audioCount < 2, "need two episodes");
+  const resumeId = orderedPodcast[1].id;
+  await seedLocalStorage(page, {
+    [commuteResumeKey]: JSON.stringify({ laneKey: "podcast", episodeId: resumeId }),
+    [audioPositionKey("podcast", resumeId)]: "60",
+  });
+  await page.goto("/commute");
+  const resume = page.getByRole("button", { name: /Resume where you left off/ });
+  await expect(resume).toBeVisible();
+  // Tap the active (default) row — starts it AND must run select()'s side-effects: dismiss the
+  // "restore last time" banner and write the episode into the URL.
+  const items = page.getByRole("list", { name: "Episode playlist" }).getByRole("listitem");
+  await items.nth(0).getByRole("button").click();
+  await expect(resume).toBeHidden();
+  await expect(page).toHaveURL(/[?&]ep=/);
+});
+
+test("commute lane switch does not auto-play from a stale toggle command", async ({ page }) => {
+  test.skip(interviewCount === 0 || audioCount === 0, "need both lanes");
+  await page.goto("/commute");
+  await page.evaluate(() => {
+    const w = window as unknown as { __plays: number };
+    w.__plays = 0;
+    HTMLMediaElement.prototype.play = function () {
+      w.__plays += 1;
+      return Promise.resolve();
+    };
+  });
+  const items = page.getByRole("list", { name: "Episode playlist" }).getByRole("listitem");
+  // Tap the active row to bump the toggle command, then switch lanes: the re-keyed player must
+  // NOT replay the stale toggle and start playing (switching is a silent peek).
+  await items.nth(0).getByRole("button").click();
+  await page.evaluate(() => {
+    (window as unknown as { __plays: number }).__plays = 0;
+  });
+  await page.getByRole("tab", { name: /Mock Interview/ }).click();
+  await page.waitForTimeout(300);
+  const plays = await page.evaluate(() => (window as unknown as { __plays: number }).__plays);
+  expect(plays).toBe(0);
+});
+
 // ── Progress breakdown + /review route ──────────────────────────────────────
 
 test("progress page shows per-type breakdown sections and link to review queue", async ({ page }) => {
