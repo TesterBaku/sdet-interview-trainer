@@ -937,6 +937,43 @@ test("commute error card offers no Skip on the last episode (nothing to advance 
   await expect(player.getByRole("button", { name: /Skip to next/ })).toHaveCount(0);
 });
 
+test("commute loads the transcript on demand from the published VTT", async ({ page }) => {
+  test.skip(audioCount === 0, "needs published audio + captions");
+  await page.goto("/commute");
+  const player = page.getByRole("region", { name: /^Listen:/ });
+  await player.getByRole("button", { name: "Transcript" }).click();
+  // Fetched + parsed client-side (cues aren't baked into the static page), so poll for the list.
+  const transcript = player.getByRole("list", { name: "Transcript" });
+  await expect(transcript).toBeVisible();
+  await expect(transcript.getByRole("listitem").first()).toBeVisible();
+  await expect(player.getByRole("button", { name: "Hide transcript" })).toBeVisible();
+});
+
+test("commute player exposes accessible seek + speed labels", async ({ page }) => {
+  test.skip(audioCount === 0, "needs published audio");
+  await page.goto("/commute");
+  const player = page.getByRole("region", { name: /^Listen:/ });
+  // Seek announces clock time, not a raw second count.
+  await expect(player.getByRole("slider", { name: "Seek" })).toHaveAttribute(
+    "aria-valuetext",
+    /\d+:\d\d of \d+:\d\d/,
+  );
+  // Speed label reads "Playback speed: 1×"; Play carries no redundant aria-pressed.
+  await expect(player.getByRole("button", { name: /Playback speed: 1×/ })).toBeVisible();
+  const play = player.getByRole("button", { name: "Play", exact: true });
+  await expect(play).not.toHaveAttribute("aria-pressed", /.*/);
+  // Track changes are announced politely.
+  await expect(player.getByText(/^Now playing:/)).toHaveAttribute("aria-live", "polite");
+});
+
+test("commute transport controls meet the 44px touch target", async ({ page }) => {
+  test.skip(audioCount === 0, "needs published audio");
+  await page.goto("/commute");
+  const player = page.getByRole("region", { name: /^Listen:/ });
+  const box = await player.getByRole("button", { name: /Playback speed/ }).boundingBox();
+  expect(box?.height ?? 0).toBeGreaterThanOrEqual(44);
+});
+
 // ── Progress breakdown + /review route ──────────────────────────────────────
 
 test("progress page shows per-type breakdown sections and link to review queue", async ({ page }) => {
