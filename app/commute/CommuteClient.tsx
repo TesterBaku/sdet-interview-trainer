@@ -55,10 +55,11 @@ export function CommuteClient({ lanes }: { lanes: Lane[] }) {
   // Only auto-play after the listener has actually picked/advanced an episode, so landing on
   // the page — or switching lanes — never blares audio unprompted.
   const [autoPlay, setAutoPlay] = useState(false);
-  // Seek-to-saved-position is armed only by an explicit Resume click, so a normal landing/
-  // lane-switch never silently seeks. Completed/never-played episodes have no saved position,
-  // so leaving it armed can't disturb the ordinary auto-advance flow.
-  const [resumeArmed, setResumeArmed] = useState(false);
+  // A one-shot "jump to saved position and play" command, issued only by an explicit Resume
+  // click — so a normal landing/lane-switch never seeks, and (unlike a standing "resume mode")
+  // auto-advanced episodes always start from the top.
+  const [resumeCommand, setResumeCommand] = useState<{ seconds: number; token: number } | null>(null);
+  const resumeToken = useRef(0);
   // The listener has started a session (picked/resumed/advanced) — hides the Resume banner,
   // which is only a "restore last time" affordance.
   const [hasStarted, setHasStarted] = useState(false);
@@ -108,13 +109,13 @@ export function CommuteClient({ lanes }: { lanes: Lane[] }) {
     };
     if (progressVersion < 0) return empty; // server / pre-hydration — no localStorage yet
 
+    const completed = readCompletedAudio();
+    // Only the current lane's rows are rendered, so only its positions need reading.
     const pos: Record<string, number> = {};
-    for (const l of lanes) {
-      for (const ep of l.episodes) {
-        const id = trackId(l.key, ep.id);
-        const sec = readAudioPosition(id);
-        if (sec > 0) pos[id] = sec;
-      }
+    for (const ep of lanes[laneIndex].episodes) {
+      const id = trackId(lanes[laneIndex].key, ep.id);
+      const sec = readAudioPosition(id);
+      if (sec > 0) pos[id] = sec;
     }
 
     let point: ResumePoint | null = null;
@@ -122,7 +123,9 @@ export function CommuteClient({ lanes }: { lanes: Lane[] }) {
     if (saved) {
       const li = lanes.findIndex((l) => l.key === saved.laneKey);
       const ei = li >= 0 ? lanes[li].episodes.findIndex((e) => e.id === saved.episodeId) : -1;
-      if (li >= 0 && ei >= 0) {
+      // Skip the banner when the pointer sits on an already-finished episode — that only happens
+      // when the whole queue ran to its end, so there's nothing to resume (no restart-from-top).
+      if (li >= 0 && ei >= 0 && !completed.includes(trackId(saved.laneKey, saved.episodeId))) {
         point = {
           laneIndex: li,
           episodeIndex: ei,
@@ -132,8 +135,8 @@ export function CommuteClient({ lanes }: { lanes: Lane[] }) {
         };
       }
     }
-    return { completedIds: readCompletedAudio(), positions: pos, resumePoint: point };
-  }, [progressVersion, lanes]);
+    return { completedIds: completed, positions: pos, resumePoint: point };
+  }, [progressVersion, lanes, laneIndex]);
 
   const setIndexFor = (laneKey: string, i: number) =>
     setIndexByLane((m) => ({ ...m, [laneKey]: i }));
@@ -148,7 +151,6 @@ export function CommuteClient({ lanes }: { lanes: Lane[] }) {
     // Keep each lane's own position (#8); switching is a silent peek, never autoplay.
     setLaneIndex(i);
     setAutoPlay(false);
-    setResumeArmed(false);
   };
   // Arrow/Home/End move the selected tab and take focus with them (automatic activation),
   // per the WAI-ARIA tabs pattern; the tablist uses roving tabindex (only the active tab is
@@ -169,7 +171,6 @@ export function CommuteClient({ lanes }: { lanes: Lane[] }) {
   // Playlist row click: start the episode from the top (the Resume banner is the dedicated
   // resume-from-position path).
   const select = (i: number) => {
-    setResumeArmed(false);
     setAutoPlay(true);
     setIndexFor(lane.key, i);
     recordResume(lane.key, episodes[i].id);
@@ -191,8 +192,10 @@ export function CommuteClient({ lanes }: { lanes: Lane[] }) {
     if (!resumePoint) return;
     setLaneIndex(resumePoint.laneIndex);
     setIndexFor(lanes[resumePoint.laneIndex].key, resumePoint.episodeIndex);
-    setResumeArmed(true); // player seeks to the saved position on load
-    setAutoPlay(true);
+    // One-shot command: seek to the saved second and play — works whether that episode's src is
+    // already loaded (episode 0 on a fresh visit) or gets swapped in by the index change.
+    resumeToken.current += 1;
+    setResumeCommand({ seconds: resumePoint.seconds, token: resumeToken.current });
     setHasStarted(true);
   };
 
@@ -269,7 +272,8 @@ export function CommuteClient({ lanes }: { lanes: Lane[] }) {
             subtitle={lane.playerSubtitle}
             icon={lane.icon}
             autoPlay={autoPlay}
-            resume={resumeArmed}
+            resume={false}
+            resumeCommand={resumeCommand}
           />
           <p className="mt-3 px-1 text-sm text-ink/60">
             {upNext ? (
@@ -291,7 +295,10 @@ export function CommuteClient({ lanes }: { lanes: Lane[] }) {
             const ratio =
               !done && ep.durationSec > 0 ? Math.min(1, savedSec / ep.durationSec) : 0;
             const marker = active ? "▶" : done ? "✓" : i + 1;
-            const statusNote = done ? "Listened" : ratio > 0 ? `${formatClock(savedSec)} in` : "";
+            // Partial state is only shown on rows you're NOT on — the active episode's live
+            // position is the player's job (the saved second wouldn't update mid-play here).
+            const showPartial = !active && !done && ratio > 0.01;
+            const statusNote = done ? "Listened" : showPartial ? `${formatClock(savedSec)} in` : "";
             return (
               <li key={ep.id}>
                 <button
@@ -317,8 +324,8 @@ export function CommuteClient({ lanes }: { lanes: Lane[] }) {
                       {statusNote ? ` · ${statusNote}` : ""}
                     </span>
                   </span>
-                  {/* Thin progress bar for a partially-heard episode. */}
-                  {ratio > 0.01 ? (
+                  {/* Thin progress bar for a partially-heard episode you're not currently on. */}
+                  {showPartial ? (
                     <span
                       aria-hidden
                       className="absolute bottom-0 left-0 h-1 rounded-full bg-signal/70"

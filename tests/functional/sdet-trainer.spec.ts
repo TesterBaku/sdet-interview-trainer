@@ -812,6 +812,55 @@ test("commute offers an explicit Resume affordance for the last-played episode",
   await expect(resume).toBeHidden();
 });
 
+test("commute Resume seeks even when the saved episode is the already-loaded first track", async ({ page }) => {
+  test.skip(audioCount === 0, "needs published audio");
+  // Episode 0 is the default loaded track; resuming it must still seek + play (not no-op).
+  const resumeId = publishedAudio[0].id;
+  await seedLocalStorage(page, {
+    [commuteResumeKey]: JSON.stringify({ laneKey: "podcast", episodeId: resumeId }),
+    [audioPositionKey("podcast", resumeId)]: "75",
+  });
+  await page.goto("/commute");
+  // Record play() + the seek target without touching the network. Previously (resume as a
+  // standing prop) episode 0 was a no-op here: src unchanged ⇒ no metadata reload ⇒ no seek and
+  // no play. The one-shot command must seek to 75 s and start playback regardless.
+  await page.evaluate(() => {
+    const w = window as unknown as { __played: number; __seekedTo: number };
+    w.__played = 0;
+    w.__seekedTo = -1;
+    HTMLMediaElement.prototype.play = function () {
+      w.__played += 1;
+      return Promise.resolve();
+    };
+    const proto = HTMLMediaElement.prototype as unknown as {
+      __ct?: PropertyDescriptor;
+    };
+    const desc = Object.getOwnPropertyDescriptor(HTMLMediaElement.prototype, "currentTime");
+    if (desc) {
+      Object.defineProperty(HTMLMediaElement.prototype, "currentTime", {
+        configurable: true,
+        get() {
+          return desc.get?.call(this) ?? 0;
+        },
+        set(v: number) {
+          w.__seekedTo = v;
+          desc.set?.call(this, v);
+        },
+      });
+      void proto;
+    }
+  });
+  const resume = page.getByRole("button", { name: /Resume where you left off/ });
+  await expect(resume).toBeVisible();
+  await resume.click();
+  const result = await page.evaluate(() => {
+    const w = window as unknown as { __played: number; __seekedTo: number };
+    return { played: w.__played, seekedTo: w.__seekedTo };
+  });
+  expect(result.played).toBeGreaterThan(0);
+  expect(result.seekedTo).toBe(75);
+});
+
 test("commute keeps a separate position per lane when you peek at another", async ({ page }) => {
   test.skip(interviewCount === 0 || audioCount < 3, "need both lanes + a few podcast episodes");
   await page.goto("/commute");

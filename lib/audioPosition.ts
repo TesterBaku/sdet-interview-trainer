@@ -23,6 +23,19 @@ export function clearAudioPosition(id: string): void {
   window.localStorage.removeItem(`${AUDIO_POSITION_PREFIX}${id}`);
 }
 
+// A localStorage-backed store signals updates through a custom event; every such store here
+// subscribes the same way (its own event + the cross-tab "storage" event), so share one factory.
+function makeStoreSubscription(eventName: string) {
+  return (onStoreChange: () => void): (() => void) => {
+    window.addEventListener(eventName, onStoreChange);
+    window.addEventListener("storage", onStoreChange);
+    return () => {
+      window.removeEventListener(eventName, onStoreChange);
+      window.removeEventListener("storage", onStoreChange);
+    };
+  };
+}
+
 // Playback speed is a single global preference (not per-episode), so it survives the
 // player remounting when you switch episodes in the Commute playlist. Exposed as a
 // subscribable store so components can read it via useSyncExternalStore (hydration-safe:
@@ -46,14 +59,7 @@ export function writeAudioRate(rate: number): void {
   window.dispatchEvent(new Event(AUDIO_RATE_CHANGE_EVENT));
 }
 
-export function subscribeToAudioRate(onStoreChange: () => void): () => void {
-  window.addEventListener(AUDIO_RATE_CHANGE_EVENT, onStoreChange);
-  window.addEventListener("storage", onStoreChange);
-  return () => {
-    window.removeEventListener(AUDIO_RATE_CHANGE_EVENT, onStoreChange);
-    window.removeEventListener("storage", onStoreChange);
-  };
-}
+export const subscribeToAudioRate = makeStoreSubscription(AUDIO_RATE_CHANGE_EVENT);
 
 // Commute progress (resume pointer + listened set) is read via useSyncExternalStore, so it
 // needs a subscribable change signal — this avoids a setState-in-effect on mount (which the
@@ -76,14 +82,7 @@ export function getServerCommuteProgressSnapshot(): number {
   return -1;
 }
 
-export function subscribeToCommuteProgress(onStoreChange: () => void): () => void {
-  window.addEventListener(COMMUTE_PROGRESS_EVENT, onStoreChange);
-  window.addEventListener("storage", onStoreChange);
-  return () => {
-    window.removeEventListener(COMMUTE_PROGRESS_EVENT, onStoreChange);
-    window.removeEventListener("storage", onStoreChange);
-  };
-}
+export const subscribeToCommuteProgress = makeStoreSubscription(COMMUTE_PROGRESS_EVENT);
 
 // "Where you were in the Commute queue" — the last lane + episode the listener actually
 // played, so a multi-day, hours-long queue can be resumed. Only the pointer lives here; the
