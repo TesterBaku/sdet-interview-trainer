@@ -741,6 +741,41 @@ test("commute lane switcher is a keyboard-operable ARIA tab pattern", async ({ p
   await expect(podcastTab).toBeFocused();
 });
 
+test("commute uses one persistent audio element that auto-advances the queue in place", async ({ page }) => {
+  test.skip(audioCount < 2, "need at least two episodes to advance");
+  await page.goto("/commute");
+  const items = page.getByRole("list", { name: "Episode playlist" }).getByRole("listitem");
+  const audio = page.locator("audio");
+  // Tag the element + record its source, then simulate the first episode ending.
+  const beforeSrc = await audio.evaluate((el: HTMLAudioElement) => {
+    (el as unknown as Record<string, unknown>).__persist = true;
+    return el.src;
+  });
+  await audio.evaluate((el: HTMLAudioElement) => el.dispatchEvent(new Event("ended")));
+  // Advanced to episode 2, and it's the SAME <audio> node (tag survived → no remount, so
+  // playback can continue in place instead of on a fresh element the lock screen would refuse).
+  await expect(items.nth(1).getByRole("button")).toHaveAttribute("aria-current", "true");
+  const after = await audio.evaluate((el: HTMLAudioElement) => ({
+    src: el.src,
+    persisted: (el as unknown as Record<string, unknown>).__persist === true,
+  }));
+  expect(after.persisted).toBe(true);
+  expect(after.src).not.toBe(beforeSrc);
+});
+
+test("commute publishes Media Session metadata for lock-screen controls", async ({ page }) => {
+  test.skip(audioCount === 0, "needs published audio");
+  await page.goto("/commute");
+  const supported = await page.evaluate(() => "mediaSession" in navigator);
+  test.skip(!supported, "browser has no Media Session API");
+  // The metadata is published by a client effect after mount, so poll rather than read once.
+  await expect
+    .poll(() => page.evaluate(() => navigator.mediaSession.metadata?.artist ?? null))
+    .toBe("SDET Interview Trainer");
+  const title = await page.evaluate(() => navigator.mediaSession.metadata?.title ?? "");
+  expect(title.length).toBeGreaterThan(0);
+});
+
 // ── Progress breakdown + /review route ──────────────────────────────────────
 
 test("progress page shows per-type breakdown sections and link to review queue", async ({ page }) => {
