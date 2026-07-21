@@ -105,6 +105,12 @@ export function AudioPlayer({
   const [current, setCurrent] = useState(0);
   const [duration, setDuration] = useState(trackDurationProp);
   const [showTranscript, setShowTranscript] = useState(false);
+  // Flaky-network resilience (#4): buffering while the element waits for data, and an error
+  // state when a source fails outright. In queue mode a failed episode auto-skips so one bad
+  // source can't halt the commute; the counter bounds the skip cascade (e.g. fully offline).
+  const [buffering, setBuffering] = useState(false);
+  const [errored, setErrored] = useState(false);
+  const errorSkips = useRef(0);
   // Speed is a persisted global preference read via an external store (hydration-safe;
   // server snapshot is always 1, so no SSR mismatch), which also survives remounts.
   const rate = useSyncExternalStore(subscribeToAudioRate, readAudioRate, getServerAudioRate);
@@ -146,6 +152,7 @@ export function AudioPlayer({
       lastSavedSecond.current = -1;
       setCurrent(0);
       setDuration(next.durationSec);
+      setErrored(false);
       onQueueIndexChange?.(i);
       return true;
     },
@@ -165,6 +172,7 @@ export function AudioPlayer({
     lastSavedSecond.current = -1;
     setCurrent(0);
     setDuration(trackDurationProp);
+    setErrored(false);
     if (autoPlay) void audio.play().catch(() => undefined);
   }, [trackSrc, autoPlay, rate, trackDurationProp]);
 
@@ -237,6 +245,39 @@ export function AudioPlayer({
     onEnded?.();
   }, [trackId, queue, queueIndex, goToIndex, onEnded, onTrackEnded]);
 
+  // Buffering: the element is waiting for data mid-play. Cleared once it plays again.
+  const onWaiting = useCallback(() => setBuffering(true), []);
+  const onPlaying = useCallback(() => {
+    setBuffering(false);
+    setErrored(false);
+    errorSkips.current = 0; // a real play resets the failure cascade guard
+  }, []);
+  const onCanPlay = useCallback(() => setBuffering(false), []);
+
+  // A source failed to load/decode. In queue mode, skip to the next episode so one bad source
+  // can't stall the whole commute (bounded so a fully-offline queue doesn't cascade endlessly);
+  // otherwise surface an error card with Retry.
+  const onError = useCallback(() => {
+    setBuffering(false);
+    const hasNext = queue != null && queueIndex != null && queueIndex + 1 < queue.length;
+    if (hasNext && errorSkips.current < queue!.length) {
+      errorSkips.current += 1;
+      goToIndex(queueIndex! + 1, true);
+      return;
+    }
+    setPlaying(false);
+    setErrored(true);
+  }, [queue, queueIndex, goToIndex]);
+
+  const retry = useCallback(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    setErrored(false);
+    errorSkips.current = 0;
+    audio.load();
+    void audio.play().catch(() => undefined);
+  }, []);
+
   // Play state is driven by the element's own play/pause events (below), so a blocked
   // play() never leaves the icon out of sync.
   const toggle = useCallback(() => {
@@ -305,6 +346,11 @@ export function AudioPlayer({
         onPlay={() => setPlaying(true)}
         onPause={() => setPlaying(false)}
         onEnded={onEndedInternal}
+        onWaiting={onWaiting}
+        onStalled={onWaiting}
+        onPlaying={onPlaying}
+        onCanPlay={onCanPlay}
+        onError={onError}
       >
         <track kind="captions" src={trackCaptions} srcLang="en" label="English" default />
       </audio>
@@ -319,10 +365,25 @@ export function AudioPlayer({
           <p className="flex items-center gap-2 text-sm font-bold text-blueprint">
             <span aria-hidden>{icon}</span>
             <span className="truncate">{trackTitle}</span>
+            {buffering && !errored ? (
+              <span className="inline-flex items-center gap-1 text-xs font-semibold text-ink/50">
+                <span aria-hidden className="h-3 w-3 animate-spin rounded-full border-2 border-ink/20 border-t-ink/60" />
+                Buffering…
+              </span>
+            ) : null}
           </p>
           <p className="text-xs font-semibold text-ink/55">{subtitle} · {formatClock(duration)}</p>
         </div>
       </div>
+
+      {errored ? (
+        <div role="alert" className="mt-3 flex flex-wrap items-center gap-3 rounded-xl border border-signal/40 bg-signal/10 p-3 text-sm">
+          <span className="font-bold text-blueprint">Couldn&apos;t play this episode.</span>
+          <button type="button" className={`${btn} border-signal/40`} onClick={retry}>
+            <span aria-hidden>↻</span>&nbsp;Retry
+          </button>
+        </div>
+      ) : null}
 
       <label className="sr-only" htmlFor={`seek-${trackId}`}>Seek</label>
       <input
