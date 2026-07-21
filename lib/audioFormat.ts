@@ -9,3 +9,12 @@ export function formatClock(sec: number): string {
   const s = Math.max(0, Math.floor(sec));
   return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
 }
+
+// A whole-lane running time, e.g. "4 h 20 m", "4 h" (whole hours), or "45 m" (under an hour).
+export function formatAudioTotal(totalSec: number): string {
+  const mins = Math.round(totalSec / 60);
+  const h = Math.floor(mins / 60);
+  const m = mins % 60;
+  if (h === 0) return `${m} m`;
+  return m === 0 ? `${h} h` : `${h} h ${m} m`;
+}

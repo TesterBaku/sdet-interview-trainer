@@ -1,8 +1,8 @@
 "use client";
 
-import { useMemo, useRef, useState, useSyncExternalStore } from "react";
+import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { AudioPlayer, type QueueTrack } from "@/components/AudioPlayer";
-import { formatAudioMinutes, formatClock } from "@/lib/audioFormat";
+import { formatAudioMinutes, formatAudioTotal, formatClock } from "@/lib/audioFormat";
 import {
   getCommuteProgressSnapshot,
   getServerCommuteProgressSnapshot,
@@ -73,6 +73,47 @@ export function CommuteClient({ lanes }: { lanes: Lane[] }) {
   const episodes = lane.episodes;
   const index = indexByLane[lane.key] ?? 0;
   const upNext = episodes[index + 1];
+  const laneTotalSec = useMemo(() => episodes.reduce((sum, ep) => sum + ep.durationSec, 0), [episodes]);
+
+  // URL state (#11): mirror ?lane=&ep= so a lane/episode is linkable and refresh-proof. Uses
+  // history.replaceState (not useSearchParams) to keep the page statically rendered. The URL is
+  // written imperatively from the user-action handlers (below), never from a state-watching
+  // effect — so a passive landing never rewrites the address bar (no seed→write cascade, and
+  // nothing to double-fire under StrictMode).
+  const writeUrl = (laneKey: string, epId: string | undefined) => {
+    const params = new URLSearchParams(window.location.search);
+    params.set("lane", laneKey);
+    if (epId) params.set("ep", epId);
+    window.history.replaceState(null, "", `${window.location.pathname}?${params.toString()}`);
+  };
+
+  const seededUrl = useRef(false);
+  useEffect(() => {
+    if (seededUrl.current) return;
+    seededUrl.current = true;
+    const params = new URLSearchParams(window.location.search);
+    const laneKey = params.get("lane");
+    const epId = params.get("ep");
+    let li = laneKey ? lanes.findIndex((l) => l.key === laneKey) : -1;
+    let ei = li >= 0 && epId ? lanes[li].episodes.findIndex((e) => e.id === epId) : -1;
+    // ?ep= without a ?lane= (or with a lane that lacks it): find whichever lane holds the episode.
+    if (epId && ei < 0) {
+      for (let k = 0; k < lanes.length; k++) {
+        const idx = lanes[k].episodes.findIndex((e) => e.id === epId);
+        if (idx >= 0) {
+          li = k;
+          ei = idx;
+          break;
+        }
+      }
+    }
+    // window.location can't be read during the SSR/hydration render without a mismatch, so this
+    // one-time seed is a legitimate post-hydration effect (not a continuous store).
+    /* eslint-disable react-hooks/set-state-in-effect */
+    if (li >= 0) setLaneIndex(li);
+    if (li >= 0 && ei >= 0) setIndexByLane((m) => ({ ...m, [lanes[li].key]: ei }));
+    /* eslint-enable react-hooks/set-state-in-effect */
+  }, [lanes]);
 
   // One persistent queue for the player. Position ids are namespaced per lane + episode so the
   // queue's transient position never overwrites the saved position on a topic's cheat-sheet page.
@@ -151,6 +192,8 @@ export function CommuteClient({ lanes }: { lanes: Lane[] }) {
     // Keep each lane's own position (#8); switching is a silent peek, never autoplay.
     setLaneIndex(i);
     setAutoPlay(false);
+    const target = lanes[i];
+    writeUrl(target.key, target.episodes[indexByLane[target.key] ?? 0]?.id);
   };
   // Arrow/Home/End move the selected tab and take focus with them (automatic activation),
   // per the WAI-ARIA tabs pattern; the tablist uses roving tabindex (only the active tab is
@@ -174,6 +217,7 @@ export function CommuteClient({ lanes }: { lanes: Lane[] }) {
     setAutoPlay(true);
     setIndexFor(lane.key, i);
     recordResume(lane.key, episodes[i].id);
+    writeUrl(lane.key, episodes[i].id);
   };
 
   // Auto-advance (or a Media Session next/prev): the player drove the index, so mirror it and
@@ -181,7 +225,10 @@ export function CommuteClient({ lanes }: { lanes: Lane[] }) {
   const onQueueIndexChange = (i: number) => {
     setIndexFor(lane.key, i);
     const ep = episodes[i];
-    if (ep) recordResume(lane.key, ep.id);
+    if (ep) {
+      recordResume(lane.key, ep.id);
+      writeUrl(lane.key, ep.id);
+    }
   };
 
   const onTrackEnded = (endedId: string) => {
@@ -190,13 +237,15 @@ export function CommuteClient({ lanes }: { lanes: Lane[] }) {
 
   const resumeHere = () => {
     if (!resumePoint) return;
+    const targetLane = lanes[resumePoint.laneIndex];
     setLaneIndex(resumePoint.laneIndex);
-    setIndexFor(lanes[resumePoint.laneIndex].key, resumePoint.episodeIndex);
+    setIndexFor(targetLane.key, resumePoint.episodeIndex);
     // One-shot command: seek to the saved second and play — works whether that episode's src is
     // already loaded (episode 0 on a fresh visit) or gets swapped in by the index change.
     resumeToken.current += 1;
     setResumeCommand({ seconds: resumePoint.seconds, token: resumeToken.current });
     setHasStarted(true);
+    writeUrl(targetLane.key, targetLane.episodes[resumePoint.episodeIndex]?.id);
   };
 
   return (
@@ -286,7 +335,12 @@ export function CommuteClient({ lanes }: { lanes: Lane[] }) {
           </p>
         </div>
 
-        <ol className="space-y-2" aria-label="Episode playlist">
+        <div>
+          {/* Lane totals so a listener can plan the commute (#9). */}
+          <p className="mb-2 px-1 text-xs font-bold uppercase tracking-wide text-ink/45">
+            {episodes.length} {episodes.length === 1 ? "episode" : "episodes"} · ~{formatAudioTotal(laneTotalSec)}
+          </p>
+          <ol className="space-y-2" aria-label="Episode playlist">
           {episodes.map((ep, i) => {
             const active = i === index;
             const id = trackId(lane.key, ep.id);
@@ -336,7 +390,8 @@ export function CommuteClient({ lanes }: { lanes: Lane[] }) {
               </li>
             );
           })}
-        </ol>
+          </ol>
+        </div>
       </div>
     </div>
   );

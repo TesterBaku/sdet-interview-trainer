@@ -1,7 +1,12 @@
 import { expect, test } from "@playwright/test";
 import type { Page } from "@playwright/test";
 import { cheatSheets } from "@/lib/cheatsheets";
-import { getAllCheatSheetAudio, getAllInterviewAudio, getCheatSheetTranscriptCues } from "@/lib/audio";
+import {
+  getAllCheatSheetAudio,
+  getAllInterviewAudio,
+  getCheatSheetTranscriptCues,
+  orderAudioByCurriculum,
+} from "@/lib/audio";
 
 // Derive expected counts from the same source of truth the pages render, so adding
 // a cheat sheet never silently breaks these tests again.
@@ -12,6 +17,10 @@ const quizSheetCount = cheatSheets.filter((sheet) => sheet.quiz.length > 0).leng
 const publishedAudio = getAllCheatSheetAudio();
 const audioCount = publishedAudio.length;
 const firstAudioId = publishedAudio[0]?.id ?? cheatSheets[0].id;
+// The Commute playlist orders by the curated curriculum (the same helper the page uses), not the
+// manifest id-sort, so position-based assertions use this order — `orderedPodcast[i]` is the
+// episode at playlist row `i`. Same array/length as publishedAudio, just reordered.
+const orderedPodcast = orderAudioByCurriculum(publishedAudio);
 // Mock-interview rounds ship on their own manifest, so derive their count separately.
 const publishedInterview = getAllInterviewAudio();
 const interviewCount = publishedInterview.length;
@@ -790,7 +799,7 @@ async function seedLocalStorage(page: Page, entries: Record<string, string>) {
 
 test("commute offers an explicit Resume affordance for the last-played episode", async ({ page }) => {
   test.skip(audioCount < 2, "need at least two episodes to resume a later one");
-  const resumeId = publishedAudio[1].id;
+  const resumeId = orderedPodcast[1].id;
   await seedLocalStorage(page, {
     [commuteResumeKey]: JSON.stringify({ laneKey: "podcast", episodeId: resumeId }),
     [audioPositionKey("podcast", resumeId)]: "120",
@@ -815,7 +824,7 @@ test("commute offers an explicit Resume affordance for the last-played episode",
 test("commute Resume seeks even when the saved episode is the already-loaded first track", async ({ page }) => {
   test.skip(audioCount === 0, "needs published audio");
   // Episode 0 is the default loaded track; resuming it must still seek + play (not no-op).
-  const resumeId = publishedAudio[0].id;
+  const resumeId = orderedPodcast[0].id;
   await seedLocalStorage(page, {
     [commuteResumeKey]: JSON.stringify({ laneKey: "podcast", episodeId: resumeId }),
     [audioPositionKey("podcast", resumeId)]: "75",
@@ -881,9 +890,9 @@ test("commute keeps a separate position per lane when you peek at another", asyn
 
 test("commute playlist reflects listened + partially-heard episodes", async ({ page }) => {
   test.skip(audioCount < 2, "need at least two episodes");
-  // Seed episode 2 as partially heard before load.
+  // Seed episode 2 (playlist row 1) as partially heard before load.
   await seedLocalStorage(page, {
-    [audioPositionKey("podcast", publishedAudio[1].id)]: "90",
+    [audioPositionKey("podcast", orderedPodcast[1].id)]: "90",
   });
   await page.goto("/commute");
   const items = page.getByRole("list", { name: "Episode playlist" }).getByRole("listitem");
@@ -929,6 +938,11 @@ test("commute error card lets you Skip a failed episode without losing it to an 
 test("commute error card offers no Skip on the last episode (nothing to advance to)", async ({ page }) => {
   test.skip(audioCount === 0, "needs published audio");
   await page.goto("/commute");
+  // Stub play() so selecting the episode doesn't start real playback — a real "playing" event
+  // would clear the error state (onPlaying) before we can assert the card, flaking in CI.
+  await page.evaluate(() => {
+    HTMLMediaElement.prototype.play = () => Promise.resolve();
+  });
   const items = page.getByRole("list", { name: "Episode playlist" }).getByRole("listitem");
   await items.last().getByRole("button").click();
   // Wait for the selection to commit so onError sees the last index (no next) — otherwise a
@@ -954,19 +968,22 @@ test("commute loads the transcript on demand from the published VTT", async ({ p
 
 test("commute transcript drops a stale fetch that resolves after the track changed", async ({ page }) => {
   test.skip(audioCount < 2, "need two episodes to advance between");
-  const firstVtt = publishedAudio[0].id;
+  const firstVtt = orderedPodcast[0].id;
   // Episode 2's real first cue, from the same source the VTT is generated from — the transcript
   // must show THIS, not the stale episode-1 cues a late-resolving fetch would otherwise pin on.
-  const secondFirstCue = getCheatSheetTranscriptCues(publishedAudio[1].id)[0]?.text ?? "";
-  let firstResolved = false;
-  // Hold episode 1's VTT in flight so its fetch is still pending when we advance.
-  await page.route(`**/${firstVtt}.vtt`, async (route) => {
-    if (!firstResolved) {
-      firstResolved = true;
-      await new Promise((r) => setTimeout(r, 1200));
-    }
-    await route.continue();
-  });
+  const secondFirstCue = getCheatSheetTranscriptCues(orderedPodcast[1].id)[0]?.text ?? "";
+  // Delay episode 1's VTT at the fetch layer (the .vtt is served by the service worker / cache,
+  // so Playwright's network routing can't see it — override window.fetch instead).
+  await page.addInitScript((vttId: string) => {
+    const orig = window.fetch.bind(window);
+    window.fetch = (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = typeof input === "string" ? input : input instanceof URL ? input.href : input.url;
+      if (url.includes(`/${vttId}.vtt`)) {
+        return new Promise((resolve) => setTimeout(() => resolve(orig(input, init)), 1200));
+      }
+      return orig(input, init);
+    };
+  }, firstVtt);
   await page.goto("/commute");
   const player = page.getByRole("region", { name: /^Listen:/ });
   await player.getByRole("button", { name: "Transcript" }).click(); // episode 1 fetch (delayed)
@@ -985,13 +1002,22 @@ test("commute transcript drops a stale fetch that resolves after the track chang
 
 test("commute transcript offers Retry after a failed fetch", async ({ page }) => {
   test.skip(audioCount === 0, "needs published captions");
-  const firstVtt = publishedAudio[0].id;
-  let calls = 0;
-  await page.route(`**/${firstVtt}.vtt`, async (route) => {
-    calls += 1;
-    if (calls === 1) return route.abort(); // first attempt fails
-    return route.continue(); // retry succeeds
-  });
+  const firstVtt = orderedPodcast[0].id;
+  // Fail episode 1's first VTT fetch at the fetch layer (SW/cache hides it from network routing);
+  // the retry then succeeds.
+  await page.addInitScript((vttId: string) => {
+    const w = window as unknown as { __vttCalls: number };
+    w.__vttCalls = 0;
+    const orig = window.fetch.bind(window);
+    window.fetch = (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = typeof input === "string" ? input : input instanceof URL ? input.href : input.url;
+      if (url.includes(`/${vttId}.vtt`)) {
+        w.__vttCalls += 1;
+        if (w.__vttCalls === 1) return Promise.reject(new TypeError("Failed to fetch"));
+      }
+      return orig(input, init);
+    };
+  }, firstVtt);
   await page.goto("/commute");
   const player = page.getByRole("region", { name: /^Listen:/ });
   await player.getByRole("button", { name: "Transcript" }).click();
@@ -1023,6 +1049,54 @@ test("commute transport controls meet the 44px touch target", async ({ page }) =
   const player = page.getByRole("region", { name: /^Listen:/ });
   const box = await player.getByRole("button", { name: /Playback speed/ }).boundingBox();
   expect(box?.height ?? 0).toBeGreaterThanOrEqual(44);
+});
+
+test("commute playlist is ordered as a syllabus with lane totals", async ({ page }) => {
+  test.skip(audioCount < 2, "needs a few episodes to order");
+  await page.goto("/commute");
+  await expect(page.getByText(/\d+ episodes · ~/)).toBeVisible();
+  // Order follows the curated curriculum, not the manifest id-sort. Titles mirror the page's
+  // toEpisode (cheat-sheet title, else the raw id) so an unmatched appended episode still checks.
+  const titleFor = (id: string) => cheatSheets.find((s) => s.id === id)?.title ?? id;
+  const firstTitle = titleFor(orderedPodcast[0].id);
+  const lastTitle = titleFor(orderedPodcast[orderedPodcast.length - 1].id);
+  const items = page.getByRole("list", { name: "Episode playlist" }).getByRole("listitem");
+  await expect(items.first()).toContainText(firstTitle);
+  await expect(items.last()).toContainText(lastTitle);
+});
+
+test("commute mirrors the current episode in the URL", async ({ page }) => {
+  test.skip(audioCount < 3, "need a few episodes");
+  await page.goto("/commute");
+  const items = page.getByRole("list", { name: "Episode playlist" }).getByRole("listitem");
+  await items.nth(2).getByRole("button").click();
+  await expect(page).toHaveURL(/[?&]lane=podcast(&|$)/);
+  await expect(page).toHaveURL(/[?&]ep=/);
+});
+
+test("commute restores lane + episode from the URL (refresh-proof, shareable)", async ({ page }) => {
+  test.skip(audioCount < 2, "need two episodes");
+  const target = publishedAudio[1];
+  const targetTitle = cheatSheets.find((s) => s.id === target.id)!.title;
+  await page.goto(`/commute?lane=podcast&ep=${target.id}`);
+  const player = page.getByRole("region", { name: /^Listen:/ });
+  await expect(player).toContainText(targetTitle);
+});
+
+test("commute deep-links into the Mock Interview lane", async ({ page }) => {
+  test.skip(interviewCount === 0 || audioCount === 0, "need both lanes");
+  await page.goto("/commute?lane=interview");
+  await expect(page.getByRole("tab", { name: /Mock Interview/ })).toHaveAttribute("aria-selected", "true");
+  // A lane-only link must NOT get an ?ep= appended on a passive landing.
+  await expect(page).toHaveURL(/\/commute\?lane=interview$/);
+});
+
+test("commute does not rewrite the URL on a passive landing", async ({ page }) => {
+  test.skip(audioCount === 0, "needs published audio");
+  await page.goto("/commute");
+  // Give any stray state-watching effect a chance to (wrongly) fire; the address bar stays clean.
+  await page.waitForTimeout(300);
+  await expect(page).toHaveURL(/\/commute$/);
 });
 
 // ── Progress breakdown + /review route ──────────────────────────────────────

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { getAllCheatSheetAudio, getAllInterviewAudio } from "@/lib/audio";
+import { getAllCheatSheetAudio, getAllInterviewAudio, orderAudioByCurriculum } from "@/lib/audio";
 import { getCheatSheet } from "@/lib/cheatsheets";
 import { CommuteClient, type Lane } from "./CommuteClient";
 
@@ -25,8 +25,8 @@ function toEpisode(audio: { id: string; mp3Url: string; vttUrl: string; duration
 }
 
 export default function CommutePage() {
-  const podcast = getAllCheatSheetAudio().map(toEpisode);
-  const interview = getAllInterviewAudio().map(toEpisode);
+  const podcast = orderAudioByCurriculum(getAllCheatSheetAudio()).map(toEpisode);
+  const interview = orderAudioByCurriculum(getAllInterviewAudio()).map(toEpisode);
 
   const lanes: Lane[] = [];
   if (podcast.length > 0) {
