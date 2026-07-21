@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test";
 import type { Page } from "@playwright/test";
 import { cheatSheets } from "@/lib/cheatsheets";
-import { getAllCheatSheetAudio, getAllInterviewAudio } from "@/lib/audio";
+import { getAllCheatSheetAudio, getAllInterviewAudio, getCheatSheetTranscriptCues } from "@/lib/audio";
 
 // Derive expected counts from the same source of truth the pages render, so adding
 // a cheat sheet never silently breaks these tests again.
@@ -931,6 +931,9 @@ test("commute error card offers no Skip on the last episode (nothing to advance 
   await page.goto("/commute");
   const items = page.getByRole("list", { name: "Episode playlist" }).getByRole("listitem");
   await items.last().getByRole("button").click();
+  // Wait for the selection to commit so onError sees the last index (no next) — otherwise a
+  // race could dispatch the error while the queue index is still 0 and a Skip would render.
+  await expect(items.last().getByRole("button")).toHaveAttribute("aria-current", "true");
   await page.locator("audio").evaluate((el: HTMLAudioElement) => el.dispatchEvent(new Event("error")));
   const player = page.getByRole("region", { name: /^Listen:/ });
   await expect(player.getByRole("button", { name: /Retry/ })).toBeVisible();
@@ -947,6 +950,54 @@ test("commute loads the transcript on demand from the published VTT", async ({ p
   await expect(transcript).toBeVisible();
   await expect(transcript.getByRole("listitem").first()).toBeVisible();
   await expect(player.getByRole("button", { name: "Hide transcript" })).toBeVisible();
+});
+
+test("commute transcript drops a stale fetch that resolves after the track changed", async ({ page }) => {
+  test.skip(audioCount < 2, "need two episodes to advance between");
+  const firstVtt = publishedAudio[0].id;
+  // Episode 2's real first cue, from the same source the VTT is generated from — the transcript
+  // must show THIS, not the stale episode-1 cues a late-resolving fetch would otherwise pin on.
+  const secondFirstCue = getCheatSheetTranscriptCues(publishedAudio[1].id)[0]?.text ?? "";
+  let firstResolved = false;
+  // Hold episode 1's VTT in flight so its fetch is still pending when we advance.
+  await page.route(`**/${firstVtt}.vtt`, async (route) => {
+    if (!firstResolved) {
+      firstResolved = true;
+      await new Promise((r) => setTimeout(r, 1200));
+    }
+    await route.continue();
+  });
+  await page.goto("/commute");
+  const player = page.getByRole("region", { name: /^Listen:/ });
+  await player.getByRole("button", { name: "Transcript" }).click(); // episode 1 fetch (delayed)
+  await expect(player.getByText(/Loading transcript/)).toBeVisible();
+  // Advance before episode 1's fetch resolves, then let it resolve into the void.
+  await page.locator("audio").evaluate((el: HTMLAudioElement) => el.dispatchEvent(new Event("ended")));
+  const items = page.getByRole("list", { name: "Episode playlist" }).getByRole("listitem");
+  await expect(items.nth(1).getByRole("button")).toHaveAttribute("aria-current", "true");
+  await page.waitForTimeout(1400);
+  // Open episode 2's transcript — it must be episode 2's, not the pinned stale episode-1 cues.
+  await player.getByRole("button", { name: "Transcript" }).click();
+  const transcript = player.getByRole("list", { name: "Transcript" });
+  await expect(transcript).toBeVisible();
+  await expect(transcript).toContainText(secondFirstCue.slice(0, 40));
+});
+
+test("commute transcript offers Retry after a failed fetch", async ({ page }) => {
+  test.skip(audioCount === 0, "needs published captions");
+  const firstVtt = publishedAudio[0].id;
+  let calls = 0;
+  await page.route(`**/${firstVtt}.vtt`, async (route) => {
+    calls += 1;
+    if (calls === 1) return route.abort(); // first attempt fails
+    return route.continue(); // retry succeeds
+  });
+  await page.goto("/commute");
+  const player = page.getByRole("region", { name: /^Listen:/ });
+  await player.getByRole("button", { name: "Transcript" }).click();
+  await expect(player.getByText(/Transcript unavailable/)).toBeVisible();
+  await player.getByRole("button", { name: /Retry/ }).click();
+  await expect(player.getByRole("list", { name: "Transcript" })).toBeVisible();
 });
 
 test("commute player exposes accessible seek + speed labels", async ({ page }) => {

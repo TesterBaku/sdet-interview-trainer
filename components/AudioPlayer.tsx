@@ -107,10 +107,18 @@ export function AudioPlayer({
   const [duration, setDuration] = useState(trackDurationProp);
   const [showTranscript, setShowTranscript] = useState(false);
   // In queue mode (Commute) cues aren't passed as props — they're fetched + parsed from the
-  // episode's published .vtt the first time the transcript opens, then cached until the track
-  // changes. Cheat-sheet pages pass `cues` directly, so `displayCues` prefers those.
+  // episode's published .vtt the first time the transcript opens. Cheat-sheet pages pass `cues`
+  // directly, so `displayCues` prefers those.
   const [fetchedCues, setFetchedCues] = useState<TranscriptCue[]>([]);
-  const [transcriptLoading, setTranscriptLoading] = useState(false);
+  const [transcriptState, setTranscriptState] = useState<"idle" | "loading" | "loaded" | "error">("idle");
+  // The captions src we've already fetched/attempted (don't re-hit the network on every reopen),
+  // and a live mirror of the current captions src so a fetch that resolves after the track
+  // changed can drop its stale result instead of pinning it onto the new episode.
+  const attemptedCaptions = useRef<string | null>(null);
+  const activeCaptions = useRef(trackCaptions);
+  useEffect(() => {
+    activeCaptions.current = trackCaptions;
+  }, [trackCaptions]);
   // Flaky-network resilience (#4): `buffering` while an actively-playing element waits for
   // data, `errored` when a source fails (or a stall drags on). Recovery is user-driven — Retry
   // the current episode or (in a queue) Skip to the next — so a transient blip never silently
@@ -164,6 +172,8 @@ export function AudioPlayer({
       setErrored(false);
       setBuffering(false);
       setFetchedCues([]);
+      setTranscriptState("idle");
+      attemptedCaptions.current = null;
       setShowTranscript(false);
       if (stallTimer.current != null) {
         window.clearTimeout(stallTimer.current);
@@ -191,6 +201,8 @@ export function AudioPlayer({
     setErrored(false);
     setBuffering(false);
     setFetchedCues([]);
+    setTranscriptState("idle");
+    attemptedCaptions.current = null;
     setShowTranscript(false);
     if (stallTimer.current != null) {
       window.clearTimeout(stallTimer.current);
@@ -329,19 +341,41 @@ export function AudioPlayer({
   // Cues passed as props (cheat-sheet pages) win; otherwise use whatever we fetched for the queue.
   const displayCues = cues.length > 0 ? cues : fetchedCues;
 
+  // Fetch + parse the current episode's published .vtt once per src. Guards: `attemptedCaptions`
+  // avoids re-hitting the network on every reopen (incl. after an empty/404 result), and the
+  // `activeCaptions` check drops a response that arrives after the track already changed.
+  const loadTranscript = useCallback(() => {
+    const src = trackCaptions;
+    if (!src || cues.length > 0) return;
+    attemptedCaptions.current = src;
+    setTranscriptState("loading");
+    fetch(src)
+      .then((res) => (res.ok ? res.text() : Promise.reject(new Error(String(res.status)))))
+      .then((text) => {
+        if (activeCaptions.current !== src) return; // track changed while in flight — drop it
+        setFetchedCues(parseVtt(text));
+        setTranscriptState("loaded");
+      })
+      .catch(() => {
+        if (activeCaptions.current !== src) return;
+        setTranscriptState("error");
+      });
+  }, [trackCaptions, cues.length]);
+
   const toggleTranscript = useCallback(() => {
     const willOpen = !showTranscript;
     setShowTranscript(willOpen);
-    // Lazy-fetch + parse the published .vtt the first time it's opened in queue mode.
-    if (willOpen && cues.length === 0 && trackCaptions && fetchedCues.length === 0) {
-      setTranscriptLoading(true);
-      fetch(trackCaptions)
-        .then((res) => (res.ok ? res.text() : Promise.reject(new Error(String(res.status)))))
-        .then((text) => setFetchedCues(parseVtt(text)))
-        .catch(() => undefined) // leave it empty — the panel shows an unavailable note
-        .finally(() => setTranscriptLoading(false));
+    if (willOpen && cues.length === 0 && trackCaptions && attemptedCaptions.current !== trackCaptions) {
+      loadTranscript();
     }
-  }, [showTranscript, cues.length, trackCaptions, fetchedCues.length]);
+  }, [showTranscript, cues.length, trackCaptions, loadTranscript]);
+
+  // Explicit retry from the "unavailable" panel — a transient network failure shouldn't strand
+  // the transcript until the user closes and reopens it.
+  const retryTranscript = useCallback(() => {
+    attemptedCaptions.current = null;
+    loadTranscript();
+  }, [loadTranscript]);
 
   // Stop the stall timer if the player unmounts mid-buffer.
   useEffect(() => clearStallTimer, [clearStallTimer]);
@@ -504,11 +538,18 @@ export function AudioPlayer({
         ) : null}
       </div>
 
-      {showTranscript && transcriptLoading && displayCues.length === 0 ? (
+      {showTranscript && displayCues.length === 0 && transcriptState === "loading" ? (
         <p className="mt-4 rounded-xl border border-ink/10 bg-paper/50 p-4 text-sm text-ink/60">Loading transcript…</p>
       ) : null}
-      {showTranscript && !transcriptLoading && displayCues.length === 0 ? (
-        <p className="mt-4 rounded-xl border border-ink/10 bg-paper/50 p-4 text-sm text-ink/60">Transcript unavailable for this episode.</p>
+      {showTranscript && displayCues.length === 0 && transcriptState !== "loading" ? (
+        <div className="mt-4 flex flex-wrap items-center gap-3 rounded-xl border border-ink/10 bg-paper/50 p-4 text-sm text-ink/60">
+          <span>Transcript unavailable for this episode.</span>
+          {trackCaptions ? (
+            <button type="button" className={`${btn} border-ink/20`} onClick={retryTranscript}>
+              <span aria-hidden>↻</span>&nbsp;Retry
+            </button>
+          ) : null}
+        </div>
       ) : null}
 
       {showTranscript && displayCues.length > 0 ? (
