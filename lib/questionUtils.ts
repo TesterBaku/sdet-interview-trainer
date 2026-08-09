@@ -83,19 +83,13 @@ function dayKey(date: Date): number {
   return Math.floor(date.getTime() / (24 * 60 * 60 * 1000));
 }
 
-function rotatePick(pool: Question[], count: number, seed: number): Question[] {
-  if (pool.length === 0) return [];
-  const sorted = [...pool].sort((a, b) => a.id.localeCompare(b.id));
-  const start = ((seed % sorted.length) + sorted.length) % sorted.length;
-  const picks: Question[] = [];
-  for (let i = 0; i < Math.min(count, sorted.length); i++) {
-    picks.push(sorted[(start + i) % sorted.length]);
-  }
-  return picks;
-}
-
-function rotatePickExcluding(pool: Question[], count: number, seed: number, excludedIds: Set<string>): Question[] {
-  if (pool.length === 0 || count === 0) return [];
+function rotatePickExcluding(
+  pool: Question[],
+  count: number,
+  seed: number,
+  excludedIds: ReadonlySet<string>,
+): Question[] {
+  if (pool.length === 0 || count <= 0) return [];
   const sorted = [...pool].sort((a, b) => a.id.localeCompare(b.id));
   const start = ((seed % sorted.length) + sorted.length) % sorted.length;
   const picks: Question[] = [];
@@ -106,48 +100,83 @@ function rotatePickExcluding(pool: Question[], count: number, seed: number, excl
   return picks;
 }
 
-function pickDueFirst(pool: Question[], count: number, seed: number, records: ProgressRecord[], now: Date): Question[] {
+const NO_EXCLUSIONS: ReadonlySet<string> = new Set();
+
+/** The calendar-only plan excludes nothing; one rotation implementation serves both plans. */
+function rotatePick(pool: Question[], count: number, seed: number): Question[] {
+  return rotatePickExcluding(pool, count, seed, NO_EXCLUSIONS);
+}
+
+function pickDueFirst(pool: Question[], count: number, seed: number, dueRecords: ProgressRecord[]): Question[] {
   const questionById = new Map(pool.map((question) => [question.id, question]));
-  const due = getDueReviewRecords(records, now)
+  const selectedDue = dueRecords
     .map((record) => questionById.get(record.questionId))
-    .filter((question): question is Question => Boolean(question));
-  const selectedDue = due.slice(0, count);
+    .filter((question): question is Question => Boolean(question))
+    .slice(0, count);
   const selectedIds = new Set(selectedDue.map((question) => question.id));
   return [...selectedDue, ...rotatePickExcluding(pool, count - selectedDue.length, seed, selectedIds)];
 }
 
-function getDailyPlanPools() {
-  const codingPool = allQuestions.filter(
-    (q) => (q.topicId === "python-coding" || q.topicId === "java-coding") && q.type === "coding"
-  );
-  const sqlPool = getQuestionsByTopic("sql-postgresql");
-  const browserPool = [
-    ...getQuestionsByTopic("playwright-python"),
-    ...getQuestionsByTopic("playwright-typescript"),
-    ...getQuestionsByTopic("selenium"),
+/** Single source of truth for the lanes a daily plan must contain. */
+export const DAILY_PLAN_SECTION_IDS = ["coding", "sql", "browser", "platform", "strategy"] as const;
+export type DailyPlanSectionId = (typeof DAILY_PLAN_SECTION_IDS)[number];
+
+type DailyPlanSectionSpec = {
+  id: DailyPlanSectionId;
+  title: string;
+  count: number;
+  seedOffset: number;
+  pool: Question[];
+};
+
+/** Shared by both plan builders so the calendar-only and adaptive plans cannot drift. */
+function getDailyPlanSpec(): DailyPlanSectionSpec[] {
+  return [
+    {
+      id: "coding",
+      title: "Python / Java coding",
+      count: 3,
+      seedOffset: 0,
+      pool: allQuestions.filter(
+        (q) => (q.topicId === "python-coding" || q.topicId === "java-coding") && q.type === "coding"
+      ),
+    },
+    { id: "sql", title: "SQL", count: 2, seedOffset: 1, pool: getQuestionsByTopic("sql-postgresql") },
+    {
+      id: "browser",
+      title: "Playwright / Selenium",
+      count: 2,
+      seedOffset: 2,
+      pool: [
+        ...getQuestionsByTopic("playwright-python"),
+        ...getQuestionsByTopic("playwright-typescript"),
+        ...getQuestionsByTopic("selenium"),
+      ],
+    },
+    {
+      id: "platform",
+      title: "API / CI/CD / AWS",
+      count: 2,
+      seedOffset: 3,
+      pool: [
+        ...getQuestionsByTopic("rest-assured"),
+        ...getQuestionsByTopic("api-testing"),
+        ...getQuestionsByTopic("cicd"),
+        ...getQuestionsByTopic("aws"),
+      ],
+    },
+    { id: "strategy", title: "Strategy / Mock", count: 1, seedOffset: 4, pool: getQuestionsByTopic("test-automation-strategy") },
   ];
-  const platformPool = [
-    ...getQuestionsByTopic("rest-assured"),
-    ...getQuestionsByTopic("api-testing"),
-    ...getQuestionsByTopic("cicd"),
-    ...getQuestionsByTopic("aws"),
-  ];
-  const strategyPool = getQuestionsByTopic("test-automation-strategy");
-  return { codingPool, sqlPool, browserPool, platformPool, strategyPool };
 }
 
 /** Calendar-only baseline. Keep this pure so the server and browser agree. */
 export function getDailyPlan(date: Date = new Date()): DailyPlanSection[] {
   const seed = dayKey(date);
-  const { codingPool, sqlPool, browserPool, platformPool, strategyPool } = getDailyPlanPools();
-
-  return [
-    { id: "coding", title: "Python / Java coding", questions: rotatePick(codingPool, 3, seed) },
-    { id: "sql", title: "SQL", questions: rotatePick(sqlPool, 2, seed + 1) },
-    { id: "browser", title: "Playwright / Selenium", questions: rotatePick(browserPool, 2, seed + 2) },
-    { id: "platform", title: "API / CI/CD / AWS", questions: rotatePick(platformPool, 2, seed + 3) },
-    { id: "strategy", title: "Strategy / Mock", questions: rotatePick(strategyPool, 1, seed + 4) },
-  ];
+  return getDailyPlanSpec().map((section) => ({
+    id: section.id,
+    title: section.title,
+    questions: rotatePick(section.pool, section.count, seed + section.seedOffset),
+  }));
 }
 
 /** Called only when creating a persisted daily snapshot, never during render. */
@@ -158,15 +187,16 @@ export function getAdaptiveDailyPlan(date: Date, records: ProgressRecord[]): {
   const seed = dayKey(date);
   const endOfDay = new Date(date);
   endOfDay.setUTCHours(23, 59, 59, 999);
-  const { codingPool, sqlPool, browserPool, platformPool, strategyPool } = getDailyPlanPools();
-  const plan = [
-    { id: "coding", title: "Python / Java coding", questions: pickDueFirst(codingPool, 3, seed, records, endOfDay) },
-    { id: "sql", title: "SQL", questions: pickDueFirst(sqlPool, 2, seed + 1, records, endOfDay) },
-    { id: "browser", title: "Playwright / Selenium", questions: pickDueFirst(browserPool, 2, seed + 2, records, endOfDay) },
-    { id: "platform", title: "API / CI/CD / AWS", questions: pickDueFirst(platformPool, 2, seed + 3, records, endOfDay) },
-    { id: "strategy", title: "Strategy / Mock", questions: pickDueFirst(strategyPool, 1, seed + 4, records, endOfDay) },
-  ];
-  const dueIds = new Set(getDueReviewRecords(records, endOfDay).map((record) => record.questionId));
+  // Resolved once and shared across every lane: this previously ran per lane
+  // plus once more for the due-id set, filtering and sorting the same array
+  // six times to build one snapshot.
+  const dueRecords = getDueReviewRecords(records, endOfDay);
+  const plan = getDailyPlanSpec().map((section) => ({
+    id: section.id,
+    title: section.title,
+    questions: pickDueFirst(section.pool, section.count, seed + section.seedOffset, dueRecords),
+  }));
+  const dueIds = new Set(dueRecords.map((record) => record.questionId));
   return { plan, dueQuestionIds: plan.flatMap((section) => section.questions).filter((q) => dueIds.has(q.id)).map((q) => q.id) };
 }
 

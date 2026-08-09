@@ -26,6 +26,10 @@ export function DailyPracticeClient({ todayIso }: DailyPracticeClientProps) {
   const { progress } = useProgress();
   const snapshot = useSyncExternalStore(
     subscribeToDailyPlanSnapshot,
+    // Reads storage directly rather than reusing `progress.records`: this runs on
+    // the hydration render too, where useProgress() still reports the empty
+    // server snapshot. Passing that in would persist a due-less plan for the
+    // whole day. The read only does work on the first cache miss of the day.
     () => getClientDailyPlanSnapshot(todayIso, readProgress().records),
     () => getServerDailyPlanSnapshot(todayIso),
   );

@@ -24,9 +24,6 @@ function ReviewInner() {
   const { progress } = useProgress();
   const dueRecords = getDueReviewRecords(progress.records);
   const dueQuestionIds = new Set(dueRecords.map((record) => record.questionId));
-  const dueCount = dueRecords.filter(
-    (record) => record.status === "weak" || record.status === "review"
-  ).length;
 
   const flaggedRecords = progress.records
     .filter((record) => record.status === "weak" || record.status === "review")
@@ -47,6 +44,10 @@ function ReviewInner() {
       return true;
     })
     .filter((item) => (topicFilter === "all" ? true : item.question.topicId === topicFilter));
+
+  // Counted from the filtered list, not the whole progress set: the banner sits
+  // directly above `items` and must agree with it once a chip is active.
+  const dueCount = items.filter((item) => dueQuestionIds.has(item.record.questionId)).length;
 
   function chipHref(next: Partial<{ status: StatusFilter; type: TypeFilter; topic: string }>): string {
     const params = new URLSearchParams();
