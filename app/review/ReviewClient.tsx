@@ -5,6 +5,7 @@ import { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { allQuestions, topics } from "@/lib/questionUtils";
 import { useProgress } from "@/lib/progress";
+import { getDueReviewRecords } from "@/lib/reviewSchedule";
 import { practiceHref } from "@/lib/practiceHref";
 import type { Question } from "@/types/Question";
 
@@ -21,10 +22,14 @@ function ReviewInner() {
   const rawTopic = searchParams.get("topic");
   const topicFilter = rawTopic && topics.some((t) => t.id === rawTopic) ? rawTopic : "all";
   const { progress } = useProgress();
-
-  const flaggedRecords = progress.records.filter(
+  const dueQuestionIds = new Set(getDueReviewRecords(progress.records).map((record) => record.questionId));
+  const dueCount = getDueReviewRecords(progress.records).filter(
     (record) => record.status === "weak" || record.status === "review"
-  );
+  ).length;
+
+  const flaggedRecords = progress.records
+    .filter((record) => record.status === "weak" || record.status === "review")
+    .sort((a, b) => Number(dueQuestionIds.has(b.questionId)) - Number(dueQuestionIds.has(a.questionId)));
 
   const items = flaggedRecords
     .map((record) => {
@@ -73,6 +78,11 @@ function ReviewInner() {
         <p className="mt-3 max-w-3xl text-lg leading-8 text-ink/75">
           Every question you marked as weak or review-later, across all topics. Click through to practice it in the right mode.
         </p>
+        {dueCount ? (
+          <p className="mt-3 inline-flex rounded-full bg-signal/15 px-4 py-2 text-sm font-bold text-signal">
+            {dueCount} {dueCount === 1 ? "question is" : "questions are"} due now
+          </p>
+        ) : null}
       </header>
 
       <section className="rounded-[2rem] border border-ink/10 bg-white/75 p-5 shadow-panel">
@@ -170,6 +180,11 @@ function ReviewInner() {
                     <span className="rounded-full bg-ink/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.16em] text-ink/70">
                       {question.type}
                     </span>
+                    {dueQuestionIds.has(record.questionId) ? (
+                      <span className="rounded-full bg-signal/15 px-3 py-1 text-xs font-bold uppercase tracking-[0.16em] text-signal">
+                        Due now
+                      </span>
+                    ) : null}
                   </div>
                   <p className="mt-3 font-bold text-blueprint">{question.title ?? question.question}</p>
                 </Link>

@@ -4,6 +4,9 @@ import { useMemo, useSyncExternalStore } from "react";
 import { allQuestions, getQuestionsByTopic } from "@/lib/questionUtils";
 import { PROGRESS_STORAGE_KEY, emptyProgress, readProgress, subscribeToProgress, writeProgress } from "@/lib/storage";
 import type { AppProgress, ProgressRecord, ProgressSummary, QuestionStatus } from "@/types/Progress";
+import { getNextReviewAt } from "@/lib/reviewSchedule";
+
+export { getDueReviewRecords, getNextReviewAt, isDueForReview, resolveNextReviewAt } from "@/lib/reviewSchedule";
 
 function normalizeProgress(records: ProgressRecord[]): AppProgress {
   const completedRecords = records.filter((record) => record.status !== "new");
@@ -26,11 +29,15 @@ export function markQuestionStatus(
   status: QuestionStatus
 ): AppProgress {
   const existing = getRecord(progress, questionId);
+  const attempts = (existing?.attempts ?? 0) + 1;
+  const statusStreak = existing?.status === status ? (existing.statusStreak ?? 1) + 1 : 1;
   const updatedRecord: ProgressRecord = {
     questionId,
     status,
-    attempts: (existing?.attempts ?? 0) + 1,
-    lastReviewedAt: new Date().toISOString()
+    attempts,
+    lastReviewedAt: new Date().toISOString(),
+    statusStreak,
+    nextReviewAt: getNextReviewAt(status, statusStreak)
   };
 
   const records = existing

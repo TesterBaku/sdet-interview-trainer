@@ -5,6 +5,10 @@ export type ProgressRecord = {
   status: QuestionStatus;
   attempts: number;
   lastReviewedAt: string;
+  /** Consecutive times this same status was selected; resets when the status changes. */
+  statusStreak?: number;
+  /** ISO timestamp for the next scheduled recall. Optional for legacy backups. */
+  nextReviewAt?: string;
 };
 
 export type AppProgress = {

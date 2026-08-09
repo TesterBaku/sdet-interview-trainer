@@ -11,6 +11,8 @@ import selenium from "@/data/questions/selenium.json";
 import sqlPostgresql from "@/data/questions/sql-postgresql.json";
 import testAutomationStrategy from "@/data/questions/test-automation-strategy.json";
 import type { Question } from "@/types/Question";
+import { getDueReviewRecords } from "@/lib/reviewSchedule";
+import type { ProgressRecord } from "@/types/Progress";
 import type { Topic } from "@/types/Topic";
 
 const questionSets = [
@@ -92,9 +94,18 @@ function rotatePick(pool: Question[], count: number, seed: number): Question[] {
   return picks;
 }
 
-export function getDailyPlan(date: Date = new Date()): DailyPlanSection[] {
-  const seed = dayKey(date);
+function pickDueFirst(pool: Question[], count: number, seed: number, records: ProgressRecord[], now: Date): Question[] {
+  const questionById = new Map(pool.map((question) => [question.id, question]));
+  const due = getDueReviewRecords(records, now)
+    .map((record) => questionById.get(record.questionId))
+    .filter((question): question is Question => Boolean(question));
+  const selectedDue = due.slice(0, count);
+  const selectedIds = new Set(selectedDue.map((question) => question.id));
+  const rotating = rotatePick(pool, pool.length, seed).filter((question) => !selectedIds.has(question.id));
+  return [...selectedDue, ...rotating.slice(0, Math.max(0, count - selectedDue.length))];
+}
 
+function getDailyPlanPools() {
   const codingPool = allQuestions.filter(
     (q) => (q.topicId === "python-coding" || q.topicId === "java-coding") && q.type === "coding"
   );
@@ -111,6 +122,13 @@ export function getDailyPlan(date: Date = new Date()): DailyPlanSection[] {
     ...getQuestionsByTopic("aws"),
   ];
   const strategyPool = getQuestionsByTopic("test-automation-strategy");
+  return { codingPool, sqlPool, browserPool, platformPool, strategyPool };
+}
+
+/** Calendar-only baseline. Keep this pure so the server and browser agree. */
+export function getDailyPlan(date: Date = new Date()): DailyPlanSection[] {
+  const seed = dayKey(date);
+  const { codingPool, sqlPool, browserPool, platformPool, strategyPool } = getDailyPlanPools();
 
   return [
     { id: "coding", title: "Python / Java coding", questions: rotatePick(codingPool, 3, seed) },
@@ -119,6 +137,26 @@ export function getDailyPlan(date: Date = new Date()): DailyPlanSection[] {
     { id: "platform", title: "API / CI/CD / AWS", questions: rotatePick(platformPool, 2, seed + 3) },
     { id: "strategy", title: "Strategy / Mock", questions: rotatePick(strategyPool, 1, seed + 4) },
   ];
+}
+
+/** Called only when creating a persisted daily snapshot, never during render. */
+export function getAdaptiveDailyPlan(date: Date, records: ProgressRecord[]): {
+  plan: DailyPlanSection[];
+  dueQuestionIds: string[];
+} {
+  const seed = dayKey(date);
+  const endOfDay = new Date(date);
+  endOfDay.setUTCHours(23, 59, 59, 999);
+  const { codingPool, sqlPool, browserPool, platformPool, strategyPool } = getDailyPlanPools();
+  const plan = [
+    { id: "coding", title: "Python / Java coding", questions: pickDueFirst(codingPool, 3, seed, records, endOfDay) },
+    { id: "sql", title: "SQL", questions: pickDueFirst(sqlPool, 2, seed + 1, records, endOfDay) },
+    { id: "browser", title: "Playwright / Selenium", questions: pickDueFirst(browserPool, 2, seed + 2, records, endOfDay) },
+    { id: "platform", title: "API / CI/CD / AWS", questions: pickDueFirst(platformPool, 2, seed + 3, records, endOfDay) },
+    { id: "strategy", title: "Strategy / Mock", questions: pickDueFirst(strategyPool, 1, seed + 4, records, endOfDay) },
+  ];
+  const dueIds = new Set(getDueReviewRecords(records, endOfDay).map((record) => record.questionId));
+  return { plan, dueQuestionIds: plan.flatMap((section) => section.questions).filter((q) => dueIds.has(q.id)).map((q) => q.id) };
 }
 
 export function shuffleArray<T>(arr: T[]): T[] {
