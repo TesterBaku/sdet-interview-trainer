@@ -1522,22 +1522,78 @@ test("review due-count banner respects the active filters", async ({ page }) => 
   await expect(page.getByText("1 question is due now")).toBeVisible();
 });
 
-test("daily practice rebuilds a snapshot holding a question that no longer exists", async ({ page }) => {
+test("a corrupted nextReviewAt falls back to deriving the schedule", async ({ page }) => {
   await clearAppState(page);
-  const todayIso = new Date().toISOString().slice(0, 10);
   await page.goto("/");
   await page.evaluate(
     ([key, value]) => window.localStorage.setItem(key, value),
     [
-      `${dailyPlanKeyPrefix}${todayIso}`,
+      progressKey,
       JSON.stringify({
-        sections: { coding: ["removed-question-999"], sql: [], browser: [], platform: [], strategy: [] },
-        dueQuestionIds: []
+        records: [
+          {
+            questionId: "python-coding-001",
+            status: "review",
+            attempts: 1,
+            statusStreak: 1,
+            nextReviewAt: "not-a-date",
+            lastReviewedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString()
+          }
+        ],
+        completedQuestions: 1,
+        weakQuestions: 0,
+        reviewQuestions: 1
       })
     ]
   );
 
+  // An unparseable nextReviewAt compares as NaN against every cutoff, which
+  // would strand the question outside the queue rather than mis-schedule it.
+  await page.goto("/review");
+  await expect(page.getByText("1 question is due now")).toBeVisible();
+});
+
+test("daily practice rebuilds a snapshot holding a question that no longer exists", async ({ page }) => {
+  await clearAppState(page);
+  const todayIso = new Date().toISOString().slice(0, 10);
+  const planKey = `${dailyPlanKeyPrefix}${todayIso}`;
   await page.goto("/daily-practice");
+  await expect(page.locator("li")).toHaveCount(10);
+  await expect
+    .poll(async () => page.evaluate((key) => window.localStorage.getItem(key) !== null, planKey))
+    .toBe(true);
+
+  // Swap one id for a missing one while keeping every lane the right length,
+  // so the rebuild is driven by the unresolvable id and not by a length check.
+  await page.evaluate((key) => {
+    const stored = JSON.parse(window.localStorage.getItem(key) ?? "{}");
+    stored.sections.coding[0] = "removed-question-999";
+    window.localStorage.setItem(key, JSON.stringify(stored));
+  }, planKey);
+
+  await page.reload();
+  await expect(page.locator("li")).toHaveCount(10);
+  await expect(page.getByRole("heading", { name: "Python / Java coding" })).toBeVisible();
+});
+
+test("daily practice rebuilds a snapshot whose lane is the wrong length", async ({ page }) => {
+  await clearAppState(page);
+  const todayIso = new Date().toISOString().slice(0, 10);
+  const planKey = `${dailyPlanKeyPrefix}${todayIso}`;
+  await page.goto("/daily-practice");
+  await expect(page.locator("li")).toHaveCount(10);
+  await expect
+    .poll(async () => page.evaluate((key) => window.localStorage.getItem(key) !== null, planKey))
+    .toBe(true);
+
+  // A partial write that is still valid JSON of the right shape.
+  await page.evaluate((key) => {
+    const stored = JSON.parse(window.localStorage.getItem(key) ?? "{}");
+    stored.sections.coding = stored.sections.coding.slice(0, 1);
+    window.localStorage.setItem(key, JSON.stringify(stored));
+  }, planKey);
+
+  await page.reload();
   await expect(page.locator("li")).toHaveCount(10);
 });
 

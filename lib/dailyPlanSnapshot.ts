@@ -22,21 +22,31 @@ export type DailyPlanSnapshot = {
 };
 
 /**
- * Returns null when the stored selection can no longer be honoured — a question
- * id that no longer resolves (removed or renamed by a same-day content deploy)
- * would otherwise silently shrink that lane for the rest of the UTC day. The
- * caller rebuilds and re-persists instead.
+ * Returns null when the stored selection can no longer be honoured, so the
+ * caller rebuilds and re-persists instead of serving a degraded plan for the
+ * rest of the UTC day. Two ways that happens: a question id that no longer
+ * resolves (removed or renamed by a same-day content deploy), and a lane whose
+ * length disagrees with the baseline (a partial write that is still valid JSON
+ * of the right shape). Either would silently shrink a lane.
  */
 function toSnapshot(date: Date, stored: StoredDailyPlan): DailyPlanSnapshot | null {
   const baseline = getDailyPlan(date);
   const plan: DailyPlanSection[] = [];
   for (const section of baseline) {
     const storedIds = stored.sections[section.id] ?? [];
+    if (storedIds.length !== section.questions.length) return null;
     const questions = storedIds.map(getQuestion);
     if (questions.some((question) => !question)) return null;
     plan.push({ ...section, questions: questions as NonNullable<(typeof questions)[number]>[] });
   }
   return { plan, dueQuestionIds: stored.dueQuestionIds };
+}
+
+function toStored(snapshot: DailyPlanSnapshot): StoredDailyPlan {
+  return {
+    sections: Object.fromEntries(snapshot.plan.map((section) => [section.id, section.questions.map((q) => q.id)])),
+    dueQuestionIds: snapshot.dueQuestionIds,
+  };
 }
 
 function isStoredDailyPlan(value: unknown): value is StoredDailyPlan {
@@ -57,19 +67,10 @@ function isStoredDailyPlan(value: unknown): value is StoredDailyPlan {
   );
 }
 
-/**
- * Set when a fresh plan had to be built. The write is deferred to
- * persistDailyPlanSnapshot so that getClientDailyPlanSnapshot — which React
- * calls as useSyncExternalStore's getSnapshot, possibly several times and for
- * renders it later discards — performs no storage side effect of its own.
- */
-let pendingPersist: { key: string; stored: StoredDailyPlan } | null = null;
-
-/** Reads the immutable selection for this UTC day. Pure: never writes storage. */
+/** Reads the immutable selection for this UTC day. Pure: no storage write, no module state. */
 function readDailyPlanSnapshot(dateIso: string, records: ProgressRecord[]): DailyPlanSnapshot {
   const date = new Date(`${dateIso}T00:00:00.000Z`);
-  const key = `${STORAGE_PREFIX}${dateIso}`;
-  const raw = window.localStorage.getItem(key);
+  const raw = window.localStorage.getItem(`${STORAGE_PREFIX}${dateIso}`);
   if (raw) {
     try {
       const parsed: unknown = JSON.parse(raw);
@@ -81,28 +82,29 @@ function readDailyPlanSnapshot(dateIso: string, records: ProgressRecord[]): Dail
       // Replace malformed snapshots with a fresh one below.
     }
   }
-
-  const { plan, dueQuestionIds } = getAdaptiveDailyPlan(date, records);
-  pendingPersist = {
-    key,
-    stored: {
-      sections: Object.fromEntries(plan.map((section) => [section.id, section.questions.map((question) => question.id)])),
-      dueQuestionIds,
-    },
-  };
-  return { plan, dueQuestionIds };
+  return getAdaptiveDailyPlan(date, records);
 }
 
 /**
- * Commits a freshly built plan. Call from an effect: it runs only after a
- * render commits, so a discarded render cannot fix the whole day's selection.
- * Idempotent — a second call with nothing pending is a no-op.
+ * Writes this UTC day's selection if it is not already stored. Call from an
+ * effect — never from render — so the write happens on the client, after a
+ * commit, and cannot be triggered by a render React discards. It re-derives
+ * the value from the same cache the committed render read, so what lands in
+ * storage is exactly what was displayed. Write-once: an already-honourable
+ * stored plan is left untouched.
  */
-export function persistDailyPlanSnapshot(): void {
-  if (!pendingPersist) return;
-  const { key, stored } = pendingPersist;
-  pendingPersist = null;
-  window.localStorage.setItem(key, JSON.stringify(stored));
+export function persistDailyPlanSnapshot(dateIso: string, records: ProgressRecord[]): void {
+  const key = `${STORAGE_PREFIX}${dateIso}`;
+  const raw = window.localStorage.getItem(key);
+  if (raw) {
+    try {
+      const parsed: unknown = JSON.parse(raw);
+      if (isStoredDailyPlan(parsed) && toSnapshot(new Date(`${dateIso}T00:00:00.000Z`), parsed)) return;
+    } catch {
+      // Replace malformed snapshots below.
+    }
+  }
+  window.localStorage.setItem(key, JSON.stringify(toStored(getClientDailyPlanSnapshot(dateIso, records))));
 }
 
 /** Stable client snapshot for useSyncExternalStore; immutable until the next UTC day. */

@@ -39,9 +39,16 @@ export function getNextReviewAt(status: QuestionStatus, statusStreak: number, re
   return Number.isFinite(dueAt) ? new Date(dueAt).toISOString() : undefined;
 }
 
-/** Supports pre-scheduling local records by deriving their first due date on read. */
+/**
+ * Supports pre-scheduling local records by deriving their first due date on
+ * read. A stored nextReviewAt is only trusted when it parses: an unparseable
+ * one compares as NaN against every cutoff, which would strand the question
+ * outside the review queue permanently rather than merely mis-scheduling it.
+ */
 export function resolveNextReviewAt(record: ProgressRecord): string | undefined {
-  if (record.nextReviewAt) return record.nextReviewAt;
+  if (typeof record.nextReviewAt === "string" && !Number.isNaN(new Date(record.nextReviewAt).getTime())) {
+    return record.nextReviewAt;
+  }
   const reviewedAt = new Date(record.lastReviewedAt);
   return Number.isNaN(reviewedAt.getTime())
     ? undefined

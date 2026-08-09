@@ -35,10 +35,12 @@ export function DailyPracticeClient({ todayIso }: DailyPracticeClientProps) {
     () => getServerDailyPlanSnapshot(todayIso),
   );
   // Storage write lives here, not in getSnapshot: the day's selection is fixed
-  // only once a render actually commits.
+  // only once a render commits, and only ever on the client. Re-derives from
+  // storage rather than from `snapshot`, which is still the calendar-only
+  // server value on the hydration commit.
   useEffect(() => {
-    persistDailyPlanSnapshot();
-  }, [snapshot]);
+    persistDailyPlanSnapshot(todayIso, readProgress().records);
+  }, [todayIso, snapshot]);
 
   const today = dateFormatter.format(new Date(`${todayIso}T00:00:00.000Z`));
   const plan = snapshot.plan;
