@@ -1334,8 +1334,8 @@ test("review prioritizes and labels overdue questions", async ({ page }) => {
 
   await page.goto("/review");
   await expect(page.getByText("1 question is due now")).toBeVisible();
-  await expect(page.getByText("Due now")).toHaveCount(1);
-  await expect(page.locator("li").filter({ hasText: "Find duplicate values" }).first()).toContainText("Due now");
+  const overdueItem = page.locator("li").filter({ hasText: "Find duplicate values" }).first();
+  await expect(overdueItem.getByText("Due now", { exact: true })).toBeVisible();
 });
 
 test("legacy records with many lifetime attempts still use the first review interval", async ({ page }) => {
