@@ -94,6 +94,18 @@ function rotatePick(pool: Question[], count: number, seed: number): Question[] {
   return picks;
 }
 
+function rotatePickExcluding(pool: Question[], count: number, seed: number, excludedIds: Set<string>): Question[] {
+  if (pool.length === 0 || count === 0) return [];
+  const sorted = [...pool].sort((a, b) => a.id.localeCompare(b.id));
+  const start = ((seed % sorted.length) + sorted.length) % sorted.length;
+  const picks: Question[] = [];
+  for (let i = 0; i < sorted.length && picks.length < count; i++) {
+    const candidate = sorted[(start + i) % sorted.length];
+    if (!excludedIds.has(candidate.id)) picks.push(candidate);
+  }
+  return picks;
+}
+
 function pickDueFirst(pool: Question[], count: number, seed: number, records: ProgressRecord[], now: Date): Question[] {
   const questionById = new Map(pool.map((question) => [question.id, question]));
   const due = getDueReviewRecords(records, now)
@@ -101,8 +113,7 @@ function pickDueFirst(pool: Question[], count: number, seed: number, records: Pr
     .filter((question): question is Question => Boolean(question));
   const selectedDue = due.slice(0, count);
   const selectedIds = new Set(selectedDue.map((question) => question.id));
-  const rotating = rotatePick(pool, pool.length, seed).filter((question) => !selectedIds.has(question.id));
-  return [...selectedDue, ...rotating.slice(0, Math.max(0, count - selectedDue.length))];
+  return [...selectedDue, ...rotatePickExcluding(pool, count - selectedDue.length, seed, selectedIds)];
 }
 
 function getDailyPlanPools() {

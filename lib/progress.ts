@@ -31,13 +31,14 @@ export function markQuestionStatus(
   const existing = getRecord(progress, questionId);
   const attempts = (existing?.attempts ?? 0) + 1;
   const statusStreak = existing?.status === status ? (existing.statusStreak ?? 1) + 1 : 1;
+  const reviewedAt = new Date();
   const updatedRecord: ProgressRecord = {
     questionId,
     status,
     attempts,
-    lastReviewedAt: new Date().toISOString(),
+    lastReviewedAt: reviewedAt.toISOString(),
     statusStreak,
-    nextReviewAt: getNextReviewAt(status, statusStreak)
+    nextReviewAt: getNextReviewAt(status, statusStreak, reviewedAt)
   };
 
   const records = existing

@@ -31,9 +31,13 @@ function toSnapshot(date: Date, stored: StoredDailyPlan): DailyPlanSnapshot {
 function isStoredDailyPlan(value: unknown): value is StoredDailyPlan {
   if (typeof value !== "object" || value === null) return false;
   const candidate = value as Record<string, unknown>;
+  const sections = candidate.sections;
   return (
-    typeof candidate.sections === "object" &&
-    candidate.sections !== null &&
+    typeof sections === "object" &&
+    sections !== null &&
+    Object.values(sections).every(
+      (questionIds) => Array.isArray(questionIds) && questionIds.every((questionId) => typeof questionId === "string"),
+    ) &&
     Array.isArray(candidate.dueQuestionIds) &&
     candidate.dueQuestionIds.every((id) => typeof id === "string")
   );

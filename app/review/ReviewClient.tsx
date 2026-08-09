@@ -22,8 +22,9 @@ function ReviewInner() {
   const rawTopic = searchParams.get("topic");
   const topicFilter = rawTopic && topics.some((t) => t.id === rawTopic) ? rawTopic : "all";
   const { progress } = useProgress();
-  const dueQuestionIds = new Set(getDueReviewRecords(progress.records).map((record) => record.questionId));
-  const dueCount = getDueReviewRecords(progress.records).filter(
+  const dueRecords = getDueReviewRecords(progress.records);
+  const dueQuestionIds = new Set(dueRecords.map((record) => record.questionId));
+  const dueCount = dueRecords.filter(
     (record) => record.status === "weak" || record.status === "review"
   ).length;
 

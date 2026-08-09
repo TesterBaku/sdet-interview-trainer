@@ -1422,6 +1422,23 @@ test("daily practice keeps its due selection stable after the daily snapshot is 
   await expect(page.getByText("Due today")).toHaveCount(0);
 });
 
+test("daily practice replaces a malformed saved snapshot", async ({ page }) => {
+  await clearAppState(page);
+  const todayIso = new Date().toISOString().slice(0, 10);
+  await page.goto("/");
+  await page.evaluate(
+    ([key, value]) => window.localStorage.setItem(key, value),
+    [
+      `${dailyPlanKeyPrefix}${todayIso}`,
+      JSON.stringify({ sections: { coding: "not-an-array" }, dueQuestionIds: [] })
+    ]
+  );
+
+  await page.goto("/daily-practice");
+  await expect(page.getByRole("heading", { name: "Python / Java coding" })).toBeVisible();
+  await expect(page.locator("li")).toHaveCount(10);
+});
+
 test("Review is folded into Progress and reachable from it", async ({ page }) => {
   await page.goto("/");
   await expect(page.getByRole("link", { name: "Progress", exact: true })).toBeVisible();
