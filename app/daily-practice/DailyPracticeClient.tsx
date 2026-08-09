@@ -1,8 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { getDailyPlan } from "@/lib/questionUtils";
+import { useEffect, useSyncExternalStore } from "react";
 import { getRecord, useProgress } from "@/lib/progress";
+import {
+  getClientDailyPlanSnapshot,
+  getServerDailyPlanSnapshot,
+  persistDailyPlanSnapshot,
+  subscribeToDailyPlanSnapshot,
+} from "@/lib/dailyPlanSnapshot";
+import { readProgress } from "@/lib/storage";
 import { practiceHref } from "@/lib/practiceHref";
 
 const dateFormatter = new Intl.DateTimeFormat("en-US", {
@@ -17,10 +24,27 @@ type DailyPracticeClientProps = {
 };
 
 export function DailyPracticeClient({ todayIso }: DailyPracticeClientProps) {
-  const todayDate = new Date(`${todayIso}T00:00:00.000Z`);
-  const plan = getDailyPlan(todayDate);
-  const today = dateFormatter.format(todayDate);
   const { progress } = useProgress();
+  const snapshot = useSyncExternalStore(
+    subscribeToDailyPlanSnapshot,
+    // Reads storage directly rather than reusing `progress.records`: this runs on
+    // the hydration render too, where useProgress() still reports the empty
+    // server snapshot. Passing that in would persist a due-less plan for the
+    // whole day. The read only does work on the first cache miss of the day.
+    () => getClientDailyPlanSnapshot(todayIso, readProgress().records),
+    () => getServerDailyPlanSnapshot(todayIso),
+  );
+  // Storage write lives here, not in getSnapshot: the day's selection is fixed
+  // only once a render commits, and only ever on the client. Re-derives from
+  // storage rather than from `snapshot`, which is still the calendar-only
+  // server value on the hydration commit.
+  useEffect(() => {
+    persistDailyPlanSnapshot(todayIso, readProgress().records);
+  }, [todayIso, snapshot]);
+
+  const today = dateFormatter.format(new Date(`${todayIso}T00:00:00.000Z`));
+  const plan = snapshot.plan;
+  const dueQuestionIds = new Set(snapshot.dueQuestionIds);
 
   const allItems = plan.flatMap((section) => section.questions);
   const completed = allItems.filter((q) => {
@@ -35,7 +59,7 @@ export function DailyPracticeClient({ todayIso }: DailyPracticeClientProps) {
         <p className="text-sm font-black uppercase tracking-[0.28em] text-signal">Daily Practice</p>
         <h1 className="mt-2 font-display text-3xl font-black text-blueprint sm:text-5xl">{today}</h1>
         <p className="mt-3 max-w-3xl text-lg leading-8 text-ink/75">
-          A focused 10-item mix — same plan all day, fresh tomorrow. Mark each as you go from inside the practice screens.
+          A focused 10-item mix — due reviews come first, then fresh practice. Mark each as you go from inside the practice screens.
         </p>
         <div className="mt-5 flex items-center justify-between gap-4">
           <p className="font-bold text-blueprint">
@@ -85,6 +109,11 @@ export function DailyPracticeClient({ todayIso }: DailyPracticeClientProps) {
                               }`}
                             >
                               {record.status}
+                            </span>
+                          ) : null}
+                          {dueQuestionIds.has(question.id) ? (
+                            <span className="rounded-full bg-signal/15 px-3 py-1 text-xs font-bold uppercase tracking-[0.16em] text-signal">
+                              Due today
                             </span>
                           ) : null}
                         </div>

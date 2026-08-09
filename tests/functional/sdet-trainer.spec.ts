@@ -28,6 +28,7 @@ const firstInterviewId = publishedInterview[0]?.id ?? cheatSheets[0].id;
 
 const progressKey = "sdet-interview-trainer-progress";
 const codeDraftKey = "sdet-interview-trainer-code-answer:python-coding-001";
+const dailyPlanKeyPrefix = "sdet-interview-trainer-daily-plan:";
 const dailyDateFormatter = new Intl.DateTimeFormat("en-US", {
   weekday: "long",
   month: "long",
@@ -38,11 +39,14 @@ const dailyDateFormatter = new Intl.DateTimeFormat("en-US", {
 async function clearAppState(page: Page) {
   await page.goto("/");
   await page.evaluate(
-    ([progressStorageKey, draftStorageKey]) => {
+    ([progressStorageKey, draftStorageKey, planKeyPrefix]) => {
       window.localStorage.removeItem(progressStorageKey);
       window.localStorage.removeItem(draftStorageKey);
+      for (const key of Object.keys(window.localStorage)) {
+        if (key.startsWith(planKeyPrefix)) window.localStorage.removeItem(key);
+      }
     },
-    [progressKey, codeDraftKey]
+    [progressKey, codeDraftKey, dailyPlanKeyPrefix]
   );
 }
 
@@ -1298,6 +1302,319 @@ test("review queue ignores invalid query params and falls back to defaults", asy
   // Invalid status, type, and topic should be ignored — both flagged questions still visible
   await page.goto("/review?status=foo&type=bar&topic=does-not-exist");
   await expect(page.getByRole("heading", { name: "2 questions" })).toBeVisible();
+});
+
+test("review prioritizes and labels overdue questions", async ({ page }) => {
+  await page.goto("/");
+  await page.evaluate(
+    ([key, value]) => window.localStorage.setItem(key, value),
+    [
+      progressKey,
+      JSON.stringify({
+        records: [
+          {
+            questionId: "python-coding-001",
+            status: "review",
+            attempts: 1,
+            lastReviewedAt: "2000-01-01T00:00:00.000Z"
+          },
+          {
+            questionId: "python-coding-002",
+            status: "weak",
+            attempts: 1,
+            lastReviewedAt: new Date().toISOString()
+          }
+        ],
+        completedQuestions: 2,
+        weakQuestions: 1,
+        reviewQuestions: 1
+      })
+    ]
+  );
+
+  await page.goto("/review");
+  await expect(page.getByText("1 question is due now")).toBeVisible();
+  const overdueItem = page.locator("li").filter({ hasText: "Find duplicate values" }).first();
+  await expect(overdueItem.getByText("Due now", { exact: true })).toBeVisible();
+});
+
+test("legacy records with many lifetime attempts still use the first review interval", async ({ page }) => {
+  await clearAppState(page);
+  await page.goto("/");
+  await page.evaluate(
+    ([key, value]) => window.localStorage.setItem(key, value),
+    [
+      progressKey,
+      JSON.stringify({
+        records: [
+          {
+            questionId: "python-coding-001",
+            status: "review",
+            attempts: 99,
+            lastReviewedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString()
+          }
+        ],
+        completedQuestions: 1,
+        weakQuestions: 0,
+        reviewQuestions: 1
+      })
+    ]
+  );
+
+  await page.goto("/review");
+  await expect(page.getByText("1 question is due now")).toBeVisible();
+});
+
+test("daily practice pulls overdue questions into their training lane", async ({ page }) => {
+  await clearAppState(page);
+  await page.goto("/");
+  await page.evaluate(
+    ([key, value]) => window.localStorage.setItem(key, value),
+    [
+      progressKey,
+      JSON.stringify({
+        records: [
+          {
+            questionId: "python-coding-001",
+            status: "weak",
+            attempts: 1,
+            lastReviewedAt: "2000-01-01T00:00:00.000Z"
+          }
+        ],
+        completedQuestions: 1,
+        weakQuestions: 1,
+        reviewQuestions: 0
+      })
+    ]
+  );
+
+  await page.goto("/daily-practice");
+  await expect(page.getByText("Due today")).toBeVisible();
+  await expect(page.getByText("Find duplicate values", { exact: true })).toBeVisible();
+});
+
+test("daily practice keeps its due selection stable after the daily snapshot is created", async ({ page }) => {
+  await clearAppState(page);
+  await page.goto("/daily-practice");
+  await expect(page.getByText("Due today")).toHaveCount(0);
+
+  await page.evaluate(
+    ([key, value]) => window.localStorage.setItem(key, value),
+    [
+      progressKey,
+      JSON.stringify({
+        records: [
+          {
+            questionId: "python-coding-001",
+            status: "weak",
+            attempts: 1,
+            lastReviewedAt: "2000-01-01T00:00:00.000Z"
+          }
+        ],
+        completedQuestions: 1,
+        weakQuestions: 1,
+        reviewQuestions: 0
+      })
+    ]
+  );
+
+  await page.reload();
+  await expect(page.getByText("Due today")).toHaveCount(0);
+});
+
+test("daily practice replaces a malformed saved snapshot", async ({ page }) => {
+  await clearAppState(page);
+  const todayIso = new Date().toISOString().slice(0, 10);
+  await page.goto("/");
+  await page.evaluate(
+    ([key, value]) => window.localStorage.setItem(key, value),
+    [
+      `${dailyPlanKeyPrefix}${todayIso}`,
+      JSON.stringify({ sections: { coding: "not-an-array" }, dueQuestionIds: [] })
+    ]
+  );
+
+  await page.goto("/daily-practice");
+  await expect(page.getByRole("heading", { name: "Python / Java coding" })).toBeVisible();
+  await expect(page.locator("li")).toHaveCount(10);
+});
+
+test("marking the same status twice in one sitting does not advance the review streak", async ({ page }) => {
+  await clearAppState(page);
+  await page.goto("/flashcards/python-coding");
+  await page.getByRole("button", { name: "Reveal answer" }).click();
+
+  await page.getByRole("button", { name: "Known" }).click();
+  await expect
+    .poll(async () => page.evaluate((key) => JSON.parse(window.localStorage.getItem(key) ?? "{}"), progressKey))
+    .toMatchObject({ records: [{ questionId: "python-coding-002", status: "known", attempts: 1, statusStreak: 1 }] });
+
+  // A second click is not a spaced repetition: attempts still counts it, the streak must not.
+  await page.getByRole("button", { name: "Known" }).click();
+  await expect
+    .poll(async () => page.evaluate((key) => JSON.parse(window.localStorage.getItem(key) ?? "{}"), progressKey))
+    .toMatchObject({ records: [{ questionId: "python-coding-002", status: "known", attempts: 2, statusStreak: 1 }] });
+});
+
+test("a corrupted statusStreak does not break the review queue", async ({ page }) => {
+  await clearAppState(page);
+  await page.goto("/");
+  await page.evaluate(
+    ([key, value]) => window.localStorage.setItem(key, value),
+    [
+      progressKey,
+      JSON.stringify({
+        records: [
+          {
+            questionId: "python-coding-001",
+            status: "review",
+            attempts: 1,
+            statusStreak: "not-a-number",
+            lastReviewedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString()
+          }
+        ],
+        completedQuestions: 1,
+        weakQuestions: 0,
+        reviewQuestions: 1
+      })
+    ]
+  );
+
+  await page.goto("/review");
+  await expect(page.getByText("1 question is due now")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "1 question" })).toBeVisible();
+});
+
+test("review due-count banner respects the active filters", async ({ page }) => {
+  await clearAppState(page);
+  await page.goto("/");
+  await page.evaluate(
+    ([key, value]) => window.localStorage.setItem(key, value),
+    [
+      progressKey,
+      JSON.stringify({
+        records: [
+          {
+            questionId: "python-coding-001",
+            status: "review",
+            attempts: 1,
+            lastReviewedAt: "2000-01-01T00:00:00.000Z"
+          },
+          {
+            questionId: "python-coding-002",
+            status: "weak",
+            attempts: 1,
+            lastReviewedAt: "2000-01-01T00:00:00.000Z"
+          }
+        ],
+        completedQuestions: 2,
+        weakQuestions: 1,
+        reviewQuestions: 1
+      })
+    ]
+  );
+
+  await page.goto("/review");
+  await expect(page.getByText("2 questions are due now")).toBeVisible();
+
+  // Filtering the list must filter the banner sitting directly above it.
+  await page.goto("/review?status=weak");
+  await expect(page.getByText("1 question is due now")).toBeVisible();
+});
+
+test("a corrupted nextReviewAt falls back to deriving the schedule", async ({ page }) => {
+  await clearAppState(page);
+  await page.goto("/");
+  await page.evaluate(
+    ([key, value]) => window.localStorage.setItem(key, value),
+    [
+      progressKey,
+      JSON.stringify({
+        records: [
+          {
+            questionId: "python-coding-001",
+            status: "review",
+            attempts: 1,
+            statusStreak: 1,
+            nextReviewAt: "not-a-date",
+            lastReviewedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString()
+          }
+        ],
+        completedQuestions: 1,
+        weakQuestions: 0,
+        reviewQuestions: 1
+      })
+    ]
+  );
+
+  // An unparseable nextReviewAt compares as NaN against every cutoff, which
+  // would strand the question outside the queue rather than mis-schedule it.
+  await page.goto("/review");
+  await expect(page.getByText("1 question is due now")).toBeVisible();
+});
+
+test("daily practice rebuilds a snapshot holding a question that no longer exists", async ({ page }) => {
+  await clearAppState(page);
+  const todayIso = new Date().toISOString().slice(0, 10);
+  const planKey = `${dailyPlanKeyPrefix}${todayIso}`;
+  await page.goto("/daily-practice");
+  await expect(page.locator("li")).toHaveCount(10);
+  await expect
+    .poll(async () => page.evaluate((key) => window.localStorage.getItem(key) !== null, planKey))
+    .toBe(true);
+
+  // Swap one id for a missing one while keeping every lane the right length,
+  // so the rebuild is driven by the unresolvable id and not by a length check.
+  await page.evaluate((key) => {
+    const stored = JSON.parse(window.localStorage.getItem(key) ?? "{}");
+    stored.sections.coding[0] = "removed-question-999";
+    window.localStorage.setItem(key, JSON.stringify(stored));
+  }, planKey);
+
+  await page.reload();
+  await expect(page.locator("li")).toHaveCount(10);
+  await expect(page.getByRole("heading", { name: "Python / Java coding" })).toBeVisible();
+});
+
+test("daily practice rebuilds a snapshot whose lane is the wrong length", async ({ page }) => {
+  await clearAppState(page);
+  const todayIso = new Date().toISOString().slice(0, 10);
+  const planKey = `${dailyPlanKeyPrefix}${todayIso}`;
+  await page.goto("/daily-practice");
+  await expect(page.locator("li")).toHaveCount(10);
+  await expect
+    .poll(async () => page.evaluate((key) => window.localStorage.getItem(key) !== null, planKey))
+    .toBe(true);
+
+  // A partial write that is still valid JSON of the right shape.
+  await page.evaluate((key) => {
+    const stored = JSON.parse(window.localStorage.getItem(key) ?? "{}");
+    stored.sections.coding = stored.sections.coding.slice(0, 1);
+    window.localStorage.setItem(key, JSON.stringify(stored));
+  }, planKey);
+
+  await page.reload();
+  await expect(page.locator("li")).toHaveCount(10);
+});
+
+test("daily practice rebuilds a snapshot that is missing a whole section", async ({ page }) => {
+  await clearAppState(page);
+  const todayIso = new Date().toISOString().slice(0, 10);
+  await page.goto("/");
+  await page.evaluate(
+    ([key, value]) => window.localStorage.setItem(key, value),
+    [
+      `${dailyPlanKeyPrefix}${todayIso}`,
+      JSON.stringify({
+        sections: { coding: [], sql: [], browser: [], platform: [] },
+        dueQuestionIds: []
+      })
+    ]
+  );
+
+  await page.goto("/daily-practice");
+  await expect(page.getByRole("heading", { name: "Strategy / Mock" })).toBeVisible();
+  await expect(page.locator("li")).toHaveCount(10);
 });
 
 test("Review is folded into Progress and reachable from it", async ({ page }) => {
