@@ -1,11 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { useSyncExternalStore } from "react";
+import { useEffect, useSyncExternalStore } from "react";
 import { getRecord, useProgress } from "@/lib/progress";
 import {
   getClientDailyPlanSnapshot,
   getServerDailyPlanSnapshot,
+  persistDailyPlanSnapshot,
   subscribeToDailyPlanSnapshot,
 } from "@/lib/dailyPlanSnapshot";
 import { readProgress } from "@/lib/storage";
@@ -33,6 +34,12 @@ export function DailyPracticeClient({ todayIso }: DailyPracticeClientProps) {
     () => getClientDailyPlanSnapshot(todayIso, readProgress().records),
     () => getServerDailyPlanSnapshot(todayIso),
   );
+  // Storage write lives here, not in getSnapshot: the day's selection is fixed
+  // only once a render actually commits.
+  useEffect(() => {
+    persistDailyPlanSnapshot();
+  }, [snapshot]);
+
   const today = dateFormatter.format(new Date(`${todayIso}T00:00:00.000Z`));
   const plan = snapshot.plan;
   const dueQuestionIds = new Set(snapshot.dueQuestionIds);

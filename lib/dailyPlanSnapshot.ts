@@ -57,8 +57,16 @@ function isStoredDailyPlan(value: unknown): value is StoredDailyPlan {
   );
 }
 
-/** Reads the immutable selection for this UTC day, creating it from current progress only once. */
-export function readOrCreateDailyPlanSnapshot(dateIso: string, records: ProgressRecord[]): DailyPlanSnapshot {
+/**
+ * Set when a fresh plan had to be built. The write is deferred to
+ * persistDailyPlanSnapshot so that getClientDailyPlanSnapshot — which React
+ * calls as useSyncExternalStore's getSnapshot, possibly several times and for
+ * renders it later discards — performs no storage side effect of its own.
+ */
+let pendingPersist: { key: string; stored: StoredDailyPlan } | null = null;
+
+/** Reads the immutable selection for this UTC day. Pure: never writes storage. */
+function readDailyPlanSnapshot(dateIso: string, records: ProgressRecord[]): DailyPlanSnapshot {
   const date = new Date(`${dateIso}T00:00:00.000Z`);
   const key = `${STORAGE_PREFIX}${dateIso}`;
   const raw = window.localStorage.getItem(key);
@@ -75,19 +83,33 @@ export function readOrCreateDailyPlanSnapshot(dateIso: string, records: Progress
   }
 
   const { plan, dueQuestionIds } = getAdaptiveDailyPlan(date, records);
-  const stored: StoredDailyPlan = {
-    sections: Object.fromEntries(plan.map((section) => [section.id, section.questions.map((question) => question.id)])),
-    dueQuestionIds,
+  pendingPersist = {
+    key,
+    stored: {
+      sections: Object.fromEntries(plan.map((section) => [section.id, section.questions.map((question) => question.id)])),
+      dueQuestionIds,
+    },
   };
-  window.localStorage.setItem(key, JSON.stringify(stored));
   return { plan, dueQuestionIds };
+}
+
+/**
+ * Commits a freshly built plan. Call from an effect: it runs only after a
+ * render commits, so a discarded render cannot fix the whole day's selection.
+ * Idempotent — a second call with nothing pending is a no-op.
+ */
+export function persistDailyPlanSnapshot(): void {
+  if (!pendingPersist) return;
+  const { key, stored } = pendingPersist;
+  pendingPersist = null;
+  window.localStorage.setItem(key, JSON.stringify(stored));
 }
 
 /** Stable client snapshot for useSyncExternalStore; immutable until the next UTC day. */
 export function getClientDailyPlanSnapshot(dateIso: string, records: ProgressRecord[]): DailyPlanSnapshot {
   const cached = clientSnapshots.get(dateIso);
   if (cached) return cached;
-  const snapshot = readOrCreateDailyPlanSnapshot(dateIso, records);
+  const snapshot = readDailyPlanSnapshot(dateIso, records);
   // Only the current day is ever read again; dropping older entries keeps a
   // long-lived tab or SSR process from retaining one full snapshot per day.
   clientSnapshots.clear();
