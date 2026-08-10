@@ -1,9 +1,9 @@
-import { loadPyodide } from "https://cdn.jsdelivr.net/pyodide/v0.28.3/full/pyodide.mjs";
+import { loadPyodide } from "/pyodide/pyodide.mjs";
 
 let pyodidePromise;
 
 function getPyodide() {
-  pyodidePromise ??= loadPyodide();
+  pyodidePromise ??= loadPyodide({ indexURL: `${self.location.origin}/pyodide/` });
   return pyodidePromise;
 }
 
@@ -12,7 +12,7 @@ import json
 
 def _safe_value(value):
     try:
-        json.dumps(value)
+        json.dumps(value, allow_nan=False)
         return value
     except (TypeError, ValueError):
         return repr(value)[:500]

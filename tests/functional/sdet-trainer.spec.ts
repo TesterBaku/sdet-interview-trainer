@@ -367,6 +367,9 @@ test("coding gym supports sandbox drafts, reveal controls, status save, and draf
   await runVisibleTests.click();
   await expect(firstTask.getByText("1/2 visible tests passed")).toBeVisible({ timeout: 20_000 });
   await expect(firstTask.getByText("Failed: keeps the first duplicate order")).toBeVisible();
+  await answerBox.fill("def find_duplicates(items):\n    return float('nan')");
+  await runVisibleTests.click();
+  await expect(firstTask.getByText("0/2 visible tests passed")).toBeVisible();
   await expect(firstTask.getByText(/\d+ chars/i)).toBeVisible();
   await expect(firstTask.getByRole("button", { name: "Clear draft" })).toBeEnabled();
   await expect.poll(async () => page.evaluate((key) => window.localStorage.getItem(key), codeDraftKey)).toContain("find_duplicates");

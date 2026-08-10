@@ -58,7 +58,7 @@ type RunnerQuestion = {
   id: string;
   language: "python";
   entrypoint: string;
-  visibleCases: Array<{ name: string; args: unknown[]; expected: unknown }>;
+  visibleTests: Array<{ name: string; args: unknown[]; expected: unknown }>;
 };
 ```
 

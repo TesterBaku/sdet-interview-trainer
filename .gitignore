@@ -23,4 +23,5 @@ tasks/
 # Committed audio artifacts are the narration scripts, transcripts, and manifest.
 build/
 public/audio/
+public/pyodide/
 data/audio/manifest*.local.json

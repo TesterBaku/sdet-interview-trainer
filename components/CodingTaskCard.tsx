@@ -41,8 +41,13 @@ export function CodingTaskCard({ question, currentStatus, onMark }: CodingTaskCa
 
     setIsRunning(true);
     setRunResult(undefined);
-    setRunResult(await runPythonVisibleTests(draft, question.runner));
-    setIsRunning(false);
+    try {
+      setRunResult(await runPythonVisibleTests(draft, question.runner));
+    } catch {
+      setRunResult({ status: "error", error: "The Python runner could not start. Please try again.", tests: [] });
+    } finally {
+      setIsRunning(false);
+    }
   }
 
   return (
