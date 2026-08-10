@@ -1,7 +1,9 @@
+import type { JsonValue } from "@/lib/coding/contracts";
+
 export type PythonVisibleTest = {
   name: string;
-  args: unknown[];
-  expected: unknown;
+  args: JsonValue[];
+  expected: JsonValue;
 };
 
 export type PythonRunner = {

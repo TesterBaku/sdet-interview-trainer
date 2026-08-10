@@ -2,7 +2,9 @@
 
 import { useState, useSyncExternalStore } from "react";
 import { StatusButtons } from "@/components/StatusButtons";
+import { TurnstileWidget } from "@/components/TurnstileWidget";
 import { clearCodeDraft, readCodeDraft, subscribeToCodeDraft, writeCodeDraft } from "@/lib/codeWorkspace";
+import type { CodeRunResponse } from "@/lib/coding/contracts";
 import { runPythonVisibleTests, type PythonRunResult } from "@/lib/pythonRunner";
 import type { Question } from "@/types/Question";
 import type { QuestionStatus } from "@/types/Progress";
@@ -18,6 +20,11 @@ export function CodingTaskCard({ question, currentStatus, onMark }: CodingTaskCa
   const [showSolution, setShowSolution] = useState(false);
   const [runResult, setRunResult] = useState<PythonRunResult>();
   const [isRunning, setIsRunning] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState("");
+  const [serverResult, setServerResult] = useState<CodeRunResponse>();
+  const [serverError, setServerError] = useState<string>();
+  const [isServerRunning, setIsServerRunning] = useState(false);
+  const [turnstileResetKey, setTurnstileResetKey] = useState(0);
   const textareaId = `code-answer-${question.id}`;
   const draft = useSyncExternalStore(
     (onStoreChange) => subscribeToCodeDraft(question.id, onStoreChange),
@@ -47,6 +54,25 @@ export function CodingTaskCard({ question, currentStatus, onMark }: CodingTaskCa
       setRunResult({ status: "error", error: "The Python runner could not start. Please try again.", tests: [] });
     } finally {
       setIsRunning(false);
+    }
+  }
+
+  async function runServerTests() {
+    if (!question.runner || !draft.trim() || !turnstileToken) return;
+    setIsServerRunning(true);
+    setServerResult(undefined);
+    setServerError(undefined);
+    try {
+      const response = await fetch("/api/runs", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ questionId: question.id, language: question.runner.language, source: draft, turnstileToken }) });
+      const payload = (await response.json()) as CodeRunResponse | { error?: string };
+      if (!response.ok || !("status" in payload)) throw new Error("error" in payload ? payload.error : "The server runner could not complete.");
+      setServerResult(payload);
+    } catch (error) {
+      setServerError(error instanceof Error ? error.message : "The server runner could not complete.");
+    } finally {
+      setIsServerRunning(false);
+      setTurnstileToken("");
+      setTurnstileResetKey((value) => value + 1);
     }
   }
 
@@ -147,6 +173,17 @@ export function CodingTaskCard({ question, currentStatus, onMark }: CodingTaskCa
                   </ul>
                 </div>
               ) : null}
+            </div>
+            <div className="mt-5 border-t border-paper/10 pt-4">
+              <p className="text-sm text-paper/70">Verify before running private server checks.</p>
+              <div className="mt-3"><TurnstileWidget action="code_run" onToken={setTurnstileToken} resetKey={turnstileResetKey} /></div>
+              <button className="mt-3 rounded-full border border-brass px-4 py-2 text-sm font-bold text-brass disabled:cursor-not-allowed disabled:opacity-45 focus-ring" disabled={!draft.trim() || !turnstileToken || isServerRunning} onClick={runServerTests} type="button">
+                {isServerRunning ? "Running server checks..." : "Run private server check"}
+              </button>
+              <div aria-live="polite" className="mt-3">
+                {serverError ? <p className="rounded-xl bg-red-950/70 p-3 text-sm text-red-100">{serverError}</p> : null}
+                {serverResult ? <p className="rounded-xl bg-paper/10 p-3 text-sm text-paper">{serverResult.visible.passed}/{serverResult.visible.total} visible and {serverResult.hidden.passed}/{serverResult.hidden.total} private checks passed.</p> : null}
+              </div>
             </div>
           </div>
         ) : null}
