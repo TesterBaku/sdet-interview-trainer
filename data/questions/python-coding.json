@@ -13,6 +13,22 @@
     "expectedOutput": "[2, 1]",
     "hint": "Track seen values and duplicate values with sets.",
     "solutionLanguage": "python",
+    "runner": {
+      "language": "python",
+      "entrypoint": "find_duplicates",
+      "visibleTests": [
+        {
+          "name": "keeps the first duplicate order",
+          "args": [[1, 2, 3, 2, 4, 1]],
+          "expected": [2, 1]
+        },
+        {
+          "name": "returns an empty list when all values are unique",
+          "args": [[1, 2, 3]],
+          "expected": []
+        }
+      ]
+    },
     "solution": "def find_duplicates(items):\n    seen = set()\n    duplicates = []\n    duplicate_set = set()\n\n    for item in items:\n        if item in seen and item not in duplicate_set:\n            duplicates.append(item)\n            duplicate_set.add(item)\n        seen.add(item)\n\n    return duplicates",
     "explanation": "The function uses one set for values already seen and another to prevent returning the same duplicate twice.",
     "commonMistakes": [
