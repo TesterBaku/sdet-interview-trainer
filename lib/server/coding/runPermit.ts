@@ -7,7 +7,22 @@ type Permit = { allowed: true; release: () => void } | { allowed: false };
 type Bucket = { startedAt: number; runs: number; active: number };
 
 const WINDOW_MS = 60 * 60 * 1000;
+const MAX_BUCKETS = 512;
 const state = new Map<string, Bucket>();
+
+function pruneExpiredBuckets(now: number) {
+  for (const [key, bucket] of state) {
+    if (now - bucket.startedAt >= WINDOW_MS) state.delete(key);
+  }
+}
+
+function makeRoomForBucket() {
+  while (state.size >= MAX_BUCKETS) {
+    const oldestKey = state.keys().next().value as string | undefined;
+    if (!oldestKey) return;
+    state.delete(oldestKey);
+  }
+}
 
 function positiveInteger(value: string | undefined, fallback: number) {
   const parsed = Number(value);
@@ -38,10 +53,10 @@ export function acquireRunPermit(clientKey: string, now = Date.now()): Permit {
   if (!isCodeRunnerEnabled()) return { allowed: false };
 
   const { maxRuns, maxConcurrent } = configuredLimits();
+  pruneExpiredBuckets(now);
   const current = state.get(clientKey);
-  const bucket = !current || now - current.startedAt >= WINDOW_MS
-    ? { startedAt: now, runs: 0, active: 0 }
-    : current;
+  if (!current) makeRoomForBucket();
+  const bucket = current ?? { startedAt: now, runs: 0, active: 0 };
 
   if (bucket.runs >= maxRuns || bucket.active >= maxConcurrent) return { allowed: false };
   bucket.runs += 1;

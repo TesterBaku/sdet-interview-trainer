@@ -18,7 +18,10 @@ test("the private runner is server-only, fail-closed, and does not expose raw sa
   assert.match(runner, /^import "server-only";/);
   assert.match(runner, /networkPolicy: "deny-all"/);
   assert.match(runner, /sandbox\.stop\(\)/);
+  assert.match(runner, /os\._exit\(0\)/);
+  assert.match(runner, /Object\.keys\(left\)\.sort\(\)/);
   assert.match(permit, /CODING_RUNNER_ENABLED === "true"/);
   assert.match(permit, /createHash\("sha256"\)/);
+  assert.match(permit, /MAX_BUCKETS = 512/);
   assert.doesNotMatch(route, /stdout|stderr/);
 });

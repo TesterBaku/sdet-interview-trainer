@@ -6,17 +6,20 @@ import type { HiddenCase } from "@/lib/server/coding/hiddenSuites";
 import type { PythonVisibleTest } from "@/types/Question";
 
 const MARKER = "__CODING_RUN_RESULT__";
-const HARNESS = `import importlib.util, json, sys
+const HARNESS = `import importlib.util, json, os, sys
+def finish(payload):
+    print("${MARKER}" + json.dumps(payload, separators=(",", ":"), allow_nan=False), flush=True)
+    os._exit(0)
 try:
     spec = importlib.util.spec_from_file_location("candidate", "/tmp/candidate.py")
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     result = getattr(module, sys.argv[1])(*json.loads(sys.argv[2]))
-    print("${MARKER}" + json.dumps({"ok": True, "value": result}, separators=(",", ":"), allow_nan=False))
+    finish({"ok": True, "value": result})
 except SyntaxError:
-    print("${MARKER}{\\"ok\\":false,\\"kind\\":\\"syntax_error\\"}")
+    finish({"ok": False, "kind": "syntax_error"})
 except Exception:
-    print("${MARKER}{\\"ok\\":false,\\"kind\\":\\"runtime_error\\"}")`;
+    finish({"ok": False, "kind": "runtime_error"})`;
 
 type InternalResult = { ok: true; value: JsonValue } | { ok: false; kind: "syntax_error" | "runtime_error" | "timeout" };
 
@@ -32,8 +35,19 @@ function parseResult(output: string): InternalResult {
   }
 }
 
-function sameJson(left: JsonValue, right: JsonValue) {
-  return JSON.stringify(left) === JSON.stringify(right);
+function sameJson(left: JsonValue, right: JsonValue): boolean {
+  if (left === right) return true;
+  if (typeof left !== typeof right || left === null || right === null) return false;
+  if (Array.isArray(left) || Array.isArray(right)) {
+    return Array.isArray(left) && Array.isArray(right)
+      && left.length === right.length
+      && left.every((value, index) => sameJson(value, right[index]));
+  }
+  if (typeof left !== "object" || typeof right !== "object") return false;
+  const leftKeys = Object.keys(left).sort();
+  const rightKeys = Object.keys(right).sort();
+  return leftKeys.length === rightKeys.length
+    && leftKeys.every((key, index) => key === rightKeys[index] && sameJson(left[key], right[key]));
 }
 
 export async function runPythonSuite(source: string, entrypoint: string, visible: PythonVisibleTest[], hidden: HiddenCase[]) {

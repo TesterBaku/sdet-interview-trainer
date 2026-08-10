@@ -178,7 +178,7 @@ export function CodingTaskCard({ question, currentStatus, onMark }: CodingTaskCa
               <p className="text-sm text-paper/70">Verify before running private server checks.</p>
               <div className="mt-3"><TurnstileWidget action="code_run" onToken={setTurnstileToken} resetKey={turnstileResetKey} /></div>
               <button className="mt-3 rounded-full border border-brass px-4 py-2 text-sm font-bold text-brass disabled:cursor-not-allowed disabled:opacity-45 focus-ring" disabled={!draft.trim() || !turnstileToken || isServerRunning} onClick={runServerTests} type="button">
-                {isServerRunning ? "Running server checksâ€¦" : "Run private server check"}
+                {isServerRunning ? "Running server checks..." : "Run private server check"}
               </button>
               <div aria-live="polite" className="mt-3">
                 {serverError ? <p className="rounded-xl bg-red-950/70 p-3 text-sm text-red-100">{serverError}</p> : null}

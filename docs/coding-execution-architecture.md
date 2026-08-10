@@ -78,9 +78,9 @@ the pilot must not be labeled as hidden or secure assessment grading.
 1. Browser sends `{ questionId, language, source, turnstileToken }` to `POST /api/runs`.
 2. The Route Handler rejects unknown ids/languages, non-JSON payloads, code over 32 KiB, invalid origin,
    unauthenticated bot checks, and exhausted rate limits before provisioning compute.
-3. The Route Handler creates an opaque UUID sandbox id and writes a generated candidate file plus a trusted
-   harness into an execution directory. It uses argument arrays / stdin rather than interpolating
-   source or input into a shell command.
+3. The Route Handler creates a fresh Sandbox and writes a generated candidate file plus a trusted
+   harness under `/tmp`. It passes arguments as an array rather than interpolating source or input
+   into a shell command.
 4. The Sandbox is created with a `deny-all` network policy; no server secret is set in the
    microVM. Each command has a short deadline (initial target: 2 seconds per test, 8 seconds total).
 5. In `finally`, the Route Handler stops the sandbox. SDK/request timeouts do not replace explicit
@@ -133,9 +133,6 @@ learning solution while keeping all hidden fixtures out of client data and respo
   lifetime, so every run must be stopped promptly. Any paid upgrade needs explicit user approval.
 - Keep private tests and all credentials in server-only modules/environment variables. Nothing
   needed for the runner may use a `NEXT_PUBLIC_` name.
-- The repository's ignored local `.env`/`.env.*` files are excluded from Vercel CLI uploads by
-  `.vercelignore`. Configure production values in the Vercel project Environment Variables UI;
-  never rely on a local credentials file being present during a cloud build.
 - The repository's ignored local `.env`/`.env.*` files are excluded from Vercel CLI uploads by
   `.vercelignore`. Configure production values in the Vercel project Environment Variables UI;
   never rely on a local credentials file being present during a cloud build.
