@@ -1,0 +1,4 @@
+# Local credentials and development configuration must never be uploaded by `vercel deploy`.
+# Production values belong in the Vercel project Environment Variables UI.
+.env
+.env.*
