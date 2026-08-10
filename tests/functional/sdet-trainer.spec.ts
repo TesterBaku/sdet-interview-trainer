@@ -359,7 +359,17 @@ test("coding gym supports sandbox drafts, reveal controls, status save, and draf
   const answerBox = firstTask.getByPlaceholder("Write your python answer here...");
   await expect(answerBox).toHaveAttribute("id", "code-answer-python-coding-001");
   await expect(answerBox).toHaveAttribute("name", "code-answer-python-coding-001");
+  const runVisibleTests = firstTask.getByRole("button", { name: "Run 2 visible tests" });
+  await expect(runVisibleTests).toBeDisabled();
+  await expect(firstTask.getByText("Visible tests only — this free browser runner does not use hidden grading.")).toBeVisible();
   await answerBox.fill("def find_duplicates(items):\n    return []");
+  await expect(runVisibleTests).toBeEnabled();
+  await runVisibleTests.click();
+  await expect(firstTask.getByText("1/2 visible tests passed")).toBeVisible({ timeout: 20_000 });
+  await expect(firstTask.getByText("Failed: keeps the first duplicate order")).toBeVisible();
+  await answerBox.fill("def find_duplicates(items):\n    return float('nan')");
+  await runVisibleTests.click();
+  await expect(firstTask.getByText("0/2 visible tests passed")).toBeVisible();
   await expect(firstTask.getByText(/\d+ chars/i)).toBeVisible();
   await expect(firstTask.getByRole("button", { name: "Clear draft" })).toBeEnabled();
   await expect.poll(async () => page.evaluate((key) => window.localStorage.getItem(key), codeDraftKey)).toContain("find_duplicates");

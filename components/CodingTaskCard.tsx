@@ -3,6 +3,7 @@
 import { useState, useSyncExternalStore } from "react";
 import { StatusButtons } from "@/components/StatusButtons";
 import { clearCodeDraft, readCodeDraft, subscribeToCodeDraft, writeCodeDraft } from "@/lib/codeWorkspace";
+import { runPythonVisibleTests, type PythonRunResult } from "@/lib/pythonRunner";
 import type { Question } from "@/types/Question";
 import type { QuestionStatus } from "@/types/Progress";
 
@@ -15,6 +16,8 @@ type CodingTaskCardProps = {
 export function CodingTaskCard({ question, currentStatus, onMark }: CodingTaskCardProps) {
   const [showHint, setShowHint] = useState(false);
   const [showSolution, setShowSolution] = useState(false);
+  const [runResult, setRunResult] = useState<PythonRunResult>();
+  const [isRunning, setIsRunning] = useState(false);
   const textareaId = `code-answer-${question.id}`;
   const draft = useSyncExternalStore(
     (onStoreChange) => subscribeToCodeDraft(question.id, onStoreChange),
@@ -28,6 +31,23 @@ export function CodingTaskCard({ question, currentStatus, onMark }: CodingTaskCa
 
   function resetDraft() {
     clearCodeDraft(question.id);
+    setRunResult(undefined);
+  }
+
+  async function runVisibleTests() {
+    if (!question.runner || !draft.trim()) {
+      return;
+    }
+
+    setIsRunning(true);
+    setRunResult(undefined);
+    try {
+      setRunResult(await runPythonVisibleTests(draft, question.runner));
+    } catch {
+      setRunResult({ status: "error", error: "The Python runner could not start. Please try again.", tests: [] });
+    } finally {
+      setIsRunning(false);
+    }
   }
 
   return (
@@ -96,6 +116,40 @@ export function CodingTaskCard({ question, currentStatus, onMark }: CodingTaskCa
           <span>{draft.length} chars</span>
           <span>Saved in this browser</span>
         </div>
+        {question.runner ? (
+          <div className="mt-4 border-t border-paper/10 pt-4">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <p className="text-sm text-paper/70">Runs {question.runner.visibleTests.length} visible Python tests in your browser.</p>
+              <button
+                className="rounded-full bg-brass px-4 py-2 text-sm font-bold text-black transition hover:bg-[#e5ad4c] disabled:cursor-not-allowed disabled:opacity-45 focus-ring"
+                disabled={!draft.trim() || isRunning}
+                onClick={runVisibleTests}
+                type="button"
+              >
+                {isRunning ? "Running visible tests…" : `Run ${question.runner.visibleTests.length} visible tests`}
+              </button>
+            </div>
+            <p className="mt-2 text-xs text-paper/55">Visible tests only — this free browser runner does not use hidden grading.</p>
+            <div aria-live="polite" className="mt-3">
+              {runResult?.status === "error" ? <p className="rounded-xl bg-red-950/70 p-3 text-sm text-red-100">{runResult.error}</p> : null}
+              {runResult?.status === "completed" ? (
+                <div className="space-y-2 rounded-xl bg-paper/10 p-3 text-sm">
+                  <p className="font-bold text-paper">
+                    {runResult.tests.filter((test) => test.passed).length}/{runResult.tests.length} visible tests passed
+                  </p>
+                  <ul className="space-y-1 text-paper/80">
+                    {runResult.tests.map((test) => (
+                      <li key={test.name}>
+                        <span className={test.passed ? "text-emerald-300" : "text-red-300"}>{test.passed ? "Passed" : "Failed"}</span>: {test.name}
+                        {!test.passed && test.error ? ` — ${test.error}` : null}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null}
+            </div>
+          </div>
+        ) : null}
       </section>
 
       {showHint ? <p className="mt-4 break-words rounded-2xl bg-brass/10 p-4 text-ink/80">{question.hint}</p> : null}

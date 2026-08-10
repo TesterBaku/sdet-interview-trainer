@@ -1,3 +1,15 @@
+export type PythonVisibleTest = {
+  name: string;
+  args: unknown[];
+  expected: unknown;
+};
+
+export type PythonRunner = {
+  language: "python";
+  entrypoint: string;
+  visibleTests: PythonVisibleTest[];
+};
+
 export type Question = {
   id: string;
   topicId: string;
@@ -19,6 +31,7 @@ export type Question = {
   expectedOutput?: string;
   hint?: string;
   solutionLanguage?: "python" | "java" | "typescript" | "sql";
+  runner?: PythonRunner;
   solution?: string;
   commonMistakes?: string[];
   tags: string[];

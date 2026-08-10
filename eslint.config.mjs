@@ -5,7 +5,7 @@ import nextTypescript from "eslint-config-next/typescript";
 const eslintConfig = [
   ...nextVitals,
   ...nextTypescript,
-  globalIgnores([".next/**", "node_modules/**"])
+  globalIgnores([".next/**", "node_modules/**", "public/pyodide/**"])
 ];
 
 export default eslintConfig;
