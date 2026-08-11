@@ -382,6 +382,14 @@ test("coding gym supports sandbox drafts, reveal controls, status save, and draf
   await expect(stringTask.getByText("2/2 visible tests passed")).toBeVisible({ timeout: 20_000 });
   await expect(stringTask.getByRole("button", { name: "Run private server check" })).toBeDisabled();
 
+  const fieldTask = page.locator("article").filter({ hasText: "Extract values from a list of dicts" });
+  const fieldAnswer = fieldTask.getByPlaceholder("Write your python answer here...");
+  await expect(fieldTask.getByRole("button", { name: "Run 2 visible tests" })).toBeDisabled();
+  await fieldAnswer.fill("def extract_field(items, field):\n    return [item[field] for item in items if field in item]");
+  await fieldTask.getByRole("button", { name: "Run 2 visible tests" }).click();
+  await expect(fieldTask.getByText("2/2 visible tests passed")).toBeVisible({ timeout: 20_000 });
+  await expect(fieldTask.getByRole("button", { name: "Run private server check" })).toBeDisabled();
+
   await expect(firstTask.getByText(/\d+ chars/i)).toBeVisible();
   await expect(firstTask.getByRole("button", { name: "Clear draft" })).toBeEnabled();
   await expect.poll(async () => page.evaluate((key) => window.localStorage.getItem(key), codeDraftKey)).toContain("find_duplicates");

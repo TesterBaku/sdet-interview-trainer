@@ -153,13 +153,29 @@
     "problem": "Given a list of dictionaries (e.g., API response items) and a field name, return a list of values for that field from every dictionary. Skip items where the key is missing.",
     "inputExample": "extract_field([{'id': 1, 'name': 'Alice'}, {'id': 2}, {'id': 3, 'name': 'Bob'}], 'name')",
     "expectedOutput": "['Alice', 'Bob']",
-    "hint": "Use dict.get() to safely access the key and filter out None results.",
+    "hint": "Check whether the field is in each dictionary before accessing it, so missing keys are skipped without dropping present None values.",
     "solutionLanguage": "python",
+    "runner": {
+      "language": "python",
+      "entrypoint": "extract_field",
+      "visibleTests": [
+        {
+          "name": "skips missing keys and preserves item order",
+          "args": [[{"id": 1, "name": "Alice"}, {"id": 2}, {"id": 3, "name": "Bob"}], "name"],
+          "expected": ["Alice", "Bob"]
+        },
+        {
+          "name": "returns an empty list when no item has the field",
+          "args": [[{"id": 1}, {"id": 2}], "name"],
+          "expected": []
+        }
+      ]
+    },
     "solution": "def extract_field(items, field):\n    return [item[field] for item in items if field in item]",
     "explanation": "The list comprehension iterates over every dict and includes only those where the key exists, returning the associated value. This is a common QA utility for pulling IDs, statuses, or names out of paginated API responses.",
     "commonMistakes": [
       "Using item[field] without guarding against KeyError",
-      "Returning None values instead of skipping missing keys",
+      "Skipping values that are present but falsy or None",
       "Using a for loop with append when a list comprehension is cleaner"
     ],
     "followUps": [

@@ -75,11 +75,11 @@ the pilot must not be labeled as hidden or secure assessment grading.
 
 ### Current coverage and deliberate deferral
 
-The Coding Gym currently contains **54 coding tasks**. Only `python-coding-001` and
-`python-coding-004` are runner-enabled: each has two browser-visible cases and one server-side
-private suite. The other 52 tasks intentionally remain draft-only; they have no `runner` metadata,
-visible cases, or private suites, so neither runner UI is shown for them and the server route will
-reject them as non-runnable.
+The Coding Gym currently contains **54 coding tasks**. Only `python-coding-001`,
+`python-coding-004`, and `python-coding-005` are runner-enabled: each has two browser-visible
+cases and one server-side private suite. The other 51 tasks intentionally remain draft-only; they
+have no `runner` metadata, visible cases, or private suites, so neither runner UI is shown for them
+and the server route will reject them as non-runnable.
 
 Expanding coverage is a content-and-contract task, not a switch to flip. Each additional Python
 task needs a reviewed function entry point, JSON-safe input/output contract, public cases, and a

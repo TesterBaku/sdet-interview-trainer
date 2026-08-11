@@ -23,6 +23,18 @@ test("runner-enabled Python questions expose reviewed visible-only contracts", a
         { name: "returns false for different text", args: ["hello", "hello!"], expected: false },
       ],
     },
+    "python-coding-005": {
+      language: "python",
+      entrypoint: "extract_field",
+      visibleTests: [
+        {
+          name: "skips missing keys and preserves item order",
+          args: [[{ id: 1, name: "Alice" }, { id: 2 }, { id: 3, name: "Bob" }], "name"],
+          expected: ["Alice", "Bob"],
+        },
+        { name: "returns an empty list when no item has the field", args: [[{ id: 1 }, { id: 2 }], "name"], expected: [] },
+      ],
+    },
   });
   for (const runner of Object.values(runners)) assert.equal("hiddenTests" in runner, false);
 });
