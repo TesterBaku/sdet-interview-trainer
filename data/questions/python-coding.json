@@ -106,6 +106,22 @@
     "expectedOutput": "True",
     "hint": "Use str.strip() and str.lower() before comparing.",
     "solutionLanguage": "python",
+    "runner": {
+      "language": "python",
+      "entrypoint": "compare_strings",
+      "visibleTests": [
+        {
+          "name": "ignores case and outer whitespace",
+          "args": ["  Hello World ", "hello world"],
+          "expected": true
+        },
+        {
+          "name": "returns false for different text",
+          "args": ["hello", "hello!"],
+          "expected": false
+        }
+      ]
+    },
     "solution": "def compare_strings(a, b):\n    return a.strip().lower() == b.strip().lower()",
     "explanation": "strip() removes leading/trailing whitespace and lower() normalizes case. Chaining them before comparison avoids false negatives caused by cosmetic differences in UI text.",
     "commonMistakes": [

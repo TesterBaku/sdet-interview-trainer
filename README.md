@@ -9,12 +9,12 @@ QA Automation / SDET interview practice app — flashcards, quizzes, mock interv
 - Next.js 16 (App Router) + React 19
 - TypeScript
 - Tailwind CSS
-- Static JSON content (no backend)
+- Static JSON content plus a protected Vercel Route Handler for the coding-runner pilot
 - localStorage for progress
 - Self-owned study audio: local neural TTS (Kokoro) → Vercel Blob hosting
 - `@vercel/analytics` for page-view tracking
 - PWA-installable (manifest + service worker)
-- Playwright for functional tests
+- Playwright functional tests and Node/TypeScript unit tests
 - GitHub Actions CI (lint → typecheck → 31 Playwright tests on every PR)
 
 ## Features
@@ -32,11 +32,26 @@ Python Coding · Java Coding · SQL / PostgreSQL · Selenium · Playwright (Pyth
 | `/flashcards/[topicId]` | Reveal-answer flashcards with known/review/weak status |
 | `/quiz/[topicId]` | Multiple choice with explanations and correctness feedback |
 | `/mock-interview/[topicId]` | Type an answer, get a 60–90s structure guide, reveal model answer, self-rate |
-| `/coding-gym` | All coding tasks; supports `?topic=<id>` to scope to one topic |
+| `/coding-gym` | All 54 coding tasks; supports `?topic=<id>` to scope to one topic. Two reviewed Python tasks currently support execution. |
 | `/review` | Global queue of all questions marked weak or review-later, with status/type/topic filters |
 | `/progress` | Overall + per-type (coding / quiz / mock interview) + per-topic breakdowns |
 | `/cheatsheets` and `/cheatsheets/[id]` | Per-topic cheat sheets — each with a **Listen** podcast player (audio + synced transcript) when audio is published |
 | `/commute` | **Commute Mode** — a screen-free playlist that queues the study-audio episodes back to back |
+
+### Coding-runner pilot
+
+The Coding Gym has 54 coding tasks. Execution is intentionally limited to **two** reviewed Python
+tasks: `python-coding-001` (Find duplicate values) and `python-coding-004` (Normalize and compare
+strings). Each has two public browser cases and a small private server-side suite. The other 52
+tasks remain draft-only while their individual function contracts and test cases are reviewed.
+
+Private checks run only through `POST /api/runs`. The route requires a verified Cloudflare Turnstile
+token, is protected by Vercel WAF rate limiting, and creates a short-lived Python Sandbox with
+deny-all network egress. `CODING_RUNNER_ENABLED` defaults to `false` in Production, so private
+execution is normally unavailable. See
+[`docs/coding-execution-architecture.md`](docs/coding-execution-architecture.md) and
+[`docs/coding-test-data-boundary.md`](docs/coding-test-data-boundary.md) for the security and
+deployment contract.
 
 ## Study audio (podcast)
 
@@ -85,7 +100,7 @@ Open http://localhost:3000.
 | `npm run build` | Production build + typecheck |
 | `npm run lint` | ESLint (zero warnings policy) |
 | `npm run test:functional` | Run all Playwright tests headlessly |
-| `npm run test:unit` | Node unit tests for the audio text transforms |
+| `npm run test:unit` | Audio and server-runner unit tests |
 | `npm run audio:podcast:captions` | Build transcripts + WebVTT from rendered podcast episodes |
 | `npm run audio:podcast:publish` | Upload changed episodes to Vercel Blob + update the manifest (needs `BLOB_READ_WRITE_TOKEN`) |
 
@@ -116,6 +131,7 @@ app/
   quiz/[topicId]/                      quiz mode
   mock-interview/[topicId]/            mock interview mode
   coding-gym/                          coding tasks (supports ?topic=)
+  api/runs/                            protected private-check route
   daily-practice/                      today's 10-item plan
   review/                              global weak/review queue
   progress/                            progress breakdown
@@ -134,6 +150,7 @@ lib/
   practiceHref.ts                      question → practice mode mapping
   storage.ts                           localStorage read/write
   codeWorkspace.ts                     coding gym draft persistence
+  server/coding/                       private suites, runner, and circuit breaker
 types/                                 Topic / Question / Progress
 tests/functional/                      Playwright spec
 .github/workflows/regression.yml       CI
