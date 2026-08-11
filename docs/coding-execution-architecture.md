@@ -73,6 +73,39 @@ the user interface stays recoverable if submitted code loops forever. This provi
 practice feedback without sending code to a server, but all test data is intentionally public and
 the pilot must not be labeled as hidden or secure assessment grading.
 
+### Current coverage and deliberate deferral
+
+The Coding Gym currently contains **54 coding tasks**. Only `python-coding-001` and
+`python-coding-004` are runner-enabled: each has two browser-visible cases and one server-side
+private suite. The other 52 tasks intentionally remain draft-only; they have no `runner` metadata,
+visible cases, or private suites, so neither runner UI is shown for them and the server route will
+reject them as non-runnable.
+
+Expanding coverage is a content-and-contract task, not a switch to flip. Each additional Python
+task needs a reviewed function entry point, JSON-safe input/output contract, public cases, and a
+private-suite entry. Java, TypeScript, and SQL remain separate future work because they require
+their own runtimes and trusted harnesses (and SQL needs an ephemeral database fixture).
+
+### Deferred trusted runtimes and harnesses
+
+Java, TypeScript, and SQL must not be added to the Python route's language union, worker, or
+Sandbox image. Each needs a separate, reviewed runtime factory and a language-specific harness.
+No runtime below is enabled by this design; enabling one requires its own question contract,
+server-only private suite parser, unit/integration tests, capacity check, and controlled production
+validation.
+
+| Language | Isolated runtime and candidate contract | Trusted harness and grading boundary | Enablement gates |
+| --- | --- | --- | --- |
+| Java | A pinned, prebuilt Java 21 JDK Sandbox snapshot with no Maven, Gradle, or network package installation. A task declares a package-free `Solution` class and one public static method with a server-owned, JSON-safe signature. Candidate source is written as `Solution.java`; compiler and JVM runs have independent short deadlines and JVM heap/process limits. | A separately generated `Harness.java` compiles after the candidate, invokes only the declared method through a fixed adapter, and emits one bounded JSON marker. It must not concatenate candidate source, test inputs, or expected values into shell commands. Hidden expected values remain in the Route Handler for structural comparison; compiler diagnostics and raw output are discarded or normalized. | Verify the exact snapshot/toolchain is available on the provider; test compile error, linkage error, timeout, heap exhaustion, marker spoofing, and guaranteed cleanup. Add a Java-only request/schema type and fail closed when its server-only suite is missing. |
+| TypeScript | A pinned Node LTS plus TypeScript compiler snapshot with no `npm install`, package cache, or network access during a run. A task exports one named synchronous function from `candidate.ts`, accepting and returning JSON-only values. The trusted build invokes `tsc` with a fixed, generated configuration and no project files from the repository. | A trusted Node launcher loads only the compiled candidate module, calls the declared export with JSON arguments, and writes the final bounded marker. Candidate output is never treated as a protocol response. Private expected values remain in the Route Handler; no secrets, environment variables, or writable shared paths enter the VM. | Verify compiler and Node versions in the snapshot; test type error, module/export mismatch, runtime error, event-loop timeout, child-process attempt, and cleanup. Add a TypeScript-only request/schema type and keep the browser worker separate from server grading. |
+| SQL | A fresh, local PostgreSQL instance per run from a pinned image/snapshot, not a shared database and not Docker nested inside the Python Sandbox. The service binds only inside the microVM. Start with a single-statement, read-only query contract against task-specific, server-owned schema and fixtures. | The trusted harness initializes one disposable database per case, connects as a non-owner role with read-only transaction, tight statement/lock/idle timeouts, row/byte caps, and no filesystem/program-copy privileges. It canonicalizes typed result rows to JSON and compares them server-side. Candidate SQL is supplied as a file/stdin to the client, never interpolated into a shell command; raw results are not returned. | Prove database teardown after pass/failure/timeout, fixture reset between cases, rejection of non-read-only/multi-statement input, role isolation, canonical ordering behavior, and bounded output. Add a SQL-only suite/parser and run a provider capacity/cost review before exposing any UI. |
+
+All three designs retain the shared controls: fresh microVM per submission, deny-all egress,
+no injected secrets, strict request/response byte limits, Turnstile plus durable rate limiting,
+and unconditional `stop()` in `finally`. They deliberately do not claim assessment-grade secrecy:
+a learner can probe an anonymous grading oracle, but hidden fixtures and raw outputs must not be
+returned to the browser.
+
 ## Execution contract
 
 1. Browser sends `{ questionId, language, source, turnstileToken }` to `POST /api/runs`.
@@ -95,9 +128,11 @@ the pilot must not be labeled as hidden or secure assessment grading.
   other origins.
 - Cloudflare Turnstile validates every anonymous run server-side. The route is disabled unless
   `CODING_RUNNER_ENABLED=true`, and its process-local circuit breaker enforces the configured
-  per-client window and concurrent-run cap before microVM allocation. It is deliberately not a
-  durable cross-instance quota: do not enable public production grading until a suitable
-  free-tier durable limiter has been selected and verified.
+  per-client window and concurrent-run cap before microVM allocation. Production also has the
+  durable Vercel WAF rule `Rate limit coding runner`: `POST /api/runs`, fixed-window IP key, three
+  requests per 600 seconds, 429 when exceeded. The WAF runs before the Route Handler, so excess
+  traffic cannot reach Turnstile verification or create a microVM; the process-local guard remains
+  a secondary concurrency breaker rather than the durable quota.
 - Enforce request and response byte limits, code-size limit, fixed language allowlist, command
   timeout, max concurrent microVM count, and destruction after every run.
 - Disable all outbound Internet access with Vercel Sandbox `deny-all`; do not inject secrets into
@@ -139,9 +174,9 @@ learning solution while keeping all hidden fixtures out of client data and respo
 - Configure `CODING_HIDDEN_TEST_SUITES_JSON` in both the ignored local environment file and
   Vercel Production. It is a compact versioned JSON document; never put it in question JSON,
   browser code, or a public repository.
-- Keep `CODING_RUNNER_ENABLED` absent (or set to `false`) in Production while the endpoint is
-  being deployed and reviewed. When a durable free-tier limiter is ready, enable it explicitly
-  with `true`; `CODING_RUNNER_MAX_RUNS_PER_HOUR` (default `5`) and
+- Keep `CODING_RUNNER_ENABLED` set to `false` in Production except during a deliberate, monitored
+  validation window. The durable Vercel WAF limiter is already in place; use an explicit `true`
+  deployment only when testing the protected endpoint. `CODING_RUNNER_MAX_RUNS_PER_HOUR` (default `5`) and
   `CODING_RUNNER_MAX_CONCURRENT` (default `1`) remain conservative circuit-breaker limits.
 
 ## Verification gates
@@ -161,9 +196,23 @@ The route and Coding Gym UI were deployed to `sdet-interview-trainer.vercel.app`
 production build. An initial direct CLI deployment detected the ignored local `.env` file during
 its build, so `.vercelignore` was added and a corrected production deployment was made. The
 superseded deployment was removed. The corrected cloud build did not detect a local environment
-file, and the live `/coding-gym` route responded successfully. `CODING_RUNNER_ENABLED` remains
-unset, so no Sandbox execution has been enabled or charged while the durable limiter and live
-Turnstile/Sandbox tests remain outstanding.
+file, and the live `/coding-gym` route responded successfully. At that initial deployment,
+`CODING_RUNNER_ENABLED` was unset, so no Sandbox execution occurred; the later production
+validation record below supersedes the then-outstanding live-test status.
+
+## Production validation record (2026-08-09)
+
+The Vercel WAF rule `Rate limit coding runner` is published for `POST /api/runs`: fixed-window,
+IP-keyed, three requests per 600 seconds, returning 429 above the limit. Production has the public
+Turnstile site key, server-side Turnstile secret, allowed hostname, and sensitive hidden-suite JSON.
+The runner switch normally remains `false`.
+
+One supervised production replay completed with a genuine Turnstile token and a correct pilot
+submission: 2/2 visible and 2/2 private checks passed. The browser received aggregate counts only.
+The runner was immediately reset to `false` and redeployed. Vercel Sandbox lists the two validation
+Python 3.13 microVMs as `stopped`, each with `deny-all` egress. A first attempt failed safely before
+allocation because Windows command-line processing stripped quotation marks from the JSON supplied
+to `vercel env add --value`; replace JSON secrets through standard input instead.
 
 ## Sources
 

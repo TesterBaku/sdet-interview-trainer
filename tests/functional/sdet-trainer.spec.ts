@@ -362,6 +362,9 @@ test("coding gym supports sandbox drafts, reveal controls, status save, and draf
   const runVisibleTests = firstTask.getByRole("button", { name: "Run 2 visible tests" });
   await expect(runVisibleTests).toBeDisabled();
   await expect(firstTask.getByText("Visible tests only — this free browser runner does not use hidden grading.")).toBeVisible();
+  const privateCheck = firstTask.getByRole("button", { name: "Run private server check" });
+  await expect(privateCheck).toBeDisabled();
+  await expect(firstTask.getByText("Verify before running private server checks.")).toBeVisible();
   await answerBox.fill("def find_duplicates(items):\n    return []");
   await expect(runVisibleTests).toBeEnabled();
   await runVisibleTests.click();
@@ -370,6 +373,15 @@ test("coding gym supports sandbox drafts, reveal controls, status save, and draf
   await answerBox.fill("def find_duplicates(items):\n    return float('nan')");
   await runVisibleTests.click();
   await expect(firstTask.getByText("0/2 visible tests passed")).toBeVisible();
+
+  const stringTask = page.locator("article").filter({ hasText: "Normalize and compare strings" });
+  const stringAnswer = stringTask.getByPlaceholder("Write your python answer here...");
+  await expect(stringTask.getByRole("button", { name: "Run 2 visible tests" })).toBeDisabled();
+  await stringAnswer.fill("def compare_strings(a, b):\n    return a.strip().lower() == b.strip().lower()");
+  await stringTask.getByRole("button", { name: "Run 2 visible tests" }).click();
+  await expect(stringTask.getByText("2/2 visible tests passed")).toBeVisible({ timeout: 20_000 });
+  await expect(stringTask.getByRole("button", { name: "Run private server check" })).toBeDisabled();
+
   await expect(firstTask.getByText(/\d+ chars/i)).toBeVisible();
   await expect(firstTask.getByRole("button", { name: "Clear draft" })).toBeEnabled();
   await expect.poll(async () => page.evaluate((key) => window.localStorage.getItem(key), codeDraftKey)).toContain("find_duplicates");

@@ -12,7 +12,7 @@
     "start": "next start",
     "lint": "eslint . --max-warnings=0",
     "test:functional": "playwright test",
-    "test:unit": "node --test \"tests/unit/**/*.test.mjs\"",
+    "test:unit": "node --test \"tests/unit/**/*.test.mjs\" && node --conditions=react-server --import tsx --test tests/unit/coding-runner.test.ts",
     "audio:scripts": "node scripts/audio/generate-scripts.mjs",
     "audio:tts": "node scripts/audio/synthesize.mjs",
     "audio:captions": "node scripts/audio/captions.mjs",
@@ -45,6 +45,7 @@
     "postcss": "^8.5.4",
     "pyodide": "^0.28.3",
     "tailwindcss": "^3.4.17",
+    "tsx": "^4.23.12",
     "typescript": "^5.8.3"
   }
 }

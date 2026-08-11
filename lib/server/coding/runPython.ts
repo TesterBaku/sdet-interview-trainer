@@ -23,7 +23,15 @@ except Exception:
 
 type InternalResult = { ok: true; value: JsonValue } | { ok: false; kind: "syntax_error" | "runtime_error" | "timeout" };
 
-function parseResult(output: string): InternalResult {
+type PythonSandbox = {
+  writeFiles(files: Array<{ path: string; content: string }>): Promise<unknown>;
+  runCommand(command: string, args: string[], options: { timeoutMs: number }): Promise<{ stdout(): Promise<string> }>;
+  stop(): Promise<unknown>;
+};
+
+export type PythonSandboxFactory = () => Promise<PythonSandbox>;
+
+export function parseResult(output: string): InternalResult {
   const encoded = output.split("\n").filter((line) => line.startsWith(MARKER)).at(-1)?.slice(MARKER.length);
   if (!encoded) return { ok: false, kind: "runtime_error" };
   try {
@@ -35,7 +43,7 @@ function parseResult(output: string): InternalResult {
   }
 }
 
-function sameJson(left: JsonValue, right: JsonValue): boolean {
+export function sameJson(left: JsonValue, right: JsonValue): boolean {
   if (left === right) return true;
   if (typeof left !== typeof right || left === null || right === null) return false;
   if (Array.isArray(left) || Array.isArray(right)) {
@@ -50,8 +58,14 @@ function sameJson(left: JsonValue, right: JsonValue): boolean {
     && leftKeys.every((key, index) => key === rightKeys[index] && sameJson(left[key], right[key]));
 }
 
-export async function runPythonSuite(source: string, entrypoint: string, visible: PythonVisibleTest[], hidden: HiddenCase[]) {
-  const sandbox = await Sandbox.create({ runtime: "python3.13", timeout: 10_000, networkPolicy: "deny-all", resources: { vcpus: 1 } });
+export async function runPythonSuite(
+  source: string,
+  entrypoint: string,
+  visible: PythonVisibleTest[],
+  hidden: HiddenCase[],
+  createSandbox: PythonSandboxFactory = () => Sandbox.create({ runtime: "python3.13", timeout: 10_000, networkPolicy: "deny-all", resources: { vcpus: 1 } })
+) {
+  const sandbox = await createSandbox();
   try {
     await sandbox.writeFiles([{ path: "/tmp/candidate.py", content: source }, { path: "/tmp/harness.py", content: HARNESS }]);
     const runCase = async (test: { args: JsonValue[]; expected: JsonValue }) => {
