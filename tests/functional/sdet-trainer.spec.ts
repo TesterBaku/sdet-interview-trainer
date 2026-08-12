@@ -417,6 +417,35 @@ test("coding gym supports sandbox drafts, reveal controls, status save, and draf
   await expect(jsonTask.getByText("2/2 visible tests passed")).toBeVisible({ timeout: 30_000 });
   await expect(jsonTask.getByRole("button", { name: "Run private server check" })).toBeDisabled();
 
+  const additionalRunnerTasks = [
+    {
+      title: "Parse CSV test data",
+      source: "import csv\nimport io\n\ndef parse_csv(csv_text):\n    return [dict(row) for row in csv.DictReader(io.StringIO(csv_text))]",
+    },
+    {
+      title: "Deep compare two JSON objects and report differences",
+      source:
+        "def diff_dicts(expected, actual, path=''):\n    differences = []\n    for key in sorted(set(expected) | set(actual)):\n        full_path = f'{path}.{key}' if path else key\n        if key not in expected:\n            differences.append(f'{full_path}: key missing in expected')\n        elif key not in actual:\n            differences.append(f'{full_path}: key missing in actual')\n        elif isinstance(expected[key], dict) and isinstance(actual[key], dict):\n            differences.extend(diff_dicts(expected[key], actual[key], full_path))\n        elif expected[key] != actual[key]:\n            differences.append(f'{full_path}: expected {expected[key]!r}, got {actual[key]!r}')\n    return differences",
+    },
+    {
+      title: "Group list items by a key",
+      source:
+        "from collections import defaultdict\n\ndef group_by(items, key):\n    groups = defaultdict(list)\n    for item in items:\n        groups[item[key]].append(item)\n    return dict(groups)",
+    },
+    {
+      title: "Flatten a nested list",
+      source:
+        "def flatten(nested):\n    result = []\n    for item in nested:\n        if isinstance(item, list):\n            result.extend(item)\n        else:\n            result.append(item)\n    return result",
+    },
+  ];
+  for (const { title, source } of additionalRunnerTasks) {
+    const task = page.locator("article").filter({ hasText: title });
+    await task.getByPlaceholder("Write your python answer here...").fill(source);
+    await task.getByRole("button", { name: "Run 2 visible tests" }).click();
+    await expect(task.getByText("2/2 visible tests passed")).toBeVisible({ timeout: 30_000 });
+    await expect(task.getByRole("button", { name: "Run private server check" })).toBeDisabled();
+  }
+
   await expect(firstTask.getByText(/\d+ chars/i)).toBeVisible();
   await expect(firstTask.getByRole("button", { name: "Clear draft" })).toBeEnabled();
   await expect.poll(async () => page.evaluate((key) => window.localStorage.getItem(key), codeDraftKey)).toContain("find_duplicates");

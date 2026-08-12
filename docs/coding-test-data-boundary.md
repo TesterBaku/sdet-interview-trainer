@@ -55,10 +55,10 @@ The initial small suite has this exact JSON shape:
 
 ## Current suite coverage
 
-This is a four-question Python pilot: only `python-coding-001`, `python-coding-004`,
-`python-coding-005`, and `python-coding-006` have public `runner` metadata and matching
-private-suite entries. Their two visible browser cases are deliberately public, while private cases
-stay only in `CODING_HIDDEN_TEST_SUITES_JSON`. The other 50 Coding Gym tasks have no runner
+This is an eight-question Python pilot: only `python-coding-001` and `python-coding-004` through
+`python-coding-010` have public `runner` metadata and matching private-suite entries. Their two
+visible browser cases are deliberately public, while private cases stay only in
+`CODING_HIDDEN_TEST_SUITES_JSON`. The other 46 Coding Gym tasks have no runner
 contract or hidden-suite configuration and must remain draft-only until their per-question contracts
 and tests are added. Do not add a generic fallback suite or reuse a question's cases for another
 task.

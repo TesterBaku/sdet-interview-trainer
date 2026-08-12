@@ -78,8 +78,8 @@ the pilot must not be labeled as hidden or secure assessment grading.
 ### Current coverage and deliberate deferral
 
 The Coding Gym currently contains **54 coding tasks**. Only `python-coding-001`,
-`python-coding-004`, `python-coding-005`, and `python-coding-006` are runner-enabled: each has two
-browser-visible cases and one server-side private suite. The other 50 tasks intentionally remain
+`python-coding-004` through `python-coding-010` are runner-enabled: each has two browser-visible
+cases and one server-side private suite. The other 46 tasks intentionally remain
 draft-only; they have no `runner` metadata, visible cases, or private suites, so neither runner UI
 is shown for them and the server route will reject them as non-runnable.
 

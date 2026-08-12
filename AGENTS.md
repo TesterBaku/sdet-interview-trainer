@@ -47,6 +47,38 @@
 5. **Document Results:** Add review section to tasks/todo.md
 6. **Capture Lessons:** Update tasks/lessons.md after corrections
 
+## Change Delivery Workflow
+
+For every implementation change, carry verified work through delivery without waiting for a
+separate prompt:
+
+1. Create a dedicated feature branch before staging changes.
+2. Commit only task-related files, preserving unrelated local/untracked files.
+3. Push the branch and open a pull request with the completed verification evidence.
+4. Inspect required CI checks and automated review feedback, including Copilot comments; resolve
+   every actionable finding and rerun relevant verification.
+5. If checks are green and no unresolved review comments remain, merge the pull request, then
+   update local `main` to the merged remote state.
+
+Do not describe a change as complete merely because local checks pass: completion includes the
+commit, pull request, review/check inspection, and merge unless the user explicitly limits scope.
+
+## Change Delivery Workflow
+
+For every implementation change, carry verified work through delivery without waiting for a
+separate prompt:
+
+1. Create a dedicated feature branch before staging changes.
+2. Commit only task-related files, preserving unrelated local/untracked files.
+3. Push the branch and open a pull request with the completed verification evidence.
+4. Inspect required CI checks and automated review feedback, including Copilot comments; resolve
+   every actionable finding and rerun relevant verification.
+5. If checks are green and no unresolved review comments remain, merge the pull request, then
+   update local `main` to the merged remote state.
+
+Do not describe a change as complete merely because local checks pass: completion includes the
+commit, pull request, review/check inspection, and merge unless the user explicitly limits scope.
+
 ---
 
 ## Core Principles
