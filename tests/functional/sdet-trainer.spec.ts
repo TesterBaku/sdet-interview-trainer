@@ -417,6 +417,35 @@ test("coding gym supports sandbox drafts, reveal controls, status save, and draf
   await expect(jsonTask.getByText("2/2 visible tests passed")).toBeVisible({ timeout: 30_000 });
   await expect(jsonTask.getByRole("button", { name: "Run private server check" })).toBeDisabled();
 
+  const additionalRunnerTasks = [
+    {
+      title: "Parse CSV test data",
+      source: "import csv\nimport io\n\ndef parse_csv(csv_text):\n    return [dict(row) for row in csv.DictReader(io.StringIO(csv_text))]",
+    },
+    {
+      title: "Deep compare two JSON objects and report differences",
+      source:
+        "def diff_dicts(expected, actual, path=''):\n    differences = []\n    for key in sorted(set(expected) | set(actual)):\n        full_path = f'{path}.{key}' if path else key\n        if key not in expected:\n            differences.append(f'{full_path}: key missing in expected')\n        elif key not in actual:\n            differences.append(f'{full_path}: key missing in actual')\n        elif isinstance(expected[key], dict) and isinstance(actual[key], dict):\n            differences.extend(diff_dicts(expected[key], actual[key], full_path))\n        elif expected[key] != actual[key]:\n            differences.append(f'{full_path}: expected {expected[key]!r}, got {actual[key]!r}')\n    return differences",
+    },
+    {
+      title: "Group list items by a key",
+      source:
+        "from collections import defaultdict\n\ndef group_by(items, key):\n    groups = defaultdict(list)\n    for item in items:\n        groups[item[key]].append(item)\n    return dict(groups)",
+    },
+    {
+      title: "Flatten a nested list",
+      source:
+        "def flatten(nested):\n    result = []\n    for item in nested:\n        if isinstance(item, list):\n            result.extend(item)\n        else:\n            result.append(item)\n    return result",
+    },
+  ];
+  for (const { title, source } of additionalRunnerTasks) {
+    const task = page.locator("article").filter({ hasText: title });
+    await task.getByPlaceholder("Write your python answer here...").fill(source);
+    await task.getByRole("button", { name: "Run 2 visible tests" }).click();
+    await expect(task.getByText("2/2 visible tests passed")).toBeVisible({ timeout: 30_000 });
+    await expect(task.getByRole("button", { name: "Run private server check" })).toBeDisabled();
+  }
+
   await expect(firstTask.getByText(/\d+ chars/i)).toBeVisible();
   await expect(firstTask.getByRole("button", { name: "Clear draft" })).toBeEnabled();
   await expect.poll(async () => page.evaluate((key) => window.localStorage.getItem(key), codeDraftKey)).toContain("find_duplicates");
@@ -966,16 +995,27 @@ test("commute playlist reflects listened + partially-heard episodes", async ({ p
 
 test("commute shows a buffering indicator only while actively playing", async ({ page }) => {
   test.skip(audioCount === 0, "needs published audio");
+  // This test injects the full media-event sequence itself. Isolate it from Chromium's trusted
+  // source-probing events (canplay/playing/error/pause), which otherwise race those synthetic
+  // events on CI and can clear the buffering state before the assertion observes it.
+  await page.addInitScript(() => {
+    const blockTrustedMediaEvent = (event: Event) => {
+      if (event.isTrusted && event.target instanceof HTMLMediaElement) event.stopImmediatePropagation();
+    };
+    for (const type of ["canplay", "playing", "error", "pause", "stalled", "waiting"]) {
+      window.addEventListener(type, blockTrustedMediaEvent, true);
+    }
+  });
   await page.goto("/commute");
   const audio = page.locator("audio");
+  const player = page.getByRole("region", { name: /^Listen:/ });
   // A stall before playback (preload) must NOT show a spinner on an idle track.
   await audio.evaluate((el: HTMLAudioElement) => el.dispatchEvent(new Event("waiting")));
   await expect(page.getByText(/Buffering/)).toBeHidden();
   // Once playing, a stall shows the spinner; recovering (playing) clears it.
-  await audio.evaluate((el: HTMLAudioElement) => {
-    el.dispatchEvent(new Event("play"));
-    el.dispatchEvent(new Event("waiting"));
-  });
+  await audio.evaluate((el: HTMLAudioElement) => el.dispatchEvent(new Event("play")));
+  await expect(player.getByRole("button", { name: "Pause", exact: true })).toBeVisible();
+  await audio.evaluate((el: HTMLAudioElement) => el.dispatchEvent(new Event("waiting")));
   await expect(page.getByText(/Buffering/)).toBeVisible();
   await audio.evaluate((el: HTMLAudioElement) => el.dispatchEvent(new Event("playing")));
   await expect(page.getByText(/Buffering/)).toBeHidden();
@@ -1084,8 +1124,9 @@ test("commute transcript offers Retry after a failed fetch", async ({ page }) =>
   await page.goto("/commute");
   const player = page.getByRole("region", { name: /^Listen:/ });
   await player.getByRole("button", { name: "Transcript" }).click();
-  await expect(player.getByText(/Transcript unavailable/)).toBeVisible();
-  await player.getByRole("button", { name: /Retry/ }).click();
+  const unavailable = player.getByText(/Transcript unavailable/);
+  await expect(unavailable).toBeVisible();
+  await unavailable.locator("..").getByRole("button", { name: "Retry" }).click();
   await expect(player.getByRole("list", { name: "Transcript" })).toBeVisible();
 });
 
@@ -1167,6 +1208,13 @@ test("commute reflects play state in the active row badge and document title", a
   await page.goto("/commute");
   const items = page.getByRole("list", { name: "Episode playlist" }).getByRole("listitem");
   const audio = page.locator("audio");
+  // Keep real source probing from racing the synthetic media events under test; see the
+  // buffering test for why only trusted pause events are suppressed.
+  await audio.evaluate((el: HTMLAudioElement) => {
+    el.addEventListener("pause", (event) => {
+      if (event.isTrusted) event.stopImmediatePropagation();
+    });
+  });
   const activeRow = items.nth(0).getByRole("button");
   await expect(activeRow).toHaveAttribute("aria-label", /^Play /);
   await audio.evaluate((el: HTMLAudioElement) => el.dispatchEvent(new Event("play")));

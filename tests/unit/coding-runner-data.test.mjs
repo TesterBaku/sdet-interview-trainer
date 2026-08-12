@@ -51,6 +51,60 @@ test("runner-enabled Python questions expose reviewed visible-only contracts", a
         },
       ],
     },
+    "python-coding-007": {
+      language: "python",
+      entrypoint: "parse_csv",
+      visibleTests: [
+        {
+          name: "maps header names to each data row",
+          args: ["username,password\nalice,secret1\nbob,secret2\n"],
+          expected: [{ username: "alice", password: "secret1" }, { username: "bob", password: "secret2" }],
+        },
+        { name: "returns an empty list for header-only CSV text", args: ["id,status\n"], expected: [] },
+      ],
+    },
+    "python-coding-008": {
+      language: "python",
+      entrypoint: "diff_dicts",
+      visibleTests: [
+        {
+          name: "reports mismatches and missing expected keys in sorted path order",
+          args: [{ a: 1, b: { x: 10 } }, { a: 2, b: { x: 10, y: 20 }, c: 3 }],
+          expected: ["a: expected 1, got 2", "b.y: key missing in expected", "c: key missing in expected"],
+        },
+        {
+          name: "reports a nested key missing from actual",
+          args: [{ user: { id: 1, name: "Ada" } }, { user: { id: 1 } }],
+          expected: ["user.name: key missing in actual"],
+        },
+      ],
+    },
+    "python-coding-009": {
+      language: "python",
+      entrypoint: "group_by",
+      visibleTests: [
+        {
+          name: "groups string values while preserving item order",
+          args: [
+            [{ env: "prod", test: "login" }, { env: "staging", test: "checkout" }, { env: "prod", test: "logout" }],
+            "env",
+          ],
+          expected: {
+            prod: [{ env: "prod", test: "login" }, { env: "prod", test: "logout" }],
+            staging: [{ env: "staging", test: "checkout" }],
+          },
+        },
+        { name: "returns an empty object for an empty item list", args: [[], "env"], expected: {} },
+      ],
+    },
+    "python-coding-010": {
+      language: "python",
+      entrypoint: "flatten",
+      visibleTests: [
+        { name: "flattens one level of nested lists", args: [[[1, 2], [3, 4], [5]]], expected: [1, 2, 3, 4, 5] },
+        { name: "preserves scalars and skips empty inner lists", args: [[1, [2, 3], 4, []]], expected: [1, 2, 3, 4] },
+      ],
+    },
   });
   for (const runner of Object.values(runners)) assert.equal("hiddenTests" in runner, false);
 });

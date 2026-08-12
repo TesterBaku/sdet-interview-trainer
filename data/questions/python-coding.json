@@ -246,28 +246,43 @@
     "level": "mid",
     "type": "coding",
     "difficulty": "medium",
-    "title": "Read and parse a CSV test data file",
-    "question": "Write a function that reads a CSV file and returns its rows as a list of dictionaries.",
-    "problem": "Given a file path to a CSV file, return a list of dicts where each dict maps column headers to row values. This is a common pattern for data-driven testing where test inputs are stored in CSV files.",
-    "inputExample": "load_csv('test_data/users.csv')\n# File contents:\n# username,password,expected_role\n# alice,secret1,admin\n# bob,secret2,viewer",
+    "title": "Parse CSV test data",
+    "question": "Write a function that parses CSV text and returns its rows as a list of dictionaries.",
+    "problem": "Given CSV text whose first row contains column headers, return a list of dicts where each dict maps headers to row values. This is a common pattern for data-driven testing where CSV data is supplied directly to a test helper.",
+    "inputExample": "parse_csv('username,password,expected_role\nalice,secret1,admin\nbob,secret2,viewer\n')",
     "expectedOutput": "[{'username': 'alice', 'password': 'secret1', 'expected_role': 'admin'}, {'username': 'bob', 'password': 'secret2', 'expected_role': 'viewer'}]",
     "hint": "Use the csv.DictReader class — it handles headers automatically.",
     "solutionLanguage": "python",
-    "solution": "import csv\n\ndef load_csv(file_path):\n    rows = []\n    with open(file_path, newline='', encoding='utf-8') as f:\n        reader = csv.DictReader(f)\n        for row in reader:\n            rows.append(dict(row))\n    return rows",
-    "explanation": "csv.DictReader uses the first row as field names and maps each subsequent row into an OrderedDict (Python 3.7+ preserves insertion order). Wrapping in dict() converts OrderedDict to a plain dict. The with block ensures the file is closed after reading.",
+    "runner": {
+      "language": "python",
+      "entrypoint": "parse_csv",
+      "visibleTests": [
+        {
+          "name": "maps header names to each data row",
+          "args": ["username,password\nalice,secret1\nbob,secret2\n"],
+          "expected": [{"username": "alice", "password": "secret1"}, {"username": "bob", "password": "secret2"}]
+        },
+        {
+          "name": "returns an empty list for header-only CSV text",
+          "args": ["id,status\n"],
+          "expected": []
+        }
+      ]
+    },
+    "solution": "import csv\nimport io\n\ndef parse_csv(csv_text):\n    return [dict(row) for row in csv.DictReader(io.StringIO(csv_text))]",
+    "explanation": "csv.DictReader uses the first row as field names and maps each subsequent row into a dictionary. io.StringIO lets it read supplied text as a file, making the helper usable in browser-run and server-run test environments without file-system access.",
     "commonMistakes": [
-      "Forgetting newline='' which causes extra blank rows on Windows",
+      "Passing a file path instead of the CSV text",
       "Using csv.reader instead of DictReader and manually indexing columns",
-      "Not specifying encoding and getting UnicodeDecodeError on non-ASCII data"
+      "Forgetting StringIO and passing raw text where a file-like object is required"
     ],
     "followUps": [
       "How would you skip comment rows starting with '#'?",
       "How would you use this data with pytest.mark.parametrize?",
-      "How would you handle a file that doesn't exist?"
+      "How would you validate required CSV columns?"
     ],
     "tags": [
       "python",
-      "file-reading",
       "csv",
       "data-driven-testing"
     ]
@@ -286,6 +301,22 @@
     "expectedOutput": "[\"a: expected 1, got 2\", \"b.y: key missing in expected\", \"c: key missing in expected\"]",
     "hint": "Use recursion and pass a path prefix string to build dotted key paths.",
     "solutionLanguage": "python",
+    "runner": {
+      "language": "python",
+      "entrypoint": "diff_dicts",
+      "visibleTests": [
+        {
+          "name": "reports mismatches and missing expected keys in sorted path order",
+          "args": [{"a": 1, "b": {"x": 10}}, {"a": 2, "b": {"x": 10, "y": 20}, "c": 3}],
+          "expected": ["a: expected 1, got 2", "b.y: key missing in expected", "c: key missing in expected"]
+        },
+        {
+          "name": "reports a nested key missing from actual",
+          "args": [{"user": {"id": 1, "name": "Ada"}}, {"user": {"id": 1}}],
+          "expected": ["user.name: key missing in actual"]
+        }
+      ]
+    },
     "solution": "def diff_dicts(expected, actual, path=''):\n    differences = []\n\n    all_keys = set(expected.keys()) | set(actual.keys())\n\n    for key in sorted(all_keys):\n        full_path = f'{path}.{key}' if path else key\n\n        if key not in expected:\n            differences.append(f'{full_path}: key missing in expected')\n        elif key not in actual:\n            differences.append(f'{full_path}: key missing in actual')\n        elif isinstance(expected[key], dict) and isinstance(actual[key], dict):\n            differences.extend(diff_dicts(expected[key], actual[key], full_path))\n        elif expected[key] != actual[key]:\n            differences.append(f'{full_path}: expected {expected[key]!r}, got {actual[key]!r}')\n\n    return differences",
     "explanation": "The function builds the union of all keys, then for each key either recurses (if both values are dicts) or records a mismatch. The dotted path prefix makes it easy to pinpoint the location of each difference in deeply nested payloads.",
     "commonMistakes": [
@@ -315,11 +346,27 @@
     "difficulty": "medium",
     "title": "Group list items by a key",
     "question": "Write a function that groups a list of dicts by a specified key value.",
-    "problem": "Given a list of dicts and a key name, return a dict where each unique value of that key maps to the list of original dicts that share it. This is useful when grouping test results by status or environment.",
+    "problem": "Given a list of dicts and a key name whose values are strings, return a dict where each unique value maps to the list of original dicts that share it. This is useful when grouping test results by status or environment.",
     "inputExample": "group_by([{'env': 'prod', 'test': 'login'}, {'env': 'staging', 'test': 'checkout'}, {'env': 'prod', 'test': 'logout'}], 'env')",
     "expectedOutput": "{'prod': [{'env': 'prod', 'test': 'login'}, {'env': 'prod', 'test': 'logout'}], 'staging': [{'env': 'staging', 'test': 'checkout'}]}",
     "hint": "Use a defaultdict(list) and append each item to the list for its key value.",
     "solutionLanguage": "python",
+    "runner": {
+      "language": "python",
+      "entrypoint": "group_by",
+      "visibleTests": [
+        {
+          "name": "groups string values while preserving item order",
+          "args": [[{"env": "prod", "test": "login"}, {"env": "staging", "test": "checkout"}, {"env": "prod", "test": "logout"}], "env"],
+          "expected": {"prod": [{"env": "prod", "test": "login"}, {"env": "prod", "test": "logout"}], "staging": [{"env": "staging", "test": "checkout"}]}
+        },
+        {
+          "name": "returns an empty object for an empty item list",
+          "args": [[], "env"],
+          "expected": {}
+        }
+      ]
+    },
     "solution": "from collections import defaultdict\n\ndef group_by(items, key):\n    groups = defaultdict(list)\n    for item in items:\n        groups[item[key]].append(item)\n    return dict(groups)",
     "explanation": "defaultdict(list) automatically initializes an empty list for new keys, so no explicit key-existence check is needed. Converting back to a plain dict at the end avoids surprises for callers who don't expect a defaultdict.",
     "commonMistakes": [
@@ -354,6 +401,22 @@
     "expectedOutput": "[1, 2, 3, 4, 5]",
     "hint": "Iterate through each item; if it is a list, extend, otherwise append.",
     "solutionLanguage": "python",
+    "runner": {
+      "language": "python",
+      "entrypoint": "flatten",
+      "visibleTests": [
+        {
+          "name": "flattens one level of nested lists",
+          "args": [[[1, 2], [3, 4], [5]]],
+          "expected": [1, 2, 3, 4, 5]
+        },
+        {
+          "name": "preserves scalars and skips empty inner lists",
+          "args": [[1, [2, 3], 4, []]],
+          "expected": [1, 2, 3, 4]
+        }
+      ]
+    },
     "solution": "def flatten(nested):\n    result = []\n    for item in nested:\n        if isinstance(item, list):\n            result.extend(item)\n        else:\n            result.append(item)\n    return result",
     "explanation": "extend() adds all elements of a sub-list in place, while append() handles scalar values. This avoids the common mistake of appending the inner list as a single element.",
     "commonMistakes": [
