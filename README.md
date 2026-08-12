@@ -32,7 +32,7 @@ Python Coding · Java Coding · SQL / PostgreSQL · Selenium · Playwright (Pyth
 | `/flashcards/[topicId]` | Reveal-answer flashcards with known/review/weak status |
 | `/quiz/[topicId]` | Multiple choice with explanations and correctness feedback |
 | `/mock-interview/[topicId]` | Type an answer, get a 60–90s structure guide, reveal model answer, self-rate |
-| `/coding-gym` | All 54 coding tasks; supports `?topic=<id>` to scope to one topic. Three reviewed Python tasks currently support execution. |
+| `/coding-gym` | All 54 coding tasks; supports `?topic=<id>` to scope to one topic. Four reviewed Python tasks currently support execution. |
 | `/review` | Global queue of all questions marked weak or review-later, with status/type/topic filters |
 | `/progress` | Overall + per-type (coding / quiz / mock interview) + per-topic breakdowns |
 | `/cheatsheets` and `/cheatsheets/[id]` | Per-topic cheat sheets — each with a **Listen** podcast player (audio + synced transcript) when audio is published |
@@ -40,11 +40,12 @@ Python Coding · Java Coding · SQL / PostgreSQL · Selenium · Playwright (Pyth
 
 ### Coding-runner pilot
 
-The Coding Gym has 54 coding tasks. Execution is intentionally limited to **three** reviewed Python
+The Coding Gym has 54 coding tasks. Execution is intentionally limited to **four** reviewed Python
 tasks: `python-coding-001` (Find duplicate values), `python-coding-004` (Normalize and compare
-strings), and `python-coding-005` (Extract values from a list of dicts). Each has two public
-browser cases and a small private server-side suite. The other 51 tasks remain draft-only while
-their individual function contracts and test cases are reviewed.
+strings), `python-coding-005` (Extract values from a list of dicts), and `python-coding-006`
+(Parse and validate JSON string). Each has two public browser cases and a small private server-side
+suite. The other 50 tasks remain draft-only while their individual function contracts and test cases
+are reviewed.
 
 Private checks run only through `POST /api/runs`. The route requires a verified Cloudflare Turnstile
 token, is protected by Vercel WAF rate limiting, and creates a short-lived Python Sandbox with

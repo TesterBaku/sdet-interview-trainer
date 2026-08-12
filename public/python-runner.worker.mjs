@@ -20,6 +20,14 @@ def _safe_value(value):
 def _error(error):
     return f"{type(error).__name__}: {error}"[:500]
 
+def _same_json(left, right):
+    try:
+        return json.dumps(left, allow_nan=False, separators=(",", ":"), sort_keys=True) == json.dumps(
+            right, allow_nan=False, separators=(",", ":"), sort_keys=True
+        )
+    except (TypeError, ValueError):
+        return False
+
 def _run_visible_tests(source, entrypoint, tests_json):
     namespace = {"__name__": "__submission__"}
     try:
@@ -41,7 +49,7 @@ def _run_visible_tests(source, entrypoint, tests_json):
             actual = candidate(*test["args"])
             results.append({
                 "name": test["name"],
-                "passed": actual == test["expected"],
+                "passed": _same_json(actual, test["expected"]),
                 "actual": _safe_value(actual),
             })
         except BaseException as error:
@@ -61,6 +69,7 @@ self.onmessage = async ({ data }) => {
 
   try {
     const pyodide = await getPyodide();
+    self.postMessage({ type: "ready" });
     pyodide.globals.set("runner_source", data.source);
     pyodide.globals.set("runner_entrypoint", data.entrypoint);
     pyodide.globals.set("runner_tests_json", JSON.stringify(data.tests));

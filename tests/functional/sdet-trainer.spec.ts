@@ -74,6 +74,24 @@ async function seedProgress(
   );
 }
 
+function transcriptVtt(id: string) {
+  const cue = getCheatSheetTranscriptCues(id)[0]?.text ?? `Transcript for ${id}`;
+  return `WEBVTT\n\n00:00.000 --> 00:01.000\n${cue}\n`;
+}
+
+async function mockPublishedVtts(page: Page, bodies: Record<string, string>) {
+  await page.addInitScript((vttBodies: Record<string, string>) => {
+    const originalFetch = window.fetch.bind(window);
+    window.fetch = (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = typeof input === "string" ? input : input instanceof URL ? input.href : input.url;
+      const matched = Object.entries(vttBodies).find(([id]) => url.includes(`/${id}.vtt`));
+      return matched
+        ? Promise.resolve(new Response(matched[1], { status: 200, headers: { "content-type": "text/vtt" } }))
+        : originalFetch(input, init);
+    };
+  }, bodies);
+}
+
 test("home Continue Practice card uses generic copy and links to a topic", async ({ page }) => {
   await clearAppState(page);
   await page.goto("/");
@@ -351,6 +369,7 @@ test("mock interview last prompt shows Back to topic link instead of disabled Ne
 });
 
 test("coding gym supports sandbox drafts, reveal controls, status save, and draft persistence", async ({ page }) => {
+  test.setTimeout(90_000);
   await clearAppState(page);
   await page.goto("/coding-gym");
 
@@ -368,18 +387,18 @@ test("coding gym supports sandbox drafts, reveal controls, status save, and draf
   await answerBox.fill("def find_duplicates(items):\n    return []");
   await expect(runVisibleTests).toBeEnabled();
   await runVisibleTests.click();
-  await expect(firstTask.getByText("1/2 visible tests passed")).toBeVisible({ timeout: 20_000 });
+  await expect(firstTask.getByText("1/2 visible tests passed")).toBeVisible({ timeout: 30_000 });
   await expect(firstTask.getByText("Failed: keeps the first duplicate order")).toBeVisible();
   await answerBox.fill("def find_duplicates(items):\n    return float('nan')");
   await runVisibleTests.click();
-  await expect(firstTask.getByText("0/2 visible tests passed")).toBeVisible();
+  await expect(firstTask.getByText("0/2 visible tests passed")).toBeVisible({ timeout: 30_000 });
 
   const stringTask = page.locator("article").filter({ hasText: "Normalize and compare strings" });
   const stringAnswer = stringTask.getByPlaceholder("Write your python answer here...");
   await expect(stringTask.getByRole("button", { name: "Run 2 visible tests" })).toBeDisabled();
   await stringAnswer.fill("def compare_strings(a, b):\n    return a.strip().lower() == b.strip().lower()");
   await stringTask.getByRole("button", { name: "Run 2 visible tests" }).click();
-  await expect(stringTask.getByText("2/2 visible tests passed")).toBeVisible({ timeout: 20_000 });
+  await expect(stringTask.getByText("2/2 visible tests passed")).toBeVisible({ timeout: 30_000 });
   await expect(stringTask.getByRole("button", { name: "Run private server check" })).toBeDisabled();
 
   const fieldTask = page.locator("article").filter({ hasText: "Extract values from a list of dicts" });
@@ -387,8 +406,16 @@ test("coding gym supports sandbox drafts, reveal controls, status save, and draf
   await expect(fieldTask.getByRole("button", { name: "Run 2 visible tests" })).toBeDisabled();
   await fieldAnswer.fill("def extract_field(items, field):\n    return [item[field] for item in items if field in item]");
   await fieldTask.getByRole("button", { name: "Run 2 visible tests" }).click();
-  await expect(fieldTask.getByText("2/2 visible tests passed")).toBeVisible({ timeout: 20_000 });
+  await expect(fieldTask.getByText("2/2 visible tests passed")).toBeVisible({ timeout: 30_000 });
   await expect(fieldTask.getByRole("button", { name: "Run private server check" })).toBeDisabled();
+
+  const jsonTask = page.locator("article").filter({ hasText: "Parse and validate JSON string" });
+  const jsonAnswer = jsonTask.getByPlaceholder("Write your python answer here...");
+  await expect(jsonTask.getByRole("button", { name: "Run 2 visible tests" })).toBeDisabled();
+  await jsonAnswer.fill("import json\n\ndef validate_json(json_string, required_keys):\n    try:\n        data = json.loads(json_string)\n    except (json.JSONDecodeError, TypeError):\n        return (None, ['INVALID_JSON'])\n    return (data, [key for key in required_keys if key not in data])");
+  await jsonTask.getByRole("button", { name: "Run 2 visible tests" }).click();
+  await expect(jsonTask.getByText("2/2 visible tests passed")).toBeVisible({ timeout: 30_000 });
+  await expect(jsonTask.getByRole("button", { name: "Run private server check" })).toBeDisabled();
 
   await expect(firstTask.getByText(/\d+ chars/i)).toBeVisible();
   await expect(firstTask.getByRole("button", { name: "Clear draft" })).toBeEnabled();
@@ -990,6 +1017,7 @@ test("commute error card offers no Skip on the last episode (nothing to advance 
 
 test("commute loads the transcript on demand from the published VTT", async ({ page }) => {
   test.skip(audioCount === 0, "needs published audio + captions");
+  await mockPublishedVtts(page, { [orderedPodcast[0].id]: transcriptVtt(orderedPodcast[0].id) });
   await page.goto("/commute");
   const player = page.getByRole("region", { name: /^Listen:/ });
   await player.getByRole("button", { name: "Transcript" }).click();
@@ -1003,21 +1031,21 @@ test("commute loads the transcript on demand from the published VTT", async ({ p
 test("commute transcript drops a stale fetch that resolves after the track changed", async ({ page }) => {
   test.skip(audioCount < 2, "need two episodes to advance between");
   const firstVtt = orderedPodcast[0].id;
+  const secondVtt = orderedPodcast[1].id;
   // Episode 2's real first cue, from the same source the VTT is generated from — the transcript
   // must show THIS, not the stale episode-1 cues a late-resolving fetch would otherwise pin on.
   const secondFirstCue = getCheatSheetTranscriptCues(orderedPodcast[1].id)[0]?.text ?? "";
   // Delay episode 1's VTT at the fetch layer (the .vtt is served by the service worker / cache,
   // so Playwright's network routing can't see it — override window.fetch instead).
-  await page.addInitScript((vttId: string) => {
+  await page.addInitScript(({ firstId, firstBody, secondId, secondBody }: { firstId: string; firstBody: string; secondId: string; secondBody: string }) => {
     const orig = window.fetch.bind(window);
     window.fetch = (input: RequestInfo | URL, init?: RequestInit) => {
       const url = typeof input === "string" ? input : input instanceof URL ? input.href : input.url;
-      if (url.includes(`/${vttId}.vtt`)) {
-        return new Promise((resolve) => setTimeout(() => resolve(orig(input, init)), 1200));
-      }
+      if (url.includes(`/${firstId}.vtt`)) return new Promise((resolve) => setTimeout(() => resolve(new Response(firstBody, { status: 200 })), 1200));
+      if (url.includes(`/${secondId}.vtt`)) return Promise.resolve(new Response(secondBody, { status: 200 }));
       return orig(input, init);
     };
-  }, firstVtt);
+  }, { firstId: firstVtt, firstBody: transcriptVtt(firstVtt), secondId: secondVtt, secondBody: transcriptVtt(secondVtt) });
   await page.goto("/commute");
   const player = page.getByRole("region", { name: /^Listen:/ });
   await player.getByRole("button", { name: "Transcript" }).click(); // episode 1 fetch (delayed)
@@ -1039,7 +1067,7 @@ test("commute transcript offers Retry after a failed fetch", async ({ page }) =>
   const firstVtt = orderedPodcast[0].id;
   // Fail episode 1's first VTT fetch at the fetch layer (SW/cache hides it from network routing);
   // the retry then succeeds.
-  await page.addInitScript((vttId: string) => {
+  await page.addInitScript(({ vttId, body }: { vttId: string; body: string }) => {
     const w = window as unknown as { __vttCalls: number };
     w.__vttCalls = 0;
     const orig = window.fetch.bind(window);
@@ -1048,10 +1076,11 @@ test("commute transcript offers Retry after a failed fetch", async ({ page }) =>
       if (url.includes(`/${vttId}.vtt`)) {
         w.__vttCalls += 1;
         if (w.__vttCalls === 1) return Promise.reject(new TypeError("Failed to fetch"));
+        return Promise.resolve(new Response(body, { status: 200 }));
       }
       return orig(input, init);
     };
-  }, firstVtt);
+  }, { vttId: firstVtt, body: transcriptVtt(firstVtt) });
   await page.goto("/commute");
   const player = page.getByRole("region", { name: /^Listen:/ });
   await player.getByRole("button", { name: "Transcript" }).click();

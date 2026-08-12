@@ -67,19 +67,21 @@ not import or reference hidden cases.
 
 ### Implemented free-tier pilot
 
-The first Python Coding Gym task now has two **visible** cases and runs them client-side through a
-fresh Pyodide Web Worker. The worker is terminated after a result or an eight-second deadline, so
-the user interface stays recoverable if submitted code loops forever. This provides immediate
+The runner-enabled Python Coding Gym tasks run their **visible** cases client-side through a fresh
+Pyodide Web Worker. Worker startup has a 20-second bounded budget; after Pyodide signals ready,
+the worker is terminated after a result or an eight-second execution deadline, so the user
+interface stays recoverable if submitted code loops forever without treating a cold runtime load as
+a code timeout. This provides immediate
 practice feedback without sending code to a server, but all test data is intentionally public and
 the pilot must not be labeled as hidden or secure assessment grading.
 
 ### Current coverage and deliberate deferral
 
 The Coding Gym currently contains **54 coding tasks**. Only `python-coding-001`,
-`python-coding-004`, and `python-coding-005` are runner-enabled: each has two browser-visible
-cases and one server-side private suite. The other 51 tasks intentionally remain draft-only; they
-have no `runner` metadata, visible cases, or private suites, so neither runner UI is shown for them
-and the server route will reject them as non-runnable.
+`python-coding-004`, `python-coding-005`, and `python-coding-006` are runner-enabled: each has two
+browser-visible cases and one server-side private suite. The other 50 tasks intentionally remain
+draft-only; they have no `runner` metadata, visible cases, or private suites, so neither runner UI
+is shown for them and the server route will reject them as non-runnable.
 
 Expanding coverage is a content-and-contract task, not a switch to flip. Each additional Python
 task needs a reviewed function entry point, JSON-safe input/output contract, public cases, and a
