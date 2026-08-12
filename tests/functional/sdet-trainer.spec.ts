@@ -995,17 +995,20 @@ test("commute playlist reflects listened + partially-heard episodes", async ({ p
 
 test("commute shows a buffering indicator only while actively playing", async ({ page }) => {
   test.skip(audioCount === 0, "needs published audio");
+  // This test injects the full media-event sequence itself. Isolate it from Chromium's trusted
+  // source-probing events (canplay/playing/error/pause), which otherwise race those synthetic
+  // events on CI and can clear the buffering state before the assertion observes it.
+  await page.addInitScript(() => {
+    const blockTrustedMediaEvent = (event: Event) => {
+      if (event.isTrusted && event.target instanceof HTMLMediaElement) event.stopImmediatePropagation();
+    };
+    for (const type of ["canplay", "playing", "error", "pause", "stalled", "waiting"]) {
+      window.addEventListener(type, blockTrustedMediaEvent, true);
+    }
+  });
   await page.goto("/commute");
   const audio = page.locator("audio");
   const player = page.getByRole("region", { name: /^Listen:/ });
-  // The test drives synthetic media events. Suppress the element's unrelated, trusted pause
-  // event (emitted by Chromium while it probes the real preview source) so it cannot clear the
-  // synthetic play state between our assertions. Synthetic pause events still reach React.
-  await audio.evaluate((el: HTMLAudioElement) => {
-    el.addEventListener("pause", (event) => {
-      if (event.isTrusted) event.stopImmediatePropagation();
-    });
-  });
   // A stall before playback (preload) must NOT show a spinner on an idle track.
   await audio.evaluate((el: HTMLAudioElement) => el.dispatchEvent(new Event("waiting")));
   await expect(page.getByText(/Buffering/)).toBeHidden();
