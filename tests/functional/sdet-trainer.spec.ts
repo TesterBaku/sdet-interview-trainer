@@ -997,14 +997,14 @@ test("commute shows a buffering indicator only while actively playing", async ({
   test.skip(audioCount === 0, "needs published audio");
   await page.goto("/commute");
   const audio = page.locator("audio");
+  const player = page.getByRole("region", { name: /^Listen:/ });
   // A stall before playback (preload) must NOT show a spinner on an idle track.
   await audio.evaluate((el: HTMLAudioElement) => el.dispatchEvent(new Event("waiting")));
   await expect(page.getByText(/Buffering/)).toBeHidden();
   // Once playing, a stall shows the spinner; recovering (playing) clears it.
-  await audio.evaluate((el: HTMLAudioElement) => {
-    el.dispatchEvent(new Event("play"));
-    el.dispatchEvent(new Event("waiting"));
-  });
+  await audio.evaluate((el: HTMLAudioElement) => el.dispatchEvent(new Event("play")));
+  await expect(player.getByRole("button", { name: "Pause", exact: true })).toBeVisible();
+  await audio.evaluate((el: HTMLAudioElement) => el.dispatchEvent(new Event("waiting")));
   await expect(page.getByText(/Buffering/)).toBeVisible();
   await audio.evaluate((el: HTMLAudioElement) => el.dispatchEvent(new Event("playing")));
   await expect(page.getByText(/Buffering/)).toBeHidden();
@@ -1113,8 +1113,9 @@ test("commute transcript offers Retry after a failed fetch", async ({ page }) =>
   await page.goto("/commute");
   const player = page.getByRole("region", { name: /^Listen:/ });
   await player.getByRole("button", { name: "Transcript" }).click();
-  await expect(player.getByText(/Transcript unavailable/)).toBeVisible();
-  await player.getByRole("button", { name: /Retry/ }).click();
+  const unavailable = player.getByText(/Transcript unavailable/);
+  await expect(unavailable).toBeVisible();
+  await unavailable.locator("..").getByRole("button", { name: "Retry" }).click();
   await expect(player.getByRole("list", { name: "Transcript" })).toBeVisible();
 });
 
