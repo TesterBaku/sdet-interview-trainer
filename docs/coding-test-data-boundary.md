@@ -55,12 +55,13 @@ The initial small suite has this exact JSON shape:
 
 ## Current suite coverage
 
-This is a three-question Python pilot: only `python-coding-001`, `python-coding-004`, and
-`python-coding-005` have public `runner` metadata and matching private-suite entries. Their two
-visible browser cases are deliberately public, while private cases stay only in
-`CODING_HIDDEN_TEST_SUITES_JSON`. The other 51 Coding Gym tasks have no runner contract or
-hidden-suite configuration and must remain draft-only until their per-question contracts and tests
-are added. Do not add a generic fallback suite or reuse a question's cases for another task.
+This is a four-question Python pilot: only `python-coding-001`, `python-coding-004`,
+`python-coding-005`, and `python-coding-006` have public `runner` metadata and matching
+private-suite entries. Their two visible browser cases are deliberately public, while private cases
+stay only in `CODING_HIDDEN_TEST_SUITES_JSON`. The other 50 Coding Gym tasks have no runner
+contract or hidden-suite configuration and must remain draft-only until their per-question contracts
+and tests are added. Do not add a generic fallback suite or reuse a question's cases for another
+task.
 
 Private cases have no names and no reference source code. A server-only parser must require a
 known public question ID, JSON-only values, matching language and entrypoint, and at least one

@@ -199,11 +199,27 @@
     "difficulty": "medium",
     "title": "Parse and validate JSON string",
     "question": "Write a function that parses a JSON string and checks for required keys.",
-    "problem": "Given a raw JSON string and a list of required key names, return a tuple of (parsed_dict, missing_keys). The function should not raise an exception if the JSON is invalid — instead return (None, ['INVALID_JSON']).",
+    "problem": "Given a raw JSON object string and a list of required key names, return a tuple of (parsed_dict, missing_keys). The function should not raise an exception if the JSON is invalid — instead return (None, ['INVALID_JSON']).",
     "inputExample": "validate_json('{\"id\": 1, \"status\": \"ok\"}', ['id', 'status', 'name'])",
     "expectedOutput": "({'id': 1, 'status': 'ok'}, ['name'])",
     "hint": "Use json.loads inside a try/except block, then compare required keys against parsed dict keys.",
     "solutionLanguage": "python",
+    "runner": {
+      "language": "python",
+      "entrypoint": "validate_json",
+      "visibleTests": [
+        {
+          "name": "returns parsed data and missing keys in request order",
+          "args": ["{\"id\": 1, \"status\": \"ok\"}", ["id", "status", "name"]],
+          "expected": [{"id": 1, "status": "ok"}, ["name"]]
+        },
+        {
+          "name": "returns the invalid JSON sentinel instead of raising",
+          "args": ["{\"id\":", ["id"]],
+          "expected": [null, ["INVALID_JSON"]]
+        }
+      ]
+    },
     "solution": "import json\n\ndef validate_json(json_string, required_keys):\n    try:\n        data = json.loads(json_string)\n    except (json.JSONDecodeError, TypeError):\n        return (None, ['INVALID_JSON'])\n\n    missing = [key for key in required_keys if key not in data]\n    return (data, missing)",
     "explanation": "json.loads parses the string into a Python dict. A try/except catches malformed input gracefully. The missing keys list is built with a list comprehension comparing required_keys against the parsed dict.",
     "commonMistakes": [

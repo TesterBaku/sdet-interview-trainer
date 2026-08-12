@@ -35,6 +35,22 @@ test("runner-enabled Python questions expose reviewed visible-only contracts", a
         { name: "returns an empty list when no item has the field", args: [[{ id: 1 }, { id: 2 }], "name"], expected: [] },
       ],
     },
+    "python-coding-006": {
+      language: "python",
+      entrypoint: "validate_json",
+      visibleTests: [
+        {
+          name: "returns parsed data and missing keys in request order",
+          args: ['{"id": 1, "status": "ok"}', ["id", "status", "name"]],
+          expected: [{ id: 1, status: "ok" }, ["name"]],
+        },
+        {
+          name: "returns the invalid JSON sentinel instead of raising",
+          args: ['{"id":', ["id"]],
+          expected: [null, ["INVALID_JSON"]],
+        },
+      ],
+    },
   });
   for (const runner of Object.values(runners)) assert.equal("hiddenTests" in runner, false);
 });
