@@ -998,6 +998,14 @@ test("commute shows a buffering indicator only while actively playing", async ({
   await page.goto("/commute");
   const audio = page.locator("audio");
   const player = page.getByRole("region", { name: /^Listen:/ });
+  // The test drives synthetic media events. Suppress the element's unrelated, trusted pause
+  // event (emitted by Chromium while it probes the real preview source) so it cannot clear the
+  // synthetic play state between our assertions. Synthetic pause events still reach React.
+  await audio.evaluate((el: HTMLAudioElement) => {
+    el.addEventListener("pause", (event) => {
+      if (event.isTrusted) event.stopImmediatePropagation();
+    });
+  });
   // A stall before playback (preload) must NOT show a spinner on an idle track.
   await audio.evaluate((el: HTMLAudioElement) => el.dispatchEvent(new Event("waiting")));
   await expect(page.getByText(/Buffering/)).toBeHidden();
@@ -1197,6 +1205,13 @@ test("commute reflects play state in the active row badge and document title", a
   await page.goto("/commute");
   const items = page.getByRole("list", { name: "Episode playlist" }).getByRole("listitem");
   const audio = page.locator("audio");
+  // Keep real source probing from racing the synthetic media events under test; see the
+  // buffering test for why only trusted pause events are suppressed.
+  await audio.evaluate((el: HTMLAudioElement) => {
+    el.addEventListener("pause", (event) => {
+      if (event.isTrusted) event.stopImmediatePropagation();
+    });
+  });
   const activeRow = items.nth(0).getByRole("button");
   await expect(activeRow).toHaveAttribute("aria-label", /^Play /);
   await audio.evaluate((el: HTMLAudioElement) => el.dispatchEvent(new Event("play")));
