@@ -42,7 +42,7 @@ and renders `transcripts/<id>.json` on the page for accessibility + SEO.
 ```bash
 npm run audio:scripts     # (re)generate narration scripts for new sheets
 npm run audio:build       # scripts → tts → captions (produces local mp3 + transcripts)
-npm run audio:publish     # upload changed audio to Blob, update manifest   (needs token)
+npm run audio:publish     # upload changed audio to R2, update manifest   (needs R2 creds)
 npm run test:unit         # unit tests for the text transforms
 ```
 
@@ -59,15 +59,15 @@ content-hash gate. `synthesize` also takes `--voice=<name>` (default `af_heart`)
    which is applied only to the TTS input at synthesis, so transcripts/captions stay
    readable. Tweak the lexicon (e.g. `SQL → "sequel"`) and re-run `audio:tts`.
 3. `npm run audio:build` — synthesize + captions. Listen to `build/audio/<id>.mp3`.
-4. `npm run audio:publish` — upload to Blob and update the manifest.
+4. `npm run audio:publish` — upload to R2 and update the manifest.
 5. Commit the changed `scripts/`, `transcripts/`, and `manifest.json`.
 
-### Developing the player without Blob
+### Developing the player without R2 credentials
 
 `node scripts/audio/publish.mjs --local` stages the built mp3/vtt into
 `public/audio/` (gitignored) and writes `/audio/<id>.*` URLs into a **separate**
 gitignored `data/audio/manifest.local.json`, so the UI can be built and tested with no
-Blob credentials. The committed `manifest.json` always holds production (Blob) URLs; a
+R2 credentials. The committed `manifest.json` always holds production (R2) URLs; a
 `--local` run can never pollute it. (The app prefers `manifest.local.json` when present.)
 
 ## What's committed vs generated
@@ -146,14 +146,14 @@ the formats are set apart by structure + role, not a distinct extra voice).
   (5–7 questions) where every answer follows direct-answer → why → concrete example/trap.
 - **Everything is namespaced** so it never collides with the podcast (which shares the same
   ids): renders → `build/audio/interview/`, transcripts → `data/audio/transcripts/interview/`,
-  Blob → `audio/interview/<id>`, manifest → `data/audio/manifest.interview.json`.
+  R2 → `audio/interview/<id>`, manifest → `data/audio/manifest.interview.json`.
 
 ```bash
-# Render one round, then captions + publish (token via .env or inline):
+# Render one round, then captions + publish (R2 creds via .env or inline):
 node scripts/audio/synthesize-podcast.mjs --kind=interview --id=api-testing
 npm run audio:interview:captions        # → transcripts/interview/ + build vtt
-npm run audio:interview:publish         # → Blob audio/interview/ + manifest.interview.json
-#   node scripts/audio/publish.mjs --interview --local   # dev staging, no Blob
+npm run audio:interview:publish         # → R2 audio/interview/ + manifest.interview.json
+#   node scripts/audio/publish.mjs --interview --local   # dev staging, no upload
 ```
 
 The app surfaces these via `getInterviewAudio(id)` — a "Mock interview" player beside the
@@ -162,7 +162,7 @@ by `tests/unit/interview-scripts.test.mjs` (script format) and functional tests 
 
 ## Shipped
 
-- **Podcast rollout** — all 18 cheat-sheet topics authored, rendered, and published to Blob.
+- **Podcast rollout** — all 18 cheat-sheet topics authored, rendered, and published to R2.
 - **In-app player** — a **Listen** player (audio + synced transcript) on each cheat-sheet page.
 - **Commute Mode** (`/commute`) — a screen-free playlist that queues the episodes back to back.
 - **Mock-interview Q&A** — a two-voice interviewer/candidate round per topic, published to

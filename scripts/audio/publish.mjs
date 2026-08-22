@@ -26,10 +26,19 @@ import { KIND_NAMESPACES, kindFromArgs } from "./kinds.mjs";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, "..", "..");
 
-// Load the gitignored .env so the R2 credentials can live there instead of on the command
-// line. A real environment variable (e.g. an inline `R2_BUCKET=... npm run …`) still wins —
-// loadEnvFile only fills what's unset.
-if (!process.env.R2_ACCESS_KEY_ID && existsSync(join(ROOT, ".env"))) {
+// The R2 S3 endpoint is keyed by the Cloudflare account id, which .env may already carry under
+// its generic name — accept that rather than making the same value appear twice. The key pair
+// is R2-specific though (Cloudflare → R2 → Manage API tokens): a CLOUDFLARE_API_TOKEN is a
+// different credential and will not authenticate against the S3 API.
+const R2_VARS = ["R2_ACCESS_KEY_ID", "R2_SECRET_ACCESS_KEY", "R2_BUCKET", "R2_PUBLIC_BASE"];
+const readAccountId = () => process.env.R2_ACCOUNT_ID || process.env.CLOUDFLARE_ACCOUNT_ID;
+
+// Load the gitignored .env so the R2 credentials can live there instead of on the command line.
+// A real environment variable (e.g. an inline `R2_BUCKET=... npm run …`) still wins — loadEnvFile
+// only fills what's unset. Gate on ANY credential being absent rather than a single sentinel one:
+// with five values involved, keying off just one means a shell that exports that one suppresses
+// the .env load entirely, and the run then dies claiming the other four are missing.
+if ((R2_VARS.some((v) => !process.env[v]) || !readAccountId()) && existsSync(join(ROOT, ".env"))) {
   process.loadEnvFile(join(ROOT, ".env"));
 }
 
@@ -70,12 +79,8 @@ function saveManifest(manifest) {
 // `immutable` tells the CDN never to revalidate.
 const CACHE_CONTROL = "public, max-age=31536000, immutable";
 
-// The R2 S3 endpoint is keyed by the Cloudflare account id, which .env may already carry under
-// its generic name — accept that rather than making the same value appear twice. The key pair
-// is R2-specific though (Cloudflare → R2 → Manage API tokens): a CLOUDFLARE_API_TOKEN is a
-// different credential and will not authenticate against the S3 API.
-const accountId = process.env.R2_ACCOUNT_ID || process.env.CLOUDFLARE_ACCOUNT_ID;
-const R2_VARS = ["R2_ACCESS_KEY_ID", "R2_SECRET_ACCESS_KEY", "R2_BUCKET", "R2_PUBLIC_BASE"];
+// Resolved after the .env load above, so a value that lives only in .env is picked up.
+const accountId = readAccountId();
 
 // uploadObject(key, body, contentType, downloadName) → public URL. Null in --local mode.
 let uploadObject = null;
@@ -186,8 +191,10 @@ for (const id of ids) {
       uploadObject(`${OBJECT_PREFIX}/${id}.mp3`, readFileSync(mp3Path), "audio/mpeg", `${id}.mp3`),
       uploadObject(`${OBJECT_PREFIX}/${id}.vtt`, readFileSync(vttPath), "text/vtt", null),
     ]);
-    // An id that already had a manifest entry is an overwrite of a live, edge-cached key.
-    if (existing) overwritten.push(mp3Url);
+    // An id that already had a manifest entry is an overwrite of live, edge-cached keys. BOTH
+    // objects need listing: the vtt is uploaded with the same `immutable` header, so purging
+    // only the mp3 leaves the new audio paired with the previous, out-of-sync captions.
+    if (existing) overwritten.push(mp3Url, vttUrl);
   }
 
   manifest[id] = {

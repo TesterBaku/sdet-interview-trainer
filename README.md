@@ -64,8 +64,8 @@ surface as a **Listen** player on each cheat-sheet page and as a **Commute Mode*
 
 Unlike a black-box tool, the whole pipeline is **self-owned and offline**: scripts are
 committed, human-editable text (the patchable source of truth), rendered locally with neural
-TTS (Kokoro, Apache-2.0 — no third-party API, no per-use cost), and hosted on our own Vercel
-Blob. Only changed episodes re-render/re-upload (content-hash gated), and every episode ships
+TTS (Kokoro, Apache-2.0 — no third-party API, no per-use cost), and hosted on our own Cloudflare
+R2 bucket. Only changed episodes re-render/re-upload (content-hash gated), and every episode ships
 with a transcript for accessibility + SEO.
 
 See [`docs/audio-pipeline.md`](docs/audio-pipeline.md) for the full authoring → synthesis →
