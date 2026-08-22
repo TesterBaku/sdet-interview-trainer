@@ -2,8 +2,8 @@
 
 Turns the app's own cheat-sheet content into narrated audio + transcripts, generated
 **fully offline** (local neural TTS, no third-party API, no per-use cost) and hosted on
-our own Vercel Blob. This replaced a NotebookLM experiment whose Google-licensed audio
-was a black box we couldn't patch, transcribe, or keep in sync with the content.
+our own Cloudflare R2 bucket. This replaced a NotebookLM experiment whose Google-licensed
+audio was a black box we couldn't patch, transcribe, or keep in sync with the content.
 
 ## How it fits together
 
@@ -18,7 +18,7 @@ build/audio/<id>.mp3 + .timing.json  ← gitignored working dir
         │  3. captions          (timings → transcript + WebVTT)
         ▼
 data/audio/transcripts/<id>.json  (COMMITTED)   build/audio/<id>.vtt
-        │  4. publish            (upload mp3 + vtt to Vercel Blob)
+        │  4. publish            (upload mp3 + vtt to Cloudflare R2)
         ▼
 data/audio/manifest.json          ← COMMITTED · id → { mp3Url, vttUrl, durationSec, … }
 ```
@@ -31,15 +31,18 @@ and renders `transcripts/<id>.json` on the page for accessibility + SEO.
 - Node (repo's version) and **ffmpeg** on `PATH` (or set `FFMPEG=/path/to/ffmpeg`).
 - First `audio:tts` run downloads the ~300 MB Kokoro ONNX model from Hugging Face
   (`onnx-community/Kokoro-82M-v1.0-ONNX`), cached under `~/.cache/huggingface` after.
-- For publishing: a Vercel Blob token in `BLOB_READ_WRITE_TOKEN`
-  (Vercel → Storage → Blob → tokens).
+- For publishing: R2 credentials in the gitignored `.env` —
+  `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET`, `R2_PUBLIC_BASE`, and
+  `R2_ACCOUNT_ID` (falls back to `CLOUDFLARE_ACCOUNT_ID` if that's already set).
+  The key pair comes from Cloudflare → R2 → Manage API tokens; a `CLOUDFLARE_API_TOKEN`
+  is a *different* credential and won't authenticate against R2's S3 API.
 
 ## Everyday commands
 
 ```bash
 npm run audio:scripts     # (re)generate narration scripts for new sheets
 npm run audio:build       # scripts → tts → captions (produces local mp3 + transcripts)
-npm run audio:publish     # upload changed audio to Blob, update manifest   (needs token)
+npm run audio:publish     # upload changed audio to R2, update manifest   (needs R2 creds)
 npm run test:unit         # unit tests for the text transforms
 ```
 
@@ -56,15 +59,15 @@ content-hash gate. `synthesize` also takes `--voice=<name>` (default `af_heart`)
    which is applied only to the TTS input at synthesis, so transcripts/captions stay
    readable. Tweak the lexicon (e.g. `SQL → "sequel"`) and re-run `audio:tts`.
 3. `npm run audio:build` — synthesize + captions. Listen to `build/audio/<id>.mp3`.
-4. `npm run audio:publish` — upload to Blob and update the manifest.
+4. `npm run audio:publish` — upload to R2 and update the manifest.
 5. Commit the changed `scripts/`, `transcripts/`, and `manifest.json`.
 
-### Developing the player without Blob
+### Developing the player without R2 credentials
 
 `node scripts/audio/publish.mjs --local` stages the built mp3/vtt into
 `public/audio/` (gitignored) and writes `/audio/<id>.*` URLs into a **separate**
 gitignored `data/audio/manifest.local.json`, so the UI can be built and tested with no
-Blob credentials. The committed `manifest.json` always holds production (Blob) URLs; a
+R2 credentials. The committed `manifest.json` always holds production (R2) URLs; a
 `--local` run can never pollute it. (The app prefers `manifest.local.json` when present.)
 
 ## What's committed vs generated
@@ -75,7 +78,7 @@ Blob credentials. The committed `manifest.json` always holds production (Blob) U
 | `data/audio/lexicon.json`             | `public/audio/*` (`--local` staging)   |
 | `data/audio/scripts/*.txt`            | the Kokoro model cache                 |
 | `data/audio/transcripts/*.json`       | `data/audio/manifest.local.json` (dev) |
-| `data/audio/manifest.json`            | audio binaries live in Vercel Blob     |
+| `data/audio/manifest.json`            | audio binaries live in Cloudflare R2    |
 
 ## Troubleshooting
 
@@ -143,14 +146,14 @@ the formats are set apart by structure + role, not a distinct extra voice).
   (5–7 questions) where every answer follows direct-answer → why → concrete example/trap.
 - **Everything is namespaced** so it never collides with the podcast (which shares the same
   ids): renders → `build/audio/interview/`, transcripts → `data/audio/transcripts/interview/`,
-  Blob → `audio/interview/<id>`, manifest → `data/audio/manifest.interview.json`.
+  R2 → `audio/interview/<id>`, manifest → `data/audio/manifest.interview.json`.
 
 ```bash
-# Render one round, then captions + publish (token via .env or inline):
+# Render one round, then captions + publish (R2 creds via .env or inline):
 node scripts/audio/synthesize-podcast.mjs --kind=interview --id=api-testing
 npm run audio:interview:captions        # → transcripts/interview/ + build vtt
-npm run audio:interview:publish         # → Blob audio/interview/ + manifest.interview.json
-#   node scripts/audio/publish.mjs --interview --local   # dev staging, no Blob
+npm run audio:interview:publish         # → R2 audio/interview/ + manifest.interview.json
+#   node scripts/audio/publish.mjs --interview --local   # dev staging, no upload
 ```
 
 The app surfaces these via `getInterviewAudio(id)` — a "Mock interview" player beside the
@@ -159,18 +162,22 @@ by `tests/unit/interview-scripts.test.mjs` (script format) and functional tests 
 
 ## Shipped
 
-- **Podcast rollout** — all 18 cheat-sheet topics authored, rendered, and published to Blob.
+- **Podcast rollout** — all 18 cheat-sheet topics authored, rendered, and published to R2.
 - **In-app player** — a **Listen** player (audio + synced transcript) on each cheat-sheet page.
 - **Commute Mode** (`/commute`) — a screen-free playlist that queues the episodes back to back.
 - **Mock-interview Q&A** — a two-voice interviewer/candidate round per topic, published to
-  Blob and surfaced beside the podcast player plus as a Mock Interview lane in Commute Mode.
+  R2 and surfaced beside the podcast player plus as a Mock Interview lane in Commute Mode.
 
 ## Shipped — offline download
 
-Each player has a **Download** button: it links to the Blob mp3 with `?download=1`, which Vercel
-Blob serves as `Content-Disposition: attachment`, so the file saves to the device for offline
-listening in the device's own player. No service-worker or Range machinery — see `downloadHref`
-in `components/AudioPlayer.tsx`.
+Each player has a **Download** button linking straight at the mp3. `publish.mjs` sets
+`Content-Disposition: attachment` on the mp3 objects themselves, so the file saves to the device
+for offline listening in the device's own player; playback is unaffected because media elements
+ignore that header. No service-worker or Range machinery — see `downloadHref` in
+`components/AudioPlayer.tsx`.
+
+> Vercel Blob's `?download=1` rewrite used to provide this. R2 has no equivalent, and the HTML
+> `download` attribute is ignored cross-origin, which is why the header moved onto the object.
 
 ## Planned expansion (later phases)
 

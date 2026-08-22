@@ -807,8 +807,11 @@ test("cheat-sheet audio player offers an offline download link", async ({ page }
   await page.goto(`/cheatsheets/${firstAudioId}`);
   const download = page.getByRole("link", { name: /Download .* audio for offline listening/ }).first();
   await expect(download).toBeVisible();
-  // Blob's ?download=1 forces Content-Disposition: attachment, so the mp3 saves to the device.
-  await expect(download).toHaveAttribute("href", /\.mp3(\?|&)download=1$/);
+  // The link points at the bare mp3. R2 has no ?download=1 equivalent (that was a Vercel Blob
+  // feature), so attachment behaviour comes from Content-Disposition set on the object at
+  // publish time — see scripts/audio/publish.mjs. A stray query suffix here would 404-by-proxy
+  // on a custom domain, so assert the href stays clean.
+  await expect(download).toHaveAttribute("href", /\.mp3$/);
 });
 
 test("commute exposes a Mock Interview lane when interview rounds are published", async ({ page }) => {

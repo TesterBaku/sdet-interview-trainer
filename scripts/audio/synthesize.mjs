@@ -116,7 +116,8 @@ for (const id of ids) {
 
   const wavPath = join(OUT_DIR, `${id}.wav`);
   writeFileSync(wavPath, floatToWav(all, SAMPLE_RATE));
-  execFileSync(FFMPEG, ["-y", "-loglevel", "error", "-i", wavPath, "-b:a", "128k", mp3Path]);
+  // 64k for the same reason as the podcast path — see synthesize-podcast.mjs.
+  execFileSync(FFMPEG, ["-y", "-loglevel", "error", "-i", wavPath, "-b:a", "64k", mp3Path]);
   rmSync(wavPath, { force: true }); // drop the ~10x-larger intermediate WAV
 
   const durationSec = Number((total / SAMPLE_RATE).toFixed(2));

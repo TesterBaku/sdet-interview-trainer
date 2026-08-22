@@ -456,10 +456,15 @@ export function AudioPlayer({
   const btn =
     "inline-flex min-h-[44px] items-center justify-center rounded-full border border-ink/15 bg-white/80 px-4 py-2 text-sm font-bold text-ink transition hover:bg-white focus-ring";
 
-  // Offline download: Vercel Blob serves `?download=1` with Content-Disposition: attachment,
-  // so a plain link saves the mp3 to the device (listen offline in the device's own player) —
-  // no service-worker/Range machinery needed.
-  const downloadHref = `${trackSrc}${trackSrc.includes("?") ? "&" : "?"}download=1`;
+  // Offline download: the mp3 is published with `Content-Disposition: attachment` set on the
+  // object itself (scripts/audio/publish.mjs), so a plain link saves it to the device — listen
+  // offline in the device's own player, no service-worker/Range machinery needed. The <audio>
+  // element above is unaffected: media elements ignore Content-Disposition on subresource loads.
+  //
+  // Deliberately NOT a `?download=1` suffix — that was a Vercel Blob-specific rewrite and has no
+  // equivalent on R2. The bare href also lets the CDN serve one cache entry per episode instead
+  // of splitting playback and download traffic across two URLs.
+  const downloadHref = trackSrc;
 
   return (
     <section className="rounded-2xl border border-ink/10 bg-white/80 p-4 shadow-panel sm:p-5" aria-label={`${label}: ${trackTitle}`}>
