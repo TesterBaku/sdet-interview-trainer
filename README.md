@@ -11,7 +11,7 @@ QA Automation / SDET interview practice app — flashcards, quizzes, mock interv
 - Tailwind CSS
 - Static JSON content plus a protected Vercel Route Handler for the coding-runner pilot
 - localStorage for progress
-- Self-owned study audio: local neural TTS (Kokoro) → Vercel Blob hosting
+- Self-owned study audio: local neural TTS (Kokoro) → Cloudflare R2 hosting
 - `@vercel/analytics` for page-view tracking
 - PWA-installable (manifest + service worker)
 - Playwright functional tests and Node/TypeScript unit tests
@@ -104,7 +104,7 @@ Open http://localhost:3000.
 | `npm run test:functional` | Run all Playwright tests headlessly |
 | `npm run test:unit` | Audio and server-runner unit tests |
 | `npm run audio:podcast:captions` | Build transcripts + WebVTT from rendered podcast episodes |
-| `npm run audio:podcast:publish` | Upload changed episodes to Vercel Blob + update the manifest (needs `BLOB_READ_WRITE_TOKEN`) |
+| `npm run audio:podcast:publish` | Upload changed episodes to Cloudflare R2 + update the manifest (needs R2 creds in `.env`) |
 
 Rendering episodes and the full authoring loop live in [`docs/audio-pipeline.md`](docs/audio-pipeline.md).
 

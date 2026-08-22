@@ -184,7 +184,10 @@ for (const c of chunks) {
 
 const wavPath = join(OUT_DIR, `${outName}.wav`);
 writeFileSync(wavPath, floatToWav(all, SAMPLE_RATE));
-execFileSync(FFMPEG, ["-y", "-loglevel", "error", "-i", wavPath, "-b:a", "128k", mp3Path]);
+// 64k, not 128k: Kokoro renders 24 kHz mono, so the signal is band-limited to 12 kHz and 128k
+// spent roughly double the bytes on nothing audible. Episodes are the app's bandwidth cost by
+// an order of magnitude, so this halves it.
+execFileSync(FFMPEG, ["-y", "-loglevel", "error", "-i", wavPath, "-b:a", "64k", mp3Path]);
 rmSync(wavPath, { force: true }); // drop the ~10x-larger intermediate WAV
 
 const durationSec = Number((total / SAMPLE_RATE).toFixed(2));
